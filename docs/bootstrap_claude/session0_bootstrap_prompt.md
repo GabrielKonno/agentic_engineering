@@ -443,7 +443,7 @@ The user can also trigger this by saying "save state and start fresh".
 
 Configured in `.claude/settings.json`. These run automatically — no AI decision involved.
 
-- **smart-formatting** (PostToolUse → Write/Edit): Auto-formats files with Prettier after every edit. Keeps diffs clean without spending context on manual formatting.
+- **smart-formatting** (PostToolUse → Write/Edit/MultiEdit): Auto-formats files with Prettier after every edit. Keeps diffs clean without spending context on manual formatting.
 
 ## Architecture
 
@@ -863,7 +863,7 @@ tools:
 
 ---
 
-## Steps 8-10 — Create agents and skills
+### Steps 8-10 — Create agents and skills
 
 **Before creating any agent or skill in the steps below:** read `assets/examples/examples_instructions.md` for conventions (frontmatter, structure, output format). Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as a structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project.
 
@@ -1325,11 +1325,11 @@ Create `.claude/settings.json`:
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'INPUT=$(cat); FILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\"); if [ -n \"$FILE_PATH\" ] && echo \"$FILE_PATH\" | grep -qE \"\\.(ts|tsx|js|jsx|json|css|md)$\"; then npx prettier --write \"$FILE_PATH\" 2>/dev/null; fi'",
+            "command": "if [[ \"$CLAUDE_TOOL_FILE_PATH\" == *.js || \"$CLAUDE_TOOL_FILE_PATH\" == *.ts || \"$CLAUDE_TOOL_FILE_PATH\" == *.jsx || \"$CLAUDE_TOOL_FILE_PATH\" == *.tsx || \"$CLAUDE_TOOL_FILE_PATH\" == *.json || \"$CLAUDE_TOOL_FILE_PATH\" == *.css || \"$CLAUDE_TOOL_FILE_PATH\" == *.md ]]; then npx prettier --write \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || true; fi",
             "timeout": 30
           }
         ]
@@ -1339,7 +1339,7 @@ Create `.claude/settings.json`:
 }
 ```
 
-**What this does:** After every file write or edit, if the file is `.ts`, `.tsx`, `.js`, `.jsx`, `.json`, `.css`, or `.md`, Prettier runs automatically. This is deterministic — the AI does not need to remember to format. Diffs stay clean without consuming context.
+**What this does:** After every file write, edit, or multi-edit, if the file is `.ts`, `.tsx`, `.js`, `.jsx`, `.json`, `.css`, or `.md`, Prettier runs automatically. Uses `$CLAUDE_TOOL_FILE_PATH` (native Claude Code environment variable) — no stdin parsing needed. Diffs stay clean without consuming context.
 
 **Permissions:** The `allow` rules grant automatic approval for editing framework files (`CLAUDE.md`, `.claude/**`), reading files, and running common commands (`git`, `npm`, `npx`). This prevents permission prompts during end-of-session documentation updates. `bypassPermissions` is the fallback for everything else.
 
@@ -1368,7 +1368,7 @@ Create `.claude/settings.json`:
 - assets/examples/ (copied from framework — Step 1.5)
 
 ### Hooks configured:
-- smart-formatting (PostToolUse → Write/Edit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]
+- smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]
 
 ### MCPs installed:
 - [name]: [WORKING / ERROR: detail]
