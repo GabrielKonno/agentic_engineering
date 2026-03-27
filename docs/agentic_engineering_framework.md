@@ -571,6 +571,8 @@ Report template categories:
 
 ⏭️ means "not applicable to this task" — NOT "I couldn't do it" or "I skipped it."
 
+**Actionable findings rule:** If during ANY step of the validation loop (review, testing, validation, browser verification, criteria check) the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in the backlog (pendencias.md) with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking.
+
 If any ❌: fix and re-run entire loop (max 3 full cycles). After limit: STOP and escalate to human with diagnosis.
 
 **Between tasks (after report, before picking next task):**
