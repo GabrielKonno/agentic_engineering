@@ -280,6 +280,9 @@ Generate a Validation Report artifact:
 - Regression: ✅/❌ [test suite results or re-checked tasks]
 ### Items for human verification:
 - [MANUAL criteria]
+### Improvements identified → added to pendencias:
+- [improvement/better approach found during validation — task created in pendencias.md]
+- [or "none"]
 ### Next from pendencias.md:
 - [next task]
 ```
@@ -290,6 +293,8 @@ Generate a Validation Report artifact:
 - DB: if task has QUERY: criteria AND database tool is available, DB MUST be ✅ or ❌, never ⏭️.
 
 ⏭️ means "not applicable to this task" — NOT "I couldn't do it" or "I skipped it."
+
+**Actionable findings rule:** If during ANY step of this loop (review, testing, validation, browser verification, criteria check) the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking. Log in the report under "Improvements identified → added to pendencias".
 
 If any ❌: fix → re-run entire loop (max 3 full cycles).
 If all ✅/⏭️: report as READY.
