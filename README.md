@@ -1,8 +1,8 @@
-# Agentic Engineering Framework v1.3.1
+# Agentic Engineering Framework v1.4.0
 
 A methodology for AI-assisted software development where the AI implements, validates, and reports with evidence — and the human approves and directs.
 
-Instead of the human testing in the browser, taking screenshots, and reporting bugs, the AI runs a self-validation loop (build → tests → review → UI → criteria → report) and presents a structured report. The human exits the "test and report" loop and enters the "approve and direct" loop.
+Instead of the human testing in the browser, taking screenshots, and reporting bugs, the AI runs a two-phase validation loop — implements and commits, then spawns independent subagents for review and verification with isolated context. The human exits the "test and report" loop and enters the "approve and direct" loop.
 
 ---
 
@@ -103,6 +103,8 @@ The AI reads the PRD and creates the entire project structure:
 | `code-reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
 | `security-reviewer.md` | OWASP Top 10 checklist |
 | `red-team.md` / `blue-team.md` | Adversarial security testing (if project has auth, payments, etc.) |
+| `validator.md` | Independent validation agent — verifies implementation with isolated context |
+| `arbitrator.md` | Resolves conflicts between validator judgment and mechanical evidence |
 | `.claude/settings.json` | Permissions + auto-formatting hook (Claude Code only) |
 | `assets/examples/` | Agent/skill templates for future reference |
 | `.claude/logs/` | Session log directory |
@@ -175,8 +177,9 @@ You can feed multiple needs in one session. The AI accumulates them in the backl
 ```
 START → Read docs → Propose sprint → Human approves →
   For each task:
-    Implement → Build → Tests → Review → UI → Criteria → Report →
-    Commit → Pick next task →
+    Phase A: Implement → Build → Tests → Commit →
+    Phase B: Independent validation (graduated by complexity) → Report →
+    Pick next task →
 END → Update project.md → Update pendencias.md → Update agents/skills →
       Create session log → Commit
 ```
@@ -210,7 +213,7 @@ The framework learns from your project:
 |-------|------|-----------|---------|
 | 1 | Autocomplete | Tests, integrates, reviews everything | Suggests code snippets |
 | 2 | Autocreate | Tests and reports bugs | Creates complete code |
-| 3 | Auto Execute | Approves plans and results | Implements, validates, reports with evidence |
+| 3 | Auto Execute | Approves plans and results | Implements, validates independently via subagents, reports with evidence |
 | **4** | **Auto Pilot (recommended)** | **Approves sprint batches** | **Plans sprints, executes autonomously, stops only on exceptions** |
 
 Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is reliable.
@@ -221,7 +224,7 @@ Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is
 
 **Acceptance Criteria** — Every task has verifiable criteria tagged with `BUILD:`, `VERIFY:`, `QUERY:`, `REVIEW:`, or `MANUAL:`. The AI uses these to validate its own work before reporting.
 
-**Self-Validation Loop** — 6 steps the AI runs after every implementation: build check → write tests → self-review → UI verification → criteria check → structured report. No task is reported as "done" without evidence.
+**Self-Validation Loop** — Two-phase validation after every implementation. Phase A (implementing agent): build → write tests → commit. Phase B (graduated by complexity): routine tasks use inline checklists; logic-heavy and architecture/security tasks spawn independent subagents (code-reviewer, validator, security-reviewer, Red Team, Blue Team) with isolated context — the agent that wrote the code never judges its own work. No task is reported as "done" without evidence.
 
 **Known Bug Patterns** — Every bug fixed becomes a check in future reviews. The AI gets smarter every session. Max 20 patterns; when exceeding, domain patterns are promoted to rules files.
 
@@ -237,4 +240,4 @@ For the full methodology, concepts, and design rationale:
 
 **Read:** `docs/agentic_engineering_framework.md`
 
-This is the tool-agnostic reference document (1300+ lines) covering: problem definition, maturity model, project structure, document boundaries, session protocol, execution protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.
+This is the tool-agnostic reference document (1500+ lines) covering: problem definition, maturity model, project structure, document boundaries, session protocol, execution protocol, validation orchestration protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.

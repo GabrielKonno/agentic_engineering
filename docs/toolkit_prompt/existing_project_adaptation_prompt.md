@@ -161,9 +161,12 @@ Required sections:
 □ Before implementing (complexity classification, complexity threshold, sprint-approved mode, exception stops)
 □ Model switch protocol (5 steps + sprint interaction)
 □ Git checkpoint strategy
-□ During implementation — self-validation loop (6 steps)
+□ During implementation — Phase A (implementation) + Phase B (validation) with graduated depth
+□ Graduated validation depth (routine=inline, logic-heavy=2 subagents, arch/security=full chain)
+□ Validation Orchestration (context routing rules, sequencing, retry flow)
 □ ⏭️ enforcement rules
-□ Between tasks (4 items including sprint report)
+□ Between tasks (4 items including sprint report, subagent-aware commit flow)
+□ Validation Failure Post-Mortem (including "subagent context incomplete" root cause)
 □ Session Protocol — END (8 items including diff-based pattern extraction and agent/skill evolution)
 □ Mid-session context recovery (4 steps + signals)
 □ Documentation quality rules
@@ -183,7 +186,7 @@ Required sections:
 **Key additions likely missing from older versions:**
 - Sprint proposal (Level 4) in Session Protocol START item 6
 - Sprint-approved mode in "Before implementing" section
-- Exception stops list
+- Exception stops list (including "False ❌ from subagent escalated by arbitrator")
 - Sprint interaction note in model switch protocol
 - Discovery cap (max 3 per sprint)
 - Sprint report template in "Between tasks" item 4
@@ -192,6 +195,13 @@ Required sections:
 - Session logs (`.claude/logs/` or `.antigravity/logs/`) — permanent record per session
 - Hooks section in config file (smart-formatting PostToolUse hook)
 - "2 per-session moments" Level 4 flow (if Level 4 content is missing entirely)
+- **Graduated validation depth** (routine=inline, logic-heavy=2 subagents, arch/security=full chain) — Phase A/B split
+- **Validation Orchestration section** (context routing rules, sequencing, retry flow, subagent mechanics)
+- **validator agent/skill** (`.claude/agents/validator.md` or `.antigravity/skills/validator/SKILL.md`) — independent validation
+- **arbitrator agent/skill** (`.claude/agents/arbitrator.md` or `.antigravity/skills/arbitrator/SKILL.md`) — conflict resolution
+- **`invocation:` frontmatter** on all review/validation agents/skills (`subagent` or `inline`)
+- **`receives:` / `produces:` frontmatter** on `invocation: subagent` agents/skills (I/O contract)
+- **Subagent context incomplete** root cause in Validation Failure Post-Mortem
 
 **For each addition, log:**
 ```
@@ -249,11 +259,16 @@ Check and upgrade:
 
 **For existing tasks without these fields:** Add them based on the task description and your understanding of the codebase. Mark additions with `← added during adaptation` so the user can review.
 
-**Step 2.4 — Upgrade code-reviewer agent:**
+**Step 2.4 — Upgrade code-reviewer agent/skill:**
 
 Check for:
 ```
 □ Frontmatter with effort: medium
+□ Frontmatter with invocation: subagent
+□ Frontmatter with receives: and produces: fields (I/O contract)
+□ Input section (what the subagent reads when invoked)
+□ Output section (report format the subagent produces)
+□ BOUNDARIES section (what NOT to read — anti-bias firewall)
 □ Project Patterns section
 □ Type Safety section
 □ API / Data Mutation Patterns section
@@ -273,6 +288,16 @@ For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the m
 
 **Step 2.5 — Upgrade security-reviewer:**
 
+Check frontmatter:
+```
+□ Frontmatter with effort: high
+□ Frontmatter with invocation: subagent
+□ Frontmatter with receives: and produces: fields (I/O contract)
+□ Input section (what the subagent reads when invoked)
+□ Output section (report format the subagent produces)
+□ BOUNDARIES section (what NOT to read — anti-bias firewall)
+```
+
 Compare against the full checklist (9 sections):
 ```
 □ 1. Injection Prevention (SQL, XSS, Prompt, Command, LDAP/XML/NoSQL)
@@ -290,9 +315,21 @@ Add missing sections. **Do NOT remove existing customizations** — they may con
 
 **Step 2.6 — Verify Red Team / Blue Team:**
 
-If they exist: verify they have effort: high in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
+If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, and `produces:` in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
 
 If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them.
+
+**Step 2.6.1 — Verify validator agent/skill:**
+
+If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, Input, Output, Verification Process, and BOUNDARIES sections. Add if missing.
+
+If it doesn't exist: create it. The validator is mandatory for ALL projects — it performs independent verification of the implementing agent's work. Use the template from the bootstrap prompt (session0) as reference.
+
+**Step 2.6.2 — Verify arbitrator agent/skill:**
+
+If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, three terminal rulings (UPHOLD/OVERRIDE/ESCALATE), and BOUNDARIES sections.
+
+If it doesn't exist: create it. The arbitrator is mandatory for ALL projects — it resolves conflicts between the validator's judgment and mechanical evidence. Use the template from the bootstrap prompt (session0) as reference.
 
 **Step 2.7 — Verify rules files:**
 
@@ -300,7 +337,7 @@ Read each rules file. No structural changes needed — rules files are project-s
 
 **Step 2.8 — Verify skills:**
 
-Read each skill. Verify frontmatter has `effort:` field. Add if missing (most skills are `effort: medium`; security-related are `effort: high`).
+Read each skill. Verify frontmatter has `effort:` field. Add if missing (most skills are `effort: medium`; security-related are `effort: high`). For review/validation/security skills, verify `invocation: subagent` and `receives:`/`produces:` fields. For knowledge/reference skills, verify `invocation: inline`.
 
 ---
 
@@ -436,6 +473,15 @@ echo "=== All agents have effort: frontmatter? ==="
 for f in .claude/agents/*.md; do
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
+
+echo "=== All agents have invocation: frontmatter? ==="
+for f in .claude/agents/*.md; do
+  grep -q "invocation:" "$f" 2>/dev/null || echo "MISSING invocation: in $f"
+done
+
+echo "=== Validator and arbitrator exist? ==="
+ls .claude/agents/validator.md .antigravity/skills/validator/SKILL.md 2>/dev/null || echo "MISSING validator"
+ls .claude/agents/arbitrator.md .antigravity/skills/arbitrator/SKILL.md 2>/dev/null || echo "MISSING arbitrator"
 
 echo "=== All skills have effort: frontmatter? ==="
 find .claude/skills -name "*.md" -o -name "SKILL.md" 2>/dev/null | while read f; do

@@ -55,14 +55,23 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 - `name:` — lowercase, hyphenated
 - `effort:` — `medium` for checklists and patterns, `high` for security, financial, architectural
 - `description:` — one sentence explaining when to use
+- `invocation:` — how the agent/skill is activated:
+  - `subagent` — spawned as an independent process via Task tool (Claude Code) or Agent Manager (Antigravity). Isolated context, no access to implementing agent's reasoning. Required for all validation/review/security agents.
+  - `inline` — read as a reference document by another agent. Default for skills and knowledge documents.
+- `receives:` — (subagent only) what the orchestrating agent passes: git diff, reports, criteria, file paths
+- `produces:` — (subagent only) what the subagent returns: structured report format
 
 **Agents (WHAT to verify):**
-- "When to invoke" section — clear triggers
+- `invocation: subagent` for review/validation/security agents
+- `## Input` section — what the agent receives (file paths, reports, criteria)
+- `## Output` section — structured report format with examples
+- "When this agent is invoked" section — clear triggers (passive: the orchestrator decides invocation)
 - Checklist with `- [ ]` items — actionable, verifiable
-- Output format with structured report template
+- `## BOUNDARIES` section — what the agent must NOT read (anti-bias firewall)
 - Recommendation line: APPROVE / FIX REQUIRED / BLOCK
 
 **Skills (HOW to do):**
+- `invocation: inline` (read by whichever agent needs the knowledge)
 - Key patterns with code examples
 - Common pitfalls table (Pitfall | Symptom | Fix)
 - Testing section with framework and conventions
