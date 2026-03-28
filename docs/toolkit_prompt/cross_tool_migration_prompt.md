@@ -59,7 +59,10 @@ mkdir -p .antigravity/skills/security-reviewer
 # Copy phases (content is identical, just different location)
 cp .claude/phases/project.md .antigravity/phases/project.md
 cp .claude/phases/pendencias.md .antigravity/phases/pendencias.md 2>/dev/null
-cp .claude/phases/pendencias_e_melhorias.md .antigravity/phases/pendencias.md 2>/dev/null
+# Handle non-standard backlog naming (copy first match)
+for f in .claude/phases/pendencias*.md; do
+  [ -f "$f" ] && [ "$(basename "$f")" != "pendencias.md" ] && cp "$f" .antigravity/phases/pendencias.md 2>/dev/null && break
+done
 
 # Copy rules (identical content)
 cp .claude/rules/*.md .antigravity/rules/

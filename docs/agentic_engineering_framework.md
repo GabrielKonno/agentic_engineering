@@ -148,17 +148,9 @@ agentic_engineering/                         # Framework root (meta-project)
 │       └── existing_project_adaptation_prompt.md # Adapt existing project to framework
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
-│   ├── agents/                              # Agent templates organized by category
-│   │   ├── quality/                         # performance-auditor, accessibility-checker, test-quality-reviewer
-│   │   ├── domain/                          # state-machine-verifier, data-integrity-checker, multi-tenancy-auditor
-│   │   ├── ops/                             # migration-runner, dependency-auditor, deploy-validator
-│   │   └── security/                        # api-security-scanner
-│   ├── skills/                              # Skill templates organized by type
-│   │   ├── stack/                           # nextjs-supabase, django-postgres, express-mongodb
-│   │   ├── domain/                          # e-commerce-patterns, scheduling-patterns, multi-tenancy-patterns
-│   │   └── process/                         # api-design-patterns, database-migration-guide, ci-cd-pipeline
-│   └── rules/                               # Rules file templates
-│       └── multi-tenancy-rules.md, e-commerce-rules.md, auth-rules.md
+│   ├── agents/                              # Agent templates (flat): performance-auditor, accessibility-checker, test-quality-reviewer, state-machine-verifier, data-integrity-checker, multi-tenancy-auditor, dependency-auditor, migration-runner, deploy-validator, api-security-scanner
+│   ├── skills/                              # Skill templates (flat): nextjs-supabase, django-postgres, express-mongodb, e-commerce-patterns, scheduling-patterns, multi-tenancy-patterns, api-design-patterns, database-migration-guide, ci-cd-pipeline
+│   └── rules/                               # Rules file templates: multi-tenancy-rules, e-commerce-rules, auth-rules
 └── projects/                                # Project folders (one per project)
     └── [project-name]/                      # Created during session 0
         └── (project structure below)
@@ -192,7 +184,7 @@ project/
 │   │   └── blue-team.md                  # (conditional) Defensive security verifier — validates defenses
 │   ├── skills/
 │   │   └── (installed or created as needed for the stack)
-│   └── settings.json                      # Permissions
+│   └── settings.json                      # Permissions + hooks (Claude Code only)
 ```
 
 ### What goes in each file
@@ -575,6 +567,63 @@ Report template categories:
 
 If any ❌: fix and re-run entire loop (max 3 full cycles). After limit: STOP and escalate to human with diagnosis.
 
+**Validation Failure Post-Mortem:**
+
+When the human identifies a bug in a task that the AI reported as ✅ (the validation loop declared success but the feature is broken), the AI must run a structured post-mortem BEFORE fixing the bug. This is mandatory — not a reflection exercise.
+
+**Trigger:** Human reports a bug AND the task's validation report shows ✅ for the relevant category.
+
+**Process:**
+
+1. **Identify the failed step:** Which of the 6 validation steps should have caught this bug?
+   - Step 1 (Build) — compilation should have failed
+   - Step 2 (Tests) — a test should have been written and failed
+   - Step 3 (Review) — code review checklist should have flagged the pattern
+   - Step 4 (UI) — browser verification should have shown the wrong behavior
+   - Step 5 (Criteria) — acceptance criteria check should have failed
+   - Step 6 (Report) — report should have flagged uncertainty instead of ✅
+
+2. **Diagnose why it passed:** Why did the step declare ✅ when it should have been ❌?
+   Common causes:
+   - **Partial execution:** Multi-step criterion was partially verified (e.g., before/after criterion only checked "before")
+   - **Silent failure:** Tool returned no error but produced wrong result (e.g., ORM returns undefined instead of throwing)
+   - **Missing criterion:** The acceptance criteria didn't cover this case at all
+   - **Wrong criterion level:** Criterion was WEAK (no failure signal) and gave false confidence
+   - **Skipped step:** Step was marked ⏭️ when it should have been mandatory
+
+3. **Classify the root cause (pick ONE primary):**
+
+   | Root cause | Improvement target | Example |
+   |------------|-------------------|---------|
+   | **Criterion was WEAK** | Criteria Quality Standard | "VERIFY: page loads correctly" → no failure signal |
+   | **Criterion was incomplete** | pendencias.md task template | Missing edge case, missing state transition |
+   | **Multi-step criterion partially verified** | Execution Protocol (Step 5) | Before/after only checked "before" |
+   | **Tool silenced an error** | Known Bug Pattern | `.select('nonexistent')` returns undefined |
+   | **Review missed a pattern** | code-reviewer checklist | New pitfall category not in checklist |
+   | **Test not written for testable logic** | Step 2 skip conditions | Business logic was incorrectly classified as "simple CRUD" |
+   | **AI judgment error** | (no doc fix — inherent limitation) | AI misread the output and declared ✅ |
+
+4. **Apply the systemic improvement** (not just a point fix):
+   - Route to the correct document based on the classification above
+   - The improvement must prevent the CLASS of failure, not just this instance
+   - If the improvement is a new rule in the Execution Protocol: apply it to the config file (CLAUDE.md / GEMINI.md), not just the session log
+
+5. **Log the post-mortem** in the session entry:
+   ```
+   ### Validation Post-Mortem: [task name]
+   **Bug found by human:** [description]
+   **Reported as:** ✅ in [category] (Session [N])
+   **Failed step:** Step [N] — [step name]
+   **Why it passed:** [diagnosis]
+   **Root cause:** [classification from table]
+   **Improvement applied:** [what was changed, in which document]
+   **Systemic scope:** [what CLASS of bug this prevents, not just this instance]
+   ```
+
+**Then fix the bug** using the normal implementation → validation loop. The post-mortem ensures the loop is improved before the bug is fixed — otherwise the same class of failure can recur.
+
+**Principle:** If the human finds a bug the AI could have found, the cost is not just one bug fix — it's one bug fix PLUS one process improvement. The validation loop must get smarter every time it fails, not just every time it succeeds.
+
 **Between tasks (after report, before picking next task):**
 1. Commit: `git add -A && git commit -m "feat: [task name] — validated"`
 2. Update pendencias.md: mark task as Done, confirm next task
@@ -884,8 +933,8 @@ Some skills emerge from real project experience — they require observed repeti
 
 ### Reasoning depth:
 When creating agents or skills, classify their reasoning requirement:
-- **Deep reasoning** (security testing, financial calculations, architectural analysis, complex debugging): the agent/skill should trigger the tool's maximum reasoning mode when invoked.
-- **Standard reasoning** (code review checklist, pattern reference, style guide): default reasoning is sufficient.
+- **Deep reasoning** (`effort: high`) — security, financial, architectural, complex debugging: when the AI reads this skill, it should increase reasoning depth for the task (e.g., `/effort high` in Claude Code). This is a convention the AI must actively honor, not an enforced feature.
+- **Standard reasoning** (`effort: medium`) — code review checklists, pattern references, style guides: default reasoning is sufficient.
 
 The tool-specific implementation (frontmatter, config, etc.) is defined in the session0 bootstrap. The principle is: security and financial agents always get deep reasoning, regardless of the session's default setting.
 
@@ -1157,12 +1206,13 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Wrong task classification in sprint** | AI classifies a large task as medium → bypasses individual plan approval within sprint | Sprint proposal includes estimated scope per task. Human can override classification before approving. Large tasks always require individual approval regardless of sprint mode. |
 | **Context degradation during sprint** | Sprint pushes 5 tasks, AI degrades at task 4 but continues because sprint was approved | "Between tasks" checkpoint evaluates context health. Task limit (3-5) is a hard cap. If degradation signals detected, trigger mid-session recovery — sprint approval does not override this. |
 | **Model switch mid-sprint** | Task in sprint requires model switch → unclear if sprint continues after restart | Model switch interrupts the sprint. After restart, the AI re-proposes a new sprint (which may include the remaining tasks). The original sprint is logged as "interrupted: model switch at task N". |
+| **Validation declares false ✅** | Multi-step criterion partially verified, tool silences error, criterion too weak | Validation Failure Post-Mortem: structured diagnosis → classify root cause → route improvement to correct document. Mandatory when human finds bug in ✅ task. |
 
 ---
 
 ## Principles
 
-1. **The human should never find a bug the AI could have found.** If they do, fix the validation loop — not just the bug.
+1. **The human should never find a bug the AI could have found.** If they do, fix the validation loop — not just the bug. The Validation Failure Post-Mortem makes this mandatory: diagnose which step failed and why, classify the root cause, apply a systemic improvement, then fix the bug. The cost of a false ✅ is one bug fix plus one process improvement.
 
 2. **Acceptance criteria are the contract.** If it is not in the criteria, the AI is not responsible for checking. If it is in the criteria and the AI did not check, it is the AI's failure.
 
@@ -1186,7 +1236,7 @@ This framework is tool-agnostic. The concepts apply to any AI coding agent.
 | `prd_change_prompt.md` | Prompt to modify an existing PRD (classify → investigate → impact → draft) | No — works with any AI |
 | `session0_bootstrap_prompt.md` | Prompt to bootstrap a new project in session 0 (creates all files, installs tools) | Yes — Claude Code specific |
 | `session0_bootstrap_antigravity.md` | Prompt to bootstrap a new project in session 0 for Antigravity | Yes — Antigravity specific |
-| `existing_project_adaptation_prompt.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | No — works with any tool (uses `.claude/` convention, adapt paths for other tools) |
+| `existing_project_adaptation_prompt.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | Partial — scans both `.claude/` and `.antigravity/` but flow is Claude Code-oriented. Adapt for other tools. |
 | `cross_tool_migration_prompt.md` | Prompt to migrate setup between Claude Code and Antigravity | Yes — bidirectional |
 
 **Path context:** The PRD prompts reference `assets/docs/prd.md` relative to the project root. When using the framework repository structure (with `projects/` directory), the full path from the framework root is `projects/[project-name]/assets/docs/prd.md`. The session0 prompts handle this mapping — no changes to the PRD prompts are needed.

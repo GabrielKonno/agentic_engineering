@@ -102,7 +102,7 @@ The AI reads the PRD and creates the entire project structure:
 | `code-reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
 | `security-reviewer.md` | OWASP Top 10 checklist |
 | `red-team.md` / `blue-team.md` | Adversarial security testing (if project has auth, payments, etc.) |
-| `settings.json` | Permissions + auto-formatting hook |
+| `settings.json` | Permissions + auto-formatting hook (Claude Code only) |
 | `assets/examples/` | Agent/skill templates for future reference |
 | `logs/` | Session log directory |
 
