@@ -81,6 +81,15 @@ if [ -f ".claude/agents/blue-team.md" ]; then
   mkdir -p .antigravity/skills/blue-team
   cp .claude/agents/blue-team.md .antigravity/skills/blue-team/SKILL.md
 fi
+# validator and arbitrator agents become skills (mandatory — should exist)
+if [ -f ".claude/agents/validator.md" ]; then
+  mkdir -p .antigravity/skills/validator
+  cp .claude/agents/validator.md .antigravity/skills/validator/SKILL.md
+fi
+if [ -f ".claude/agents/arbitrator.md" ]; then
+  mkdir -p .antigravity/skills/arbitrator
+  cp .claude/agents/arbitrator.md .antigravity/skills/arbitrator/SKILL.md
+fi
 
 # Copy any other skills
 for skill in .claude/skills/*.md; do
@@ -133,11 +142,17 @@ fi
 if [ -f ".antigravity/skills/blue-team/SKILL.md" ]; then
   cp .antigravity/skills/blue-team/SKILL.md .claude/agents/blue-team.md
 fi
+if [ -f ".antigravity/skills/validator/SKILL.md" ]; then
+  cp .antigravity/skills/validator/SKILL.md .claude/agents/validator.md
+fi
+if [ -f ".antigravity/skills/arbitrator/SKILL.md" ]; then
+  cp .antigravity/skills/arbitrator/SKILL.md .claude/agents/arbitrator.md
+fi
 
 # Copy other skills
 for skill_dir in .antigravity/skills/*/; do
   name=$(basename "$skill_dir")
-  if [ "$name" != "code-reviewer" ] && [ "$name" != "security-reviewer" ] && [ "$name" != "red-team" ] && [ "$name" != "blue-team" ] && [ -f "$skill_dir/SKILL.md" ]; then
+  if [ "$name" != "code-reviewer" ] && [ "$name" != "security-reviewer" ] && [ "$name" != "red-team" ] && [ "$name" != "blue-team" ] && [ "$name" != "validator" ] && [ "$name" != "arbitrator" ] && [ -f "$skill_dir/SKILL.md" ]; then
     cp "$skill_dir/SKILL.md" ".claude/skills/$name.md"
   fi
 done
@@ -229,6 +244,7 @@ Also update references in:
 - `project.md` session entries (paths mentioned in logs)
 - `pendencias.md` task descriptions (if they reference specific paths)
 - `rules/*.md` files (if they reference other docs by path)
+- All agents/skills (`validator.md`, `arbitrator.md`, `code-reviewer.md`, `security-reviewer.md`, etc.) — update `.claude/` ↔ `.antigravity/` and `CLAUDE.md` ↔ `GEMINI.md` in Input sections, BOUNDARIES sections, and context routing paths
 
 ---
 
@@ -322,12 +338,16 @@ ASK the user which option they prefer.
 | `.claude/agents/security-reviewer.md` | `.antigravity/skills/security-reviewer/SKILL.md` | Same content, different format convention |
 | `.claude/agents/red-team.md` (conditional) | `.antigravity/skills/red-team/SKILL.md` (conditional) | Same content, different format. Only exists if PRD has high-risk features |
 | `.claude/agents/blue-team.md` (conditional) | `.antigravity/skills/blue-team/SKILL.md` (conditional) | Same content, different format. Only exists if PRD has high-risk features |
+| `.claude/agents/validator.md` (mandatory) | `.antigravity/skills/validator/SKILL.md` (mandatory) | Same content, different format. Independent validation agent |
+| `.claude/agents/arbitrator.md` (mandatory) | `.antigravity/skills/arbitrator/SKILL.md` (mandatory) | Same content, different format. Conflict resolution agent |
 | `.claude/skills/*.md` | `.antigravity/skills/*/SKILL.md` | Same content, different folder structure |
 | `.claude/settings.json` | Antigravity Settings UI | Not transferable — reconfigure manually |
 | MCPs via `claude mcp add` | MCPs via Settings UI | Same MCPs, different install method |
 | Playwright MCP (external) | Browser Subagent (native) | Same capability, Antigravity doesn't need MCP |
 | `assets/examples/` | `assets/examples/` | ✅ Identical content, same path (tool-agnostic, lives at project root) |
 | `.claude/logs/*.md` | `.antigravity/logs/*.md` | ✅ Identical content, different path (session logs preserved during migration) |
+
+**Frontmatter preservation:** When migrating agents/skills, preserve all frontmatter fields including `invocation:`, `receives:`, and `produces:`. These define the subagent I/O contract and are tool-agnostic — they apply to both Claude Code (Task tool) and Antigravity (Agent Manager). Only path references inside the content need updating (`.claude/` ↔ `.antigravity/`, `CLAUDE.md` ↔ `GEMINI.md`).
 
 ## When to migrate vs when to start fresh
 

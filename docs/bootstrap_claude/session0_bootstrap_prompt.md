@@ -170,6 +170,7 @@ For architecture/security: trigger the model switch protocol.
 - MANUAL: criteria (flag in report, continue with next task)
 - Context degradation (trigger mid-session recovery)
 - Current task blocked by a discovery requiring human input
+- False ❌ from subagent escalated by arbitrator (genuinely ambiguous — human decides)
 
 If medium or large (Level 3, or large tasks within sprint):
 1. Read relevant `.claude/rules/*.md`
@@ -210,9 +211,34 @@ After approval: the plan becomes the technical record. Include summary in projec
 Before writing code: `git add -A && git commit -m "checkpoint: before [task name]"`
 This enables clean rollback if the task needs to be reverted.
 
-### During implementation (for EVERY feature/fix):
+### During implementation (validation loop):
 
-After writing code and BEFORE reporting to the user:
+After writing code and BEFORE reporting to the user, execute two phases. The implementing agent handles Phase A. Phase B is graduated by task complexity — routine tasks use inline validation, logic-heavy and architecture/security tasks use independent subagents.
+
+#### Graduated validation depth
+
+The task's computational complexity classification (set in "Before implementing") determines the validation approach:
+
+```
+Routine task (UI text, config, styling, simple CRUD)
+  → Phase B uses inline checklist (current behavior). No subagent.
+  → Bias risk near-zero. Token cost: ~5-10k.
+
+Logic-heavy task (business rules, calculations, state machines, financial)
+  → Phase B spawns code-reviewer subagent + validator subagent (2 calls)
+  → Token cost: ~50-65k. Acceptable for where bias matters.
+
+Architecture/security task (new module, cross-module, Red Team trigger)
+  → Phase B spawns full chain: code-reviewer + security-reviewer +
+    Red Team + validator + Blue Team (up to 5 calls)
+  → Token cost: ~120-150k. Worth it for high-risk tasks.
+```
+
+The implementing agent can override the classification after reading the task (same as the existing override rule).
+
+#### Phase A — Implementation (implementing agent)
+
+The implementing agent writes code, writes tests, and commits. This phase is identical for all complexity levels.
 
 **Step 1 — Build check:**
 Run the project build command. If errors: fix and rebuild. Do NOT proceed with build errors.
@@ -230,19 +256,31 @@ This IS the task. Before writing application code:
 Log: "Test framework configured: [framework name]. First test: [test name]."
 This only happens once. After configuration, Step 2 proceeds normally for all future tasks.
 
-**Step 3 — Self-review:**
-Read rules in `.claude/agents/code-reviewer.md` (read the checklist, do NOT invoke as separate agent):
+**Step 3 — Commit implementation:**
+```bash
+git add -A && git commit -m "feat: [task name] — pending validation"
+```
+This ensures: (1) subagents can access the diff via `git diff HEAD~1`, (2) clean rollback point, (3) implementation preserved regardless of validation outcome.
+
+For **routine tasks** using inline validation (Route A): this commit can be deferred until after Phase B passes (single commit after validation).
+
+#### Phase B — Validation (graduated by complexity)
+
+**Route A — Routine tasks (inline validation):**
+
+The implementing agent validates its own work inline. Bias risk is near-zero for routine changes.
+
+**Step 4 — Self-review:**
+Read rules in `.claude/agents/code-reviewer.md` as a checklist:
 - Project patterns (CLAUDE.md Key Patterns)
 - Domain rules (`.claude/rules/*.md`)
 - Known Bug Patterns (check EVERY pattern against your changes)
 - Architecture Patterns (file size, cross-module imports)
 - **Security** (`.claude/agents/security-reviewer.md`) — ALWAYS read the Security section headers. If changes touch user input, auth, database, APIs, AI/LLM, secrets, or HTML rendering: read the FULL checklist and run applicable Tier 1 checks. When in doubt, read it — the cost of reading unnecessarily is seconds; the cost of missing a vulnerability is hours.
-- **Red Team trigger:** If this task implemented or modified ANY of: authentication logic, authorization/RLS policies, payment/financial transactions, multi-tenancy isolation, user input handling that stores to database, or AI/LLM integration → run Red Team Tier 1 tests (REVIEW: checks) and Tier 2 tests (QUERY: checks) from `.claude/agents/red-team.md` BEFORE proceeding to Step 4. Log results in report under "Security:" line. Tier 3 tests require human approval — flag them as MANUAL:.
-- **Blue Team trigger:** If Red Team ran in this session (or a previous session produced a Red Team report that hasn't been verified yet) → read `.claude/agents/blue-team.md`, verify each finding, update Defense Inventory. Log in report under "Security:" line. If Red Team found CRITICAL/HIGH issues that aren't fixed: report as ❌.
 - Edge cases: empty data? null? zero? negative?
 If ANY check fails: fix before proceeding.
 
-**Step 4 — Verify with browser automation (if UI changed AND project has web frontend):**
+**Step 5 — UI verification (web projects only):**
 Skip entirely for non-web projects (CLIs, APIs, libraries).
 Skip entirely if no UI was modified in this task.
 If UI was changed in a web project, this step is MANDATORY — do not wait for user to request it.
@@ -250,28 +288,67 @@ Health check first:
 ```bash
 curl -s -o /dev/null -w "%{http_code}" http://localhost:[PORT] || echo "DEV SERVER NOT RUNNING"
 ```
-If not running: try starting it (check Commands section), wait 10s. If still unavailable AND UI files were modified in this task: mark as ❌ with reason "dev server unavailable", list all VERIFY: criteria as MANUAL:. If no UI files were modified: mark as ⏭️ (not applicable).
-If running: navigate → action → verify → screenshot.
-Note: when using browser automation for RESEARCH (browsing public sites for tools/docs), none of the above health check or auth rules apply. Just navigate to the URL.
-Retry limits: max 3 attempts per step.
+If not running: try starting it (check Commands section), wait 10s. If still unavailable AND UI files were modified in this task: mark as ❌ with reason "dev server unavailable", list all VERIFY: criteria as MANUAL:. If no UI files modified: mark as ⏭️ (not applicable).
+If running: navigate → action → verify → screenshot. Max 3 attempts.
 
-**Step 5 — Check acceptance criteria:**
+**Step 6 — Check acceptance criteria:**
+Execute each criterion by tag type. For criteria with corresponding tests (Step 2): the passing test IS the verification — do not re-check manually. For criteria without tests: verify manually by tag.
 
-**5a — Decompose:** Before executing, decompose multi-step criteria into atomic sub-checks. Each sub-check gets its own ✅/❌. The criterion only passes when ALL sub-checks pass. Example: "earmark updates from 500 to 0, transaction created" becomes 3+ separate checks: value before, action, value after, transaction exists. Single-condition criteria pass through unchanged.
+Then run **regression:** if test suite exists, run full suite. If no suite yet, re-execute `QUERY:` criteria from last 2-3 completed tasks. If results changed unexpectedly → regression detected → treat as ❌.
 
-**5b — Execute by tag:**
-- `BUILD:` → done in Step 1
-- `REVIEW:` → done in Step 3
-- `VERIFY:` → criteria with tests (Step 2): passing test IS the verification. Criteria without tests: execute via browser automation (web) or command/curl (non-web)
-- `QUERY:` → criteria with tests (Step 2): passing test IS the verification. Criteria without tests: execute via database tool. If data missing: create test data first, document what was created.
-- `MANUAL:` → flag for human in report
-**Regression:** If test suite exists: run full suite — failing tests = regression. If no tests yet: re-run `QUERY:` criteria from last 2-3 completed tasks. If results changed unexpectedly → regression detected → treat as ❌. If no completed tasks have `QUERY:` criteria yet (early sessions): skip regression, note "⏭️ no prior QUERY: criteria" in report.
+**Step 7 — Report:** Structured validation report (see report format below).
 
-**Step 5c — Mutation test (logic-heavy and architecture/security only):**
-Skip for routine tasks. After all criteria pass: pick 1-3 critical lines of implementation, break each one (comment out, change value, rename column), re-run affected criteria. Criteria MUST fail with broken code. If they still pass → criteria don't test what they claim → strengthen and re-validate. Restore code after each mutation.
-Log: "Mutation test: [N] mutations, [N] confirmed, [N] strengthened"
+**Route B — Logic-heavy tasks (2 subagents):**
 
-**Step 6 — Report:**
+The implementing agent spawns independent subagents with isolated context. See "Validation Orchestration" section below for context routing, instruction templates, and sequencing.
+
+**Step 4 — Spawn code-reviewer subagent:**
+Input: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table from project.md.
+Output: Code Review Report with findings.
+
+**Step 5 — Spawn validator subagent:**
+Input: git diff, acceptance criteria, Code Review Report, rules files, Architectural Decisions table from project.md.
+The validator independently: re-runs build, re-runs tests (and evaluates test quality), navigates browser for VERIFY: criteria, runs QUERY: criteria via database, decomposes multi-step criteria, executes mutation tests, runs regression, produces the Validation Report.
+Output: Validation Report with ✅/❌/⏭️ per category.
+
+**Step 6 — Process Validation Report:**
+- If all ✅: proceed to report.
+- If any ❌ AND mechanical evidence contradicts (build passes, tests pass, query matches): spawn arbitrator subagent (see "Validation Orchestration").
+- If any ❌ AND mechanical evidence agrees: fix → commit `"fix: [task] — validation fix N"` → re-spawn from Step 4. Max 3 retry cycles.
+
+**Step 7 — Report:** Structured validation report (see report format below).
+
+**Route C — Architecture/security tasks (full chain):**
+
+Full subagent chain for maximum confidence on high-risk tasks.
+
+**Step 4 — Spawn code-reviewer subagent:** (same as Route B Step 4)
+
+**Step 5 — Spawn security-reviewer subagent:**
+Input: git diff, security-reviewer.md, stack security skill, rules files.
+Output: Security Review Report.
+
+**Step 6 — Red Team (if triggered):**
+Trigger: task implemented or modified authentication logic, authorization/RLS, payment/financial, multi-tenancy, user input → DB, or AI/LLM integration.
+Input: git diff, red-team.md, security context.
+Output: Vulnerability Report with Tier 1-2 findings. Tier 3 flagged as MANUAL:.
+
+**Step 7 — Spawn validator subagent:**
+Input: git diff, acceptance criteria, Code Review Report, Security Review Report, Vulnerability Report (if exists), rules files, Architectural Decisions table from project.md.
+The validator independently: re-runs build, re-runs tests (and evaluates test quality), navigates browser, runs queries, decomposes multi-step criteria, executes mutation tests, runs regression, produces the Validation Report.
+Output: Validation Report with ✅/❌/⏭️ per category.
+
+**Step 8 — Process Validation Report:** (same as Route B Step 6)
+
+**Step 9 — Blue Team (after validation passes, if Red Team ran):**
+Input: Vulnerability Report + final code (post-fixes from retry loop).
+Output: Defense Assessment — verifies defenses exist for each finding, updates Defense Inventory.
+Blue Team runs AFTER validation passes because it evaluates the final code state.
+
+**Step 10 — Report:** Structured validation report (see report format below).
+
+#### Validation report format (all routes)
+
 ```
 ## Validation Report: [feature]
 ### What was implemented:
@@ -281,12 +358,13 @@ Log: "Mutation test: [N] mutations, [N] confirmed, [N] strengthened"
 ### Verification results:
 - Build:      ✅/❌ [details]
 - Tests:      ✅/❌/⏭️ [N passed, N failed, or skipped if no testable logic]
-- Review:     ✅/❌ [issues]
-- Security:   ✅/❌/⏭️ [Red Team Tier 1-2 results, or "no security-relevant changes"]
+- Review:     ✅/❌ [inline or "code-reviewer subagent"]
+- Security:   ✅/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes"]
 - Mutation:   ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
 - DB:         ✅/❌/⏭️ [query results or covered by tests]
 - UI:         ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
 - Regression: ✅/❌ [test suite results or re-checked tasks]
+- Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
 ### Items for human verification:
 - [MANUAL criteria]
 ### Improvements identified → added to pendencias:
@@ -303,37 +381,96 @@ Log: "Mutation test: [N] mutations, [N] confirmed, [N] strengthened"
 
 ⏭️ means "not applicable to this task" — NOT "I couldn't do it" or "I skipped it."
 
-**Actionable findings rule:** If during ANY step of this loop (review, testing, validation, browser verification, criteria check) the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking. Log in the report under "Improvements identified → added to pendencias".
+**Actionable findings rule:** If during ANY step of the validation loop (review, testing, validation, browser verification, criteria check) the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking.
+
+If any ❌ after max retry cycles: STOP and escalate to human with diagnosis.
+
+#### Validation Orchestration (subagent mechanics)
+
+When spawning validation subagents (Routes B and C), construct the Task tool prompt following this template:
+
+```
+1. Role definition — "You are the [agent name]. Your role is [purpose]."
+2. Files to read — explicit paths from the context routing rules below
+3. Evidence to evaluate — "Read the git diff via `git diff HEAD~1`" + acceptance criteria (copied into prompt)
+4. Prior reports (if any) — "Read [report path] for findings from previous reviewers"
+5. Report format — the exact structure the subagent must produce
+6. BOUNDARIES — "Do NOT read: [NEVER list]. Do NOT access implementation plans, session logs, or progress entries."
+```
+
+The implementing agent does NOT package file contents into the prompt. It provides paths and the subagent reads them directly.
+
+**Context routing rules:**
+```
+ALWAYS instruct the subagent to read:
+  - The agent's own .md file (code-reviewer reads code-reviewer.md, etc.)
+  - .claude/rules/*.md (ALL rules files — cost is low, risk of omission is high)
+  - CLAUDE.md sections: Key Patterns, Architecture
+  - project.md: Architectural Decisions table ONLY
+
+IF security-relevant:
+  - .claude/agents/security-reviewer.md
+  - Stack security skill in .claude/skills/ (if exists)
+
+IF UI task:
+  - Design System section of CLAUDE.md
+
+NEVER instruct the subagent to read (anti-bias firewall):
+  - project.md Progress Log (contains implementation reasoning)
+  - .claude/logs/*.md (session history)
+  - Sprint proposals or implementation plans
+  - Any file the implementing agent wrote as part of the task explanation
+```
+
+**Sequencing:**
+```
+Logic-heavy tasks (Route B):
+  1. code-reviewer subagent → Code Review Report
+  2. validator subagent (receives Code Review Report) → Validation Report
+
+Architecture/security tasks (Route C):
+  1. code-reviewer subagent → Code Review Report
+  2. security-reviewer subagent → Security Review Report
+  3. Red Team subagent (if triggered) → Vulnerability Report
+  4. validator subagent (receives all prior reports) → Validation Report
+  5. arbitrator subagent (only if validator ❌ contradicts mechanical evidence)
+  6. Blue Team subagent (after validation passes, if Red Team ran) → Defense Assessment
+```
+
+Each subagent is a fresh Task tool instance — isolated context, no carryover between invocations.
+
+**Retry flow:** When validator returns ❌: fix → commit `"fix: [task] — validation fix N"` → re-spawn from step 1 of subagent sequence. Max 3 retry cycles. After limit: STOP and escalate to human with diagnosis.
+
+**Large task mitigation:** For large tasks (diff exceeds ~300 lines or criteria exceed 10), split validation into sequential subagent calls: (1) code review + criteria evaluation, (2) mutation testing. Each call gets a fresh context.
 
 **Validation Failure Post-Mortem (when human finds a bug in a ✅ task):**
 If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
-1. Identify which of the 6 steps should have caught it
+1. Identify which validation step should have caught it (Phase A build/tests, Phase B review/UI/criteria/validation subagent)
 2. Diagnose why that step declared ✅ (partial execution? silent failure? missing criterion? weak criterion?)
 3. Classify the root cause and route the improvement to the correct document:
-   - Weak/incomplete criterion → improve criteria quality rules
-   - Partially verified multi-step criterion → add enforcement to Step 5
+   - Weak/incomplete criterion ��� improve criteria quality rules
+   - Partially verified multi-step criterion → strengthen Phase B criteria check
    - Tool silenced an error → add Known Bug Pattern
    - Review missed a pattern → update code-reviewer checklist
-   - Test not written for testable logic → refine Step 2 skip conditions
+   - Test not written for testable logic → refine Phase A Step 2 skip conditions
+   - **Subagent context incomplete** → update context routing rules (relevant rules file not routed to the reviewing subagent)
+   - AI judgment error → inherent limitation, no doc fix
 4. Apply the systemic improvement (prevent the CLASS of failure, not just this instance)
 5. Log the post-mortem in the session entry
 Then fix the bug normally. The validation loop improves before the bug is fixed.
 
-If any ❌: fix → re-run entire loop (max 3 full cycles).
-If all ✅/⏭️: report as READY.
-**Global retry limit:** After 3 full cycles with ❌, STOP. Report: what works, what doesn't (all 3 attempts), root cause hypothesis, suggested approach.
+**Between tasks (after validation passes, before picking next task):**
 
-**Between tasks (after report, before picking next task):**
-1. Commit: `git add -A && git commit -m "feat: [task name] — validated"`
+1. Commit (if not already committed): for routine tasks with inline validation, `git add -A && git commit -m "feat: [task name] — validated"`. For subagent-validated tasks, the `feat:` commit was made before Phase B — it already stands.
 2. Update pendencias.md: mark task as Done, confirm next task
 3. If this is task 3+ in the current session: evaluate context health. If degrading → trigger mid-session recovery instead of continuing.
-4. **Sprint-approved mode:** If executing a sprint, pick next task from the batch and proceed. If all sprint tasks are done, produce a consolidated sprint report:
+4. **Sprint-approved mode:** If executing a sprint, pick next task from the batch and proceed directly to "Before implementing". Do NOT re-propose the sprint or ask for confirmation. If all sprint tasks are done, produce a consolidated sprint report:
    ```
    ## Sprint Report: Session N
    ### Tasks completed: [N/N]
    | Task | Result | Issues |
    |------|--------|--------|
-   | [name] | ✅/❌ | [notes] |
+   | [name] | ✅/❌ | [MANUAL: items or notes] |
    ### Discoveries added to backlog: [N new tasks]
    ### Known Bug Patterns added: [N]
    ### Rules files created/updated: [list]
@@ -416,16 +553,17 @@ If all ✅/⏭️: report as READY.
    **Proactive (predictable from context):** The PRD, stack, or domain makes a skill predictable even without repetition.
    - New framework introduced that has specific patterns (e.g., new ORM, new auth library)
    - New domain with known conventions (e.g., payment processing, HIPAA compliance)
-   - This trigger was already used in Session 0 (Steps 8, 9, and 10) for security-reviewer, Red Team/Blue Team, and stack skills.
+   - This trigger was already used in Session 0 (Steps 8, 9, 10, 11, and 12) for security-reviewer, Red Team/Blue Team, validator, arbitrator, and stack skills.
    
    Skill = knowledge (HOW). Agent = judgment (WHAT to verify). Max 100 lines.
    
    **Before creating:** Read `assets/examples/examples_instructions.md` for conventions. Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project. If no example exists, create from scratch following the conventions in the instructions file.
    
-   **Effort frontmatter:** Every new agent or skill MUST include an `effort:` field in its frontmatter:
-   - `effort: high` — agents/skills involving security, financial calculations, architectural decisions, or complex verification
-   - `effort: medium` — code review checklists, style guides, pattern references
-   This ensures the AI automatically uses deeper reasoning when invoking critical agents, without human intervention.
+   **Frontmatter requirements:** Every new agent or skill MUST include:
+   - `effort:` — `high` for security, financial, architectural, complex verification; `medium` for checklists, style guides, patterns
+   - `invocation:` — `subagent` for review/validation/security agents (spawned via Task tool with isolated context); `inline` for knowledge/reference skills (read by another agent)
+   - `receives:` and `produces:` — required for `invocation: subagent` agents (defines I/O contract for Task tool)
+   This ensures the AI knows whether to spawn the agent independently or read it inline, and what to pass/expect.
    
    Do NOT create if: one-time pattern, rules file more appropriate, Known Bug Pattern suffices, duplicates existing content, or contradicts patterns in CLAUDE.md/rules (precedence: CLAUDE.md > rules > skills/agents).
    Log: "Created skill/agent: [name] — [trigger: reactive/proactive]"
@@ -471,7 +609,7 @@ The user can also trigger this by saying "save state and start fresh".
 
 ## Hooks
 
-[Configured in Step 12 below — depends on project formatter. If Prettier is installed, smart-formatting hook auto-formats files after every edit.]
+[Configured in Step 14 below — depends on project formatter. If Prettier is installed, smart-formatting hook auto-formats files after every edit.]
 
 ## Architecture
 
@@ -826,13 +964,46 @@ Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills 
 ```markdown
 ---
 name: code-reviewer
+invocation: subagent
 effort: medium
 description: >
-  Reviews code after implementation. Invoked as checklist in Step 3
-  of the self-validation loop. Can also be invoked manually.
+  Reviews code after implementation. Spawned as independent subagent for
+  logic-heavy and architecture/security tasks (Routes B and C). Read as
+  inline checklist for routine tasks (Route A).
+receives: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table
+produces: Code Review Report with findings, pattern violations, and APPROVE/FIX REQUIRED recommendation
 ---
 
 # Code Review Rules
+
+## Input
+
+When invoked as subagent:
+- **Git diff** — read via `git diff HEAD~1`
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
+- **project.md** — Architectural Decisions table ONLY
+
+## Output
+
+When invoked as subagent, produce:
+```
+## Code Review Report: [feature/task name]
+### Findings:
+| # | Severity | Category | Finding | File:Line | Recommendation |
+|---|----------|----------|---------|-----------|---------------|
+### Pattern violations: [list any CLAUDE.md/rules violations]
+### Known Bug Pattern matches: [any patterns that apply to this diff]
+### Architecture: [file size, cross-module imports, structure issues]
+### Recommendation: APPROVE / FIX REQUIRED
+```
+
+## BOUNDARIES
+
+When invoked as subagent, do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md`
+- Sprint proposals or implementation plans
 
 ## Project Patterns
 - Follows patterns in CLAUDE.md?
@@ -889,13 +1060,13 @@ description: >
 
 ---
 
-### Steps 8-10 — Create agents and skills
+### Steps 8-12 — Create agents and skills
 
-**Before creating any agent or skill in the steps below:** read `assets/examples/examples_instructions.md` for conventions (frontmatter, structure, output format). Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as a structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project.
+**Before creating any agent or skill in the steps below:** read `assets/examples/examples_instructions.md` for conventions (frontmatter, structure, output format, invocation type). Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as a structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project.
 
 ### Step 8 — Create security-reviewer agent
 
-This agent is created at bootstrap for ALL projects (security is universal). It covers OWASP Top 10, injection prevention (SQL, XSS, prompt), auth/authz, and data protection. Stack-agnostic — covers universal principles. Stack-specific security checks are created dynamically by the proactive stack skill (Step 10) and Red Team agent (Step 9).
+This agent is created at bootstrap for ALL projects (security is universal). It covers OWASP Top 10, injection prevention (SQL, XSS, prompt), auth/authz, and data protection. Stack-agnostic — covers universal principles. Stack-specific security checks are created dynamically by the proactive stack skill (Step 12) and Red Team agent (Step 9).
 
 **If `.claude/agents/security-reviewer.md` already exists:** Do NOT overwrite. Verify it has: prompt injection section, tiered security testing model reference, and Section 8 delegation to stack skills/Red Team.
 
@@ -904,17 +1075,48 @@ This agent is created at bootstrap for ALL projects (security is universal). It 
 ```markdown
 ---
 name: security-reviewer
+invocation: subagent
 effort: high
 description: >
-  Security review checklist based on OWASP Top 10 and common attack vectors.
-  Referenced by the code-reviewer during Step 3 (self-review) for any code
-  that handles user input, authentication, data storage, or external APIs.
-  Also applicable when building AI-powered features (prompt injection).
+  Security review agent based on OWASP Top 10 and common attack vectors.
+  Spawned as independent subagent for architecture/security tasks (Route C).
+  Read as inline checklist for routine tasks (Route A). Covers user input,
+  authentication, data storage, external APIs, and AI/LLM features.
+receives: git diff, security-reviewer.md (self), stack security skill, rules files
+produces: Security Review Report with findings by category, severity, and APPROVE/FIX REQUIRED/BLOCK recommendation
 ---
 
 # Security Review Rules
 
-## When to invoke
+## Input
+
+When invoked as subagent:
+- **Git diff** — read via `git diff HEAD~1`
+- **Stack security skill** — in `.claude/skills/` (if exists)
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
+
+## Output
+
+When invoked as subagent, produce:
+```
+## Security Review Report: [feature/task name]
+### Sections checked: [list which sections 1-9 were applicable]
+### Findings:
+| # | Severity | Section | Finding | Evidence | Status |
+|---|----------|---------|---------|----------|--------|
+### Summary: [N critical, N high, N medium, N low]
+### Recommendation: APPROVE / FIX REQUIRED / BLOCK
+```
+
+## BOUNDARIES
+
+When invoked as subagent, do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md`
+- Sprint proposals or implementation plans
+
+## When this agent is invoked
 Check whenever changes involve: user input, auth, database queries, API endpoints,
 file operations, external APIs, AI/LLM integration, secrets, HTML rendering, sessions.
 
@@ -1074,10 +1276,14 @@ PRD indicates NONE of these → security-reviewer skill is sufficient, skip this
 ```markdown
 ---
 name: red-team
+invocation: subagent
 effort: high
 description: >
-  Adversarial security tester for [STACK]. Runs after security-relevant
-  implementations. Produces vulnerability reports using the tiered security model.
+  Adversarial security tester for [STACK]. Spawned as independent subagent
+  for architecture/security tasks (Route C) when security triggers are met.
+  Produces vulnerability reports using the tiered security model.
+receives: git diff, red-team.md (self), security-reviewer.md, stack security skill, rules files
+produces: Vulnerability Report with findings by severity, category, tier, and evidence
 ---
 
 # Red Team — [Project Name]
@@ -1187,10 +1393,14 @@ After running tests, produce:
 ```markdown
 ---
 name: blue-team
+invocation: subagent
 effort: high
 description: >
-  Defensive security verifier. Reads Red Team reports, verifies defenses,
-  confirms fixes, tracks security control inventory.
+  Defensive security verifier. Spawned as independent subagent after validation
+  passes (Route C only, when Red Team ran). Reads Red Team reports, verifies
+  defenses, confirms fixes, tracks security control inventory.
+receives: Vulnerability Report (Red Team), final code (post-fixes), rules files
+produces: Defense Assessment with gap analysis, defense inventory updates, APPROVE/BLOCK recommendation
 ---
 
 # Blue Team — [Project Name]
@@ -1242,7 +1452,201 @@ After reviewing all Red Team findings:
 
 ---
 
-### Step 10 — Create proactive stack skills
+### Step 10 — Create validator agent
+
+The validator is a mandatory agent created for ALL projects. It performs independent verification of the implementing agent's work — re-running build, tests, criteria checks, and mutation tests with isolated context. This is the agent that eliminates confirmation bias: the implementing agent never judges its own work on non-trivial tasks.
+
+**If `.claude/agents/validator.md` already exists:** Do NOT overwrite. Verify it has Input, Output, and BOUNDARIES sections. Add them if missing.
+
+**If it does not exist:** Create `.claude/agents/validator.md`:
+
+```markdown
+---
+name: validator
+invocation: subagent
+effort: high
+description: >
+  Independent validation agent. Spawned via Task tool after implementation.
+  Re-runs build, tests, criteria checks, and mutation tests with isolated context.
+  Receives prior review reports (code-reviewer, security-reviewer, Red Team) as
+  additional evidence. Produces the Validation Report with ✅/❌/⏭️ per category.
+receives: >
+  git diff, acceptance criteria, Code Review Report, Security Review Report (if exists),
+  Vulnerability Report (if exists), rules files, Architectural Decisions table from project.md
+produces: >
+  Validation Report with ✅/❌/⏭️ per category (Build, Tests, Review, Security,
+  Mutation, DB, UI, Regression) + mutation test results + test quality evaluation
+---
+
+# Validator
+
+## Input
+
+This agent receives (via Task tool prompt):
+- **Git diff** — read via `git diff HEAD~1`
+- **Acceptance criteria** — copied into the prompt (short, central contract)
+- **Code Review Report** — findings from code-reviewer subagent
+- **Security Review Report** — findings from security-reviewer subagent (if exists)
+- **Vulnerability Report** — findings from Red Team subagent (if exists)
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
+- **project.md** — Architectural Decisions table ONLY
+
+## Output
+
+Produce a structured Validation Report:
+
+```
+## Validation Report: [feature/task name]
+
+### Build: ✅/❌
+[build command output summary]
+
+### Tests: ✅/❌/⏭️
+[N passed, N failed — or "no testable logic"]
+**Test quality:** [Do tests actually assert what criteria describe? Are assertions meaningful or superficial?]
+
+### Criteria Results:
+| # | Criterion | Type | Result | Evidence |
+|---|-----------|------|--------|----------|
+| 1 | [criterion text] | VERIFY/QUERY/BUILD/REVIEW | ✅/❌ | [what was observed] |
+
+### Mutation Tests: ✅/⏭️
+[N mutations tested, N criteria confirmed — or "routine task, skipped"]
+| # | Mutation | Criterion affected | Criteria failed? | Result |
+|---|---------|-------------------|-------------------|--------|
+| 1 | [what was changed] | [criterion] | Yes/No | ✅/❌ |
+
+### Regression: ✅/❌
+[full test suite results or re-checked prior criteria]
+
+### Prior Review Findings:
+- Code Review: [summary of findings, all addressed?]
+- Security Review: [summary if exists]
+- Red Team: [summary if exists]
+
+### Overall: ✅ PASS / ❌ FAIL
+[If FAIL: which criteria failed and why]
+```
+
+## Verification Process
+
+Execute in order:
+
+1. **Read the git diff** via `git diff HEAD~1` — understand what changed
+2. **Re-run build** — verify it compiles/builds without errors
+3. **Re-run tests** — verify all tests pass. Then evaluate test quality:
+   - Do tests actually test what the acceptance criteria describe?
+   - Are assertions checking real values, not just "no error thrown"?
+   - Are edge cases covered (empty, null, zero, negative)?
+   - If test quality is insufficient: report as ❌ with explanation
+4. **UI verification (web projects):** Navigate browser for VERIFY: criteria. Health check dev server first. If UI was modified and server unavailable: mark as ❌.
+5. **Execute QUERY: criteria** via database tool. If data missing: create test data, document it.
+6. **Decompose multi-step criteria** into atomic sub-checks. Each sub-check gets its own ✅/❌. The criterion only passes when ALL sub-checks pass.
+7. **Mutation tests (logic-heavy and arch/security tasks):** Pick 1-3 critical lines of implementation, break each one (comment out, change value, rename column), re-run affected criteria. Criteria MUST fail with broken code. If they still pass → criteria don't test what they claim → report as ❌. Restore code after each mutation. Max 3 mutations.
+8. **Regression:** Run full test suite if it exists. If no suite: re-run QUERY: criteria from last 2-3 completed tasks. If results changed → regression.
+9. **Evaluate prior review reports:** Check if code-reviewer findings were addressed. Check security findings if applicable.
+10. **Produce the Validation Report** using the format above.
+
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log (contains implementation reasoning from previous sessions)
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Any file the implementing agent wrote as part of the task explanation
+
+You do not know WHY the code was written this way. You only see code + checklists + criteria. This is intentional — it eliminates confirmation bias.
+```
+
+---
+
+### Step 11 — Create arbitrator agent
+
+The arbitrator resolves conflicts between the validator's judgment and mechanical evidence. Created at bootstrap for ALL projects — false ❌ frequency cannot be tracked across sessions (no persistent memory mechanism), so the reactive trigger is impractical.
+
+**If `.claude/agents/arbitrator.md` already exists:** Do NOT overwrite.
+
+**If it does not exist:** Create `.claude/agents/arbitrator.md`:
+
+```markdown
+---
+name: arbitrator
+invocation: subagent
+effort: high
+description: >
+  Resolves conflicts between validator ❌ and contradicting mechanical evidence.
+  Three terminal outputs: UPHOLD ❌, OVERRIDE TO ✅, or ESCALATE.
+  Spawned only when validator says ❌ but build passes, tests pass, queries match.
+receives: >
+  Validation Report (with ❌), mechanical evidence (build/test/query results),
+  git diff, all checklists and rules files, acceptance criteria
+produces: >
+  Arbitration Ruling: UPHOLD ❌ (with justification) / OVERRIDE TO ✅
+  (with justification) / ESCALATE (with explanation of ambiguity)
+---
+
+# Arbitrator
+
+## Trigger Condition
+
+This agent is spawned ONLY when:
+- The validator returned ❌ on one or more criteria, AND
+- Mechanical evidence contradicts the ❌ (build passes, tests pass, query returns expected value)
+
+Do NOT spawn when validator ❌ AND mechanical evidence also indicates a problem — that is a legitimate ❌.
+
+## Input
+
+- **Validation Report** — the full report that contains the ❌ ruling
+- **Mechanical evidence** — build output, test results, query results that suggest ✅
+- **Git diff** — read via `git diff HEAD~1`
+- **Acceptance criteria** — copied into prompt
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
+- **project.md** — Architectural Decisions table ONLY
+
+## Output — Three Terminal Rulings (no recursion)
+
+### UPHOLD ❌
+The validator was right. The mechanical evidence is insufficient or misleading.
+**Required:** Justification explaining why the ❌ stands despite passing mechanical checks.
+**Next action:** Implementing agent fixes the issue and re-submits to the **validator** (not the arbitrator). The arbitrator is not an alternative validator.
+
+### OVERRIDE TO ✅
+The validator was wrong. The code correctly satisfies the criterion.
+**Required:** Justification explaining what the validator missed or misinterpreted.
+**Next action:** Implementing agent proceeds. The override is logged in the session entry with this justification.
+
+### ESCALATE
+Genuinely ambiguous. Neither the validator nor mechanical evidence is clearly right.
+**Required:** Explanation of the ambiguity — what makes this undecidable.
+**Next action:** Human decides. This is the last resort.
+
+## Arbitration Process
+
+1. Read the Validation Report — understand what the validator found and why it ruled ❌
+2. Read the mechanical evidence — understand what the build/test/query results show
+3. Read the git diff — understand what actually changed
+4. Read the acceptance criteria — understand what was supposed to be achieved
+5. Read relevant checklists and rules files — same context the validator had
+6. Compare the validator's reasoning against the evidence independently
+7. Produce ONE of the three rulings with justification
+
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log (contains implementation reasoning)
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Any file the implementing agent wrote as part of the task explanation
+
+Same anti-bias firewall as the validator. You judge the CODE against CRITERIA, not the intent.
+```
+
+---
+
+### Step 12 — Create proactive stack skills
 
 If the stack identified in the PRD has framework-specific patterns AND no existing skill was found in Step 6, create a basic skill from the AI's knowledge of that framework.
 
@@ -1313,7 +1717,7 @@ VERIFY: Create order with 3 items (qty: 2, 1, 5 × prices: 10.00, 25.50, 3.99)
 
 ---
 
-### Step 11 — Identify future rules
+### Step 13 — Identify future rules
 
 Analyze the PRD and list modules with complex business logic (3+ business rules).
 
@@ -1326,7 +1730,7 @@ Do NOT create the rule now — wait until implementation when the details are kn
 
 ---
 
-### Step 12 — Create settings.json, configure hooks, and initialize logs
+### Step 14 — Create settings.json, configure hooks, and initialize logs
 
 Create `.claude/logs/` directory for session logs:
 ```bash
@@ -1375,7 +1779,7 @@ Create `.claude/settings.json`:
 
 ---
 
-### Step 13 — Report
+### Step 15 — Report
 
 ```
 ## Session 0 — Bootstrap Complete
@@ -1388,7 +1792,9 @@ Create `.claude/settings.json`:
 - .claude/agents/security-reviewer.md ([lines] lines)
 - .claude/agents/red-team.md ([lines] lines) ← if created (Step 9)
 - .claude/agents/blue-team.md ([lines] lines) ← if created (Step 9)
-- .claude/skills/[domain]-test-patterns.md ([lines] lines) ← if created (Step 10)
+- .claude/agents/validator.md ([lines] lines) ← mandatory (Step 10)
+- .claude/agents/arbitrator.md ([lines] lines) ← mandatory (Step 11)
+- .claude/skills/[domain]-test-patterns.md ([lines] lines) ← if created (Step 12)
 - .claude/settings.json
 - .claude/logs/ (initialized — session logs start from session 1)
 - assets/examples/ (copied from framework — Step 1.5)
@@ -1401,8 +1807,8 @@ Create `.claude/settings.json`:
 
 ### Skills installed:
 - [name or "none"]
-- [stack-skill if created] (proactive — Step 10)
-- [domain-test-patterns if created] (proactive — Step 10)
+- [stack-skill if created] (proactive — Step 12)
+- [domain-test-patterns if created] (proactive — Step 12)
 
 ### Rules planned for future creation:
 - [module] → .claude/rules/[module]-rules.md

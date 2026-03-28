@@ -1,15 +1,41 @@
 ---
 name: api-security-scanner
+invocation: subagent
 effort: high
 description: >
   Scans API endpoints for security vulnerabilities using the tiered security model.
   Covers authentication bypass, authorization flaws, injection, and data exposure.
   Stack-specific — adapt to project's API framework.
+receives: git diff, security-reviewer.md, stack security skill, rules files, acceptance criteria
+produces: API Security Scan Report with findings table, severity counts, APPROVE/FIX REQUIRED/BLOCK recommendation
 ---
 
 # API Security Scanner
 
-## When to invoke
+## Input
+
+This agent receives:
+- **Git diff** — read via `git diff HEAD~1` to identify changed endpoints and data flows
+- **Security-reviewer.md** — universal security principles and OWASP checklist
+- **Stack security skill** — framework-specific security settings and patterns (if exists in `.claude/skills/`)
+- **Rules files** — all `.claude/rules/*.md` for domain-specific constraints
+- **Acceptance criteria** — the task's criteria to verify security requirements
+
+## Output
+
+Produces an API Security Scan Report (see Output Format below) with:
+- Findings table: severity, tier, endpoint, finding, evidence, status
+- Summary: count by severity level
+- Recommendation: APPROVE / FIX REQUIRED / BLOCK
+
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log (contains implementation reasoning)
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+
+## When this agent is invoked
 
 - After implementing or modifying API endpoints
 - After changing authentication or authorization logic

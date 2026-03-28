@@ -14,16 +14,17 @@ Tool-agnostic in concepts. Reference implementations provided for Claude Code (`
 4. [Document Boundaries](#document-boundaries)
 5. [Session Protocol](#session-protocol)
 6. [Execution Protocol](#execution-protocol)
-7. [The 6 Evolutions](#the-6-evolutions)
-8. [Browser Automation Guidelines](#browser-automation-guidelines)
-9. [MCP and Tool Discovery](#mcp-and-tool-discovery)
-10. [On-Demand Skill and Agent Creation](#on-demand-skill-and-agent-creation)
-11. [Task Parallelism](#task-parallelism)
-12. [Test Automation Guidance](#test-automation-guidance)
-13. [Security Testing Tiers](#security-testing-tiers)
-14. [Risks and Mitigations](#risks-and-mitigations)
-15. [Principles](#principles)
-16. [Implementation](#implementation)
+7. [Validation Orchestration Protocol](#validation-orchestration-protocol)
+8. [The 6 Evolutions](#the-6-evolutions)
+9. [Browser Automation Guidelines](#browser-automation-guidelines)
+10. [MCP and Tool Discovery](#mcp-and-tool-discovery)
+11. [On-Demand Skill and Agent Creation](#on-demand-skill-and-agent-creation)
+12. [Task Parallelism](#task-parallelism)
+13. [Test Automation Guidance](#test-automation-guidance)
+14. [Security Testing Tiers](#security-testing-tiers)
+15. [Risks and Mitigations](#risks-and-mitigations)
+16. [Principles](#principles)
+17. [Implementation](#implementation)
 
 ---
 
@@ -108,6 +109,7 @@ AI implements, validates, and reports with evidence. Human approves.
 - ✅ Everything from Level 2
 - ✅ Verifiable acceptance criteria on every task
 - ✅ Self-validation loop (build → tests → review → UI → criteria → report)
+- ✅ Independent validation via subagents (implementing agent ≠ validating agent)
 - ✅ Auto-review with Known Bug Patterns and Architecture Patterns (cumulative memory)
 - ✅ Task decomposition with approvable plan (complexity threshold)
 - ✅ On-demand creation of skills and agents when recurring patterns are identified
@@ -448,6 +450,7 @@ Include the recommendation in the implementation plan for medium/large tasks. Fo
 - MANUAL: criteria that genuinely require human judgment (flag in report, continue with next task)
 - Context degradation detected (trigger mid-session recovery)
 - Current task is blocked by a discovery that requires human input before proceeding
+- False ❌ from subagent escalated by arbitrator (genuinely ambiguous — human decides)
 
 **Plan format (medium and large):**
 ```
@@ -507,19 +510,50 @@ Before writing code for any medium or large task, create a git checkpoint:
 git add -A && git commit -m "checkpoint: before [task name]"
 ```
 
-After the validation loop passes and the task is confirmed READY:
+After Phase A (implementation) completes and before spawning validation subagents (Phase B), commit the implementation:
 
 ```bash
-git add -A && git commit -m "feat: [task name] — validated"
+git add -A && git commit -m "feat: [task name] — pending validation"
 ```
+
+This commit ensures: (1) the subagent can access the diff via `git diff HEAD~1`, (2) there is a clean rollback point, and (3) the implementation is preserved regardless of validation outcome.
+
+After Phase B (validation) passes:
+- If all ✅: the `feat:` commit stands. No additional commit needed.
+- If any ❌: fix → `git add -A && git commit -m "fix: [task name] — validation fix N"` → re-spawn validation from Phase B step 1.
 
 **Why:** If the next task breaks something, or the human rejects the result, `git diff` shows exactly what changed and `git restore .` reverts cleanly. Without checkpoints, reverting means manually undoing across multiple files.
 
-**For small tasks:** A single commit after validation is sufficient. No pre-checkpoint needed.
+**For small/routine tasks:** A single commit after inline validation is sufficient. No pre-checkpoint needed.
 
-### During implementation (self-validation loop)
+### During implementation (validation loop)
 
-After writing code and BEFORE reporting to the user, execute 6 steps:
+After writing code and BEFORE reporting to the user, execute two phases. The implementing agent handles Phase A. Phase B is graduated by task complexity — routine tasks use inline validation, logic-heavy and architecture/security tasks use independent subagents (see [Validation Orchestration Protocol](#validation-orchestration-protocol) for subagent mechanics).
+
+#### Graduated validation depth
+
+The task's computational complexity classification (set in "Before implementing") determines the validation approach:
+
+```
+Routine task (UI text, config, styling, simple CRUD)
+  → Phase B uses inline checklist (current behavior). No subagent.
+  → Bias risk near-zero. Token cost: ~5-10k.
+
+Logic-heavy task (business rules, calculations, state machines, financial)
+  → Phase B spawns code-reviewer subagent + validator subagent (2 calls)
+  → Token cost: ~50-65k. Acceptable for where bias matters.
+
+Architecture/security task (new module, cross-module, Red Team trigger)
+  → Phase B spawns full chain: code-reviewer + security-reviewer +
+    Red Team + validator + Blue Team (up to 5 calls)
+  → Token cost: ~120-150k. Worth it for high-risk tasks.
+```
+
+The implementing agent can override the classification after reading the task (same as the existing override rule).
+
+#### Phase A — Implementation (implementing agent)
+
+The implementing agent writes code, writes tests, and commits. This phase is identical for all complexity levels.
 
 **Step 1 — Build check:** Run the build command. Fix errors before proceeding.
 
@@ -535,82 +569,91 @@ This IS the task. Before writing application code:
 Log: "Test framework configured: [framework name]. First test: [test name]."
 This only happens once. After configuration, Step 2 proceeds normally for all future tasks.
 
-**Step 3 — Self-review:** Read the code-reviewer rules (read as checklist, do not invoke as separate agent). Check: project patterns, domain rules, Known Bug Patterns (every pattern against changes), Architecture Patterns, **security** (ALWAYS read security section headers; if changes touch user input, auth, database, APIs, AI/LLM, secrets, or HTML rendering: read the FULL security-reviewer checklist and run Tier 1 checks; when in doubt, read it), edge cases (empty, null, zero, negative).
-
-- **Red Team trigger:** If this task implemented or modified ANY of: authentication logic, authorization/RLS policies, payment/financial transactions, multi-tenancy isolation, user input handling that stores to database, or AI/LLM integration → run Red Team Tier 1 tests (REVIEW: checks) and Tier 2 tests (QUERY: checks) from the Red Team agent BEFORE proceeding to Step 4. Log results in report under "Security:" line. Tier 3 tests require human approval — flag them as MANUAL:.
-
-- **Blue Team trigger:** If Red Team ran in this session (or a previous session produced a Red Team report that hasn't been verified yet) → read the Blue Team agent, verify each finding, update Defense Inventory. Log in report under "Security:" line. If Red Team found CRITICAL/HIGH issues that aren't fixed: report as ❌.
-
-**Step 4 — UI verification (web projects only):** Skip entirely for non-web projects. Skip entirely if no UI was modified. If UI was changed, this step is MANDATORY — do not wait for user to request it. Health check the dev server first. If not running: try starting it (check Commands section), wait 10s. If still unavailable AND UI files were modified in this task: mark as ❌ with reason "dev server unavailable", list all VERIFY: criteria as MANUAL:. If no UI files were modified: mark as ⏭️ (not applicable). If running: navigate → action → verify → screenshot. Max 3 attempts.
-
-**Step 5 — Check acceptance criteria:**
-
-**Step 5a — Decompose multi-step criteria:** Before executing, scan each criterion for multiple sub-checks (sequential states, multiple fields, before/after patterns, lists of conditions). Decompose into atomic sub-checks, each independently verifiable:
-
+**Step 3 — Commit implementation:**
+```bash
+git add -A && git commit -m "feat: [task name] — pending validation"
 ```
-Original criterion:
-  VERIFY: /financeiro → pay water bill → earmark updates from 500 to 0,
-  transaction created with is_paid=true, balance decreases by 500
+This ensures the diff is available to subagents via `git diff HEAD~1` and provides a clean rollback point.
 
-Decomposed:
-  ☐ 5a.1: Before payment → earmark = 500 (via Playwright or QUERY)
-  ☐ 5a.2: Execute payment action
-  ☐ 5a.3: After payment → earmark = 0 (via Playwright or QUERY)
-  ☐ 5a.4: After payment → transaction exists with is_paid=true (QUERY)
-  ☐ 5a.5: After payment → balance decreased by 500 (QUERY)
+For **routine tasks** that use inline validation: this commit can be deferred until after Phase B passes (same as v1.3 behavior — single commit after validation).
 
-Result: ALL 5 sub-checks must be ✅. If 5a.1 passes but 5a.3 fails → criterion is ❌.
-```
+#### Phase B — Validation (graduated by complexity)
 
-Only decompose criteria that have 2+ verifiable conditions. Single-condition criteria (e.g., `BUILD: zero errors`) pass through unchanged.
+**Route A — Routine tasks (inline validation):**
 
-**Step 5b — Execute criteria:** Execute each criterion (or sub-check) by tag type. For criteria with corresponding tests (Step 2): the passing test IS the verification — do not re-check manually. For criteria without tests: verify manually by tag.
+The implementing agent validates its own work inline. Bias risk is near-zero for routine changes.
+
+**Step 4 — Self-review:** Read the code-reviewer rules as a checklist. Check: project patterns, domain rules, Known Bug Patterns (every pattern against changes), Architecture Patterns, **security** (ALWAYS read security section headers; if changes touch user input, auth, database, APIs, AI/LLM, secrets, or HTML rendering: read the FULL security-reviewer checklist and run Tier 1 checks; when in doubt, read it), edge cases (empty, null, zero, negative).
+
+**Step 5 — UI verification (web projects only):** Skip entirely for non-web projects. Skip entirely if no UI was modified. If UI was changed, this step is MANDATORY — do not wait for user to request it. Health check the dev server first. If not running: try starting it (check Commands section), wait 10s. If still unavailable AND UI files were modified in this task: mark as ❌ with reason "dev server unavailable", list all VERIFY: criteria as MANUAL:. If no UI files were modified: mark as ⏭️ (not applicable). If running: navigate → action → verify → screenshot. Max 3 attempts.
+
+**Step 6 — Check acceptance criteria:** Execute each criterion by tag type. For criteria with corresponding tests (Step 2): the passing test IS the verification — do not re-check manually. For criteria without tests: verify manually by tag.
 
 **Then run regression:** if test suite exists, run full suite. If no suite yet, re-execute `QUERY:` criteria from last 2-3 completed tasks. If results changed unexpectedly → regression detected → treat as ❌.
 
-**Step 5c — Mutation test (logic-heavy and architecture/security tasks only):**
+**Step 7 — Report:** Structured validation report (see report format below).
 
-Skip for routine tasks (UI, styling, config, simple CRUD).
+**Route B — Logic-heavy tasks (2 subagents):**
 
-After all criteria pass (Step 5b), verify that the criteria actually detect breakage:
+The implementing agent spawns independent subagents with isolated context. See [Validation Orchestration Protocol](#validation-orchestration-protocol) for context routing, instruction templates, and sequencing.
 
-1. **Identify 1-3 critical mutations:** Pick the core lines of the implementation — the calculation, the query, the state change, the authorization check. These are the lines where a bug would be most damaging.
+**Step 4 — Spawn code-reviewer subagent:**
+Input: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table from project.md.
+Output: Code Review Report with findings.
 
-2. **Apply mutation:** Comment out, change a value, rename a column, or invert a condition. One mutation at a time.
+**Step 5 — Spawn validator subagent:**
+Input: git diff, acceptance criteria, Code Review Report, rules files, Architectural Decisions table from project.md.
+The validator independently: re-runs build, re-runs tests (and evaluates test quality), navigates browser for VERIFY: criteria, runs QUERY: criteria via database, decomposes multi-step criteria, executes mutation tests, runs regression, produces the Validation Report.
+Output: Validation Report with ✅/❌/⏭️ per category.
 
-3. **Re-run affected criteria:** Execute only the criteria that should catch this mutation (not the full suite).
+**Step 6 — Process Validation Report:**
+- If all ✅: proceed to report.
+- If any ❌ AND mechanical evidence contradicts (build passes, tests pass, query matches): spawn arbitrator subagent (see [Validation Orchestration Protocol](#validation-orchestration-protocol)).
+- If any ❌ AND mechanical evidence agrees: fix → commit `"fix: [task] — validation fix N"` → re-spawn from Step 4. Max 3 retry cycles.
 
-4. **Verify failure:** The criteria MUST fail. If they still pass with broken code:
-   - The criteria are not testing what they claim
-   - Strengthen the failing criterion: add a sub-check, add a complementary QUERY:, or add a before/after verification
-   - Re-validate with the strengthened criteria
+**Step 7 — Report:** Structured validation report (see report format below).
 
-5. **Restore code:** Revert the mutation. Verify criteria pass again with correct code.
+**Route C — Architecture/security tasks (full chain):**
 
-**Example:**
-```
-Implementation: a validation function that rejects negative quantities
-Mutation: comment out the validation check (or change `quantity < 0` to `quantity < -999`)
-Re-run: VERIFY: "submit order with quantity=-1 → expect validation error"
-Expected: criterion FAILS (negative quantity is accepted because validation is gone)
-If criterion still passes: it wasn't actually testing the validation → strengthen
-```
+Full subagent chain for maximum confidence on high-risk tasks.
 
-**Cost control:** Max 3 mutations per task. Each mutation re-runs only its affected criteria, not the full validation loop. Total added time: ~30 seconds for most tasks.
+**Step 4 — Spawn code-reviewer subagent:** (same as Route B Step 4)
 
-Log in report: "Mutation test: [N] mutations tested, [N] criteria confirmed, [N] criteria strengthened"
+**Step 5 — Spawn security-reviewer subagent:**
+Input: git diff, security-reviewer.md, stack security skill, rules files.
+Output: Security Review Report.
 
-**Step 6 — Report:** Structured validation report with ✅/❌/⏭️ per category. Include test results, security results, and regression results.
+**Step 6 — Red Team (if triggered):**
+Trigger: task implemented or modified authentication logic, authorization/RLS, payment/financial, multi-tenancy, user input → DB, or AI/LLM integration.
+Input: git diff, red-team.md, security context.
+Output: Vulnerability Report with Tier 1-2 findings. Tier 3 flagged as MANUAL:.
+
+**Step 7 — Spawn validator subagent:**
+Input: git diff, acceptance criteria, Code Review Report, Security Review Report, Vulnerability Report (if exists), rules files, Architectural Decisions table from project.md.
+The validator independently: re-runs build, re-runs tests (and evaluates test quality), navigates browser, runs queries, decomposes multi-step criteria, executes mutation tests, runs regression, produces the Validation Report.
+Output: Validation Report with ✅/❌/⏭️ per category.
+
+**Step 8 — Process Validation Report:** (same as Route B Step 6)
+
+**Step 9 — Blue Team (after validation passes, if Red Team ran):**
+Input: Vulnerability Report + final code (post-fixes from retry loop).
+Output: Defense Assessment — verifies defenses exist for each finding, updates Defense Inventory.
+Blue Team runs AFTER validation passes because it evaluates the final code state.
+
+**Step 10 — Report:** Structured validation report (see report format below).
+
+#### Validation report format (all routes)
 
 Report template categories:
 - Build: ✅/❌
 - Tests: ✅/❌/⏭️
-- Review: ✅/❌
-- Security: ✅/❌/⏭️ [Red Team Tier 1-2 results, or "no security-relevant changes"]
+- Review: ✅/❌ [inline or "code-reviewer subagent"]
+- Security: ✅/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes"]
 - Mutation: ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
 - UI: ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
 - Regression: ✅/❌
+- Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
 
 **⏭️ is NOT valid when:**
 - UI: if ANY frontend template, component, or style file was modified in this task, UI MUST be ✅ or ❌, never ⏭️. If browser automation couldn't run after trying to start the dev server: mark as ❌ with reason, and list all VERIFY: criteria as MANUAL:.
@@ -621,7 +664,7 @@ Report template categories:
 
 **Actionable findings rule:** If during ANY step of the validation loop (review, testing, validation, browser verification, criteria check) the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in the backlog (pendencias.md) with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking.
 
-If any ❌: fix and re-run entire loop (max 3 full cycles). After limit: STOP and escalate to human with diagnosis.
+If any ❌ after max retry cycles: STOP and escalate to human with diagnosis.
 
 **Validation Failure Post-Mortem:**
 
@@ -631,13 +674,13 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
 
 **Process:**
 
-1. **Identify the failed step:** Which of the 6 validation steps should have caught this bug?
-   - Step 1 (Build) — compilation should have failed
-   - Step 2 (Tests) — a test should have been written and failed
-   - Step 3 (Review) — code review checklist should have flagged the pattern
-   - Step 4 (UI) — browser verification should have shown the wrong behavior
-   - Step 5 (Criteria) — acceptance criteria check should have failed
-   - Step 6 (Report) — report should have flagged uncertainty instead of ✅
+1. **Identify the failed step:** Which validation step should have caught this bug?
+   - Phase A, Step 1 (Build) — compilation should have failed
+   - Phase A, Step 2 (Tests) — a test should have been written and failed
+   - Phase B, Review (inline or code-reviewer subagent) — code review should have flagged the pattern
+   - Phase B, UI verification — browser verification should have shown the wrong behavior
+   - Phase B, Criteria check (inline or validator subagent) — acceptance criteria check should have failed
+   - Phase B, Report — report should have flagged uncertainty instead of ✅
 
 2. **Diagnose why it passed:** Why did the step declare ✅ when it should have been ❌?
    Common causes:
@@ -653,10 +696,11 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
    |------------|-------------------|---------|
    | **Criterion was WEAK** | Criteria Quality Standard | "VERIFY: page loads correctly" → no failure signal |
    | **Criterion was incomplete** | pendencias.md task template | Missing edge case, missing state transition |
-   | **Multi-step criterion partially verified** | Execution Protocol (Step 5) | Before/after only checked "before" |
+   | **Multi-step criterion partially verified** | Execution Protocol (Phase B criteria check) | Before/after only checked "before" |
    | **Tool silenced an error** | Known Bug Pattern | `.select('nonexistent')` returns undefined |
    | **Review missed a pattern** | code-reviewer checklist | New pitfall category not in checklist |
-   | **Test not written for testable logic** | Step 2 skip conditions | Business logic was incorrectly classified as "simple CRUD" |
+   | **Test not written for testable logic** | Phase A Step 2 skip conditions | Business logic was incorrectly classified as "simple CRUD" |
+   | **Subagent context incomplete** | Context routing rules | Relevant rules file not routed to the reviewing subagent |
    | **AI judgment error** | (no doc fix — inherent limitation) | AI misread the output and declared ✅ |
 
 4. **Apply the systemic improvement** (not just a point fix):
@@ -680,8 +724,8 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
 
 **Principle:** If the human finds a bug the AI could have found, the cost is not just one bug fix — it's one bug fix PLUS one process improvement. The validation loop must get smarter every time it fails, not just every time it succeeds.
 
-**Between tasks (after report, before picking next task):**
-1. Commit: `git add -A && git commit -m "feat: [task name] — validated"`
+**Between tasks (after validation passes, before picking next task):**
+1. Commit (if not already committed): for routine tasks with inline validation, `git add -A && git commit -m "feat: [task name] — validated"`. For subagent-validated tasks, the `feat:` commit was made before Phase B — it already stands.
 2. Update pendencias.md: mark task as Done, confirm next task
 3. If this is task 3+ in the current session: evaluate context health. If degrading → trigger mid-session recovery instead of continuing.
 4. **Sprint-approved mode:** If executing a sprint, pick the next task from the sprint batch and proceed directly to "Before implementing". Do NOT re-propose the sprint or ask for confirmation. If all sprint tasks are done, produce a consolidated sprint report:
@@ -698,6 +742,143 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
    ### Rules files created/updated: [list]
    ### Next sprint suggestion: [top 3-5 tasks from updated pendencias.md]
    ```
+
+---
+
+## Validation Orchestration Protocol
+
+This section defines how the implementing agent spawns and coordinates independent validation subagents. It applies to **logic-heavy** and **architecture/security** tasks (Routes B and C in the validation loop). Routine tasks use inline validation and skip this protocol entirely.
+
+### Core principle: separation of implementation and judgment
+
+The agent that wrote the code never judges its own work on non-trivial tasks. An LLM that just wrote code using pattern X has a statistical tendency to confirm pattern X is correct when reviewing in the same context window. Spawning independent subagents with isolated context eliminates this confirmation bias.
+
+### Context routing rules
+
+Each subagent receives an **instruction set with file paths and scope**, not a data blob. The subagent reads files directly from the filesystem. Only the acceptance criteria text is copied into the prompt (short, central contract).
+
+```
+ALWAYS instruct the subagent to read:
+  - The agent's own .md file (code-reviewer reads code-reviewer.md, etc.)
+  - .claude/rules/*.md (ALL rules files — cost is low, risk of omission is high)
+  - CLAUDE.md sections: Key Patterns, Architecture
+  - project.md: Architectural Decisions table ONLY
+
+IF security-relevant:
+  - .claude/agents/security-reviewer.md
+  - Stack security skill in .claude/skills/ (if exists)
+
+IF UI task:
+  - Design System section of CLAUDE.md
+
+NEVER instruct the subagent to read (anti-bias firewall):
+  - project.md Progress Log (contains implementation reasoning from previous sessions)
+  - .claude/logs/*.md (session history)
+  - Sprint proposals or implementation plans
+  - Any file the implementing agent wrote as part of the task explanation
+```
+
+The NEVER list is as important as the ALWAYS list — it is the anti-bias firewall. The subagent does not know WHY the code was written this way. It only sees code + checklists + criteria.
+
+**Note:** The restriction is instructional, not physical — the subagent CAN read restricted files if it decides to. In practice, subagents follow their prompt instructions and have no motivation to seek implementation reasoning. The BOUNDARIES section in the prompt is the available mechanism and is sufficient.
+
+### Subagent instruction template
+
+The implementing agent constructs a prompt for the tool's subagent mechanism (Claude Code: Task tool; Antigravity: Agent Manager). The prompt follows this structure:
+
+```
+1. Role definition — "You are the [agent name]. Your role is [purpose]."
+2. Files to read — explicit paths from the context routing rules above
+3. Evidence to evaluate — "Read the git diff via `git diff HEAD~1`" + acceptance criteria (copied)
+4. Prior reports (if any) — "Read [report path] for findings from previous reviewers"
+5. Report format — the exact structure the subagent must produce
+6. BOUNDARIES — "Do NOT read: [NEVER list]. Do NOT access implementation plans, session logs, or progress entries."
+```
+
+The implementing agent does NOT package file contents into the prompt. It provides paths and the subagent reads them directly.
+
+### Sequencing
+
+Subagents are spawned **sequentially** by the implementing agent. Each subagent is a fresh instance with isolated context — no carryover between invocations.
+
+```
+Logic-heavy tasks (Route B):
+  1. code-reviewer subagent → Code Review Report
+  2. validator subagent (receives Code Review Report) → Validation Report
+
+Architecture/security tasks (Route C):
+  1. code-reviewer subagent → Code Review Report
+  2. security-reviewer subagent → Security Review Report
+  3. Red Team subagent (if triggered) → Vulnerability Report
+  4. validator subagent (receives all prior reports) → Validation Report
+  5. arbitrator subagent (only if validator ❌ contradicts mechanical evidence)
+  6. Blue Team subagent (after validation passes, if Red Team ran) → Defense Assessment
+```
+
+**Why this order:**
+- Code-reviewer FIRST: catches code pattern issues cheaply before expensive validation.
+- Security-reviewer SECOND: security findings affect the validator's ✅/❌ judgment.
+- Red Team THIRD: adversarial testing before final validation.
+- Validator FOURTH: receives ALL prior reports as input, does independent verification. The validator is the final authority on ✅/❌.
+- Arbitrator FIFTH: only if validator ❌ contradicts mechanical evidence. Not triggered when validator ❌ agrees with evidence.
+- Blue Team LAST: assesses FINAL code state (post-fixes from retry loop).
+
+### Validator agent
+
+The most complex subagent. It performs the complete verification independently:
+
+1. Re-runs build (intentional redundancy — like an auditor re-running calculations)
+2. Re-runs tests AND evaluates test quality (do tests actually assert what criteria describe?)
+3. Navigates browser for VERIFY: criteria (web projects)
+4. Runs QUERY: criteria via database
+5. Decomposes multi-step criteria into atomic sub-checks
+6. Executes mutation tests (logic-heavy and arch/security tasks): identifies 1-3 critical mutations, applies one at a time, verifies criteria fail, restores code. Max 3 mutations.
+7. Runs regression (full test suite or last 2-3 tasks' QUERY: criteria)
+8. Evaluates prior review reports (code-reviewer, security-reviewer, Red Team) as additional evidence
+9. Produces structured Validation Report with ✅/❌/⏭️ per category
+
+### Arbitrator agent
+
+Resolves conflicts between the validator's judgment and mechanical evidence.
+
+**Trigger:** Validator returns ❌ on a criterion AND mechanical evidence contradicts (build passes, tests pass, query returns expected value). If validator says ❌ AND mechanical evidence also indicates a problem — there is no conflict, the ❌ is legitimate, no arbitration needed.
+
+**Three terminal outputs (no recursion):**
+- **UPHOLD ❌:** Validator was right. Implementing agent fixes and re-submits to the validator (not the arbitrator).
+- **OVERRIDE TO ✅:** Validator was wrong. Implementing agent proceeds. Override is logged in the session entry with the arbitrator's justification.
+- **ESCALATE:** Genuinely ambiguous. Goes to the human as last resort.
+
+The arbitrator reads the same checklists, rules, and architectural decisions as the validator. It does NOT read implementation reasoning (same BOUNDARIES).
+
+### Retry flow
+
+When the validator returns ❌:
+
+1. Implementing agent fixes the issue
+2. Commits: `git add -A && git commit -m "fix: [task] — validation fix N"`
+3. Re-spawns the full subagent sequence from step 1 (code-reviewer). Each validation is a fresh subagent instance.
+4. Max 3 retry cycles. After limit: STOP and escalate to human with diagnosis.
+
+Each retry is a complete re-validation — not a partial re-check. The subagent sees the full current state, including all fixes.
+
+### Large task mitigation
+
+For large tasks (diff exceeds ~300 lines or criteria exceed 10), the implementing agent may split validation into sequential subagent calls to prevent context overload:
+
+1. **Call 1:** Code review + criteria evaluation
+2. **Call 2:** Mutation testing
+
+Each call gets a fresh context. Only use when the combined scope would strain a single subagent.
+
+### Tool-specific mechanics
+
+The concepts in this protocol are tool-agnostic. The mechanics are tool-specific:
+
+- **Claude Code:** Subagents are spawned via the **Task tool**. Each Task tool call creates a new conversation with isolated context.
+- **Antigravity:** Subagents are spawned via the **Agent Manager**. Adapt the instruction template to Agent Manager's prompt format.
+- **Other tools:** Adapt to the tool's subagent/subprocess mechanism. If the tool does not support subagents, fall back to inline validation (Route A behavior for all tasks) and note the limitation.
+
+The bootstrap files (`session0_bootstrap_prompt.md` and `session0_bootstrap_antigravity.md`) contain the tool-specific implementation with exact templates and commands.
 
 ---
 
@@ -818,19 +999,20 @@ This review is NOT optional introspection — it is a mechanical checklist appli
 
 ### Evolution 2: Self-Validation Loop
 
-The 6-step loop described in [Execution Protocol](#during-implementation-self-validation-loop). Key design decisions:
+The validation loop described in [Execution Protocol](#during-implementation-validation-loop). Two phases: Phase A (implementation — build, tests, commit) and Phase B (validation — graduated by complexity). Key design decisions:
 - Build check catches compilation errors before anything else
-- Self-review runs BEFORE UI/DB checks (catches code-level issues cheaply)
-- Retry limits prevent infinite fix-validate-break cycles (3 per step, 3 globally)
+- Independent subagents validate logic-heavy and architecture/security tasks (implementing agent ≠ validating agent)
+- Routine tasks retain inline validation (bias risk near-zero, token cost low)
+- Retry limits prevent infinite fix-validate-break cycles (max 3 retry cycles)
 - The report provides evidence, not claims ("screenshot showing X" not "it works")
 
 #### Regression Protection
 
-The validation loop verifies the CURRENT task's criteria. But implementing feature B can break feature A. To catch this, regression is checked in Step 5 of the validation loop:
+The validation loop verifies the CURRENT task's criteria. But implementing feature B can break feature A. To catch this, regression is checked during Phase B of the validation loop:
 
-**If the project has tests (written in Step 2 of current and previous tasks):** run the full test suite. Failing tests = regression. This is the preferred path — tests are permanent, repeatable, and cheap to run.
+**If the project has tests (written in Phase A of current and previous tasks):** run the full test suite. Failing tests = regression. This is the preferred path — tests are permanent, repeatable, and cheap to run.
 
-**If the project has no tests yet (early sessions):** re-verify the `QUERY:` criteria of the last 2-3 completed tasks from pendencias.md as a manual smoke test. `BUILD:` is already covered by Step 1 (the build compiles the entire project). If no completed tasks have `QUERY:` criteria yet: skip regression, note in report.
+**If the project has no tests yet (early sessions):** re-verify the `QUERY:` criteria of the last 2-3 completed tasks from pendencias.md as a manual smoke test. `BUILD:` is already covered by Phase A Step 1 (the build compiles the entire project). If no completed tasks have `QUERY:` criteria yet: skip regression, note in report.
 
 **If regression detected:** treat it as a ❌ in the validation report. Fix the regression before declaring the current task done. Add a Known Bug Pattern if the regression was caused by a pattern that could recur. If the regression was in an untested area: write a test for it now (red → green).
 
@@ -894,7 +1076,7 @@ Browsing public websites to search for tools, skills, documentation.
 
 Verifying that implemented features work in the browser. Part of the self-validation loop (Step 4).
 
-**When:** Step 4 of the validation loop, Step 5 for `VERIFY:` criteria. Only when the project has a web frontend.
+**When:** Phase B of the validation loop (UI verification step for inline validation, or validator subagent for subagent-based validation). Only when the project has a web frontend.
 
 **Rules:**
 - Health check the dev server before using
@@ -1024,8 +1206,33 @@ Some skills emerge from real project experience — they require observed repeti
 - A repeated multi-step workflow could be packaged (e.g., migration-runner with project conventions)
 
 ### Skill vs Agent:
-- **Skill** = knowledge/process documentation (HOW to do something). Read as reference.
-- **Agent** = role with checklist and judgment (WHAT to verify/decide). Invoked for review or analysis.
+- **Skill** = knowledge/process documentation (HOW to do something). Read as inline reference by whichever agent needs it.
+- **Agent** = role with checklist and judgment (WHAT to verify/decide). Spawned as an independent subagent with isolated context.
+
+### Invocation convention:
+
+Every agent and skill declares how it is activated via `invocation` frontmatter:
+
+- `invocation: subagent` — spawned as an independent process (Claude Code: Task tool; Antigravity: Agent Manager; other tools: adapt). The subagent receives instructions, reads files from the filesystem, and returns a structured report. It operates with **isolated context** — no access to the implementing agent's reasoning or conversation history.
+- `invocation: inline` — read as a reference document by another agent (implementing agent, validator, or any subagent that needs the knowledge). Skills are typically `inline`. Knowledge documents, design systems, and stack references are `inline`.
+
+**All validation/review/security agents are `subagent`:** code-reviewer, security-reviewer, red-team, blue-team, validator, arbitrator, and on-demand agents created for specialized review roles.
+
+**Skills remain `inline`:** stack skills, domain skills, test-pattern skills — read by whichever agent needs them.
+
+### I/O contract (subagent agents):
+
+Agents with `invocation: subagent` declare their I/O contract via frontmatter:
+
+```yaml
+receives: git diff, acceptance criteria, rules files
+produces: Validation Report with ✅/❌/⏭️ per category
+```
+
+- `receives` — what the orchestrating agent must pass to the subagent (via the tool's task description / prompt). The subagent reads these from the filesystem; the orchestrator provides file paths and scope, not data blobs.
+- `produces` — what the subagent returns. Defines the report format the orchestrating agent should expect.
+
+For `invocation: inline` agents/skills, `receives` and `produces` are optional — they are read as reference, not invoked with a contract.
 
 ### Reasoning depth:
 When creating agents or skills, classify their reasoning requirement:
@@ -1295,7 +1502,7 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Criteria quality drift** | Over time, criteria get lazy ("works correctly") and validation becomes theater | Criteria Quality Standard enforces 3 parts (action, expected result, failure signal). Reject WEAK criteria during task creation. |
 | **False parallelism** | Tasks marked parallel actually share state (same DB tables, same files) | Dependency mapping rules: if tasks share migration, files, or outputs, they cannot be parallel. Default to sequential when unsure. |
 | **AI executes harmful security test** | Tier 3 probe corrupts data, injects persistent payload, or tests on production | Tiered security model: Tier 1-2 unrestricted, Tier 3 requires approval, Tier 4 prohibited. Never on production. No persistent payloads. |
-| **AI skips security review** | Step 3 security check is conditional ("if changes touch...") — AI judges incorrectly | Always read Security section header. If in doubt, read the full checklist. The cost of reading unnecessarily is low; the cost of skipping is high. |
+| **AI skips security review** | Security check is conditional ("if changes touch...") — AI judges incorrectly | Always read Security section header. If in doubt, read the full checklist. The cost of reading unnecessarily is low; the cost of skipping is high. For subagent routes, the security-reviewer is a separate subagent — omission is an orchestration failure. |
 | **Wrong reasoning depth** | AI uses shallow reasoning on complex financial logic, or deep reasoning on simple UI change | Three-mechanism system: agent/skill metadata for automatic depth (zero intervention), task classification for recommendations (2 seconds), tool settings edit for model switch (5 seconds). |
 | **Lost context after model switch** | AI switches model, restarts, but new session doesn't know what to continue | MODEL SWITCH marker in project.md with explicit task name, reason, and settings changed. Session Protocol checks for marker before normal task selection. |
 | **Sprint scope creep** | Discoveries during sprint add tasks faster than tasks complete, exhausting context | Cap: max 3 discoveries per sprint. After 3, flag to human in next exception stop. Discoveries do not extend the sprint — they go to the backlog for the next sprint. |
@@ -1304,6 +1511,12 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Model switch mid-sprint** | Task in sprint requires model switch → unclear if sprint continues after restart | Model switch interrupts the sprint. After restart, the AI re-proposes a new sprint (which may include the remaining tasks). The original sprint is logged as "interrupted: model switch at task N". |
 | **Validation declares false ✅** | Multi-step criterion partially verified, tool silences error, criterion too weak | Validation Failure Post-Mortem: structured diagnosis → classify root cause → route improvement to correct document. Mandatory when human finds bug in ✅ task. |
 | **Criteria don't detect breakage** | Criteria check a snapshot or pass with hardcoded/wrong data | Mutation testing (Step 5c): sabotage critical code, verify criteria fail. If they don't, strengthen and re-validate. Only for logic-heavy and architecture tasks. |
+| **Subagent context incomplete** | Context routing omits a relevant rules file | Route ALL rules files (`.claude/rules/*.md`) to every subagent. Cost is low, risk of omission is high. |
+| **Subagent context contaminated** | Boundaries violated — subagent reads implementation reasoning | BOUNDARIES section in subagent prompt template. NEVER list explicitly blocks project.md Progress Log, session logs, sprint proposals, and implementation plans. |
+| **Validation token overhead** | Each subagent consumes tokens for file reads + reasoning | Graduated validation depth: routine tasks use inline checklist (no subagent), logic-heavy use 2 subagents, arch/security use full chain. Accept overhead as cost of unbiased validation where bias matters. Monitor if sessions become shorter. |
+| **Validation latency** | Subagent spawn + file reads + reasoning + return per subagent | 10-30s per subagent. Acceptable vs risk of false ✅ from biased inline review. |
+| **False ❌ from subagent** | Subagent rejects correct code due to missing context or rigid interpretation | Arbitrator agent resolves: receives validator report + mechanical evidence, rules UPHOLD ❌ / OVERRIDE TO ✅ / ESCALATE. If genuinely ambiguous, escalates to human. |
+| **Context overload in subagent** | Large task: 500+ line diff + many criteria + mutations in single subagent context | Split validation into sequential subagent calls for large tasks: (1) code review + criteria evaluation, (2) mutation testing. Each call gets a fresh context. Only when diff exceeds ~300 lines or criteria exceed 10. |
 
 ---
 
