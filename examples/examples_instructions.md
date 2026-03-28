@@ -20,16 +20,25 @@ examples/
 │   ├── migration-runner.md        # Safe migration execution, rollback, verification
 │   ├── deploy-validator.md        # Pre-deploy checklist, environment, rollback plan
 │   └── api-security-scanner.md    # Tiered model (Tier 1/2/3), auth, injection, data exposure
-├── skills/                        # Skill templates (all types)
-│   ├── nextjs-supabase.md         # Next.js App Router + Supabase (Auth, RLS, Storage)
-│   ├── django-postgres.md         # Django + PostgreSQL (ORM, CBV, middleware)
-│   ├── express-mongodb.md         # Express.js + MongoDB (Mongoose, JWT, middleware)
-│   ├── e-commerce-patterns.md     # Cart, pricing, inventory, orders, payments, refunds
-│   ├── scheduling-patterns.md     # Appointments, availability, recurring events, timezones
-│   ├── multi-tenancy-patterns.md  # Isolation strategies, data model, scoping patterns
-│   ├── api-design-patterns.md     # REST conventions, status codes, pagination, versioning
-│   ├── database-migration-guide.md # Safe operations, data migration, rollback
-│   └── ci-cd-pipeline.md         # GitHub Actions, environments, deploy strategies
+├── skills/                        # Skill templates (Anthropic folder format)
+│   ├── nextjs-supabase/
+│   │   └── SKILL.md               # Next.js App Router + Supabase (Auth, RLS, Storage)
+│   ├── django-postgres/
+│   │   └── SKILL.md               # Django + PostgreSQL (ORM, CBV, middleware)
+│   ├── express-mongodb/
+│   │   └── SKILL.md               # Express.js + MongoDB (Mongoose, JWT, middleware)
+│   ├── e-commerce-patterns/
+│   │   └── SKILL.md               # Cart, pricing, inventory, orders, payments, refunds
+│   ├── scheduling-patterns/
+│   │   └── SKILL.md               # Appointments, availability, recurring events, timezones
+│   ├── multi-tenancy-patterns/
+│   │   └── SKILL.md               # Isolation strategies, data model, scoping patterns
+│   ├── api-design-patterns/
+│   │   └── SKILL.md               # REST conventions, status codes, pagination, versioning
+│   ├── database-migration-guide/
+│   │   └── SKILL.md               # Safe operations, data migration, rollback
+│   └── ci-cd-pipeline/
+│       └── SKILL.md               # GitHub Actions, environments, deploy strategies
 └── rules/                        # Domain rules templates
     ├── multi-tenancy-rules.md     # Inviolable rules, query patterns, new table checklist
     ├── e-commerce-rules.md        # Monetary values, cart, stock, orders, discounts
@@ -60,6 +69,15 @@ The framework instructs the AI to check `assets/examples/` before creating any n
   - `inline` — read as a reference document by another agent. Default for skills and knowledge documents.
 - `receives:` — (subagent only) what the orchestrating agent passes: git diff, reports, criteria, file paths
 - `produces:` — (subagent only) what the subagent returns: structured report format
+- **Lineage fields** (added at creation, maintained during evolution):
+  - `created:` — session and context (e.g., `s0 (bootstrap)`, `s5 (reactive: recurring migration pattern)`)
+  - `last_eval:` — session of last eval run (e.g., `s0 (2/2 passed)`). Omitted for `invocation: inline` skills.
+  - `fixes:` — (optional) list of FIX evolutions applied
+  - `derived_from:` — (optional) parent component this was derived from
+- **Evolution classification** (logged when components are updated):
+  - `FIX` — something failed that should have worked (bug missed, pattern violated)
+  - `DERIVED` — something works but can be consolidated (3+ patterns → rules file)
+  - `CAPTURED` — pattern observed in real usage (diff-based extraction)
 
 **Agents (WHAT to verify):**
 - `invocation: subagent` for review/validation/security agents
@@ -70,8 +88,13 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 - `## BOUNDARIES` section — what the agent must NOT read (anti-bias firewall)
 - Recommendation line: APPROVE / FIX REQUIRED / BLOCK
 
-**Skills (HOW to do):**
+**Skills (HOW to do) — Anthropic folder format:**
+- Each skill is a folder: `skill-name/SKILL.md`
 - `invocation: inline` (read by whichever agent needs the knowledge)
+- Optional subdirectories:
+  - `scripts/` — deterministic executable code (executed without loading into context)
+  - `references/` — heavy docs loaded on demand (progressive disclosure)
+  - `assets/` — templates, icons, files used in output
 - Key patterns with code examples
 - Common pitfalls table (Pitfall | Symptom | Fix)
 - Testing section with framework and conventions
