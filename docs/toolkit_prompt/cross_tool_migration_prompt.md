@@ -258,18 +258,18 @@ Read the "MCP Servers" section from the source config file (CLAUDE.md or GEMINI.
 ### Step 6 — Verify migration
 
 ```bash
-echo "=== Target structure ==="
-# Verify all files exist in target
-find [.claude|.antigravity] -name "*.md" | sort
+# === Verify target structure ===
+# If migrated TO Claude Code:
+find .claude -name "*.md" | sort
+grep "Session Protocol" CLAUDE.md
+grep -r ".antigravity/" .claude/ 2>/dev/null  # Should return nothing
+grep "GEMINI.md" CLAUDE.md 2>/dev/null        # Should return nothing
 
-echo "=== Config file ==="
-# Verify config exists and has Session Protocol
-grep "Session Protocol" [CLAUDE.md|GEMINI.md]
-
-echo "=== No stale references ==="
-# Verify no references to source tool paths remain
-grep -r "[.claude|.antigravity]/" [.antigravity|.claude]/ 2>/dev/null
-grep "[CLAUDE.md|GEMINI.md]" [GEMINI.md|CLAUDE.md] 2>/dev/null
+# If migrated TO Antigravity:
+find .antigravity -name "*.md" | sort
+grep "Session Protocol" GEMINI.md
+grep -r ".claude/" .antigravity/ 2>/dev/null  # Should return nothing
+grep "CLAUDE.md" GEMINI.md 2>/dev/null        # Should return nothing
 ```
 
 ---
@@ -290,7 +290,7 @@ Add a migration session entry to the target project.md:
 
 **Source files preserved:** [YES — source .claude/.antigravity folder kept as backup | NO — deleted after verification]
 
-**PRD version:** v[X.X] (unchanged — migration does not affect product scope)
+**PRD version:** v[X.X.X] (unchanged — migration does not affect product scope)
 
 **Next step:** [continue with next task from pendencias.md]
 ```

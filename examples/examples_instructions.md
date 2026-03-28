@@ -34,6 +34,7 @@ examples/
     ├── multi-tenancy-rules.md     # Inviolable rules, query patterns, new table checklist
     ├── e-commerce-rules.md        # Monetary values, cart, stock, orders, discounts
     └── auth-rules.md              # Auth levels, password reset, token management
+```
 
 ## How to use
 
@@ -72,4 +73,3 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 - Checklists for new entities (new table, new endpoint, etc.)
 - Testing section with verification queries
 - Domain-specific edge cases
-```

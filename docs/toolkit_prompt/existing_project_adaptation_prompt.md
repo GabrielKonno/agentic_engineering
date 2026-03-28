@@ -227,7 +227,7 @@ Add an adaptation session entry at the end of the Progress Log:
 - [N] rules: [names]
 - [N] skills: [names]
 
-**PRD version:** v1.0 (retroactive — created from codebase analysis)
+**PRD version:** v1.0.0 (retroactive — created from codebase analysis)
 
 **Next step:** [first item from pendencias.md]
 ```
@@ -334,7 +334,7 @@ Create `assets/docs/prd.md` with this approach:
 ```
 | Version | Date | Change | Author |
 |---------|------|--------|--------|
-| 1.0 | [date] | Retroactive PRD — created from codebase analysis during framework adaptation | AI + [owner] |
+| 1.0.0 | [date] | Retroactive PRD — created from codebase analysis during framework adaptation | AI + [owner] |
 ```
 
 **After creating the PRD:** update CLAUDE.md/GEMINI.md to reference it (`**PRD:** See assets/docs/prd.md`).
@@ -350,9 +350,9 @@ Create `assets/docs/prd.md` with this approach:
 ls assets/examples/ 2>/dev/null || echo "MISSING"
 ```
 
-If missing and framework root is accessible:
+If missing and framework root is accessible (assumes project is at `projects/[name]/` within the framework — adjust path if running from a standalone project):
 ```bash
-cp -r ../../examples/ assets/examples/ 2>/dev/null || echo "Framework examples not accessible — skip, copy manually later"
+cp -r ../../examples/ assets/examples/ 2>/dev/null || echo "Framework examples not accessible — copy manually from the framework's examples/ directory"
 ```
 
 If framework root is not accessible: note in the report that `assets/examples/` should be copied manually.
@@ -480,7 +480,7 @@ done
 ### Non-standard naming:
 - [e.g., pendencias_e_melhorias.md — reference updated in CLAUDE.md]
 
-### PRD version: v1.0 (retroactive)
+### PRD version: v1.0.0 (retroactive)
 
 ### Next session should:
 - Review TBD sections in PRD

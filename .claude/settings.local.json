@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "defaultMode": "bypassPermissions",
-    "allow": [
-      "Bash(cd \"C:\\\\Users\\\\Gabriel\\\\OneDrive\\\\Documentos\\\\Projetos\\\\Agency\\\\agentic_engineering\" echo \"=== Skills step in GEMINI template ===\" grep -A1 \"## Skills\" docs/bootstrap_antigravity/session0_bootstrap_antigravity.md)"
-    ]
-  }
-}
