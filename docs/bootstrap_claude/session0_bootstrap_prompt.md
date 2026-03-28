@@ -471,9 +471,7 @@ The user can also trigger this by saying "save state and start fresh".
 
 ## Hooks
 
-Configured in `.claude/settings.json`. These run automatically — no AI decision involved.
-
-- **smart-formatting** (PostToolUse → Write/Edit/MultiEdit): Auto-formats files with Prettier after every edit. Keeps diffs clean without spending context on manual formatting.
+[Configured in Step 12 below — depends on project formatter. If Prettier is installed, smart-formatting hook auto-formats files after every edit.]
 
 ## Architecture
 
@@ -699,7 +697,7 @@ parallel: true (if independent of task 3)
 - [ ] `BUILD:` Zero build errors, all tests pass
 - [ ] `VERIFY:` [page/endpoint/command] → [main action] → [expected result with specific values/elements]
 - [ ] `VERIFY:` [page/endpoint/command] → empty state → [specific empty state message/response]
-- [ ] `QUERY:` [verify data created/updated correctly — this criterion should also become an executable test]
+- [ ] `QUERY:` [specific query] → [specific expected value — this criterion should also become an executable test]
 - [ ] `REVIEW:` API handlers follow authentication and authorization patterns defined in CLAUDE.md
 - [ ] `MANUAL:` Visual matches design system
 
@@ -832,10 +830,6 @@ effort: medium
 description: >
   Reviews code after implementation. Invoked as checklist in Step 3
   of the self-validation loop. Can also be invoked manually.
-tools:
-  - Read
-  - Glob
-  - Bash
 ---
 
 # Code Review Rules
