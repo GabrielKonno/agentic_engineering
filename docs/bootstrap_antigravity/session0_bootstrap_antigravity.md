@@ -413,7 +413,7 @@ ALWAYS instruct the subagent to read:
 
 IF security-relevant:
   - .antigravity/skills/security-reviewer/SKILL.md
-  - Stack security skill in .antigravity/skills/ (if exists)
+  - Stack security skill in .antigravity/skills/*/SKILL.md (if exists)
 
 IF UI task:
   - Design System section of GEMINI.md
@@ -482,6 +482,23 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ### At the END of every session:
 
+#### Evolution classification
+
+Every evolution in items 3-8 below must be classified by its trigger mode:
+
+| Mode | Trigger | Examples |
+|------|---------|----------|
+| **FIX** | Something failed that should have worked | Bug missed by review → fix skill checklist. Rule contradicts code → fix rule. |
+| **DERIVED** | Something works but can be consolidated | 3+ Known Bug Patterns from same domain → derive rules file. Skill accumulates similar checks → derive organized sections. |
+| **CAPTURED** | Pattern observed in real usage | Diff scan finds recurring pattern → capture as Known Bug Pattern. Structural decision → capture as Architecture Pattern. |
+
+The classification determines follow-up actions:
+- **FIX** → re-run eval if the component has a `last_eval` in its lineage (see Creation Eval in item 8)
+- **DERIVED** → no eval needed (source patterns were already validated individually)
+- **CAPTURED** → no eval needed (the diff is the evidence)
+
+Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component] — [what changed and why]"`
+
 **Priority order** (if context limited, at minimum do items 1 and 2):
 
 1. **Update `.antigravity/phases/project.md`** — new entry: date, done, decisions, bugs, next. Always include `PRD version: vX.X.X`. If feature incomplete: document what was attempted and why.
@@ -517,11 +534,14 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    
    ## Commits
    [git log --oneline for this session]
-   
+
+   ## Evolutions applied
+   - [FIX/DERIVED/CAPTURED]: [component] — [what changed and why]
+
    ## PRD version: v[X.X.X]
    ## Next session should: [specific next step]
    ```
-   
+
    **Rules:** Logs are append-only (never edit old logs), not read by AI in normal sessions (human reference only), permanent record even when project.md entries are archived.
 2. **Update `.antigravity/phases/pendencias.md`** — move completed to Done, update In Progress, add new items. Every new item MUST have:
    - **Context, State, Constraints** fields (why the task exists, what state the project will be in when it starts, what to avoid)
@@ -534,14 +554,15 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
 3. **Update `GEMINI.md`** — if module status, patterns, rules, or File Map changed.
 4. **Update `.antigravity/rules/*.md`** — if domain logic was established. **Create a new rules file when:** a module has 3+ business rules affecting code, same logic referenced 2+ times across sessions, a bug was caused by domain misunderstanding, or 3+ Known Bug Patterns are from the same domain.
 5. **Update `.antigravity/skills/code-reviewer/SKILL.md` (diff-based pattern extraction):** Review the git diff of this session. For each non-trivial fix or implementation:
-   - **Bug fixed → Could this recur?** Add the CORRECT pattern to Known Bug Patterns.
+   - **Bug fixed → Could this recur?** Add the CORRECT pattern to Known Bug Patterns with efficacy tracking: `[added: sN | triggered: never | false-positive: 0]`.
    - **Mistake corrected mid-task?** Add a check that catches the wrong approach.
    - **Structural decision worth preserving?** Add to Architecture Patterns.
    This is a systematic diff scan, not optional introspection. The diff is the source of truth.
-   **Cap:** Max 20 patterns. At 15+, aggressively promote related patterns to rules files (3+ patterns from same domain → `rules/[domain]-rules.md`). Rules files have no limit. Remove patterns enforced by linting or tests.
+   **Cap:** Max 20 patterns. At 15+, aggressively promote related patterns to rules files (3+ patterns from same domain → `rules/[domain]-rules.md`). Rules files have no limit. Remove patterns enforced by linting or tests. Use efficacy data to decide: patterns with no `triggered` history are removed first; patterns with frequent `triggered` are promoted.
+   **Update efficacy tracking:** Review the Code Review Report from this session. For each Known Bug Pattern listed under "Known Bug Patterns triggered", append the current session to the pattern's `triggered` field. If a pattern was flagged but was a false positive, increment `false-positive`.
 6. **Update existing skills** — if a discovery from this session belongs to the scope of an existing skill (not the code-reviewer), update that file directly:
    - New RLS edge case → add to `.antigravity/skills/red-team/SKILL.md` (new Tier 1 or Tier 2 test)
-   - Framework pitfall → add to stack skill in `.antigravity/skills/` (new pitfall entry)
+   - Framework pitfall → add to stack skill in `.antigravity/skills/[stack]/SKILL.md` (new pitfall entry)
    - New attack vector → add to `.antigravity/skills/security-reviewer/SKILL.md` (new checklist item)
    - Verified defense → update `.antigravity/skills/blue-team/SKILL.md` Defense Inventory
    
@@ -565,12 +586,40 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    - `effort:` — `high` for security, financial, architectural, complex verification; `medium` for checklists, style guides, patterns
    - `invocation:` — `subagent` for review/validation/security skills (spawned via Agent Manager with isolated context); `inline` for knowledge/reference skills (read by another agent)
    - `receives:` and `produces:` — required for `invocation: subagent` skills (defines I/O contract for Agent Manager)
-   This ensures the AI knows whether to spawn the skill independently or read it inline, and what to pass/expect.
+   - **Lineage fields:** `created: sN ([context])`, `last_eval: sN (N/N passed)` (subagent skills) or omitted (inline skills), `fixes: []`, `derived_from: [parent component or null]`
+   This ensures the AI knows whether to spawn the skill independently or read it inline, and what to pass/expect. Lineage provides traceability for evolution and diagnostics.
+
+   **Creation eval (subagent skills only):** After creating any skill with `invocation: subagent`, run 2 test scenarios (1 positive with a clear issue, 1 negative with clean code). Spawn via Agent Manager, verify results. If wrong: improve and re-test. Update lineage: `last_eval: sN (2/2 passed)`. Skip eval for `invocation: inline` skills. DEFERRABLE if context is low — log "Eval deferred to session N."
 
    Do NOT create if: one-time pattern, rules file more appropriate, Known Bug Pattern suffices, duplicates existing content, contradicts GEMINI.md/rules (precedence: GEMINI.md > rules > skills), or AI unfamiliar with framework (proactive only).
-   Log: "Created skill: [name] — [trigger: proactive/reactive]"
+   Log: "Created/Updated [component]: [name] — [FIX/DERIVED/CAPTURED]: [justification]" (for evolutions) or "Created skill: [name] — [trigger: proactive/reactive]" (for new creation)
 
 **Documentation updates are mandatory.** Items 3-8 can be deferred if context window is low.
+
+### Auto-evolution boundaries
+
+The rule: if the evolution changes **DATA** (what the agent knows), it is safe for autonomous evolution. If it changes **BEHAVIOR** (how the agent acts), it requires human approval.
+
+**Agent evolves autonomously (no human approval needed):**
+- Known Bug Patterns (factual — derived from diffs)
+- Architecture Patterns (factual — derived from structural decisions)
+- File Map in GEMINI.md (factual — reflects filesystem)
+- Commands section in GEMINI.md (factual — reflects what works)
+- Skills content (knowledge/process — errors are caught by eval loops)
+- Skill checklist items — **ADDING** new checks (from real bugs via FIX mechanism)
+- Lineage metadata (append-only)
+- Efficacy tracking fields (append-only metrics)
+
+**Requires human approval before modification:**
+- Session Protocol / Execution Protocol / Validation Orchestration Protocol
+- Task limits, retry limits, sprint mechanics
+- Context routing rules
+- Rules files (domain business logic)
+- PRD
+- Skill checklist items — **REMOVING or WEAKENING** existing checks
+- Changing a skill's `invocation` type, report format, or trigger conditions
+
+The agent checks this list before making end-of-session updates (items 3-8). For human-approval items, propose the change in the session log and wait for confirmation instead of applying directly.
 
 ### Mid-session context recovery:
 If context window is getting full (forgetting earlier decisions, repeating mistakes, losing track):
@@ -965,6 +1014,10 @@ description: >
   inline checklist for routine tasks (Route A).
 receives: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table
 produces: Code Review Report with findings, pattern violations, and APPROVE/FIX REQUIRED recommendation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Code Review Rules
@@ -986,7 +1039,7 @@ When invoked as subagent, produce:
 | # | Severity | Category | Finding | File:Line | Recommendation |
 |---|----------|----------|---------|-----------|---------------|
 ### Pattern violations: [list any GEMINI.md/rules violations]
-### Known Bug Pattern matches: [any patterns that apply to this diff]
+### Known Bug Patterns triggered: [list patterns that matched this diff, by name — used to update efficacy tracking]
 ### Architecture: [file size, cross-module imports, structure issues]
 ### Recommendation: APPROVE / FIX REQUIRED
 ```
@@ -1018,7 +1071,7 @@ When invoked as subagent, do NOT read:
 - N+1 queries?
 - Unnecessary imports or heavy dependencies?
 - Code running on client/frontend that could run on server/backend?
-- Consult .antigravity/skills/ for framework-specific rules
+- Consult .antigravity/skills/*/SKILL.md for framework-specific rules
 
 ## Security
 - Inputs validated
@@ -1039,16 +1092,44 @@ When invoked as subagent, do NOT read:
 
 ## Known Bug Patterns (check EVERY review)
 
-**Max 20 patterns.** If exceeds: consolidate similar, remove enforced by linting, promote to rules files.
+**Max 20 patterns.** If exceeds: consolidate similar, remove enforced by linting, promote to rules files. Use efficacy data to decide: patterns with no `triggered` history are removed first; patterns with frequent `triggered` are promoted to rules files.
+
+**Efficacy tracking:** Each pattern includes tracking metadata:
+
+```
+- [ ] [Pattern description]
+  [added: sN | triggered: sN, sN | false-positive: N]
+```
+
+- `added` — session when the pattern was created
+- `triggered` — sessions where this pattern actually caught a problem during review
+- `false-positive` — count of times the pattern flagged something that wasn't a real issue
+
+**Periodic review (every 10 sessions or via maintenance):**
+- `triggered: never` after 10+ sessions → candidate for removal
+- Frequent `false-positive` → needs refinement (pattern too broad)
+- Frequent `triggered` → working well, candidate for DERIVED promotion to rules file
 
 [Empty on day 1. Populated automatically.]
 <!--
 - [ ] Date formatting: search for toISOString() — should use local formatting
+  [added: s3 | triggered: s5, s8 | false-positive: 0]
 - [ ] Transaction deletion: verify source guard exists
+  [added: s4 | triggered: never | false-positive: 0]
 -->
 
 **Rule:** When a bug is fixed, ask: "Could this pattern appear elsewhere?" If yes, add here AND grep for existing instances.
 ```
+
+**Creation eval for code-reviewer (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff containing a SQL string concatenation vulnerability and an N+1 query — code-reviewer should flag both
+   - **Scenario B (negative):** A clean git diff with parameterized queries and proper patterns — code-reviewer should APPROVE with no false flags
+2. Spawn code-reviewer via Agent Manager against each scenario
+3. Verify: A → issues detected, B → no false flags
+4. If any result is wrong: improve the skill and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Code-reviewer eval deferred to session 1" and set `last_eval: none (deferred)`
 
 ---
 
@@ -1076,6 +1157,10 @@ description: >
   authentication, data storage, external APIs, and AI/LLM features.
 receives: git diff, security-reviewer SKILL.md (self), stack security skill, rules files
 produces: Security Review Report with findings by category, severity, and APPROVE/FIX REQUIRED/BLOCK recommendation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Security Review Rules
@@ -1084,7 +1169,7 @@ produces: Security Review Report with findings by category, severity, and APPROV
 
 When invoked as subagent:
 - **Git diff** — read via `git diff HEAD~1`
-- **Stack security skill** — in `.antigravity/skills/` (if exists)
+- **Stack security skill** — in `.antigravity/skills/*/SKILL.md` (if exists)
 - **Rules files** — all `.antigravity/rules/*.md`
 - **GEMINI.md** — Key Patterns and Architecture sections
 
@@ -1251,6 +1336,16 @@ If any answer reveals a risk: address it before proceeding.
 After creating, update code-reviewer's "Security" section to reference:
 `For detailed security checks, consult .antigravity/skills/security-reviewer/SKILL.md`
 
+**Creation eval for security-reviewer (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff introducing an endpoint with string-concatenated SQL, no auth check, and hardcoded API key — security-reviewer should flag all three
+   - **Scenario B (negative):** A git diff with parameterized queries, auth middleware, and env-var secrets — security-reviewer should APPROVE
+2. Spawn security-reviewer via Agent Manager against each scenario
+3. Verify: A → issues detected, B → no false flags
+4. If any result is wrong: improve the skill and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Security-reviewer eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 10 — Create Red Team / Blue Team skills (if project risk warrants it)
@@ -1285,6 +1380,10 @@ description: >
   Produces vulnerability reports using the tiered security model.
 receives: git diff, red-team SKILL.md (self), security-reviewer SKILL.md, stack security skill, rules files
 produces: Vulnerability Report with findings by severity, category, tier, and evidence
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Red Team — [Project Name]
@@ -1402,6 +1501,10 @@ description: >
   defenses, confirms fixes, tracks security control inventory.
 receives: Vulnerability Report (Red Team), final code (post-fixes), rules files
 produces: Defense Assessment with gap analysis, defense inventory updates, APPROVE/BLOCK recommendation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Blue Team — [Project Name]
@@ -1451,6 +1554,16 @@ After reviewing all Red Team findings:
 
 **Interaction:** Red Team runs first (attack), Blue Team runs after validation passes (verify defense against final code). Both reference the security-reviewer skill for universal principles and the tiered security model for guardrails.
 
+**Creation eval for Red Team / Blue Team (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff introducing an RLS-protected endpoint where the policy has a gap (e.g., missing tenant filter on a JOIN) — Red Team should identify the bypass vector
+   - **Scenario B (negative):** A git diff with correct RLS policies, proper session scoping, and no bypass paths — Red Team should report no findings
+2. Spawn Red Team via Agent Manager against each scenario
+3. Verify: A → vulnerability detected, B → no false flags
+4. For Blue Team: use Red Team's Scenario A report as input — Blue Team should identify the defense gap and propose mitigation
+5. Update lineage for both: `last_eval: s0 (2/2 passed)`
+If skipped: log "Red Team/Blue Team eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 11 — Create validator skill
@@ -1477,6 +1590,10 @@ receives: >
 produces: >
   Validation Report with ✅/❌/⏭️ per category (Build, Tests, Review, Security,
   Mutation, DB, UI, Regression) + mutation test results + test quality evaluation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Validator
@@ -1560,6 +1677,16 @@ Do NOT read:
 You do not know WHY the code was written this way. You only see code + checklists + criteria. This is intentional — it eliminates confirmation bias.
 ```
 
+**Creation eval for validator (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff with a passing build but a QUERY: criterion that returns wrong data — validator should report ❌ with evidence
+   - **Scenario B (negative):** A git diff where build passes, tests pass, and all criteria match — validator should report ✅ PASS
+2. Spawn validator via Agent Manager against each scenario
+3. Verify: A → ❌ detected with evidence, B → ✅ with no false flags
+4. If any result is wrong: improve the skill and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Validator eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 11.1 — Create arbitrator skill
@@ -1585,6 +1712,10 @@ receives: >
 produces: >
   Arbitration Ruling: UPHOLD ❌ (with justification) / OVERRIDE TO ✅
   (with justification) / ESCALATE (with explanation of ambiguity)
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Arbitrator
@@ -1645,6 +1776,16 @@ Do NOT read:
 Same anti-bias firewall as the validator. You judge the CODE against CRITERIA, not the intent.
 ```
 
+**Creation eval for arbitrator (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (UPHOLD ❌):** Validator says ❌, build passes but the test assertions are superficial (checking `!= null` instead of specific values) — arbitrator should UPHOLD the ❌
+   - **Scenario B (OVERRIDE TO ✅):** Validator says ❌ on a criterion but build passes, tests pass with strong assertions, and query returns exact expected value — arbitrator should OVERRIDE TO ✅
+2. Spawn arbitrator via Agent Manager against each scenario
+3. Verify: A → UPHOLD ❌, B → OVERRIDE TO ✅
+4. If any result is wrong: improve the skill and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Arbitrator eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 12 — Create proactive stack skills
@@ -1666,9 +1807,12 @@ If the stack identified in the PRD has framework-specific patterns AND no existi
 ---
 name: [domain]-test-patterns
 effort: high
+invocation: inline
 description: >
   Test patterns for [domain] features. Use when writing acceptance criteria
   and executable tests for [domain]-related tasks.
+created: s0 (bootstrap)
+derived_from: null
 ---
 
 # [Domain] Test Patterns

@@ -112,7 +112,7 @@ This file provides guidance to Claude Code when working with this repository.
    Sprint rules: respect task limit (3-5), only include dependency-satisfied tasks, order by dependency then priority. If human approves → sprint-approved mode. If human wants task-by-task → proceed as Level 3.
 7. Read `.claude/rules/*.md` relevant to current task
 8. Read design system if modifying UI
-9. Read `.claude/skills/*.md` if creating components or optimizing
+9. Read `.claude/skills/*/SKILL.md` if relevant skill exists for current task
 10. **Codebase discovery** (if first session or unfamiliar module):
    ```bash
    find . -maxdepth 2 -type d -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | head -40
@@ -410,7 +410,7 @@ ALWAYS instruct the subagent to read:
 
 IF security-relevant:
   - .claude/agents/security-reviewer.md
-  - Stack security skill in .claude/skills/ (if exists)
+  - Stack security skill in .claude/skills/*/SKILL.md (if exists)
 
 IF UI task:
   - Design System section of CLAUDE.md
@@ -479,6 +479,23 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ### At the END of every session:
 
+#### Evolution classification
+
+Every evolution in items 3-8 below must be classified by its trigger mode:
+
+| Mode | Trigger | Examples |
+|------|---------|----------|
+| **FIX** | Something failed that should have worked | Bug missed by review → fix agent checklist. Rule contradicts code → fix rule. |
+| **DERIVED** | Something works but can be consolidated | 3+ Known Bug Patterns from same domain → derive rules file. Agent accumulates similar checks → derive organized sections. |
+| **CAPTURED** | Pattern observed in real usage | Diff scan finds recurring pattern → capture as Known Bug Pattern. Structural decision → capture as Architecture Pattern. |
+
+The classification determines follow-up actions:
+- **FIX** → re-run eval if the component has a `last_eval` in its lineage (see Creation Eval in item 8)
+- **DERIVED** → no eval needed (source patterns were already validated individually)
+- **CAPTURED** → no eval needed (the diff is the evidence)
+
+Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component] — [what changed and why]"`
+
 **Priority order** (if context limited, at minimum do items 1 and 2):
 
 1. **Update `.claude/phases/project.md`** — new entry: date, done, decisions, bugs, next. Always include `PRD version: vX.X.X`. If feature incomplete: document what was attempted and why.
@@ -514,7 +531,10 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    
    ## Commits
    [git log --oneline for this session]
-   
+
+   ## Evolutions applied
+   - [FIX/DERIVED/CAPTURED]: [component] — [what changed and why]
+
    ## PRD version: v[X.X.X]
    ## Next session should: [specific next step]
    ```
@@ -531,14 +551,15 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
 3. **Update `CLAUDE.md`** — if module status, patterns, rules, or File Map changed.
 4. **Update `.claude/rules/*.md`** — if domain logic was established. **Create a new rules file when:** a module has 3+ business rules affecting code, same logic referenced 2+ times across sessions, a bug was caused by domain misunderstanding, or 3+ Known Bug Patterns are from the same domain.
 5. **Update `.claude/agents/code-reviewer.md` (diff-based pattern extraction):** Review the git diff of this session. For each non-trivial fix or implementation:
-   - **Bug fixed → Could this recur?** Add the CORRECT pattern to Known Bug Patterns.
+   - **Bug fixed → Could this recur?** Add the CORRECT pattern to Known Bug Patterns with efficacy tracking: `[added: sN | triggered: never | false-positive: 0]`.
    - **Mistake corrected mid-task?** Add a check that catches the wrong approach.
    - **Structural decision worth preserving?** Add to Architecture Patterns.
    This is a systematic diff scan, not optional introspection. The diff is the source of truth.
-   **Cap:** Max 20 patterns. At 15+, aggressively promote related patterns to rules files (3+ patterns from same domain → `rules/[domain]-rules.md`). Rules files have no limit. Remove patterns enforced by linting or tests.
+   **Cap:** Max 20 patterns. At 15+, aggressively promote related patterns to rules files (3+ patterns from same domain → `rules/[domain]-rules.md`). Rules files have no limit. Remove patterns enforced by linting or tests. Use efficacy data to decide: patterns with no `triggered` history are removed first; patterns with frequent `triggered` are promoted.
+   **Update efficacy tracking:** Review the Code Review Report from this session. For each Known Bug Pattern listed under "Known Bug Patterns triggered", append the current session to the pattern's `triggered` field. If a pattern was flagged but was a false positive, increment `false-positive`.
 6. **Update existing agents and skills** — if a discovery from this session belongs to the scope of an existing agent or skill (not the code-reviewer), update that file directly:
    - New RLS edge case → add to `.claude/agents/red-team.md` (new Tier 1 or Tier 2 test)
-   - Framework pitfall → add to stack skill in `.claude/skills/` (new pitfall entry)
+   - Framework pitfall → add to stack skill in `.claude/skills/[stack]/SKILL.md` (new pitfall entry)
    - New attack vector → add to `.claude/agents/security-reviewer.md` (new checklist item)
    - Verified defense → update `.claude/agents/blue-team.md` Defense Inventory
    
@@ -547,7 +568,7 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
 8. **Create skills or agents on-demand** — two trigger types:
    
    **Reactive (pattern repeated):** A complex process was executed 2+ times and will recur.
-   - **Skill** (`.claude/skills/[name].md`): migration steps, deploy pipeline, data import.
+   - **Skill** (`.claude/skills/[name]/SKILL.md`): migration steps, deploy pipeline, data import.
    - **Agent** (`.claude/agents/[name].md`): specialized review role (performance-auditor, accessibility-checker).
    
    **Proactive (predictable from context):** The PRD, stack, or domain makes a skill predictable even without repetition.
@@ -563,12 +584,40 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    - `effort:` — `high` for security, financial, architectural, complex verification; `medium` for checklists, style guides, patterns
    - `invocation:` — `subagent` for review/validation/security agents (spawned via Task tool with isolated context); `inline` for knowledge/reference skills (read by another agent)
    - `receives:` and `produces:` — required for `invocation: subagent` agents (defines I/O contract for Task tool)
-   This ensures the AI knows whether to spawn the agent independently or read it inline, and what to pass/expect.
-   
+   - **Lineage fields:** `created: sN ([context])`, `last_eval: sN (N/N passed)` (subagent agents) or omitted (inline skills), `fixes: []`, `derived_from: [parent component or null]`
+   This ensures the AI knows whether to spawn the agent independently or read it inline, and what to pass/expect. Lineage provides traceability for evolution and diagnostics.
+
+   **Creation eval (subagent agents only):** After creating any agent with `invocation: subagent`, run 2 test scenarios (1 positive with a clear issue, 1 negative with clean code). Spawn via Task tool, verify results. If wrong: improve and re-test. Update lineage: `last_eval: sN (2/2 passed)`. Skip eval for `invocation: inline` skills. DEFERRABLE if context is low — log "Eval deferred to session N."
+
    Do NOT create if: one-time pattern, rules file more appropriate, Known Bug Pattern suffices, duplicates existing content, or contradicts patterns in CLAUDE.md/rules (precedence: CLAUDE.md > rules > skills/agents).
-   Log: "Created skill/agent: [name] — [trigger: reactive/proactive]"
+   Log: "Created/Updated [component]: [name] — [FIX/DERIVED/CAPTURED]: [justification]" (for evolutions) or "Created skill/agent: [name] — [trigger: proactive/reactive]" (for new creation)
 
 **Documentation updates are mandatory.** Items 3-8 can be deferred if context window is low.
+
+### Auto-evolution boundaries
+
+The rule: if the evolution changes **DATA** (what the agent knows), it is safe for autonomous evolution. If it changes **BEHAVIOR** (how the agent acts), it requires human approval.
+
+**Agent evolves autonomously (no human approval needed):**
+- Known Bug Patterns (factual — derived from diffs)
+- Architecture Patterns (factual — derived from structural decisions)
+- File Map in CLAUDE.md (factual — reflects filesystem)
+- Commands section in CLAUDE.md (factual — reflects what works)
+- Skills content (knowledge/process — errors are caught by eval loops)
+- Agent checklist items — **ADDING** new checks (from real bugs via FIX mechanism)
+- Lineage metadata (append-only)
+- Efficacy tracking fields (append-only metrics)
+
+**Requires human approval before modification:**
+- Session Protocol / Execution Protocol / Validation Orchestration Protocol
+- Task limits, retry limits, sprint mechanics
+- Context routing rules
+- Rules files (domain business logic)
+- PRD
+- Agent checklist items — **REMOVING or WEAKENING** existing checks
+- Changing an agent's `invocation` type, report format, or trigger conditions
+
+The agent checks this list before making end-of-session updates (items 3-8). For human-approval items, propose the change in the session log and wait for confirmation instead of applying directly.
 
 ### Mid-session context recovery:
 If context window is getting full (forgetting earlier decisions, repeating mistakes, losing track):
@@ -955,6 +1004,20 @@ Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills 
 
 ---
 
+### Step 6.5 — Install Skill Creator plugin
+
+Install the Skill Creator plugin for automated skill evaluation:
+
+```bash
+/plugin install skill-creator@claude-plugins-official
+```
+
+**If installation succeeds:** Log "Skill Creator plugin installed. Will be used for skill eval in Steps 7-12 and on-demand creation."
+
+**If installation fails** (plugin not available, network error, unsupported environment): Log "Skill Creator plugin unavailable — framework creation eval protocol will be used instead." Continue with Step 7. The framework's manual creation eval (2 test scenarios per agent) provides the same quality gate without the plugin.
+
+---
+
 ### Step 7 — Create code-reviewer agent
 
 **If `.claude/agents/code-reviewer.md` already exists:** Do NOT overwrite. Verify it has "Known Bug Patterns" and "Architecture Patterns" sections. Add them if missing. Do not remove existing patterns.
@@ -972,6 +1035,10 @@ description: >
   inline checklist for routine tasks (Route A).
 receives: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table
 produces: Code Review Report with findings, pattern violations, and APPROVE/FIX REQUIRED recommendation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Code Review Rules
@@ -993,7 +1060,7 @@ When invoked as subagent, produce:
 | # | Severity | Category | Finding | File:Line | Recommendation |
 |---|----------|----------|---------|-----------|---------------|
 ### Pattern violations: [list any CLAUDE.md/rules violations]
-### Known Bug Pattern matches: [any patterns that apply to this diff]
+### Known Bug Patterns triggered: [list patterns that matched this diff, by name — used to update efficacy tracking]
 ### Architecture: [file size, cross-module imports, structure issues]
 ### Recommendation: APPROVE / FIX REQUIRED
 ```
@@ -1025,7 +1092,7 @@ When invoked as subagent, do NOT read:
 - N+1 queries?
 - Unnecessary imports or heavy dependencies?
 - Code running on client/frontend that could run on server/backend?
-- Consult .claude/skills/ for framework-specific rules
+- Consult .claude/skills/*/SKILL.md for framework-specific rules
 
 ## Security
 - Inputs validated
@@ -1046,17 +1113,46 @@ When invoked as subagent, do NOT read:
 
 ## Known Bug Patterns (check EVERY review)
 
-**Max 20 patterns.** If exceeds: consolidate similar, remove enforced by linting, promote domain rules to rules files.
+**Max 20 patterns.** If exceeds: consolidate similar, remove enforced by linting, promote domain rules to rules files. Use efficacy data to decide: patterns with no `triggered` history are removed first; patterns with frequent `triggered` are promoted to rules files.
+
+**Efficacy tracking:** Each pattern includes tracking metadata:
+
+```
+- [ ] [Pattern description]
+  [added: sN | triggered: sN, sN | false-positive: N]
+```
+
+- `added` — session when the pattern was created
+- `triggered` — sessions where this pattern actually caught a problem during review
+- `false-positive` — count of times the pattern flagged something that wasn't a real issue
+
+**Periodic review (every 10 sessions or via maintenance):**
+- `triggered: never` after 10+ sessions → candidate for removal
+- Frequent `false-positive` → needs refinement (pattern too broad)
+- Frequent `triggered` → working well, candidate for DERIVED promotion to rules file
 
 [Empty on day 1. Populated automatically. Examples after a few sessions:]
 <!--
 - [ ] Date formatting: search for toISOString() — should use local formatting
+  [added: s3 | triggered: s5, s8 | false-positive: 0]
 - [ ] Transaction deletion: verify source guard exists
+  [added: s4 | triggered: never | false-positive: 0]
 - [ ] Recurring queries: verify date range filter includes start boundary
+  [added: s5 | triggered: s7 | false-positive: 1]
 -->
 
 **Rule:** When a bug is fixed, ask: "Could this pattern appear elsewhere?" If yes, add here AND grep for existing instances.
 ```
+
+**Creation eval for code-reviewer (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff containing a SQL string concatenation vulnerability and an N+1 query — code-reviewer should flag both
+   - **Scenario B (negative):** A clean git diff with parameterized queries and proper patterns — code-reviewer should APPROVE with no false flags
+2. Spawn code-reviewer via Task tool against each scenario
+3. Verify: A → issues detected, B → no false flags
+4. If any result is wrong: improve the agent and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Code-reviewer eval deferred to session 1" and set `last_eval: none (deferred)`
 
 ---
 
@@ -1084,6 +1180,10 @@ description: >
   authentication, data storage, external APIs, and AI/LLM features.
 receives: git diff, security-reviewer.md (self), stack security skill, rules files
 produces: Security Review Report with findings by category, severity, and APPROVE/FIX REQUIRED/BLOCK recommendation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Security Review Rules
@@ -1092,7 +1192,7 @@ produces: Security Review Report with findings by category, severity, and APPROV
 
 When invoked as subagent:
 - **Git diff** — read via `git diff HEAD~1`
-- **Stack security skill** — in `.claude/skills/` (if exists)
+- **Stack security skill** — in `.claude/skills/*/SKILL.md` (if exists)
 - **Rules files** — all `.claude/rules/*.md`
 - **CLAUDE.md** — Key Patterns and Architecture sections
 
@@ -1250,6 +1350,16 @@ Add to code-reviewer's "Security" section:
 - For detailed security checks, consult `.claude/agents/security-reviewer.md`
 ```
 
+**Creation eval for security-reviewer (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff introducing an endpoint with string-concatenated SQL, no auth check, and hardcoded API key — security-reviewer should flag all three
+   - **Scenario B (negative):** A git diff with parameterized queries, auth middleware, and env-var secrets — security-reviewer should APPROVE
+2. Spawn security-reviewer via Task tool against each scenario
+3. Verify: A → issues detected, B → no false flags
+4. If any result is wrong: improve the agent and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Security-reviewer eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 9 — Create Red Team / Blue Team agents (if project risk warrants it)
@@ -1284,6 +1394,10 @@ description: >
   Produces vulnerability reports using the tiered security model.
 receives: git diff, red-team.md (self), security-reviewer.md, stack security skill, rules files
 produces: Vulnerability Report with findings by severity, category, tier, and evidence
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Red Team — [Project Name]
@@ -1401,6 +1515,10 @@ description: >
   defenses, confirms fixes, tracks security control inventory.
 receives: Vulnerability Report (Red Team), final code (post-fixes), rules files
 produces: Defense Assessment with gap analysis, defense inventory updates, APPROVE/BLOCK recommendation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Blue Team — [Project Name]
@@ -1450,6 +1568,16 @@ After reviewing all Red Team findings:
 
 **Interaction:** Red Team runs first (attack), Blue Team runs after (verify defense). Both reference the security-reviewer for universal principles and the tiered security model for guardrails.
 
+**Creation eval for Red Team / Blue Team (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff introducing an RLS-protected endpoint where the policy has a gap (e.g., missing tenant filter on a JOIN) — Red Team should identify the bypass vector
+   - **Scenario B (negative):** A git diff with correct RLS policies, proper session scoping, and no bypass paths — Red Team should report no findings
+2. Spawn Red Team via Task tool against each scenario
+3. Verify: A → vulnerability detected, B → no false flags
+4. For Blue Team: use Red Team's Scenario A report as input — Blue Team should identify the defense gap and propose mitigation
+5. Update lineage for both: `last_eval: s0 (2/2 passed)`
+If skipped: log "Red Team/Blue Team eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 10 — Create validator agent
@@ -1476,6 +1604,10 @@ receives: >
 produces: >
   Validation Report with ✅/❌/⏭️ per category (Build, Tests, Review, Security,
   Mutation, DB, UI, Regression) + mutation test results + test quality evaluation
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Validator
@@ -1559,6 +1691,16 @@ Do NOT read:
 You do not know WHY the code was written this way. You only see code + checklists + criteria. This is intentional — it eliminates confirmation bias.
 ```
 
+**Creation eval for validator (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (positive):** A git diff with a passing build but a QUERY: criterion that returns wrong data — validator should report ❌ with evidence
+   - **Scenario B (negative):** A git diff where build passes, tests pass, and all criteria match — validator should report ✅ PASS
+2. Spawn validator via Task tool against each scenario
+3. Verify: A → ❌ detected with evidence, B → ✅ with no false flags
+4. If any result is wrong: improve the agent and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Validator eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 11 — Create arbitrator agent
@@ -1584,6 +1726,10 @@ receives: >
 produces: >
   Arbitration Ruling: UPHOLD ❌ (with justification) / OVERRIDE TO ✅
   (with justification) / ESCALATE (with explanation of ambiguity)
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
 ---
 
 # Arbitrator
@@ -1644,30 +1790,48 @@ Do NOT read:
 Same anti-bias firewall as the validator. You judge the CODE against CRITERIA, not the intent.
 ```
 
+**Creation eval for arbitrator (DEFERRABLE if context is low):**
+1. Generate 2 test scenarios:
+   - **Scenario A (UPHOLD ❌):** Validator says ❌, build passes but the test assertions are superficial (checking `!= null` instead of specific values) — arbitrator should UPHOLD the ❌
+   - **Scenario B (OVERRIDE TO ✅):** Validator says ❌ on a criterion but build passes, tests pass with strong assertions, and query returns exact expected value — arbitrator should OVERRIDE TO ✅
+2. Spawn arbitrator via Task tool against each scenario
+3. Verify: A → UPHOLD ❌, B → OVERRIDE TO ✅
+4. If any result is wrong: improve the agent and re-test
+5. Update lineage: `last_eval: s0 (2/2 passed)`
+If skipped: log "Arbitrator eval deferred to session 1" and set `last_eval: none (deferred)`
+
 ---
 
 ### Step 12 — Create proactive stack skills
 
-If the stack identified in the PRD has framework-specific patterns AND no existing skill was found in Step 6, create a basic skill from the AI's knowledge of that framework.
+If the stack identified in the PRD has framework-specific patterns AND no existing skill was found in Step 6, create a stack skill using the Anthropic folder format:
+
+```bash
+mkdir -p .claude/skills/[stack-name]
+# Create .claude/skills/[stack-name]/SKILL.md
+```
 
 **Trigger:** Stack is defined in PRD + no pre-made skill found + framework has known patterns that differ from generic best practices.
 
-**Include in the stack skill:**
+**Include in the stack skill (`.claude/skills/[stack-name]/SKILL.md`):**
 - Key patterns for the framework (ORM, middleware, routing, component model)
 - Common mistakes to avoid
 - **Stack-specific security settings** (debug mode, secure cookies, CSRF, headers — these were removed from the generic security-reviewer to live here where they belong)
 - **Testing framework and conventions** (which test runner, folder structure, naming conventions, setup/teardown patterns for the stack — e.g., jest + supertest for Node.js APIs, pytest + fixtures for Django, go test for Go). Add the test command to the `Commands` section of CLAUDE.md.
 - Project-specific adaptations (from PRD constraints)
 
-**Also create domain-specific test patterns** when the project enters a domain with complex verification needs (financial calculations, state machines, multi-step workflows). This ensures criteria quality scales with domain complexity. Create as `.claude/skills/[domain]-test-patterns.md` with this structure:
+**Also create domain-specific test patterns** when the project enters a domain with complex verification needs (financial calculations, state machines, multi-step workflows). This ensures criteria quality scales with domain complexity. Create as `.claude/skills/[domain]-test-patterns/SKILL.md` (Anthropic folder format) with this structure:
 
 ```markdown
 ---
 name: [domain]-test-patterns
 effort: high
+invocation: inline
 description: >
   Test patterns for [domain] features. Use when writing acceptance criteria
   and executable tests for [domain]-related tasks.
+created: s0 (bootstrap)
+derived_from: null
 ---
 
 # [Domain] Test Patterns
@@ -1794,7 +1958,7 @@ Create `.claude/settings.json`:
 - .claude/agents/blue-team.md ([lines] lines) ← if created (Step 9)
 - .claude/agents/validator.md ([lines] lines) ← mandatory (Step 10)
 - .claude/agents/arbitrator.md ([lines] lines) ← mandatory (Step 11)
-- .claude/skills/[domain]-test-patterns.md ([lines] lines) ← if created (Step 12)
+- .claude/skills/[domain]-test-patterns/SKILL.md ([lines] lines) ← if created (Step 12)
 - .claude/settings.json
 - .claude/logs/ (initialized — session logs start from session 1)
 - assets/examples/ (copied from framework — Step 1.5)
