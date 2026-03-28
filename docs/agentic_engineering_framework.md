@@ -933,8 +933,8 @@ Some skills emerge from real project experience — they require observed repeti
 
 ### Reasoning depth:
 When creating agents or skills, classify their reasoning requirement:
-- **Deep reasoning** (`effort: high`) — security, financial, architectural, complex debugging: when the AI reads this skill, it should increase reasoning depth for the task (e.g., `/effort high` in Claude Code). This is a convention the AI must actively honor, not an enforced feature.
-- **Standard reasoning** (`effort: medium`) — code review checklists, pattern references, style guides: default reasoning is sufficient.
+- **Deep reasoning** (security testing, financial calculations, architectural analysis, complex debugging): the agent/skill should trigger the tool's maximum reasoning mode when invoked.
+- **Standard reasoning** (code review checklist, pattern reference, style guide): default reasoning is sufficient.
 
 The tool-specific implementation (frontmatter, config, etc.) is defined in the session0 bootstrap. The principle is: security and financial agents always get deep reasoning, regardless of the session's default setting.
 
