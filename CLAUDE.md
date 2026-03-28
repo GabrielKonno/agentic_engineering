@@ -7,7 +7,7 @@ This file provides guidance to Claude Code when working with the Agentic Enginee
 This is a **meta-project** — a framework for creating and managing other projects. There is no application code here. Only documentation, templates, examples, and project folders.
 
 **You do NOT write application code in this repository root.** You bootstrap projects inside `projects/` and develop within them.
-
+ 
 ## Repository Structure
 
 ```
