@@ -2,44 +2,38 @@
 
 Quality reference templates for creating agents, skills, and rules. The AI consults these before creating new on-demand agents or skills to calibrate structure, depth, and conventions.
 
-**These are templates, not active configuration.** They are copied to each project's `assets/examples/` during bootstrap (Step 1.5) if not perfectly suitable for the project. In this case, will serve as read-only reference.
+**These are templates, not active configuration.** They are always copied to each project's `assets/examples/` during bootstrap (Step 1.5) as read-only reference. When creating new agents or skills, adapt these templates to the project's stack and domain — do not copy verbatim if they are not perfectly suitable.
 
 ## Structure
 
 ```
 examples/
-├── agents/
-│   ├── quality/                    # Code quality and review agents
-│   │   ├── performance-auditor.md  # Data fetching, rendering, DB, bundle optimization
-│   │   ├── accessibility-checker.md # WCAG 2.1 AA compliance
-│   │   └── test-quality-reviewer.md # Test quality, false positives, coverage gaps
-│   ├── domain/                     # Domain-specific verification agents
-│   │   ├── state-machine-verifier.md # Status workflows, transition matrix, guards
-│   │   ├── data-integrity-checker.md # Referential integrity, transactions, consistency
-│   │   └── multi-tenancy-auditor.md  # Tenant isolation, RLS, cross-tenant leak detection
-│   ├── ops/                        # Operations and infrastructure agents
-│   │   ├── dependency-auditor.md   # Security vulnerabilities, outdated packages, licenses
-│   │   ├── migration-runner.md     # Safe migration execution, rollback, verification
-│   │   └── deploy-validator.md     # Pre-deploy checklist, environment, rollback plan
-│   └── security/                   # Security-focused agents
-│       └── api-security-scanner.md # Tiered model (Tier 1/2/3), auth, injection, data exposure
-├── skills/
-│   ├── stack/                      # Stack-specific patterns
-│   │   ├── nextjs-supabase.md      # Next.js App Router + Supabase (Auth, RLS, Storage)
-│   │   ├── django-postgres.md      # Django + PostgreSQL (ORM, CBV, middleware)
-│   │   └── express-mongodb.md      # Express.js + MongoDB (Mongoose, JWT, middleware)
-│   ├── domain/                     # Domain knowledge skills
-│   │   ├── e-commerce-patterns.md  # Cart, pricing, inventory, orders, payments, refunds
-│   │   ├── scheduling-patterns.md  # Appointments, availability, recurring events, timezones
-│   │   └── multi-tenancy-patterns.md # Isolation strategies, data model, scoping patterns
-│   └── process/                    # Process and methodology skills
-│       ├── api-design-patterns.md  # REST conventions, status codes, pagination, versioning
-│       ├── database-migration-guide.md # Safe operations, data migration, rollback
-│       └── ci-cd-pipeline.md       # GitHub Actions, environments, deploy strategies
-└── rules/                          # Domain rules templates
-    ├── multi-tenancy-rules.md      # Inviolable rules, query patterns, new table checklist
-    ├── e-commerce-rules.md         # Monetary values, cart, stock, orders, discounts
-    └── auth-rules.md               # Auth levels, password reset, token management
+├── examples_instructions.md       # This file
+├── agents/                        # Agent templates (all categories)
+│   ├── performance-auditor.md     # Data fetching, rendering, DB, bundle optimization
+│   ├── accessibility-checker.md   # WCAG 2.1 AA compliance
+│   ├── test-quality-reviewer.md   # Test quality, false positives, coverage gaps
+│   ├── state-machine-verifier.md  # Status workflows, transition matrix, guards
+│   ├── data-integrity-checker.md  # Referential integrity, transactions, consistency
+│   ├── multi-tenancy-auditor.md   # Tenant isolation, RLS, cross-tenant leak detection
+│   ├── dependency-auditor.md      # Security vulnerabilities, outdated packages, licenses
+│   ├── migration-runner.md        # Safe migration execution, rollback, verification
+│   ├── deploy-validator.md        # Pre-deploy checklist, environment, rollback plan
+│   └── api-security-scanner.md    # Tiered model (Tier 1/2/3), auth, injection, data exposure
+├── skills/                        # Skill templates (all types)
+│   ├── nextjs-supabase.md         # Next.js App Router + Supabase (Auth, RLS, Storage)
+│   ├── django-postgres.md         # Django + PostgreSQL (ORM, CBV, middleware)
+│   ├── express-mongodb.md         # Express.js + MongoDB (Mongoose, JWT, middleware)
+│   ├── e-commerce-patterns.md     # Cart, pricing, inventory, orders, payments, refunds
+│   ├── scheduling-patterns.md     # Appointments, availability, recurring events, timezones
+│   ├── multi-tenancy-patterns.md  # Isolation strategies, data model, scoping patterns
+│   ├── api-design-patterns.md     # REST conventions, status codes, pagination, versioning
+│   ├── database-migration-guide.md # Safe operations, data migration, rollback
+│   └── ci-cd-pipeline.md         # GitHub Actions, environments, deploy strategies
+└── rules/                        # Domain rules templates
+    ├── multi-tenancy-rules.md     # Inviolable rules, query patterns, new table checklist
+    ├── e-commerce-rules.md        # Monetary values, cart, stock, orders, discounts
+    └── auth-rules.md              # Auth levels, password reset, token management
 
 ## How to use
 

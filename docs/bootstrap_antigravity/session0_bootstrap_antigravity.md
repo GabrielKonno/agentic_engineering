@@ -5,7 +5,7 @@ The project will be created inside `projects/[project-name]/`.
 
 **Before starting:**
 1. Create the project folder: `projects/[project-name]/`
-2. Place the PRD at `projects/[project-name]/assets/docs/prd.md` (create one using `docs/prd_planning_prompt.md`)
+2. Place the PRD at `projects/[project-name]/assets/docs/prd.md` (create one using `docs/toolkit_prompt/prd_planning_prompt.md`)
 3. If no PRD exists, the session still works — PRD-derived sections will be marked "to be defined"
 
 Antigravity-specific: This prompt leverages native Planning Mode, Browser Subagent, and multi-agent capabilities. No external Playwright MCP needed.
@@ -130,7 +130,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 **Three mechanisms for reasoning depth (complementary):**
 
-1. **Agent-level (automatic, zero intervention):** `effort:` in skill frontmatter. Applies automatically when that skill is invoked. Security skills always use `effort: high` regardless of session settings.
+1. **Agent-level (convention, zero intervention):** `effort:` in skill frontmatter. When reading a skill with `effort: high`, the AI should increase reasoning depth for that task. Security skills always warrant high effort regardless of session settings.
 
 2. **Task-level recommendation (2 seconds):** AI classifies task complexity → recommends increased reasoning depth in implementation plan. Human adjusts reasoning setting before approving. No restart needed.
 
@@ -296,6 +296,20 @@ Generate a Validation Report artifact:
 
 **Actionable findings rule:** If during ANY step of this loop (review, testing, validation, browser verification, criteria check) the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking. Log in the report under "Improvements identified → added to pendencias".
 
+**Validation Failure Post-Mortem (when human finds a bug in a ✅ task):**
+If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
+1. Identify which of the 6 steps should have caught it
+2. Diagnose why that step declared ✅ (partial execution? silent failure? missing criterion? weak criterion?)
+3. Classify the root cause and route the improvement to the correct document:
+   - Weak/incomplete criterion → improve criteria quality rules
+   - Partially verified multi-step criterion → add enforcement to Step 5
+   - Tool silenced an error → add Known Bug Pattern
+   - Review missed a pattern → update code-reviewer checklist
+   - Test not written for testable logic → refine Step 2 skip conditions
+4. Apply the systemic improvement (prevent the CLASS of failure, not just this instance)
+5. Log the post-mortem in the session entry
+Then fix the bug normally. The validation loop improves before the bug is fixed.
+
 If any ❌: fix → re-run entire loop (max 3 full cycles).
 If all ✅/⏭️: report as READY.
 **Global retry limit:** After 3 full cycles with ❌, STOP. Report: what works, what doesn't (all 3 attempts), root cause hypothesis, suggested approach.
@@ -438,11 +452,11 @@ The user can also trigger this by saying "save state and start fresh".
 
 ## MCP Servers
 
-[Filled in Step 5 below]
+[Filled in Step 6 below]
 
 ## Skills
 
-[Filled in Step 6 below]
+[Filled in Step 7 below]
 
 ## Architecture
 

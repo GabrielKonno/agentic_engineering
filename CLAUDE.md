@@ -101,8 +101,10 @@ The user wants to switch a project from Claude Code to Antigravity or vice versa
 
 ## Rules
 
-- **Never modify files in `docs/`** — these are the framework source of truth
-- **Never modify files in `examples/`** — these are read-only quality references
+- **Never modify files in `docs/` or `examples/` during bootstrap operations** — these are 
+  read-only references for project creation. Exception: framework maintenance sessions 
+  (when the user explicitly states this is a maintenance session, or provides a correction 
+  plan / audit report targeting these files).
 - **Always work inside `projects/[project-name]/`** when creating project files
 - **Copy `examples/` into the project** during bootstrap (Step 1.5) — projects get their own copy
 - **Each project is self-contained** — after bootstrap, development happens from within the project folder with its own CLAUDE.md

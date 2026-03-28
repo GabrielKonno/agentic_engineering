@@ -5,9 +5,9 @@ The project will be created inside `projects/[project-name]/`.
 
 **Before starting:**
 1. Create the project folder: `projects/[project-name]/`
-2. Place the PRD at `projects/[project-name]/assets/docs/prd.md` (create one using `docs/prd_planning_prompt.md`)
+2. Place the PRD at `projects/[project-name]/assets/docs/prd.md` (create one using `docs/toolkit_prompt/prd_planning_prompt.md`)
 3. If no PRD exists, the session still works — PRD-derived sections will be marked "to be defined"
-4. Run Claude Code from the framework root: `cd agentic-framework && claude`
+4. Run Claude Code from the framework root: `cd agentic_engineering && claude`
 5. Send this prompt, specifying the project name
 
 ---
@@ -128,7 +128,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 **Three mechanisms for reasoning depth (complementary):**
 
-1. **Agent-level (automatic, zero intervention):** `effort:` in agent/skill frontmatter. Applies automatically when that agent/skill is invoked. Security agents always use `effort: high` regardless of session settings.
+1. **Agent-level (convention, zero intervention):** `effort:` in agent/skill frontmatter. When reading a skill with `effort: high`, the AI should use `/effort high` for that task. Security agents always warrant high effort regardless of session settings.
 
 2. **Task-level recommendation (2 seconds):** AI classifies task complexity → recommends `/effort high` in implementation plan. Human types one command before approving. No restart needed.
 
@@ -196,14 +196,15 @@ After approval: the plan becomes the technical record. Include summary in projec
    **What was done:** [work before switch]
    **Model switch reason:** Task "[name]" classified as architecture/security — requires Opus + high effort
    **Continue with:** Task [N] from pendencias — [task name]
-   **Settings changed:** model → claude-opus-4-6, effortLevel → high
+   **Settings changed:** model → claude-opus-4-6
+   **Post-restart action:** Use `/effort high` at session start
    **PRD version:** vX.X
    ```
 2. Commit: `git add -A && git commit -m "wip: model switch for [task name]"`
    **If model switch is triggered during a sprint:** The sprint is interrupted. Add to the MODEL SWITCH marker: `**Sprint interrupted:** Yes — remaining tasks: [list remaining sprint tasks]`. After restart, do NOT resume the previous sprint — propose a new sprint instead. Log the previous sprint as "interrupted: model switch at task N of M".
-3. Edit `~/.claude/settings.json`: change `"model"` to `"claude-opus-4-6"` and `"effortLevel"` to `"high"`
+3. Edit `~/.claude/settings.json`: change `"model"` to `"claude-opus-4-6"`
 4. Tell user: "Task [name] requires Opus. Settings updated. Please restart: type `claude` to continue."
-5. **After task complete:** evaluate next task. If routine → revert settings.json to `"model": "sonnet"`, `"effortLevel": "medium"`. Log revert in project.md. If next task also needs the current model: keep settings, skip revert.
+5. **After task complete:** evaluate next task. If routine → revert settings.json `"model"` to the default model. Log revert in project.md. If next task also needs the current model: keep settings, skip revert.
 
 ### Git checkpoint (medium and large tasks):
 Before writing code: `git add -A && git commit -m "checkpoint: before [task name]"`
@@ -294,6 +295,20 @@ Retry limits: max 3 attempts per step.
 ⏭️ means "not applicable to this task" — NOT "I couldn't do it" or "I skipped it."
 
 **Actionable findings rule:** If during ANY step of this loop (review, testing, validation, browser verification, criteria check) the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking. Log in the report under "Improvements identified → added to pendencias".
+
+**Validation Failure Post-Mortem (when human finds a bug in a ✅ task):**
+If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
+1. Identify which of the 6 steps should have caught it
+2. Diagnose why that step declared ✅ (partial execution? silent failure? missing criterion? weak criterion?)
+3. Classify the root cause and route the improvement to the correct document:
+   - Weak/incomplete criterion → improve criteria quality rules
+   - Partially verified multi-step criterion → add enforcement to Step 5
+   - Tool silenced an error → add Known Bug Pattern
+   - Review missed a pattern → update code-reviewer checklist
+   - Test not written for testable logic → refine Step 2 skip conditions
+4. Apply the systemic improvement (prevent the CLASS of failure, not just this instance)
+5. Log the post-mortem in the session entry
+Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 If any ❌: fix → re-run entire loop (max 3 full cycles).
 If all ✅/⏭️: report as READY.
