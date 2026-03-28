@@ -204,7 +204,7 @@ project/
 | `skills/[custom].md` | Custom skills created on-demand for recurring complex processes | When a technical process repeats 2+ times |
 | `skills/[stack].md` | Stack knowledge (framework-specific patterns for the project's stack) | Created at bootstrap or one-time installation |
 | `assets/examples/` | Reference templates for agents, skills, and rules (copied from framework repo during bootstrap) | Read-only reference. Consult before creating on-demand agents/skills. |
-| `logs/YYYYMMDD_sN_slug_commit.md` | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Not read by AI during normal sessions — exists for human reference, debugging, and project history. | Created automatically at end of every session (item 1). Never edited after creation. |
+| `.claude/logs/YYYYMMDD_sN_slug_commit.md` (or `.antigravity/logs/` for Antigravity) | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Not read by AI during normal sessions — exists for human reference, debugging, and project history. | Created automatically at end of every session (item 1). Never edited after creation. |
 
 ---
 
@@ -607,6 +607,7 @@ Report template categories:
 - Tests: ✅/❌/⏭️
 - Review: ✅/❌
 - Security: ✅/❌/⏭️ [Red Team Tier 1-2 results, or "no security-relevant changes"]
+- Mutation: ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
 - UI: ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
 - Regression: ✅/❌

@@ -66,6 +66,7 @@ agentic_engineering/
 │       └── cross_tool_migration_prompt.md      ← Migrate between tools
 │
 ├── examples/                           ← Quality reference templates (copied to projects)
+│   ├── examples_instructions.md        ← Conventions for creating agents/skills
 │   ├── agents/                         ← 10 agent templates (quality, domain, ops, security)
 │   ├── skills/                         ← 9 skill templates (stack, domain, process)
 │   └── rules/                          ← 3 rules templates (multi-tenancy, e-commerce, auth)
@@ -102,9 +103,9 @@ The AI reads the PRD and creates the entire project structure:
 | `code-reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
 | `security-reviewer.md` | OWASP Top 10 checklist |
 | `red-team.md` / `blue-team.md` | Adversarial security testing (if project has auth, payments, etc.) |
-| `settings.json` | Permissions + auto-formatting hook (Claude Code only) |
+| `.claude/settings.json` | Permissions + auto-formatting hook (Claude Code only) |
 | `assets/examples/` | Agent/skill templates for future reference |
-| `logs/` | Session log directory |
+| `.claude/logs/` | Session log directory |
 
 ### 3. Extract to its own repo
 
@@ -236,4 +237,4 @@ For the full methodology, concepts, and design rationale:
 
 **Read:** `docs/agentic_engineering_framework.md`
 
-This is the tool-agnostic reference document (1200 lines) covering: problem definition, maturity model, project structure, document boundaries, session protocol, execution protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.
+This is the tool-agnostic reference document (1300+ lines) covering: problem definition, maturity model, project structure, document boundaries, session protocol, execution protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.

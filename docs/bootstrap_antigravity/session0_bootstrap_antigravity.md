@@ -674,6 +674,8 @@ parallel: false
 - Install dependencies
 - Configure database
 - Configure environment variables
+- Configure deploy pipeline (if applicable)
+- Create design system (or import reference)
 
 **Acceptance criteria:**
 - [ ] `BUILD:` Project builds with zero errors
@@ -696,6 +698,7 @@ parallel: true (if independent of task 3)
 **Acceptance criteria:**
 - [ ] `BUILD:` Zero build errors, all tests pass
 - [ ] `VERIFY:` [page/endpoint/command] → [main action] → [expected result with specific values/elements]
+- [ ] `VERIFY:` [page/endpoint/command] → empty state → [specific empty state message/response]
 - [ ] `QUERY:` [specific query] → [specific expected value — this criterion should also become an executable test]
 - [ ] `REVIEW:` API handlers follow authentication and authorization patterns defined in GEMINI.md
 - [ ] `MANUAL:` Visual matches design system
@@ -899,7 +902,7 @@ description: >
 
 # Security Review Rules
 
-## When to use this skill
+## When to invoke
 
 Check this skill whenever your changes involve ANY of:
 - User input (forms, URL params, query strings, headers, file uploads)

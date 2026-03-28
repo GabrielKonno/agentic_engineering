@@ -16,7 +16,7 @@ Use this prompt with Claude Code when you have a project that already has partia
 
 ## Existing Project Adaptation
 
-**Project folder:** `[CONFIGURE: path to project root, e.g., projects/kyojin-system]`
+**Project folder:** `[CONFIGURE: path to project root — e.g., "." if running from the project root, or "projects/kyojin-system" if running from the framework root]`
 
 This session reads the existing codebase and documentation, then upgrades everything to the current Agentic Engineering Framework version. NO application code will be written or modified. Only documentation and configuration.
 
