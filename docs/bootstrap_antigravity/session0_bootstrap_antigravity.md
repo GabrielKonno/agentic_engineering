@@ -653,6 +653,8 @@ Last updated: [date]
    Submit valid → redirect to /clients/[id], client visible in list.
 ```
 
+**Specificity inheritance:** Every criterion must be at least as precise as its source (PRD, design system, rules file, migration schema). If the source defines exact values, the criterion must contain those values. A criterion vaguer than its source is WEAK regardless of having 3 parts.
+
 **Dependency mapping (optional — enables parallelism for multi-agent tools):**
 - `depends: [task numbers]` — tasks that must be DONE before this one starts
 - `parallel: true` — can run simultaneously with other parallel tasks at same dependency level
