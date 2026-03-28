@@ -150,8 +150,8 @@ agentic_engineering/                         # Framework root (meta-project)
 │       └── existing_project_adaptation_prompt.md # Adapt existing project to framework
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
-│   ├── agents/                              # Agent templates (flat): performance-auditor, accessibility-checker, test-quality-reviewer, state-machine-verifier, data-integrity-checker, multi-tenancy-auditor, dependency-auditor, migration-runner, deploy-validator, api-security-scanner
-│   ├── skills/                              # Skill templates (flat): nextjs-supabase, django-postgres, express-mongodb, e-commerce-patterns, scheduling-patterns, multi-tenancy-patterns, api-design-patterns, database-migration-guide, ci-cd-pipeline
+│   ├── agents/                              # Agent templates (flat .md): performance-auditor, accessibility-checker, test-quality-reviewer, state-machine-verifier, data-integrity-checker, multi-tenancy-auditor, dependency-auditor, migration-runner, deploy-validator, api-security-scanner
+│   ├── skills/                              # Skill templates (Anthropic folder format: name/SKILL.md): nextjs-supabase, django-postgres, express-mongodb, e-commerce-patterns, scheduling-patterns, multi-tenancy-patterns, api-design-patterns, database-migration-guide, ci-cd-pipeline
 │   └── rules/                               # Rules file templates: multi-tenancy-rules, e-commerce-rules, auth-rules
 └── projects/                                # Project folders (one per project)
     └── [project-name]/                      # Created during session 0
@@ -184,7 +184,7 @@ project/
 │   │   ├── security-reviewer.md          # OWASP Top 10, injection, auth, data protection (universal, stack-agnostic)
 │   │   ├── red-team.md                   # (conditional) Adversarial security tester — stack-specific attack vectors
 │   │   └── blue-team.md                  # (conditional) Defensive security verifier — validates defenses
-│   ├── skills/
+│   ├── skills/                           # Anthropic folder format: name/SKILL.md
 │   │   └── (installed or created as needed for the stack)
 │   └── settings.json                      # Permissions + hooks (Claude Code only)
 ```
@@ -203,8 +203,8 @@ project/
 | `agents/red-team.md` (conditional) | ADVERSARIAL security testing — stack-specific attack vectors, tiered security model | Bootstrap, if PRD has high-risk features (auth, payments, AI/LLM, PII, multi-tenancy) |
 | `agents/blue-team.md` (conditional) | DEFENSIVE security verification — validates defenses, confirms fixes | Bootstrap, if PRD has high-risk features (same trigger as Red Team) |
 | `agents/[custom].md` | Custom agents created on-demand when recurring review/analysis patterns emerge | When a review pattern repeats |
-| `skills/[custom].md` | Custom skills created on-demand for recurring complex processes | When a technical process repeats 2+ times |
-| `skills/[stack].md` | Stack knowledge (framework-specific patterns for the project's stack) | Created at bootstrap or one-time installation |
+| `skills/[custom]/SKILL.md` | Custom skills created on-demand for recurring complex processes (Anthropic folder format) | When a technical process repeats 2+ times |
+| `skills/[stack]/SKILL.md` | Stack knowledge (framework-specific patterns for the project's stack) | Created at bootstrap or one-time installation |
 | `assets/examples/` | Reference templates for agents, skills, and rules (copied from framework repo during bootstrap) | Read-only reference. Consult before creating on-demand agents/skills. |
 | `.claude/logs/YYYYMMDD_sN_slug_commit.md` (or `.antigravity/logs/` for Antigravity) | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Not read by AI during normal sessions — exists for human reference, debugging, and project history. | Created automatically at end of every session (item 1). Never edited after creation. |
 
@@ -314,6 +314,23 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 ### At the END of every session:
 
+#### Evolution classification
+
+Every evolution in items 3-8 below must be classified by its trigger mode:
+
+| Mode | Trigger | Examples |
+|------|---------|----------|
+| **FIX** | Something failed that should have worked | Bug missed by review → fix agent checklist. Rule contradicts code → fix rule. |
+| **DERIVED** | Something works but can be consolidated | 3+ Known Bug Patterns from same domain → derive rules file. Agent accumulates similar checks → derive organized sections. |
+| **CAPTURED** | Pattern observed in real usage | Diff scan finds recurring pattern → capture as Known Bug Pattern. Structural decision → capture as Architecture Pattern. |
+
+The classification determines follow-up actions:
+- **FIX** → re-run eval if the component has a `last_eval` in its lineage (see Creation Eval below)
+- **DERIVED** → no eval needed (source patterns were already validated individually)
+- **CAPTURED** → no eval needed (the diff is the evidence)
+
+Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component] — [what changed and why]"`
+
 **Priority order** (if context is limited, at minimum do items 1 and 2):
 
 1. **Update project.md** — new session entry: date, what was done, decisions, bugs found/fixed, next step. Always include: `PRD version: vX.X.X`. If a feature was left incomplete, document what was attempted and why it stopped.
@@ -353,6 +370,9 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
    ## Commits
    [output of `git log --oneline` for this session's commits]
    
+   ## Evolutions applied
+   - [FIX/DERIVED/CAPTURED]: [component] — [what changed and why]
+
    ## PRD version: v[X.X.X]
    ## Next session should: [specific next step]
    ```
@@ -382,9 +402,29 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
    **This is a systematic diff scan, not optional introspection.** The diff is the source of truth, not memory of what happened.
    
    **Known Bug Patterns cap:** Max 20 patterns. When reaching 15+, aggressively promote related patterns to rules files: if 3+ patterns share a domain (dates, currency, auth), consolidate into a `rules/[domain]-rules.md` and remove from Known Bug Patterns. Rules files have no limit and serve as long-term memory. Remove patterns now enforced by linting or tests.
+
+   **Efficacy tracking:** Each Known Bug Pattern includes tracking metadata:
+
+   ```
+   - [ ] Date formatting: use local parsing, not toISOString()
+     [added: s3 | triggered: s5, s8 | false-positive: 0]
+   ```
+
+   - `added` — session when the pattern was created
+   - `triggered` — sessions where this pattern actually caught a problem during review
+   - `false-positive` — count of times the pattern flagged something that wasn't a real issue
+
+   The code-reviewer subagent reports which Known Bug Patterns were triggered in its Code Review Report. The implementing agent updates the tracking fields in this end-of-session step.
+
+   **Periodic review (every 10 sessions or via maintenance):**
+   - `triggered: never` after 10+ sessions → candidate for removal (bug class may be eliminated, or pattern too specific)
+   - Frequent `false-positive` → needs refinement (pattern too broad)
+   - Frequent `triggered` → working well, candidate for DERIVED promotion to rules file
+
+   Efficacy data informs the cap management: instead of arbitrary selection when promoting at 15+, patterns with evidence of effectiveness are preserved while patterns with no evidence of impact are removed first.
 6. **Update existing agents and skills** — if a discovery from this session belongs to the scope of an existing agent or skill (not the code-reviewer), update that file directly. Examples:
    - Found a new RLS edge case during implementation → add to **red-team.md** (new Tier 1 or Tier 2 test)
-   - Discovered a framework-specific pitfall → add to **stack skill** (new entry in Common Pitfalls table)
+   - Discovered a framework-specific pitfall → add to **stack skill** (`skills/[stack]/SKILL.md`, new entry in Common Pitfalls table)
    - Found a new attack vector during security review → add to **security-reviewer.md** (new checklist item in the relevant section)
    - Blue Team verified a new defense → update **blue-team.md** Defense Inventory
    
@@ -393,6 +433,31 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 8. **Create skills or agents on-demand** — if a recurring pattern was identified. Before creating, consult `assets/examples/` for quality reference (see [On-Demand Creation](#on-demand-skill-and-agent-creation)).
 
 **Documentation updates are mandatory.** Items 3-8 can be deferred to the next session if context window is running low.
+
+### Auto-evolution boundaries
+
+The rule: if the evolution changes **DATA** (what the agent knows), it is safe for autonomous evolution. If it changes **BEHAVIOR** (how the agent acts), it requires human approval.
+
+**Agent evolves autonomously (no human approval needed):**
+- Known Bug Patterns (factual — derived from diffs)
+- Architecture Patterns (factual — derived from structural decisions)
+- File Map in config file (factual — reflects filesystem)
+- Commands section in config file (factual — reflects what works)
+- Skills content (knowledge/process — errors are caught by eval loops)
+- Agent checklist items — **ADDING** new checks (from real bugs via FIX mechanism)
+- Lineage metadata (append-only)
+- Efficacy tracking fields (append-only metrics)
+
+**Requires human approval before modification:**
+- Session Protocol / Execution Protocol / Validation Orchestration Protocol
+- Task limits, retry limits, sprint mechanics
+- Context routing rules
+- Rules files (domain business logic)
+- PRD
+- Agent checklist items — **REMOVING or WEAKENING** existing checks
+- Changing an agent's `invocation` type, report format, or trigger conditions
+
+The agent checks this list before making end-of-session updates (items 3-8). For human-approval items, propose the change in the session log and wait for confirmation instead of applying directly.
 
 ### Mid-session context recovery
 
@@ -766,7 +831,7 @@ ALWAYS instruct the subagent to read:
 
 IF security-relevant:
   - .claude/agents/security-reviewer.md
-  - Stack security skill in .claude/skills/ (if exists)
+  - Stack security skill in .claude/skills/*/SKILL.md (if exists)
 
 IF UI task:
   - Design System section of CLAUDE.md
@@ -1020,7 +1085,7 @@ The validation loop verifies the CURRENT task's criteria. But implementing featu
 
 The code-reviewer agent has three sections that grow over time:
 
-**Known Bug Patterns:** Every bug fixed that could have been prevented becomes a check. Max 20 patterns. When exceeding: consolidate similar, remove patterns enforced by linting/types, promote domain rules to rules files.
+**Known Bug Patterns:** Every bug fixed that could have been prevented becomes a check. Max 20 patterns. When exceeding: consolidate similar, remove patterns enforced by linting/types, promote domain rules to rules files. Each pattern carries efficacy tracking metadata (`[added | triggered | false-positive]`) that provides evidence-based criteria for which patterns to promote vs remove.
 
 **Architecture Patterns:** Structural checks that prevent technical debt. Start with basics (file size limits, no cross-module imports, shared utilities location), grow as structural issues emerge.
 
@@ -1051,6 +1116,8 @@ Known Bug Patterns and Architecture Patterns are no longer populated only when t
 3. Structural decision → is this worth preserving?
 
 This transforms cumulative memory from a voluntary practice (that gets skipped under context pressure) into a systematic scan with a concrete artifact (the diff) as trigger. Combined with aggressive promotion to rules files (at 15+ Known Bug Patterns), this creates a two-tier memory system: short-term (Known Bug Patterns, max 20) and long-term (rules files, no limit).
+
+Each extraction is classified by trigger mode: question 1 (bug fixed) is a **FIX** trigger, question 3 (structural decision) is a **CAPTURED** trigger, and promotions to rules files are **DERIVED** triggers. This classification (see Evolution Classification in Session Protocol) determines whether re-evaluation is needed and provides traceability in the session log.
 
 ---
 
@@ -1149,6 +1216,9 @@ If any item is ⚠️: ASK the user, explain the risk.
 
 Maximum 5 tools on day 1. Install only if the resource already exists (do not install a database tool if the database is not yet created).
 
+### Quality tools (Claude Code only):
+- **Skill Creator plugin** (`/plugin install skill-creator@claude-plugins-official`) — automates skill eval: generates test cases, runs baselines, grades results, iterates. Installed during bootstrap (see tool-specific session0 prompt). If unavailable, the framework's creation eval protocol handles quality validation manually.
+
 ---
 
 ## On-Demand Skill and Agent Creation
@@ -1191,7 +1261,7 @@ PRD indicates NONE of these → security-reviewer only
 - A new framework or library is introduced that has specific patterns (e.g., new ORM, auth library)
 - A new domain with known conventions enters scope (e.g., payment processing, HIPAA compliance)
 - The AI recognizes the project will need specific patterns before they cause bugs
-- **Domain-specific test patterns** — when the project enters a domain with complex verification needs (financial calculations, state machines, multi-step workflows, real-time systems), the AI creates a test patterns skill with STRONG criteria examples specific to that domain. This ensures criteria quality scales with domain complexity without hardcoding examples in the framework. Example: entering a financial domain → create `.skills/financial-test-patterns` with examples like "monthly closing with 3 employees, 2 recurring bills, 1 variable commission → expected profit = X, verify via QUERY: SELECT profit FROM closings WHERE month='2026-01'"
+- **Domain-specific test patterns** — when the project enters a domain with complex verification needs (financial calculations, state machines, multi-step workflows, real-time systems), the AI creates a test patterns skill with STRONG criteria examples specific to that domain. This ensures criteria quality scales with domain complexity without hardcoding examples in the framework. Example: entering a financial domain → create `skills/financial-test-patterns/SKILL.md` with examples like "monthly closing with 3 employees, 2 recurring bills, 1 variable commission → expected profit = X, verify via QUERY: SELECT profit FROM closings WHERE month='2026-01'"
 
 ### Reactive creation (pattern repeated)
 
@@ -1218,7 +1288,7 @@ Every agent and skill declares how it is activated via `invocation` frontmatter:
 
 **All validation/review/security agents are `subagent`:** code-reviewer, security-reviewer, red-team, blue-team, validator, arbitrator, and on-demand agents created for specialized review roles.
 
-**Skills remain `inline`:** stack skills, domain skills, test-pattern skills — read by whichever agent needs them.
+**Skills remain `inline`:** stack skills, domain skills, test-pattern skills — read by whichever agent needs them. Skills use the Anthropic folder format (`skills/[name]/SKILL.md`) with optional `scripts/`, `references/`, and `assets/` subdirectories for progressive disclosure.
 
 ### I/O contract (subagent agents):
 
@@ -1234,6 +1304,26 @@ produces: Validation Report with ✅/❌/⏭️ per category
 
 For `invocation: inline` agents/skills, `receives` and `produces` are optional — they are read as reference, not invoked with a contract.
 
+### Lineage tracking:
+
+Every agent, skill, and rules file carries lineage metadata in its frontmatter:
+
+```yaml
+created: s0 (bootstrap)
+last_eval: s0 (2/2 passed)
+fixes: []
+derived_from: null
+```
+
+- `created:` — session and context (e.g., `s0 (bootstrap)`, `s5 (reactive: recurring migration pattern)`)
+- `last_eval:` — session of last eval run with result (e.g., `s0 (2/2 passed)`). Omitted for `invocation: inline` skills (knowledge references are not eval'd).
+- `fixes:` — list of FIX evolutions applied with session and reason (e.g., `[s5 (timezone bug not detected), s12 (RLS bypass missed)]`)
+- `derived_from:` — (optional) parent component this was derived from (e.g., `code-reviewer Known Bug Patterns 3,7,9`)
+
+The agent maintains lineage automatically during end-of-session updates. When a component is fixed (FIX evolution), the fix is appended to `fixes`. When a component is re-evaluated, `last_eval` is updated. Lineage is append-only — fields are added to, never removed.
+
+**Diagnostic value:** When an agent fails (Validation Failure Post-Mortem), the lineage immediately shows when the component was last validated and what changed since. This narrows the diagnosis window without manually reconstructing evolution history from session logs.
+
 ### Reasoning depth:
 When creating agents or skills, classify their reasoning requirement:
 - **Deep reasoning** (security testing, financial calculations, architectural analysis, complex debugging): the agent/skill should trigger the tool's maximum reasoning mode when invoked.
@@ -1247,6 +1337,27 @@ Before creating any agent or skill (proactive or reactive), read `assets/example
 
 Examples provide quality calibration: they show the expected depth of checklists, the tier structure for security agents, the STRONG criteria format for test patterns, and the effort frontmatter convention. An agent created with an example as reference will be significantly more thorough than one created from scratch.
 
+### Creation eval (quality gate):
+
+After creating any agent with `invocation: subagent`, validate it via test scenarios before declaring it ready:
+
+1. Generate 2 test scenarios relevant to the agent's purpose:
+   - **Scenario A:** contains a clear issue the agent should detect (positive case)
+   - **Scenario B:** clean code/input with no issues (negative case — should not trigger false flags)
+2. Spawn the agent via the tool's subagent mechanism (Task tool, Agent Manager, etc.) against each scenario
+3. Verify: A → issue detected, B → no false flags
+4. If any result is wrong: improve the agent and re-test
+5. Update lineage: `last_eval: sN (2/2 passed)`
+
+**Skip eval for:** `invocation: inline` skills (knowledge references, not judgment agents — stack skills, domain patterns, etc.).
+
+**When to eval:**
+- **At creation** (bootstrap or on-demand) — DEFERRABLE if context is low. If skipped, log: "Eval deferred to session N."
+- **After FIX evolution** — re-run eval with original scenarios + 1 new scenario for the specific failure that triggered the FIX. All scenarios must pass.
+- **NOT for DERIVED/CAPTURED evolutions** — source patterns were already validated individually (DERIVED) or the diff is the evidence (CAPTURED).
+
+**If the Skill Creator plugin is installed (Claude Code):** Use it for skill eval — it automates test case generation, baseline comparison, grading, and iteration. For agents with `invocation: subagent`, use the Task tool directly since the Skill Creator is designed for skills, not for subagent I/O contracts.
+
 ### Do NOT create when:
 - The pattern is a one-time thing (will not recur) — applies to reactive only
 - A rules file would be more appropriate (domain logic belongs in rules)
@@ -1256,7 +1367,23 @@ Examples provide quality calibration: they show the expected depth of checklists
 - It exceeds 100 lines (probably a rules file, not a skill)
 - The AI is unfamiliar with the framework (better to skip than invent wrong patterns) — applies to proactive only
 
-Log in session entry: "Created skill/agent: [name] — [trigger: proactive/reactive]"
+Log in session entry: "Created/Updated [component]: [name] — [FIX/DERIVED/CAPTURED]: [justification]" (for evolutions) or "Created skill/agent: [name] — [trigger: proactive/reactive]" (for new creation)
+
+### Experimental: External skill evolution engines
+
+For mature projects (10+ sessions, 5+ custom skills), external skill evolution tools like OpenSpace can automate skill quality tracking and evolution. These are **experimental** — the framework works fully without them.
+
+**What external tools add:** automatic skill performance tracking (error rates, success rates), auto-fix for broken skills, auto-improve from successful patterns, new skill capture from observed usage.
+
+**What external tools do NOT replace:** Agent evolution, rules file evolution, config file (CLAUDE.md/GEMINI.md) evolution, Known Bug Patterns management. The framework's end-of-session protocol handles all non-skill evolution.
+
+**If using an external skill manager:**
+- Restrict it to a dedicated namespace (e.g., `.claude/skills/external-*/`) to avoid dual-authority conflicts
+- Framework-managed components (agents, rules, protocol sections) must NOT be managed by external tools
+- The framework's end-of-session protocol retains authority over all components
+- If both the framework protocol and the external tool attempt to modify the same skill, the framework protocol wins
+
+**Caution:** External skill managers may have significant dependencies (Python runtime, LLM API keys, databases) and may auto-evolve skills in ways that conflict with the framework's evolution classification and lineage tracking. Evaluate thoroughly before integrating.
 
 ---
 
@@ -1517,6 +1644,9 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Validation latency** | Subagent spawn + file reads + reasoning + return per subagent | 10-30s per subagent. Acceptable vs risk of false ✅ from biased inline review. |
 | **False ❌ from subagent** | Subagent rejects correct code due to missing context or rigid interpretation | Arbitrator agent resolves: receives validator report + mechanical evidence, rules UPHOLD ❌ / OVERRIDE TO ✅ / ESCALATE. If genuinely ambiguous, escalates to human. |
 | **Context overload in subagent** | Large task: 500+ line diff + many criteria + mutations in single subagent context | Split validation into sequential subagent calls for large tasks: (1) code review + criteria evaluation, (2) mutation testing. Each call gets a fresh context. Only when diff exceeds ~300 lines or criteria exceed 10. |
+| **Creation eval adds token cost to bootstrap** | Eval loops spawn 8-12 subagents during bootstrap, consuming significant tokens | Mark creation evals as DEFERRABLE. If context is low by agent creation steps, log "Eval deferred to session 1" and continue. One-time cost justified by preventing weak agents from entering the project. |
+| **Lineage metadata becomes stale** | Agent forgets to update lineage during end-of-session | Lineage fields are part of the end-of-session protocol. `last_eval` is the canary — if missing or outdated, the component was never validated or hasn't been re-validated since changes. |
+| **Efficacy tracking becomes mechanical** | Agent fills `triggered: never` without actually checking during review | Code Review Report explicitly lists which Known Bug Patterns were triggered. Periodic review (every 10 sessions) forces evaluation of pattern effectiveness. |
 
 ---
 

@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v1.4.0
+# Agentic Engineering Framework v1.5.0
 
 A methodology for AI-assisted software development where the AI implements, validates, and reports with evidence — and the human approves and directs.
 
