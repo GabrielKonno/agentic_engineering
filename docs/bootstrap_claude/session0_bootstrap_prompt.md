@@ -128,7 +128,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 **Three mechanisms for reasoning depth (complementary):**
 
-1. **Agent-level (convention, zero intervention):** `effort:` in agent/skill frontmatter. When reading a skill with `effort: high`, the AI should use `/effort high` for that task. Security agents always warrant high effort regardless of session settings.
+1. **Agent-level (automatic, zero intervention):** `effort:` in agent/skill frontmatter. Applies automatically when that agent/skill is invoked. Security agents always use `effort: high` regardless of session settings.
 
 2. **Task-level recommendation (2 seconds):** AI classifies task complexity → recommends `/effort high` in implementation plan. Human types one command before approving. No restart needed.
 
@@ -196,15 +196,14 @@ After approval: the plan becomes the technical record. Include summary in projec
    **What was done:** [work before switch]
    **Model switch reason:** Task "[name]" classified as architecture/security — requires Opus + high effort
    **Continue with:** Task [N] from pendencias — [task name]
-   **Settings changed:** model → claude-opus-4-6
-   **Post-restart action:** Use `/effort high` at session start
+   **Settings changed:** model → claude-opus-4-6, effortLevel → high
    **PRD version:** vX.X
    ```
 2. Commit: `git add -A && git commit -m "wip: model switch for [task name]"`
    **If model switch is triggered during a sprint:** The sprint is interrupted. Add to the MODEL SWITCH marker: `**Sprint interrupted:** Yes — remaining tasks: [list remaining sprint tasks]`. After restart, do NOT resume the previous sprint — propose a new sprint instead. Log the previous sprint as "interrupted: model switch at task N of M".
-3. Edit `~/.claude/settings.json`: change `"model"` to `"claude-opus-4-6"`
+3. Edit `~/.claude/settings.json`: change `"model"` to `"claude-opus-4-6"` and `"effortLevel"` to `"high"`
 4. Tell user: "Task [name] requires Opus. Settings updated. Please restart: type `claude` to continue."
-5. **After task complete:** evaluate next task. If routine → revert settings.json `"model"` to the default model. Log revert in project.md. If next task also needs the current model: keep settings, skip revert.
+5. **After task complete:** evaluate next task. If routine → revert settings.json to `"model": "sonnet"`, `"effortLevel": "medium"`. Log revert in project.md. If next task also needs the current model: keep settings, skip revert.
 
 ### Git checkpoint (medium and large tasks):
 Before writing code: `git add -A && git commit -m "checkpoint: before [task name]"`
