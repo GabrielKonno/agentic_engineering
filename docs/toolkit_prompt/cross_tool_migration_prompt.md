@@ -91,12 +91,21 @@ if [ -f ".claude/agents/arbitrator.md" ]; then
   cp .claude/agents/arbitrator.md .antigravity/skills/arbitrator/SKILL.md
 fi
 
-# Copy any other skills
+# Copy any other skills (handle both flat and folder formats)
+# Flat format: .claude/skills/name.md → .antigravity/skills/name/SKILL.md
 for skill in .claude/skills/*.md; do
   if [ -f "$skill" ]; then
     name=$(basename "$skill" .md)
     mkdir -p ".antigravity/skills/$name"
     cp "$skill" ".antigravity/skills/$name/SKILL.md"
+  fi
+done
+# Folder format: .claude/skills/name/SKILL.md → .antigravity/skills/name/SKILL.md
+for skill_dir in .claude/skills/*/; do
+  name=$(basename "$skill_dir")
+  if [ -f "$skill_dir/SKILL.md" ]; then
+    mkdir -p ".antigravity/skills/$name"
+    cp "$skill_dir/SKILL.md" ".antigravity/skills/$name/SKILL.md"
   fi
 done
 
@@ -149,11 +158,12 @@ if [ -f ".antigravity/skills/arbitrator/SKILL.md" ]; then
   cp .antigravity/skills/arbitrator/SKILL.md .claude/agents/arbitrator.md
 fi
 
-# Copy other skills
+# Copy other skills (preserve Anthropic folder format)
 for skill_dir in .antigravity/skills/*/; do
   name=$(basename "$skill_dir")
   if [ "$name" != "code-reviewer" ] && [ "$name" != "security-reviewer" ] && [ "$name" != "red-team" ] && [ "$name" != "blue-team" ] && [ "$name" != "validator" ] && [ "$name" != "arbitrator" ] && [ -f "$skill_dir/SKILL.md" ]; then
-    cp "$skill_dir/SKILL.md" ".claude/skills/$name.md"
+    mkdir -p ".claude/skills/$name"
+    cp "$skill_dir/SKILL.md" ".claude/skills/$name/SKILL.md"
   fi
 done
 
@@ -340,14 +350,14 @@ ASK the user which option they prefer.
 | `.claude/agents/blue-team.md` (conditional) | `.antigravity/skills/blue-team/SKILL.md` (conditional) | Same content, different format. Only exists if PRD has high-risk features |
 | `.claude/agents/validator.md` (mandatory) | `.antigravity/skills/validator/SKILL.md` (mandatory) | Same content, different format. Independent validation agent |
 | `.claude/agents/arbitrator.md` (mandatory) | `.antigravity/skills/arbitrator/SKILL.md` (mandatory) | Same content, different format. Conflict resolution agent |
-| `.claude/skills/*.md` | `.antigravity/skills/*/SKILL.md` | Same content, different folder structure |
+| `.claude/skills/*/SKILL.md` | `.antigravity/skills/*/SKILL.md` | ✅ Identical content and format (both use Anthropic folder format) |
 | `.claude/settings.json` | Antigravity Settings UI | Not transferable — reconfigure manually |
 | MCPs via `claude mcp add` | MCPs via Settings UI | Same MCPs, different install method |
 | Playwright MCP (external) | Browser Subagent (native) | Same capability, Antigravity doesn't need MCP |
 | `assets/examples/` | `assets/examples/` | ✅ Identical content, same path (tool-agnostic, lives at project root) |
 | `.claude/logs/*.md` | `.antigravity/logs/*.md` | ✅ Identical content, different path (session logs preserved during migration) |
 
-**Frontmatter preservation:** When migrating agents/skills, preserve all frontmatter fields including `invocation:`, `receives:`, and `produces:`. These define the subagent I/O contract and are tool-agnostic — they apply to both Claude Code (Task tool) and Antigravity (Agent Manager). Only path references inside the content need updating (`.claude/` ↔ `.antigravity/`, `CLAUDE.md` ↔ `GEMINI.md`).
+**Frontmatter preservation:** When migrating agents/skills, preserve all frontmatter fields including `invocation:`, `receives:`, `produces:`, and **lineage fields** (`created:`, `last_eval:`, `fixes:`, `derived_from:`). These define the subagent I/O contract and evolution history — they are tool-agnostic and apply to both Claude Code (Task tool) and Antigravity (Agent Manager). Only path references inside the content need updating (`.claude/` ↔ `.antigravity/`, `CLAUDE.md` ↔ `GEMINI.md`).
 
 ## When to migrate vs when to start fresh
 

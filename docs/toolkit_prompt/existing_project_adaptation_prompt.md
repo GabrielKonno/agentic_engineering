@@ -202,6 +202,14 @@ Required sections:
 - **`invocation:` frontmatter** on all review/validation agents/skills (`subagent` or `inline`)
 - **`receives:` / `produces:` frontmatter** on `invocation: subagent` agents/skills (I/O contract)
 - **Subagent context incomplete** root cause in Validation Failure Post-Mortem
+- **Evolution classification table** in end-of-session (FIX/DERIVED/CAPTURED modes with follow-up actions)
+- **Lineage frontmatter** on all agents/skills (`created:`, `last_eval:`, `fixes:`, `derived_from:`)
+- **Efficacy tracking** on Known Bug Patterns (`[added: sN | triggered: sN | false-positive: N]`)
+- **"Known Bug Patterns triggered"** field in Code Review Report output format
+- **"Evolutions applied"** section in session log template
+- **Auto-evolution boundaries** section (DATA = autonomous, BEHAVIOR = human approval)
+- **Skill Creator plugin** reference (Claude Code only — `/plugin install skill-creator@claude-plugins-official`)
+- **Creation eval** substeps for subagent agents (2 test scenarios per agent, DEFERRABLE)
 
 **For each addition, log:**
 ```
@@ -266,8 +274,9 @@ Check for:
 □ Frontmatter with effort: medium
 □ Frontmatter with invocation: subagent
 □ Frontmatter with receives: and produces: fields (I/O contract)
+□ Frontmatter with lineage fields: created:, last_eval:, fixes:, derived_from:
 □ Input section (what the subagent reads when invoked)
-□ Output section (report format the subagent produces)
+□ Output section with "Known Bug Patterns triggered" field in report format
 □ BOUNDARIES section (what NOT to read — anti-bias firewall)
 □ Project Patterns section
 □ Type Safety section
@@ -275,7 +284,7 @@ Check for:
 □ Performance section
 □ Security section (references security-reviewer)
 □ Architecture Patterns section (populated, not empty)
-□ Known Bug Patterns section (populated from git history)
+□ Known Bug Patterns section (populated from git history, with efficacy tracking metadata)
 ```
 
 **Seed Known Bug Patterns from git history:**
@@ -284,7 +293,7 @@ If the Known Bug Patterns section is empty or sparse, analyze the git log fix co
 # Read recent fix commits for pattern extraction
 git log --oneline --all | grep -iE "fix|bug|hotfix|patch" | head -10
 ```
-For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the mistake).
+For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the mistake) with efficacy tracking metadata: `[added: adaptation | triggered: never | false-positive: 0]`.
 
 **Step 2.5 — Upgrade security-reviewer:**
 
@@ -293,6 +302,7 @@ Check frontmatter:
 □ Frontmatter with effort: high
 □ Frontmatter with invocation: subagent
 □ Frontmatter with receives: and produces: fields (I/O contract)
+□ Frontmatter with lineage fields: created:, last_eval:, fixes:, derived_from:
 □ Input section (what the subagent reads when invoked)
 □ Output section (report format the subagent produces)
 □ BOUNDARIES section (what NOT to read — anti-bias firewall)
@@ -315,7 +325,7 @@ Add missing sections. **Do NOT remove existing customizations** — they may con
 
 **Step 2.6 — Verify Red Team / Blue Team:**
 
-If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, and `produces:` in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
+If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, `produces:`, and lineage fields (`created:`, `last_eval:`, `fixes:`, `derived_from:`) in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
 
 If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them.
 
@@ -335,9 +345,24 @@ If it doesn't exist: create it. The arbitrator is mandatory for ALL projects —
 
 Read each rules file. No structural changes needed — rules files are project-specific. Just verify they are referenced from the code-reviewer's Security section or relevant agent.
 
-**Step 2.8 — Verify skills:**
+**Step 2.8 — Verify and upgrade skills:**
 
 Read each skill. Verify frontmatter has `effort:` field. Add if missing (most skills are `effort: medium`; security-related are `effort: high`). For review/validation/security skills, verify `invocation: subagent` and `receives:`/`produces:` fields. For knowledge/reference skills, verify `invocation: inline`.
+
+**Verify lineage fields** on all agents/skills: `created:`, `last_eval:` (subagent only), `fixes:`, `derived_from:`. Add if missing — set `created:` to the adaptation session, `last_eval: none (pre-framework)`, `fixes: []`, `derived_from: null`.
+
+**Flat→folder migration (Claude Code skills):** If any skills exist as flat files (`.claude/skills/[name].md`), migrate to the Anthropic folder format:
+```bash
+for skill in .claude/skills/*.md; do
+  if [ -f "$skill" ]; then
+    name=$(basename "$skill" .md)
+    mkdir -p ".claude/skills/$name"
+    mv "$skill" ".claude/skills/$name/SKILL.md"
+    echo "Migrated: $skill → .claude/skills/$name/SKILL.md"
+  fi
+done
+```
+After migration, update any references in CLAUDE.md from `.claude/skills/[name].md` to `.claude/skills/[name]/SKILL.md`.
 
 ---
 
@@ -479,14 +504,27 @@ for f in .claude/agents/*.md; do
   grep -q "invocation:" "$f" 2>/dev/null || echo "MISSING invocation: in $f"
 done
 
+echo "=== All agents have lineage frontmatter? ==="
+for f in .claude/agents/*.md; do
+  grep -q "created:" "$f" 2>/dev/null || echo "MISSING lineage (created:) in $f"
+done
+
 echo "=== Validator and arbitrator exist? ==="
 ls .claude/agents/validator.md .antigravity/skills/validator/SKILL.md 2>/dev/null || echo "MISSING validator"
 ls .claude/agents/arbitrator.md .antigravity/skills/arbitrator/SKILL.md 2>/dev/null || echo "MISSING arbitrator"
 
+echo "=== Skills use folder format? ==="
+for f in .claude/skills/*.md; do
+  [ -f "$f" ] && echo "FLAT FORMAT (needs migration): $f"
+done 2>/dev/null
+
 echo "=== All skills have effort: frontmatter? ==="
-find .claude/skills -name "*.md" -o -name "SKILL.md" 2>/dev/null | while read f; do
+find .claude/skills -name "SKILL.md" 2>/dev/null | while read f; do
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
+
+echo "=== Known Bug Patterns have efficacy tracking? ==="
+grep -c "\[added:" .claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
 ```
 
 **Step 5.2 — Produce the adaptation report:**
