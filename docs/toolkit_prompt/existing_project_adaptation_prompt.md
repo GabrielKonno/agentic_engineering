@@ -263,6 +263,7 @@ Check and upgrade:
 □ Done section exists (with completed items)
 □ Future Improvements section exists
 □ Dependency mapping (depends:/parallel:) is optional but noted
+□ Evolution classification (FIX/DERIVED/CAPTURED) noted for items that originated from bug fixes or pattern captures during codebase analysis
 ```
 
 **For existing tasks without these fields:** Add them based on the task description and your understanding of the codebase. Mark additions with `← added during adaptation` so the user can review.
