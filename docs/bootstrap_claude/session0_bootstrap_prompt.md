@@ -142,6 +142,7 @@ Mechanisms stack: a Sonnet/medium session uses high effort when Red Team runs (m
 
 **For ALL tasks (before determining complexity):**
 Read the task from pendencias.md including acceptance criteria. **If criteria are WEAK** (missing expected result or failure signal): rewrite them to STRONG before proceeding. Log: "Upgraded criteria for [task]"
+   Run the Criteria Adversarial Review on each criterion: sabotage test, transformation test, empty/boundary test, data origin test. Strengthen any criterion that fails a test. This catches criteria that are structurally STRONG (3 parts) but logically weak (easy to satisfy with a broken implementation).
 
 **Classify task complexity for model/effort:**
 Based on task content, classify and recommend:
@@ -255,12 +256,20 @@ Note: when using browser automation for RESEARCH (browsing public sites for tool
 Retry limits: max 3 attempts per step.
 
 **Step 5 — Check acceptance criteria:**
+
+**5a — Decompose:** Before executing, decompose multi-step criteria into atomic sub-checks. Each sub-check gets its own ✅/❌. The criterion only passes when ALL sub-checks pass. Example: "earmark updates from 500 to 0, transaction created" becomes 3+ separate checks: value before, action, value after, transaction exists. Single-condition criteria pass through unchanged.
+
+**5b — Execute by tag:**
 - `BUILD:` → done in Step 1
 - `REVIEW:` → done in Step 3
 - `VERIFY:` → criteria with tests (Step 2): passing test IS the verification. Criteria without tests: execute via browser automation (web) or command/curl (non-web)
 - `QUERY:` → criteria with tests (Step 2): passing test IS the verification. Criteria without tests: execute via database tool. If data missing: create test data first, document what was created.
 - `MANUAL:` → flag for human in report
 **Regression:** If test suite exists: run full suite — failing tests = regression. If no tests yet: re-run `QUERY:` criteria from last 2-3 completed tasks. If results changed unexpectedly → regression detected → treat as ❌. If no completed tasks have `QUERY:` criteria yet (early sessions): skip regression, note "⏭️ no prior QUERY: criteria" in report.
+
+**Step 5c — Mutation test (logic-heavy and architecture/security only):**
+Skip for routine tasks. After all criteria pass: pick 1-3 critical lines of implementation, break each one (comment out, change value, rename column), re-run affected criteria. Criteria MUST fail with broken code. If they still pass → criteria don't test what they claim → strengthen and re-validate. Restore code after each mutation.
+Log: "Mutation test: [N] mutations, [N] confirmed, [N] strengthened"
 
 **Step 6 — Report:**
 ```
@@ -274,6 +283,7 @@ Retry limits: max 3 attempts per step.
 - Tests:      ✅/❌/⏭️ [N passed, N failed, or skipped if no testable logic]
 - Review:     ✅/❌ [issues]
 - Security:   ✅/❌/⏭️ [Red Team Tier 1-2 results, or "no security-relevant changes"]
+- Mutation:   ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
 - DB:         ✅/❌/⏭️ [query results or covered by tests]
 - UI:         ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
 - Regression: ✅/❌ [test suite results or re-checked tasks]
@@ -377,6 +387,7 @@ If all ✅/⏭️: report as READY.
    - **Context, State, Constraints** fields (why the task exists, what state the project will be in when it starts, what to avoid)
    - **Acceptance criteria** with `BUILD:`/`VERIFY:`/`QUERY:`/`REVIEW:`/`MANUAL:` tags
    - **Criteria at STRONG level** (3 parts: action + expected result + failure signal). If a criterion is WEAK: rewrite before saving.
+   - **Criteria Adversarial Review** before saving: for each criterion, ask (1) "how could a wrong implementation still pass this?" — if easy, strengthen it; (2) "am I checking a snapshot or a transformation?" — if snapshot, add before/after; (3) "what if 0 items, 1 item, negative?" — add edge cases; (4) for VERIFY: criteria, "could this pass with hardcoded data?" — add complementary QUERY: if so.
    - **Complexity** classification (routine / logic-heavy / architecture-security) — determines reasoning depth for next session
    - `QUERY:` and `VERIFY:` criteria that involve business logic should be flagged as candidates for executable tests
    If task hit retry limit: mark "⚠️ Blocked: [reason]". **If Done section exceeds 30 items:** archive older items to "Done (archived)" at bottom. **If Next Steps exceeds 15 items:** flag to user for reprioritization.

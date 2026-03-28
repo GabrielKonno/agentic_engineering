@@ -543,7 +543,62 @@ This only happens once. After configuration, Step 2 proceeds normally for all fu
 
 **Step 4 — UI verification (web projects only):** Skip entirely for non-web projects. Skip entirely if no UI was modified. If UI was changed, this step is MANDATORY — do not wait for user to request it. Health check the dev server first. If not running: try starting it (check Commands section), wait 10s. If still unavailable AND UI files were modified in this task: mark as ❌ with reason "dev server unavailable", list all VERIFY: criteria as MANUAL:. If no UI files were modified: mark as ⏭️ (not applicable). If running: navigate → action → verify → screenshot. Max 3 attempts.
 
-**Step 5 — Check acceptance criteria:** Execute each criterion by tag type. For criteria with corresponding tests (Step 2): the passing test IS the verification — do not re-check manually. For criteria without tests: verify manually by tag. **Then run regression:** if test suite exists, run full suite. If no suite yet, re-execute `QUERY:` criteria from last 2-3 completed tasks. If results changed unexpectedly → regression detected → treat as ❌.
+**Step 5 — Check acceptance criteria:**
+
+**Step 5a — Decompose multi-step criteria:** Before executing, scan each criterion for multiple sub-checks (sequential states, multiple fields, before/after patterns, lists of conditions). Decompose into atomic sub-checks, each independently verifiable:
+
+```
+Original criterion:
+  VERIFY: /financeiro → pay water bill → earmark updates from 500 to 0,
+  transaction created with is_paid=true, balance decreases by 500
+
+Decomposed:
+  ☐ 5a.1: Before payment → earmark = 500 (via Playwright or QUERY)
+  ☐ 5a.2: Execute payment action
+  ☐ 5a.3: After payment → earmark = 0 (via Playwright or QUERY)
+  ☐ 5a.4: After payment → transaction exists with is_paid=true (QUERY)
+  ☐ 5a.5: After payment → balance decreased by 500 (QUERY)
+
+Result: ALL 5 sub-checks must be ✅. If 5a.1 passes but 5a.3 fails → criterion is ❌.
+```
+
+Only decompose criteria that have 2+ verifiable conditions. Single-condition criteria (e.g., `BUILD: zero errors`) pass through unchanged.
+
+**Step 5b — Execute criteria:** Execute each criterion (or sub-check) by tag type. For criteria with corresponding tests (Step 2): the passing test IS the verification — do not re-check manually. For criteria without tests: verify manually by tag.
+
+**Then run regression:** if test suite exists, run full suite. If no suite yet, re-execute `QUERY:` criteria from last 2-3 completed tasks. If results changed unexpectedly → regression detected → treat as ❌.
+
+**Step 5c — Mutation test (logic-heavy and architecture/security tasks only):**
+
+Skip for routine tasks (UI, styling, config, simple CRUD).
+
+After all criteria pass (Step 5b), verify that the criteria actually detect breakage:
+
+1. **Identify 1-3 critical mutations:** Pick the core lines of the implementation — the calculation, the query, the state change, the authorization check. These are the lines where a bug would be most damaging.
+
+2. **Apply mutation:** Comment out, change a value, rename a column, or invert a condition. One mutation at a time.
+
+3. **Re-run affected criteria:** Execute only the criteria that should catch this mutation (not the full suite).
+
+4. **Verify failure:** The criteria MUST fail. If they still pass with broken code:
+   - The criteria are not testing what they claim
+   - Strengthen the failing criterion: add a sub-check, add a complementary QUERY:, or add a before/after verification
+   - Re-validate with the strengthened criteria
+
+5. **Restore code:** Revert the mutation. Verify criteria pass again with correct code.
+
+**Example:**
+```
+Implementation: `.select('bill_id')` in a function that marks bills as paid
+Mutation: change to `.select('nonexistent_column')`
+Re-run: VERIFY: "after paying, earmark = 0"
+Expected: criterion FAILS (earmark stays 500 because select returns undefined)
+If criterion still passes: it wasn't actually checking the payment effect → strengthen
+```
+
+**Cost control:** Max 3 mutations per task. Each mutation re-runs only its affected criteria, not the full validation loop. Total added time: ~30 seconds for most tasks.
+
+Log in report: "Mutation test: [N] mutations tested, [N] criteria confirmed, [N] criteria strengthened"
 
 **Step 6 — Report:** Structured validation report with ✅/❌/⏭️ per category. Include test results, security results, and regression results.
 
@@ -717,6 +772,22 @@ Not all criteria are equal. A vague criterion gives false confidence — the AI 
 **Enforcement:** The AI must actively check criteria quality at two moments:
 1. **When creating tasks in pendencias.md** (end of session, item 2): write criteria that meet the STRONG level. If a criterion only has action without expected result or failure signal, rewrite it before saving.
 2. **When reading a task before implementation** (Execution Protocol, "Before implementing"): if the task's criteria are WEAK, rewrite them to STRONG before proceeding. Log: "Upgraded criteria for [task]: [what was changed]"
+
+**Criteria Adversarial Review (applied at both enforcement moments):**
+
+After writing or upgrading a criterion, run this checklist before saving:
+
+1. **Sabotage test:** "If I were to implement this feature incorrectly in a way that this criterion still passes, how would I do it?" If the answer is easy (e.g., hardcode values, return mock data, skip a step), the criterion is weak — add a complementary check that closes the loophole.
+
+2. **Transformation test:** "Does this criterion verify a STATE or a TRANSFORMATION?" If it only checks a snapshot (value = X at one point in time), ask: should it verify before AND after? A criterion that checks `earmark = 500` without checking that it changes to `0` after an action is a snapshot, not a transformation test.
+
+3. **Empty/zero/boundary test:** "What happens if there are 0 items? 1 item? The maximum? A negative value?" If the criterion assumes data exists without stating it, add an explicit edge case criterion or sub-check.
+
+4. **Data origin test (for VERIFY: criteria):** "Does this criterion verify that displayed data comes from the real source, or could it pass with hardcoded/stale data?" If a UI criterion doesn't have a complementary `QUERY:` that confirms the database state, consider adding one.
+
+If any test reveals a gap: strengthen the criterion or add a complementary criterion before saving. Log: "Adversarial review: strengthened [criterion] — [what was added and why]"
+
+This review is NOT optional introspection — it is a mechanical checklist applied to every criterion at creation time. The AI has not yet written code, so the bias toward defending an implementation does not exist.
 
 **Complexity hint:** Each task carries a complexity classification (routine, logic-heavy, architecture/security) set at creation time. This determines which reasoning depth mechanism activates: routine tasks use defaults, logic-heavy tasks get increased reasoning, architecture/security tasks may trigger a model switch. The implementing AI can override this classification after reading the task.
 
@@ -1207,6 +1278,7 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Context degradation during sprint** | Sprint pushes 5 tasks, AI degrades at task 4 but continues because sprint was approved | "Between tasks" checkpoint evaluates context health. Task limit (3-5) is a hard cap. If degradation signals detected, trigger mid-session recovery — sprint approval does not override this. |
 | **Model switch mid-sprint** | Task in sprint requires model switch → unclear if sprint continues after restart | Model switch interrupts the sprint. After restart, the AI re-proposes a new sprint (which may include the remaining tasks). The original sprint is logged as "interrupted: model switch at task N". |
 | **Validation declares false ✅** | Multi-step criterion partially verified, tool silences error, criterion too weak | Validation Failure Post-Mortem: structured diagnosis → classify root cause → route improvement to correct document. Mandatory when human finds bug in ✅ task. |
+| **Criteria don't detect breakage** | Criteria check a snapshot or pass with hardcoded/wrong data | Mutation testing (Step 5c): sabotage critical code, verify criteria fail. If they don't, strengthen and re-validate. Only for logic-heavy and architecture tasks. |
 
 ---
 
