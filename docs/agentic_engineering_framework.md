@@ -769,6 +769,30 @@ Not all criteria are equal. A vague criterion gives false confidence — the AI 
 - **Multi-step criteria** must define the sequence AND the success signal for each step. If step 3 of 5 fails, the criterion fails.
 - **Edge cases** must be explicit criteria, not implied. If empty state matters, write a criterion for it. If zero values matter, write a criterion for it.
 
+**Specificity inheritance:** Every criterion must be at least as precise as its source — the PRD business rule, the design system spec, the rules file formula, or the migration schema that defines the expected behavior. If the source defines exact values (pixel offsets, formula results, status codes, column names), the criterion must contain those exact values. A criterion vaguer than its source is WEAK regardless of having 3 parts.
+
+```
+Source: design system defines `transform: scale(1.1) translateY(-10px)`
+  + `drop-shadow rgba(249,115,22,0.2)`
+❌ WEAK: VERIFY: hover → bar lifts up + glow visible
+✅ STRONG: VERIFY: hover → bar transforms with scale(1.1) translateY(-10px),
+  drop-shadow with rgba(249,115,22,0.2) visible. FAILURE: any deviation
+  from spec values (scale ≠ 1.1, no translateY, wrong shadow color).
+
+Source: financial-rules.md defines earmark = sum of is_paid=false direct_cost
+❌ WEAK: VERIFY: after paying → earmark updates
+✅ STRONG: QUERY: with 1 unpaid direct_cost of R$320 → earmark = 320.
+  After paying → earmark = 0. SUCCESS: both values exact. FAILURE: any difference.
+
+Source: PRD defines "paginated list, max 20 items per page"
+❌ WEAK: VERIFY: API returns paginated list
+✅ STRONG: VERIFY: GET /api/items?page=1 → 200, array.length ≤ 20,
+  body includes totalPages (integer > 0). With 25 items in DB:
+  page=1 returns 20, page=2 returns 5. FAILURE: any page > 20 items.
+```
+
+The rule applies at creation time AND at "Before implementing" when upgrading WEAK criteria. It stacks with the Criteria Adversarial Review — the sabotage test catches criteria that are vague, but specificity inheritance prevents vagueness from being written in the first place.
+
 **Enforcement:** The AI must actively check criteria quality at two moments:
 1. **When creating tasks in pendencias.md** (end of session, item 2): write criteria that meet the STRONG level. If a criterion only has action without expected result or failure signal, rewrite it before saving.
 2. **When reading a task before implementation** (Execution Protocol, "Before implementing"): if the task's criteria are WEAK, rewrite them to STRONG before proceeding. Log: "Upgraded criteria for [task]: [what was changed]"
