@@ -95,7 +95,7 @@ This file provides guidance to Antigravity agents when working with this reposit
 4. **PRD sync check:** If `assets/docs/prd.md` exists, perform two checks:
    **Check A (version):** Compare PRD changelog version with `PRD version:` in project.md last session entry. If newer → propagate.
    **Check B (content):** Compare PRD structure (module count, scope items, roadmap, stack) with project.md. If mismatch → ASK user before propagating.
-   If changes detected: read full PRD, update project.md/pendencias.md/GEMINI.md, ensure changelog updated, log in session entry: "PRD synced: vX.X → vY.Y — [changes]"
+   If changes detected: read full PRD, update project.md/pendencias.md/GEMINI.md, ensure changelog updated, log in session entry: "PRD synced: vX.X.X → vY.Y.Y — [changes]"
    If ambiguous or contradicts existing decision: ASK user.
    If both checks show no changes: skip.
 5. Read `.antigravity/phases/pendencias.md` — what is next
@@ -200,7 +200,7 @@ After approval: the plan becomes the technical record. Include summary in projec
    **Model switch reason:** Task "[name]" classified as architecture/security — requires most capable model + maximum reasoning
    **Continue with:** Task [N] from pendencias — [task name]
    **Settings changed:** model → [target model], reasoning → maximum
-   **PRD version:** vX.X
+   **PRD version:** vX.X.X
    ```
 2. Commit: `git add -A && git commit -m "wip: model switch for [task name]"`
    **If model switch is triggered during a sprint:** The sprint is interrupted. Add to the MODEL SWITCH marker: `**Sprint interrupted:** Yes — remaining tasks: [list remaining sprint tasks]`. After restart, do NOT resume the previous sprint — propose a new sprint instead. Log the previous sprint as "interrupted: model switch at task N of M".
@@ -345,7 +345,7 @@ If all ✅/⏭️: report as READY.
 
 **Priority order** (if context limited, at minimum do items 1 and 2):
 
-1. **Update `.antigravity/phases/project.md`** — new entry: date, done, decisions, bugs, next. Always include `PRD version: vX.X`. If feature incomplete: document what was attempted and why.
+1. **Update `.antigravity/phases/project.md`** — new entry: date, done, decisions, bugs, next. Always include `PRD version: vX.X.X`. If feature incomplete: document what was attempted and why.
    
    **Create session log:** Save a detailed permanent record to `.antigravity/logs/`. More verbose than the project.md entry — include reasoning, alternatives considered, error messages, what was tried and failed.
    
@@ -379,7 +379,7 @@ If all ✅/⏭️: report as READY.
    ## Commits
    [git log --oneline for this session]
    
-   ## PRD version: v[X.X]
+   ## PRD version: v[X.X.X]
    ## Next session should: [specific next step]
    ```
    
@@ -420,7 +420,7 @@ If all ✅/⏭️: report as READY.
    
    Skill = knowledge (HOW). Max 100 lines. If longer: it is a rules file.
    
-   **Before creating:** Read `assets/examples/examples_instructions.md` for conventions. Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project. If no example exists, create from scratch following the conventions in the instructions file.
+   **Before creating:** Read `assets/examples/examples_instructions.md` for conventions. Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. In Antigravity, all components are skills — including review/analysis roles that would be "agents" in other tools. When using an agent example as template, adapt it as `.antigravity/skills/[name]/SKILL.md`. If no example exists, create from scratch following the conventions in the instructions file.
    
    **Effort frontmatter:** Every new skill MUST include an `effort:` field in its frontmatter:
    - `effort: high` — skills involving security, financial calculations, architectural decisions, or complex verification
@@ -594,7 +594,7 @@ All documents are in English. Conversational output should follow the language p
 - [Stack confirmed/defined]
 - [Build order defined]
 
-**PRD version:** v1.0
+**PRD version:** v1.0.0
 
 **Next step:** [first real item from Build Order]
 
@@ -1385,7 +1385,7 @@ In Antigravity settings, ensure:
 ### Decisions made:
 - [list]
 
-### PRD version: v[X.X]
+### PRD version: v[X.X.X]
 
 ### Next session should:
 - [specific action from first Build Order item]

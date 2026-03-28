@@ -189,7 +189,7 @@ After approval, run this checklist:
 - [ ] Module relationships still accurate
 ```
 
-Summarize: "PRD updated from vX.X to vY.Y. In the next AI agent session, the PRD sync check will detect and propagate automatically."
+Summarize: "PRD updated from vX.X.X to vY.Y.Y. In the next AI agent session, the PRD sync check will detect and propagate automatically."
 ```
 
 ---
@@ -234,9 +234,9 @@ Even with shortcuts, the AI will follow the full process (classify → investiga
 | Change type | Increment | Example |
 |------------|-----------|---------|
 | Typo, clarification | Patch: 1.0.0 → 1.0.1 | Fix spelling |
-| New feature, removed feature, rule changed | Minor: 1.0 → 1.1 | Add reports module |
-| Audience or stack changed | Minor: 1.1 → 1.2 | Switch database |
-| Product pivot | Major: 1.x → 2.0 | From SaaS to marketplace |
+| New feature, removed feature, rule changed | Minor: 1.0.0 → 1.1.0 | Add reports module |
+| Audience or stack changed | Minor: 1.1.0 → 1.2.0 | Switch database |
+| Product pivot | Major: 1.x.x → 2.0.0 | From SaaS to marketplace |
 
 ### Automation flow
 
@@ -253,7 +253,7 @@ Agent reads full PRD → identifies changes
   ↓
 Propagates to: project.md, pendencias.md, main config file, rules
   ↓
-Logs in session: "PRD vX.X → vY.Y — propagated: [list]"
+Logs in session: "PRD vX.X.X → vY.Y.Y — propagated: [list]"
 ```
 
 ### If you edit the PRD manually (without this prompt)

@@ -39,7 +39,7 @@ After my approval, generate the final document in markdown.
 
 # [Product Name] — Product Requirements Document
 
-**Version:** 1.0
+**Version:** 1.0.0
 **Date:** [date]
 **Author:** [name]
 **Status:** Draft → Under Review → Approved
@@ -219,7 +219,7 @@ To modify this PRD after approval, use the `prd_change_prompt.md` which guides t
 
 | Version | Date | Change | Author |
 |---------|------|--------|--------|
-| 1.0 | [date] | Initial version | [name] |
+| 1.0.0 | [date] | Initial version | [name] |
 ```
 
 ---

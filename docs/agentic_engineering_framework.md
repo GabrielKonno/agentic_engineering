@@ -247,9 +247,9 @@ The PRD changes when the PRODUCT changes:
 | Change type | Increment | Example |
 |------------|-----------|---------|
 | Typo, clarification | Patch: 1.0.0 → 1.0.1 | Fix spelling |
-| New feature, removed feature, rule changed | Minor: 1.0 → 1.1 | Add reports module |
-| Audience or stack changed | Minor: 1.1 → 1.2 | Switch database provider |
-| Product pivot | Major: 1.x → 2.0 | From SaaS to marketplace |
+| New feature, removed feature, rule changed | Minor: 1.0.0 → 1.1.0 | Add reports module |
+| Audience or stack changed | Minor: 1.1.0 → 1.2.0 | Switch database provider |
+| Product pivot | Major: 1.x.x → 2.0.0 | From SaaS to marketplace |
 
 The version number is what the AI agent uses in the PRD sync check to detect changes automatically. If the version does not increment, the sync check does not detect.
 
@@ -269,7 +269,7 @@ The version number is what the AI agent uses in the PRD sync check to detect cha
    - Proceed directly to "Before implementing" with the specified task
 3. **Read project.md** — full document on first session. On returning sessions: architectural decisions table + current phase status + last 2 session entries
 4. **PRD sync check** — if a PRD exists, perform two checks:
-   - **Check A (version-based):** Compare the PRD changelog version with the version recorded in the last project.md session entry (`PRD version: vX.X`). If newer → propagate.
+   - **Check A (version-based):** Compare the PRD changelog version with the version recorded in the last project.md session entry (`PRD version: vX.X.X`). If newer → propagate.
    - **Check B (content-based):** Compare PRD structure (number of modules, scope items, roadmap entries, stack) with what project.md describes. If mismatch → ASK the user before propagating.
    - If changes detected: read full PRD, update project.md/pendencias.md/CLAUDE.md as needed, ensure changelog is updated, log in session entry.
    - If ambiguous or contradicts existing decision: ASK the user.
@@ -314,7 +314,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 **Priority order** (if context is limited, at minimum do items 1 and 2):
 
-1. **Update project.md** — new session entry: date, what was done, decisions, bugs found/fixed, next step. Always include: `PRD version: vX.X`. If a feature was left incomplete, document what was attempted and why it stopped.
+1. **Update project.md** — new session entry: date, what was done, decisions, bugs found/fixed, next step. Always include: `PRD version: vX.X.X`. If a feature was left incomplete, document what was attempted and why it stopped.
    
    **Create session log:** After writing the project.md entry, save a permanent copy as a log file in `logs/`. The log contains the same content as the project.md entry PLUS additional detail that would be too verbose for project.md (full reasoning behind decisions, what was tried and failed, exact error messages, alternatives considered).
    
@@ -351,7 +351,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
    ## Commits
    [output of `git log --oneline` for this session's commits]
    
-   ## PRD version: v[X.X]
+   ## PRD version: v[X.X.X]
    ## Next session should: [specific next step]
    ```
    
@@ -478,7 +478,7 @@ When the task complexity classification indicates the current model is insuffici
      **Model switch reason:** Task "[task name]" classified as [architecture/security] — requires [target model] + [target reasoning depth]
      **Continue with:** Task [N] from pendencias — [task name]
      **Settings changed:** model → [target], reasoning depth → [target]
-     **PRD version:** vX.X
+     **PRD version:** vX.X.X
      ```
    - Commit current work: `git add -A && git commit -m "wip: model switch for [task name]"`
    - **If triggered during a sprint:** The sprint is interrupted. In the MODEL SWITCH marker, add: `**Sprint interrupted:** Yes — remaining tasks: [list remaining sprint tasks]`. After restart with the new model, the AI does NOT resume the previous sprint. Instead, it proposes a new sprint (which may include the remaining tasks from the interrupted sprint plus the task that triggered the switch). The previous sprint is logged as "interrupted: model switch at task N of M".
@@ -589,11 +589,11 @@ After all criteria pass (Step 5b), verify that the criteria actually detect brea
 
 **Example:**
 ```
-Implementation: `.select('bill_id')` in a function that marks bills as paid
-Mutation: change to `.select('nonexistent_column')`
-Re-run: VERIFY: "after paying, earmark = 0"
-Expected: criterion FAILS (earmark stays 500 because select returns undefined)
-If criterion still passes: it wasn't actually checking the payment effect → strengthen
+Implementation: a validation function that rejects negative quantities
+Mutation: comment out the validation check (or change `quantity < 0` to `quantity < -999`)
+Re-run: VERIFY: "submit order with quantity=-1 → expect validation error"
+Expected: criterion FAILS (negative quantity is accepted because validation is gone)
+If criterion still passes: it wasn't actually testing the validation → strengthen
 ```
 
 **Cost control:** Max 3 mutations per task. Each mutation re-runs only its affected criteria, not the full validation loop. Total added time: ~30 seconds for most tasks.

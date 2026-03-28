@@ -1,4 +1,4 @@
-# Agentic Engineering Framework
+# Agentic Engineering Framework v1.3.1
 
 A methodology for AI-assisted software development where the AI implements, validates, and reports with evidence — and the human approves and directs.
 
@@ -35,9 +35,9 @@ At Level 4 (Auto Pilot), the AI proposes sprints, executes 3-5 tasks autonomousl
 
 ```
 1. Clone this repo
-2. Run Claude Code from your project root
-3. Send the existing project adaptation prompt
-4. Framework reads your codebase and creates/upgrades docs
+2. Open docs/toolkit_prompt/existing_project_adaptation_prompt.md — copy its content
+3. Run Claude Code from your project root
+4. Paste the adaptation prompt — the AI reads your codebase and creates/upgrades docs
 ```
 
 ---
