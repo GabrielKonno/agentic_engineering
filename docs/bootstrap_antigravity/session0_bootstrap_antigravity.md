@@ -130,7 +130,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 **Three mechanisms for reasoning depth (complementary):**
 
-1. **Agent-level (convention, zero intervention):** `effort:` in skill frontmatter. When reading a skill with `effort: high`, the AI should increase reasoning depth for that task. Security skills always warrant high effort regardless of session settings.
+1. **Agent-level (automatic, zero intervention):** `effort:` in skill frontmatter. When reading a skill with `effort: high`, the AI should increase reasoning depth for that task. Security skills always warrant high effort regardless of session settings.
 
 2. **Task-level recommendation (2 seconds):** AI classifies task complexity → recommends increased reasoning depth in implementation plan. Human adjusts reasoning setting before approving. No restart needed.
 
