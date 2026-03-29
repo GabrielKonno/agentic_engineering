@@ -1,5 +1,6 @@
 ---
 name: test-quality-reviewer
+invocation: subagent
 effort: medium
 description: >
   Reviews test code for quality, coverage gaps, and false-positive risk.

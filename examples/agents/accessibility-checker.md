@@ -1,5 +1,6 @@
 ---
 name: accessibility-checker
+invocation: subagent
 effort: medium
 description: >
   Reviews UI components and pages for WCAG 2.1 AA compliance.

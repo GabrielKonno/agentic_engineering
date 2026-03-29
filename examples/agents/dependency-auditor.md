@@ -1,5 +1,6 @@
 ---
 name: dependency-auditor
+invocation: subagent
 effort: medium
 description: >
   Audits project dependencies for security vulnerabilities, outdated packages,

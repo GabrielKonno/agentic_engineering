@@ -1,5 +1,6 @@
 ---
 name: deploy-validator
+invocation: subagent
 effort: medium
 description: >
   Pre-deployment checklist ensuring the application is ready for production.
