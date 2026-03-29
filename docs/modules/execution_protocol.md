@@ -1,0 +1,248 @@
+# Execution Protocol
+
+> Shared module — tool-agnostic. Both bootstrap prompts reference this file.
+> Placeholders: `{CONFIG_FILE}`, `{CONFIG_DIR}`, `{AGENTS_PATH}`, `{SUBAGENT_TOOL}`
+
+This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. It is embedded into the project's config file ({CONFIG_FILE}) during bootstrap.
+
+In v1.6.0, key processes within this protocol are delegated to pre-built process skills. The `criteria-enforcer` skill handles criteria quality. The `validation-orchestrator` skill handles the validation loop (Phase A + Phase B).
+
+---
+
+## Before implementing any feature
+
+**This is where technical specification happens.** There is no separate spec document. The PRD defines WHAT. This step translates into HOW. The approved plan is recorded in project.md.
+
+**For ALL tasks (before determining complexity):**
+
+**Enforce criteria quality** → run `{CONFIG_DIR}/skills/criteria-enforcer/SKILL.md`
+<!-- Rewrites WEAK criteria to STRONG, runs adversarial review (sabotage, transformation, boundary, data origin tests) -->
+
+**Classify task complexity for model/effort:**
+Based on task content, classify and recommend:
+- **Routine** (UI changes, simple CRUD, text updates) → current model + effort is fine. No recommendation needed.
+- **Logic-heavy** (business rules, calculations, state machines, financial operations) → recommend increased reasoning depth. Log: "Recommend: increase reasoning depth — [reason]"
+- **Architecture/Security** (new module design, cross-module changes, security audit, debugging cross-module bugs) → triggers model switch (see model switch protocol below). Log: "Recommend: model switch to most capable model — [reason]"
+
+For routine and logic-heavy: include recommendation in plan, human adjusts reasoning settings if needed (no restart).
+For architecture/security: trigger the model switch protocol.
+
+**Complexity threshold:**
+- **Small** (single file, bug fix, text update): implement directly → validation loop. No plan needed.
+- **Medium** (2-5 files, new component, schema change): propose plan → wait for approval.
+- **Large** (new module, cross-module, architectural): propose plan with risks → wait for approval.
+
+**Sprint-approved mode (Level 4):** If the human approved a sprint batch:
+- **Small tasks:** implement directly (same as Level 3).
+- **Medium tasks:** generate the plan, log it, and proceed WITHOUT waiting for approval.
+- **Large tasks:** still require individual plan approval, even within a sprint.
+- **Discoveries during implementation:** add new task to pendencias.md with full Context/State/Constraints/Complexity/Criteria. Continue sprint unless the discovery blocks the current task. **Cap: max 3 discoveries per sprint.** After 3, flag to human at next exception stop or sprint report.
+
+**Exception stops (sprint-approved mode pauses only for these):**
+- ❌ after 3 retry cycles
+- PRD ambiguity or contradiction with existing decision
+- MANUAL: criteria (flag in report, continue with next task)
+- Context degradation (trigger mid-session recovery)
+- Current task blocked by a discovery requiring human input
+- False ❌ from subagent escalated by arbitrator (genuinely ambiguous — human decides)
+
+If medium or large (Level 3, or large tasks within sprint):
+1. Read relevant `{CONFIG_DIR}/rules/*.md`
+2. Codebase discovery on affected files
+3. Propose plan:
+   ```
+   ## Implementation Plan: [feature name]
+   ### Changes needed:
+   1. [file] — [what changes and why]
+   ### Migration needed: [yes/no]
+   ### Risks: [what could break]
+   ### Validation strategy: [which criteria, which tools]
+   ### Estimated scope: [small / medium / large]
+   ```
+4. Wait for user approval
+   - "go" → implement → validation loop
+   - "adjust X" → revise → wait again
+
+After approval: the plan becomes the technical record. Include summary in project.md session entry.
+
+**Model switch protocol (if task classified as Architecture/Security AND current model is not the most capable):**
+1. Save state: run end-of-session project-md-updater and pendencias-updater skills. Add MODEL SWITCH marker to project.md:
+   ```
+   ### [date] — Session N (MODEL SWITCH — continuing in next session)
+   **What was done:** [work before switch]
+   **Model switch reason:** Task "[name]" classified as architecture/security — requires most capable model + high effort
+   **Continue with:** Task [N] from pendencias — [task name]
+   **Settings changed:** [model and effort level details]
+   **PRD version:** vX.X.X
+   ```
+2. Commit: `git add -A && git commit -m "wip: model switch for [task name]"`
+   **If model switch is triggered during a sprint:** The sprint is interrupted. Add to the MODEL SWITCH marker: `**Sprint interrupted:** Yes — remaining tasks: [list remaining sprint tasks]`. After restart, do NOT resume the previous sprint — propose a new sprint instead. Log the previous sprint as "interrupted: model switch at task N of M".
+3. Update model/effort configuration as appropriate for the tool
+4. Tell user to restart the session
+5. **After task complete:** evaluate next task. If routine → revert to standard settings. Log revert in project.md. If next task also needs the current model: keep settings, skip revert.
+
+### Git checkpoint (medium and large tasks):
+Before writing code: `git add -A && git commit -m "checkpoint: before [task name]"`
+This enables clean rollback if the task needs to be reverted.
+
+---
+
+## During implementation (validation loop)
+
+**Run validation** → run `{CONFIG_DIR}/skills/validation-orchestrator/SKILL.md`
+<!-- Orchestrates Phase A (implementation) and Phase B (graduated validation by complexity) -->
+
+The validation-orchestrator skill contains the full validation loop detail. Below is the structural overview:
+
+After writing code and BEFORE reporting to the user, execute two phases. The implementing agent handles Phase A. Phase B is graduated by task complexity — routine tasks use inline validation, logic-heavy and architecture/security tasks use independent subagents.
+
+### Graduated validation depth
+
+```
+Routine task (UI text, config, styling, simple CRUD)
+  → Phase B uses inline checklist. No subagent.
+  → Bias risk near-zero. Token cost: ~5-10k.
+
+Logic-heavy task (business rules, calculations, state machines, financial)
+  → Phase B spawns code-reviewer subagent + validator subagent (2 calls)
+  → Token cost: ~50-65k. Acceptable for where bias matters.
+
+Architecture/security task (new module, cross-module, Red Team trigger)
+  → Phase B spawns full chain: code-reviewer + security-reviewer +
+    Red Team + validator + Blue Team (up to 5 calls)
+  → Token cost: ~120-150k. Worth it for high-risk tasks.
+```
+
+### Validation report format (all routes)
+
+```
+## Validation Report: [feature]
+### What was implemented:
+- [change 1]
+### Tests written:
+- [test file]: [N] tests covering [what]
+### Verification results:
+- Build:      ✅/❌ [details]
+- Tests:      ✅/❌/⏭️ [N passed, N failed, or skipped if no testable logic]
+- Review:     ✅/❌ [inline or "code-reviewer subagent"]
+- Security:   ✅/❌/⏭️ [inline / security-reviewer subagent / Red Team results / "no security-relevant changes"]
+- Mutation:   ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
+- DB:         ✅/❌/⏭️ [query results or covered by tests]
+- UI:         ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
+- Regression: ✅/❌ [test suite results or re-checked tasks]
+- Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
+### Items for human verification:
+- [MANUAL criteria]
+### Improvements identified → added to pendencias:
+- [improvement/better approach found during validation — task created in pendencias.md]
+- [or "none"]
+### Next from pendencias.md:
+- [next task]
+```
+
+**⏭️ is NOT valid when:**
+- UI: if ANY `.tsx`, `.jsx`, `.html`, `.css`, or template file was modified in this task, UI MUST be ✅ or ❌, never ⏭️.
+- Tests: if task has QUERY: or VERIFY: criteria with business logic AND test framework is configured, Tests MUST be ✅ or ❌, never ⏭️.
+- DB: if task has QUERY: criteria AND database tool is available, DB MUST be ✅ or ❌, never ⏭️.
+
+⏭️ means "not applicable to this task" — NOT "I couldn't do it" or "I skipped it."
+
+**Actionable findings rule:** If during ANY step of the validation loop the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking.
+
+If any ❌ after max retry cycles: STOP and escalate to human with diagnosis.
+
+---
+
+## Validation Orchestration (subagent mechanics)
+
+When spawning validation subagents (Routes B and C), construct the {SUBAGENT_TOOL} prompt following this template:
+
+```
+1. Role definition — "You are the [agent name]. Your role is [purpose]."
+2. Files to read — explicit paths from the context routing rules below
+3. Evidence to evaluate — "Read the git diff via `git diff HEAD~1`" + acceptance criteria (copied into prompt)
+4. Prior reports (if any) — "Read [report path] for findings from previous reviewers"
+5. Report format — the exact structure the subagent must produce
+6. BOUNDARIES — "Do NOT read: [NEVER list]. Do NOT access implementation plans, session logs, or progress entries."
+```
+
+The implementing agent does NOT package file contents into the prompt. It provides paths and the subagent reads them directly.
+
+**Context routing rules:**
+```
+ALWAYS instruct the subagent to read:
+  - The agent's own .md file (code-reviewer reads code-reviewer.md, etc.)
+  - {CONFIG_DIR}/rules/*.md (ALL rules files — cost is low, risk of omission is high)
+  - {CONFIG_FILE} sections: Key Patterns, Architecture
+  - project.md: Architectural Decisions table ONLY
+
+IF security-relevant:
+  - {AGENTS_PATH}/security-reviewer.md
+  - Stack security skill in {CONFIG_DIR}/skills/*/SKILL.md (if exists)
+
+IF UI task:
+  - Design System section of {CONFIG_FILE}
+
+NEVER instruct the subagent to read (anti-bias firewall):
+  - project.md Progress Log (contains implementation reasoning)
+  - {CONFIG_DIR}/logs/*.md (session history)
+  - Sprint proposals or implementation plans
+  - Any file the implementing agent wrote as part of the task explanation
+```
+
+**Sequencing:**
+```
+Logic-heavy tasks (Route B):
+  1. code-reviewer subagent → Code Review Report
+  2. validator subagent (receives Code Review Report) → Validation Report
+
+Architecture/security tasks (Route C):
+  1. code-reviewer subagent → Code Review Report
+  2. security-reviewer subagent → Security Review Report
+  3. Red Team subagent (if triggered) → Vulnerability Report
+  4. validator subagent (receives all prior reports) → Validation Report
+  5. arbitrator subagent (only if validator ❌ contradicts mechanical evidence)
+  6. Blue Team subagent (after validation passes, if Red Team ran) → Defense Assessment
+```
+
+Each subagent is a fresh {SUBAGENT_TOOL} instance — isolated context, no carryover between invocations.
+
+**Retry flow:** When validator returns ❌: fix → commit `"fix: [task] — validation fix N"` → re-spawn from step 1 of subagent sequence. Max 3 retry cycles. After limit: STOP and escalate to human with diagnosis.
+
+**Large task mitigation:** For large tasks (diff exceeds ~300 lines or criteria exceed 10), split validation into sequential subagent calls: (1) code review + criteria evaluation, (2) mutation testing. Each call gets a fresh context.
+
+**Validation Failure Post-Mortem (when human finds a bug in a ✅ task):**
+If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
+1. Identify which validation step should have caught it
+2. Diagnose why that step declared ✅ (partial execution? silent failure? missing criterion? weak criterion?)
+3. Classify the root cause and route the improvement to the correct document:
+   - Weak/incomplete criterion → improve criteria quality rules
+   - Partially verified multi-step criterion → strengthen Phase B criteria check
+   - Tool silenced an error → add Known Bug Pattern
+   - Review missed a pattern → update code-reviewer checklist
+   - Test not written for testable logic → refine Phase A Step 2 skip conditions
+   - **Subagent context incomplete** → update context routing rules
+   - AI judgment error → inherent limitation, no doc fix
+4. Apply the systemic improvement (prevent the CLASS of failure, not just this instance)
+5. Log the post-mortem in the session entry
+Then fix the bug normally. The validation loop improves before the bug is fixed.
+
+---
+
+## Between tasks (after validation passes, before picking next task):
+
+1. Commit (if not already committed): for routine tasks with inline validation, `git add -A && git commit -m "feat: [task name] — validated"`. For subagent-validated tasks, the `feat:` commit was made before Phase B — it already stands.
+2. Update pendencias.md: mark task as Done, confirm next task
+3. If this is task 3+ in the current session: evaluate context health. If degrading → trigger mid-session recovery instead of continuing.
+4. **Sprint-approved mode:** If executing a sprint, pick next task from the batch and proceed directly to "Before implementing". Do NOT re-propose the sprint or ask for confirmation. If all sprint tasks are done, produce a consolidated sprint report:
+   ```
+   ## Sprint Report: Session N
+   ### Tasks completed: [N/N]
+   | Task | Result | Issues |
+   |------|--------|--------|
+   | [name] | ✅/❌ | [MANUAL: items or notes] |
+   ### Discoveries added to backlog: [N new tasks]
+   ### Known Bug Patterns added: [N]
+   ### Rules files created/updated: [list]
+   ### Next sprint suggestion: [top 3-5 tasks]
+   ```

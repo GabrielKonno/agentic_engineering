@@ -4,6 +4,10 @@ effort: medium
 description: >
   Pre-deployment checklist ensuring the application is ready for production.
   Run before every deployment to staging or production.
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Deploy Validator

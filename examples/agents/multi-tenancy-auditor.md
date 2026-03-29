@@ -4,6 +4,10 @@ effort: high
 description: >
   Audits multi-tenant implementations for data isolation, cross-tenant leaks,
   and permission boundaries. Critical for SaaS applications.
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Multi-Tenancy Auditor

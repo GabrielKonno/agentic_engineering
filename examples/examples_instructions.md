@@ -63,7 +63,9 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 **Frontmatter:**
 - `name:` — lowercase, hyphenated
 - `effort:` — `medium` for checklists and patterns, `high` for security, financial, architectural
-- `description:` — one sentence explaining when to use
+- `description:` — explains when to use. Two conventions:
+  - **Process skills** (workflow steps): pushy format — `[What]. MUST [trigger]. [Consequence of skipping].`
+  - **Knowledge skills** (reference patterns): contextual format — explains when the skill is useful, no imperative trigger
 - `invocation:` — how the agent/skill is activated:
   - `subagent` — spawned as an independent process via Task tool (Claude Code) or Agent Manager (Antigravity). Isolated context, no access to implementing agent's reasoning. Required for all validation/review/security agents.
   - `inline` — read as a reference document by another agent. Default for skills and knowledge documents.

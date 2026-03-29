@@ -4,6 +4,8 @@ effort: high
 description: >
   Test patterns and business rules for e-commerce features: cart, checkout,
   inventory, pricing, discounts, orders, payments, shipping, refunds.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # E-Commerce Domain Patterns

@@ -139,10 +139,15 @@ agentic_engineering/                         # Framework root (meta-project)
 ├── .gitignore                               # Contains "projects/" — isolates project repos
 ├── docs/
 │   ├── agentic_engineering_framework.md      # This document (tool-agnostic concepts)
+│   ├── modules/                              # Shared templates and skills (single source of truth)
+│   │   ├── session_protocol.md               # Session Protocol (tool-agnostic)
+│   │   ├── execution_protocol.md             # Execution Protocol (tool-agnostic)
+│   │   ├── templates/                        # Document and agent templates for bootstrap
+│   │   └── skills/                           # 10 pre-built process skills (copied to projects)
 │   ├── bootstrap_claude/
-│   │   └── session0_bootstrap_prompt.md      # Bootstrap for Claude Code
+│   │   └── session0_bootstrap_prompt.md      # Bootstrap for Claude Code (references modules)
 │   ├── bootstrap_antigravity/
-│   │   └── session0_bootstrap_antigravity.md # Bootstrap for Antigravity
+│   │   └── session0_bootstrap_antigravity.md # Bootstrap for Antigravity (references modules)
 │   └── toolkit_prompt/
 │       ├── prd_planning_prompt.md             # PRD creation prompt
 │       ├── prd_change_prompt.md               # PRD modification prompt
@@ -150,9 +155,9 @@ agentic_engineering/                         # Framework root (meta-project)
 │       └── existing_project_adaptation_prompt.md # Adapt existing project to framework
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
-│   ├── agents/                              # Agent templates (flat .md): performance-auditor, accessibility-checker, test-quality-reviewer, state-machine-verifier, data-integrity-checker, multi-tenancy-auditor, dependency-auditor, migration-runner, deploy-validator, api-security-scanner
-│   ├── skills/                              # Skill templates (Anthropic folder format: name/SKILL.md): nextjs-supabase, django-postgres, express-mongodb, e-commerce-patterns, scheduling-patterns, multi-tenancy-patterns, api-design-patterns, database-migration-guide, ci-cd-pipeline
-│   └── rules/                               # Rules file templates: multi-tenancy-rules, e-commerce-rules, auth-rules
+│   ├── agents/                              # Agent templates (flat .md)
+│   ├── skills/                              # Skill templates (Anthropic folder format)
+│   └── rules/                               # Rules file templates
 └── projects/                                # Project folders (one per project)
     └── [project-name]/                      # Created during session 0
         └── (project structure below)
@@ -1384,6 +1389,50 @@ For mature projects (10+ sessions, 5+ custom skills), external skill evolution t
 - If both the framework protocol and the external tool attempt to modify the same skill, the framework protocol wins
 
 **Caution:** External skill managers may have significant dependencies (Python runtime, LLM API keys, databases) and may auto-evolve skills in ways that conflict with the framework's evolution classification and lineage tracking. Evaluate thoroughly before integrating.
+
+---
+
+## Undertriggering Mitigation
+
+AI agents sometimes fail to invoke skills they should use — a problem known as "undertriggering." The skill exists but the agent does not run it. For process skills that implement mandatory workflow steps (Session Protocol, Execution Protocol), undertriggering means critical steps are skipped silently.
+
+The framework uses dual-layer protection for all fixed process skills:
+
+### Layer 1 — Explicit triggers in CLAUDE.md/GEMINI.md (deterministic)
+
+The config file's Session Protocol contains explicit trigger points:
+- "At session start item 4: run prd-sync-checker"
+- "Before implementing: run criteria-enforcer"
+- "After implementation: run validation-orchestrator"
+- "At session end item 2: run project-md-updater + session-log-creator"
+
+These are deterministic — the AI follows the numbered protocol and encounters the trigger.
+
+### Layer 2 — Pushy descriptions in SKILL.md (persuasive)
+
+Each process skill's `description:` frontmatter field includes:
+1. What the skill does
+2. WHEN it MUST run (imperative language)
+3. What goes wrong if it is skipped (consequence)
+
+Example:
+```yaml
+description: >
+  Enforces criteria quality before implementation. Rewrites WEAK criteria to STRONG.
+  MUST run before implementing any task. Skipping this is the #1 cause of
+  false-positive validation results.
+```
+
+When the AI reads the skill list during session start (item 9), the pushy descriptions reinforce the trigger points.
+
+### Convention for new skills
+
+When creating new fixed process skills (framework or project):
+- Description MUST include a `MUST` clause and a consequence clause
+- Format: `[What it does]. MUST [when it must run]. [Consequence of skipping].`
+- If the skill has a trigger point in the Session Protocol, that trigger must reference the skill by path
+
+This convention applies to **process skills** (workflow steps). Knowledge skills (`invocation: inline`, used as reference) use contextual descriptions instead — they explain when the skill is useful, without imperative triggers.
 
 ---
 

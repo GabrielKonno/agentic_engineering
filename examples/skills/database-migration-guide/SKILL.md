@@ -4,6 +4,8 @@ effort: high
 description: >
   Safe database migration patterns. Covers schema changes, data migrations,
   zero-downtime strategies, and rollback procedures. Stack-agnostic.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # Database Migration Guide

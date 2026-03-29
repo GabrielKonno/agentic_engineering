@@ -16,10 +16,26 @@ agentic_engineering/                        ← Cloned once, kept permanently
 ├── .gitignore                              ← Contains "projects/" — isolates project repos
 ├── docs/
 │   ├── agentic_engineering_framework.md    # Framework concepts (tool-agnostic)
+│   ├── modules/                            # Shared templates and skills (single source of truth)
+│   │   ├── session_protocol.md             # Session Protocol (START, END, recovery)
+│   │   ├── execution_protocol.md           # Execution Protocol (validation loop, orchestration)
+│   │   ├── templates/                      # Document and agent templates for bootstrap
+│   │   │   ├── claude_md.md, gemini_md.md  # Config file templates (orchestrator format)
+│   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
+│   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
+│   │   │   ├── validator.md, arbitrator.md # Validation agent templates
+│   │   │   ├── red_team.md, blue_team.md   # Security agent templates
+│   │   │   └── settings_json.md            # Settings + hooks template
+│   │   └── skills/                         # Pre-built process skills (copied to projects)
+│   │       ├── prd-sync-checker/           # 10 process skills implementing
+│   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
+│   │       ├── criteria-enforcer/          # as reusable, evolvable components
+│   │       ├── validation-orchestrator/    # (see skills/README.md for full list)
+│   │       └── ... (6 more)
 │   ├── bootstrap_claude/
-│   │   └── session0_bootstrap_prompt.md    # Bootstrap for Claude Code (greenfield)
+│   │   └── session0_bootstrap_prompt.md    # Bootstrap for Claude Code (references modules)
 │   ├── bootstrap_antigravity/
-│   │   └── session0_bootstrap_antigravity.md # Bootstrap for Antigravity (greenfield)
+│   │   └── session0_bootstrap_antigravity.md # Bootstrap for Antigravity (references modules)
 │   └── toolkit_prompt/
 │       ├── prd_planning_prompt.md              # Create a PRD from scratch
 │       ├── prd_change_prompt.md                # Modify an existing PRD

@@ -4,6 +4,8 @@ effort: medium
 description: >
   Stack patterns for Next.js (App Router) + Supabase (PostgreSQL, Auth, RLS, Storage).
   Includes security settings, component patterns, and common pitfalls.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # Next.js + Supabase Patterns

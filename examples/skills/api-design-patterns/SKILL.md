@@ -4,6 +4,8 @@ effort: medium
 description: >
   REST API design conventions and patterns. Use when creating new endpoints,
   reviewing API design, or standardizing an existing API.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # API Design Patterns
