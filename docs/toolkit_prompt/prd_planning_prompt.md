@@ -10,30 +10,178 @@ The output is the PRD that feeds the entire project structure.
 ```
 We are creating a PRD (Product Requirements Document) for a new project. This document will be the central product reference — everything built must align with it.
 
-I will describe the project and you will ask questions to understand it completely before writing. DO NOT write the PRD until you have asked all questions and I have answered.
+I will describe the project. You will act as a product co-creator — not just an interviewer filling out a form. Your role is to:
+- Extract maximum detail from my answers (dig deeper, ask follow-ups, challenge vague statements)
+- Proactively suggest ideas, features, modules, architectural patterns, and edge cases based on what you learn
+- Build the document incrementally as sections are confirmed — never accumulate everything for the end
 
-### Process:
+DO NOT write the full PRD at the end. Build it progressively as each phase completes.
 
-**Phase 1 — Understanding (you ask, I answer):**
-Ask questions about:
-- The problem the product solves
-- Who the users are (personas)
-- What they do today without the product
+---
+
+### How to Ask Questions
+
+1. Ask 3-5 questions per round. Wait for my answers before continuing.
+2. After each round, analyze the answers for:
+   - Ambiguities (words like "maybe", "probably", "something like")
+   - Implicit assumptions (things I assumed you know but did not state)
+   - Missing details (features mentioned but not described)
+   - Contradictions with earlier answers
+3. Build the next round on what was just learned. Drill into ambiguities first — depth over breadth.
+4. If I give a vague answer, say: "Can you be more specific about [aspect]? For example, [concrete example of what you need]."
+5. Never ask a question whose answer is already implied by a previous answer.
+6. For each business rule I state, immediately propose a verifiable criterion: "So the acceptance criterion would be: VERIFY: [specific test]. Correct?"
+
+---
+
+### Proactive Suggestions
+
+You are a product co-creator, not just a scribe. Throughout the process:
+
+1. **After Phase 1** (Discovery): suggest at least one competitive opportunity or differentiator I have not mentioned.
+2. **After Phase 2** (Architecture): suggest at least one architectural pattern or technical approach that fits the product characteristics (caching, event-driven, background jobs, multi-tenancy, etc.).
+3. **During Phase 3** (Deep Dive): for each module, suggest at least one feature, edge case, or business rule improvement.
+4. **Before Phase 5** (Finalization): review the complete document and suggest cross-cutting concerns that may be missing (logging, audit trail, notification system, analytics, rate limiting, etc.).
+
+For each suggestion: explain WHY you think it adds value, then ask "Would you like to include this?" If yes, ask the follow-up questions needed to define it fully. If no, move on.
+
+---
+
+### Session Recovery
+
+If a partial PRD already exists (from a previous session or context break):
+1. Read the existing document
+2. Identify which sections are complete and which are still skeleton/empty
+3. Summarize what exists: "I see sections 1, 2, 5, 7, 9 are complete. Modules A and B in section 3 are detailed, but modules C and D are still skeleton. I will continue with the Deep Dive for module C."
+4. Resume from where the document left off — do not re-ask questions about completed sections.
+
+---
+
+### Phase 1 — Discovery (broad product understanding)
+
+Understand the problem space, users, market, and constraints. This is the broadest phase.
+
+Ask about (adapt order based on the conversation — follow what is most interesting):
+- The problem the product solves and who has it
+- Who the users are (initial persona sketches with pain points)
+- What they do today without the product (workarounds, competitors)
 - Differentiators vs alternatives
-- Modules/functional areas
-- Constraints (deadline, budget, compliance, platform)
-- Preferred stack (or if you should suggest one)
-- Business model (SaaS, internal tool, marketplace, etc.)
-- External integrations needed
-- What is out of scope for the MVP
+- Business model direction (SaaS, internal tool, marketplace, etc.)
+- Hard constraints (deadline, budget, compliance, platform)
+- What is explicitly out of scope for the MVP
 
-Ask in blocks of 3-5 questions. Wait for my answers before proceeding.
+**Mirror Technique:** After 2-3 rounds, summarize your understanding back to me in 3-5 sentences: "Here is what I understand so far: [summary]. Is this correct? What am I missing?" This forces alignment and reveals implicit assumptions.
 
-**Phase 2 — Draft (you write, I review):**
-After understanding everything, write the PRD following the structure below. I will review and request adjustments.
+**Exit:** You can articulate the product vision, who it serves, why it is different, and what the boundaries are. I confirm the summary.
 
-**Phase 3 — Finalization:**
-After my approval, generate the final document in markdown.
+**Incremental write:** After I confirm, write the PRD file with:
+- Document header (product name, version 1.0.0, date, author, status)
+- Section 1 (Product Vision — Problem, Solution, Target Audience, Differentiator)
+- Section 2 (Scope — In Scope MVP, Out of Scope, Constraints)
+- Section 7 (Business Model — Monetization, Plans, Success Metrics)
+- Section 9 (Risks and Dependencies)
+
+Present what you wrote and proceed to Phase 2.
+
+---
+
+### Phase 2 — Architecture (structural skeleton)
+
+Define the product's structural skeleton: modules, dependencies, stack, integrations.
+
+Ask about:
+- Functional modules / areas of the product
+- **Module dependencies:** "Which modules depend on which? What must exist before another can work?"
+- Preferred stack (or ask me if I want a suggestion — if suggesting, explain WHY for each choice based on the product)
+- External integrations mapped to specific modules (not just a global list: "Which module calls Stripe? What data does it send?")
+- High-level data model: main entities and key relationships across modules
+- Non-functional requirements: performance targets, security needs, availability, scalability expectations
+- Design/UX direction: platform (web, mobile, PWA), visual style, accessibility requirements
+
+**Build order proposal:** After understanding dependencies, propose an implementation build order and confirm it with me.
+
+**Exit:** Module list, dependency graph, stack decision, integration points per module, and build order confirmed.
+
+**Incremental write:** After I confirm, update the PRD file with:
+- Section 4 (Non-Functional Requirements)
+- Section 5 (Architecture and Stack — including 5.4 Build Order)
+- Section 6 (Design and UX)
+- Section 8 (High-Level Roadmap — MVP phases derived from build order)
+- Section 3 skeleton (module headers with objectives only — details come in Phase 3)
+
+Present what you wrote and proceed to Phase 3.
+
+---
+
+### Phase 3 — Deep Dive (per-module detail extraction)
+
+This is the most critical phase. For each module (in build order), conduct a focused deep dive.
+
+**Per-module interview cycle:**
+
+Pick one module. Ask about:
+1. **Features** and their priorities (High = MVP mandatory, Medium = MVP desired, Low = future)
+2. **Business rules** — explicit rules the system must enforce. For every rule, immediately propose a verifiable acceptance criterion and confirm.
+3. **Main flow** — step-by-step of the most common user journey in this module
+4. **Edge cases** — after the happy path, systematically ask:
+   - "What happens when there is no data yet?" (empty state)
+   - "What happens if the operation fails?" (error handling)
+   - "What are the limits?" (boundary values, maximums, rate limits)
+   - "What if two users do the same thing at the same time?" (concurrency)
+   - "What if an external service is unavailable?" (integration failures)
+5. **Data model** — "What data does this module create, read, update, delete? Key fields and types? Status/state fields? Relationships to other modules' data?"
+6. **Integration points** — which external APIs or other modules it interacts with, what data is exchanged, what happens if unavailable
+7. **Module constraints** — specific performance targets, authorization rules (who can do what), expected data volume
+
+After completing a module's interview, present a summary:
+"**Module [X] summary:** [features], [N business rules], [main flow], [N edge cases], [data entities], [integration points]. Correct?"
+
+**Incremental write:** After I confirm each module, immediately write its complete Section 3.X into the document. Do this BEFORE moving to the next module — each module must be persisted so no information is lost if the session breaks.
+
+Continue until all modules are complete.
+
+**Exit:** Every module has full detail; I confirmed each; all Section 3.X written to the document.
+
+---
+
+### Phase 4 — Review & Consolidation
+
+The document already exists from phases 1-3. This phase is a polish pass, not a rewrite.
+
+1. Re-read the complete document
+2. **Quality gate:** Every module must have at least:
+   - 1 `BUILD:` criterion
+   - 1 `VERIFY:` criterion with specific page/command, action, and expected result
+   - 1 `QUERY:` criterion if the module touches persistent data
+3. **Consistency check:**
+   - All module dependencies reference modules that exist in the document
+   - All integration points reference real services
+   - Build order matches the dependency graph
+   - Roadmap phases align with build order
+   - Data model entities are consistent across modules (no conflicting field definitions)
+4. Fix any inconsistencies found
+5. Add the Changelog section
+
+Present the consolidated document for review.
+
+---
+
+### Phase 5 — Finalization
+
+Guide my review with specific checkpoints:
+1. Are all modules accounted for? Any missing?
+2. Are business rules correct and complete?
+3. Are edge cases realistic and well-covered?
+4. Is the build order feasible? Dependencies make sense?
+5. Are acceptance criteria specific enough to validate automatically?
+
+**Final suggestions:** Before finalizing, review the complete document and suggest any cross-cutting concerns that may be missing (logging, audit trail, notification system, analytics, etc.).
+
+**Bootstrap readiness statement:** After my final approval, confirm: "This PRD has [N] modules, [N] business rules, [N] acceptance criteria ([N] BUILD, [N] VERIFY, [N] QUERY, [N] MANUAL). Every module has dependencies, data model, and edge cases defined. It is ready for bootstrap."
+
+Generate the final version with the Changelog entry.
+
+---
 
 ### PRD Structure:
 
@@ -81,6 +229,8 @@ After my approval, generate the final document in markdown.
 
 **Objective:** [what this module does]
 
+**Dependencies:** [which modules must exist before this one can work | "none"]
+
 **Features:**
 - [F1] [description] — Priority: High/Medium/Low
 - [F2] [description] — Priority: High/Medium/Low
@@ -89,15 +239,30 @@ After my approval, generate the final document in markdown.
 - [BR1] [specific rule the system must follow]
 - [BR2] [rule]
 
+**Data model (module-owned entities):**
+- [Entity]: [key fields, types, constraints] — [relationships to other entities]
+- Status/state fields: [if applicable, with valid transitions]
+
 **Main flow:**
 [Step-by-step of the most common user flow in this module]
 
+**Edge cases:**
+- Empty state: [what happens when no data exists yet]
+- Error state: [what happens on failure — validation, server error, timeout]
+- Boundary: [limits, maximums, what happens at the boundary]
+- Concurrent: [what if two users do the same thing simultaneously]
+
+**Integration points:** (omit if none)
+- [Service/Module]: [data exchanged, direction, fallback if unavailable]
+
+**Module constraints:** (omit if no specific constraints beyond project-wide)
+- Performance: [specific targets for this module]
+- Authorization: [who can do what — roles, permissions]
+- Volume: [expected data scale]
+
 **Acceptance criteria:**
 Verifiable criteria that the AI agent will use to validate the implementation automatically.
-In session 0, these criteria will propagate to the backlog with executable tags.
-
-Guide: focus on WHAT to verify (expected result), not HOW to implement.
-Every criterion must have 3 parts: **action** (what to do), **expected result** (what success looks like), and **failure signal** (how to know it truly passed).
+Every criterion must have 3 parts: **action** (what to do), **expected result** (what success looks like), and **failure signal** (how to know it truly passed — not a false positive).
 
 - `BUILD:` The module compiles with zero errors
 - `VERIFY:` [page/command] → [user action] → [expected visible result with specifics]
@@ -120,7 +285,7 @@ Bad examples (WEAK — vague, no failure signal):
 - "Form appears" (which fields? what states? what happens on submit?)
 
 ### 3.2 [Module B]
-[Same structure: Objective, Features, Business rules, Main flow, Acceptance criteria]
+[Same structure: Objective, Dependencies, Features, Business rules, Data model, Main flow, Edge cases, Integration points, Module constraints, Acceptance criteria]
 
 ### 3.3 [Module C]
 [Same structure]
@@ -150,13 +315,21 @@ Bad examples (WEAK — vague, no failure signal):
 **Note:** This section defines high-level choices and justifications (the WHY of the stack). Implementation details (specific patterns, code conventions, technical decisions during development) go in project.md and CLAUDE.md, not here.
 
 ### 5.1 Suggested Stack
-[Frontend, backend, database, auth, deploy, CI/CD — with justification]
+[Frontend, backend, database, auth, deploy, CI/CD — with justification for each choice]
 
 ### 5.2 External Integrations
-[APIs, third-party services, webhooks]
+[APIs, third-party services, webhooks — consolidated view; per-module detail is in Section 3]
 
 ### 5.3 Data Model (high level)
-[Main entities and relationships — not detailed schema, but macro view]
+[Consolidated entity-relationship overview — how entities from different modules relate to each other. Not detailed schema, but macro view.]
+
+### 5.4 Build Order
+[Ordered implementation sequence derived from Section 3 module dependencies]
+
+1. [Module] — depends on: none
+2. [Module] — depends on: [1]
+3. [Module] — depends on: [1, 2]
+[Continue for all modules]
 
 ---
 
@@ -189,7 +362,7 @@ Bad examples (WEAK — vague, no failure signal):
 ## 8. High-Level Roadmap
 
 ### MVP (Phase 1)
-[Minimum features to launch]
+[Minimum features to launch — aligned with Build Order]
 
 ### Phase 2
 [Post-launch expansion features]
@@ -226,17 +399,38 @@ To modify this PRD after approval, use the `prd_change_prompt.md` which guides t
 
 ## Tips for the Process
 
-**When answering the AI's questions:**
+**During Phase 1 (Discovery):**
 - Be specific about business rules (e.g., "commission is fixed per service, not percentage" saves hours of rework)
 - Say what is OUT of scope — as important as what is in scope
 - If unsure about the stack, ask for a suggestion based on the product type
 - If you have visual references (sites, apps), mention them
 
-**When reviewing the draft:**
+**During Phase 2 (Architecture):**
+- Think about module dependencies — which parts of the product can only work after others exist
+- If you have preferences about tech choices, state them with reasons
+- Mention any external services you already have accounts/contracts with
+
+**During Phase 3 (Deep Dive):**
+- For each module, think about the "first use" experience — what does the user see when there is no data yet?
+- Think about error scenarios — what can go wrong? How should the system respond?
+- When the AI proposes acceptance criteria, evaluate honestly: is the criterion specific enough that someone could verify it with no ambiguity?
+
+**About proactive suggestions:**
+- The AI will suggest ideas, features, and patterns — evaluate them honestly. Good suggestions can save significant design time later. But say "no" without hesitation to anything that doesn't fit.
+- Pay special attention to edge case suggestions — these often catch issues that would only surface during implementation.
+
+**When reviewing the draft (Phase 4-5):**
 - Check that each module has clear business rules (not just vague features)
 - Check that flows make sense from the user's perspective
 - Check that priorities are correct (High = MVP mandatory)
+- Verify acceptance criteria have all 3 parts (action + expected result + failure signal)
 - Add constraints you forgot to mention
+
+**About incremental writing:**
+- The AI writes sections as they are confirmed — do not wait until the end
+- This protects against session breaks and context limitations
+- Review each section when presented; it is easier to fix early than to review a massive document at the end
+- If a session breaks, start a new one and point the AI to the partial PRD — it will resume where it left off
 
 **After approval:**
 - Save as `assets/docs/prd.md` in the project
@@ -251,9 +445,9 @@ The PRD is a **living document** that changes when the PRODUCT changes:
 
 | Event | PRD action |
 |-------|-----------|
-| New feature requested | Add to Functional Requirements + update Roadmap + changelog |
-| Feature removed | Move to "Out of scope" + changelog |
-| Business rule changed | Update in module rules + changelog |
+| New feature requested | Add to Functional Requirements + update Roadmap + Build Order + changelog |
+| Feature removed | Move to "Out of scope" + update dependency graph + changelog |
+| Business rule changed | Update in module rules + update acceptance criteria + changelog |
 | Target audience changed | Update Personas + review priorities + changelog |
 | Stack changed | Update section 5 + changelog |
 | Product pivot | PRD v2.0 — rewrite affected sections + changelog |

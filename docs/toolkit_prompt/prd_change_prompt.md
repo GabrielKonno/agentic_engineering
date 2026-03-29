@@ -52,29 +52,36 @@ Before drafting any changes, ask me questions to fully understand the impact. Ad
 1. What problem does this feature solve? Who requested it?
 2. Is it mandatory for MVP or can it be Phase 2/3?
 3. Which existing modules does it affect?
-4. Does it introduce new database entities? Which fields?
-5. Does it have business rules? Which?
-6. What is the main user flow?
-7. What are the edge cases?
-8. What are the verifiable acceptance criteria?
-9. Does it impact existing features? How?
-10. What is its priority vs what is already planned?
+4. Which modules does this feature depend on? Does it depend on modules not yet built?
+5. Does it introduce new database entities? Which fields, types, constraints? Does it modify existing entities?
+6. Does it have business rules? Which? (For each rule, propose a verifiable acceptance criterion.)
+7. What is the main user flow?
+8. What are the edge cases? (Empty state, error handling, boundary values, concurrency, integration failures)
+9. What are the verifiable acceptance criteria? (Must have 3 parts: action, expected result, failure signal)
+10. Does it impact existing features? How?
+11. Which external services or other modules does it integrate with? What data is exchanged?
+12. Are there specific performance, authorization, or volume constraints for this feature?
+13. What is its priority vs what is already planned?
+14. Where does it fit in the build order? Does it shift existing module priorities?
 
 **If FEATURE REMOVED:**
 1. Why is it being removed?
 2. Has it been partially implemented? What happens to existing code?
-3. Do other modules depend on it?
+3. Do other modules depend on it? Does removing it break the dependency graph?
 4. Goes to "Out of scope" permanently or to "Future phase"?
 5. Should associated data/tables be removed or kept?
+6. Does the build order need resequencing after removal?
 
 **If BUSINESS RULE CHANGED:**
 1. What was the old rule and what is the new one?
 2. What motivated the change?
 3. Does it affect existing data? How to migrate?
-4. Does it affect flows in other modules?
-5. Does it affect financial calculations, permissions, or status logic?
-6. What is the transition period?
-7. Are existing acceptance criteria still valid?
+4. Does it affect the module's data model (field types, constraints, status fields, state transitions)?
+5. Does it affect flows in other modules?
+6. Does it affect financial calculations, permissions, or status logic?
+7. Does it introduce or invalidate edge cases?
+8. What is the transition period?
+9. Are existing acceptance criteria still valid with the new rule? (Review each criterion against the change.)
 
 **If TARGET AUDIENCE CHANGED:**
 1. Who was the old audience and who is the new one?
@@ -87,10 +94,12 @@ Before drafting any changes, ask me questions to fully understand the impact. Ad
 **If STACK CHANGED:**
 1. What changes and why?
 2. Impact on existing code?
-3. Are architectural decisions in project.md affected?
-4. Do installed tools need to change?
-5. Do installed skills still apply?
-6. Is the timeline affected?
+3. Does the data model structure change (e.g., different DB paradigm, ORM vs raw SQL)?
+4. Are architectural decisions in project.md affected?
+5. Do installed tools need to change?
+6. Do installed skills still apply?
+7. Does the build order need adjustment?
+8. Is the timeline affected?
 
 **If PRODUCT PIVOT:**
 1. What was the old vision and what is the new one?
@@ -119,6 +128,12 @@ Based on the answers, present an impact analysis BEFORE drafting:
 ### PRD sections affected:
 - Section X.X — [what changes]
 - Section Y.Y — [what changes]
+- Section 3.X Dependencies — [if dependency graph changes]
+- Section 3.X Data model — [if entities/fields change]
+- Section 3.X Edge cases — [if new edge cases or invalidated ones]
+- Section 3.X Integration points — [if integrations change]
+- Section 5.4 Build Order — [if implementation sequence changes]
+[Remove lines that don't apply]
 
 ### Impact on engineering documents:
 - project.md: [what to update — phases, decisions, module relationships]
@@ -183,9 +198,14 @@ After approval, run this checklist:
 - [ ] PRD internal consistency: change does not contradict other sections
 - [ ] Changelog updated with new version
 - [ ] All affected engineering documents updated
-- [ ] Acceptance criteria of affected tasks updated
+- [ ] Acceptance criteria of affected tasks updated (3-part standard: action + expected result + failure signal)
 - [ ] Removed features not referenced elsewhere in PRD
 - [ ] New features have acceptance criteria
+- [ ] Module dependencies still form a valid DAG (no circular dependencies)
+- [ ] Data model changes consistent across related modules
+- [ ] Build order (Section 5.4) reflects current dependency graph
+- [ ] Edge cases updated for affected modules
+- [ ] Integration points updated if external services changed
 - [ ] Module relationships still accurate
 ```
 
@@ -201,6 +221,9 @@ Summarize: "PRD updated from vX.X.X to vY.Y.Y. In the next AI agent session, the
 I want to add [feature] to the product.
 Context: [why, who asked, what problem it solves]
 Priority: [MVP / Phase 2 / Phase 3]
+Dependencies: [which modules must exist first | "none"]
+Data entities: [new tables/fields introduced, or "uses existing"]
+Integration: [external APIs or modules it calls | "none"]
 ```
 
 ### Remove feature:
@@ -251,7 +274,7 @@ PRD sync check: reads Changelog → detects new version
   ↓
 Agent reads full PRD → identifies changes
   ↓
-Propagates to: project.md, pendencias.md, main config file, rules
+Propagates to: project.md, pendencias.md, CLAUDE.md (Build Order, Architecture), rules
   ↓
 Logs in session: "PRD vX.X.X → vY.Y.Y — propagated: [list]"
 ```
