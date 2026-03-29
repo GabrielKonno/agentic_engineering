@@ -123,7 +123,7 @@ Before proceeding, present a summary of everything you read:
 
 ### Existing framework docs:
 - CLAUDE.md / GEMINI.md: [exists/missing] — [summary of content]
-- project.md: [exists/missing] — [N session entries, last session date]
+- project.md: [exists/missing] — [N rows in Progress Log index, last session date]
 - pendencias/backlog: [filename] — [N items in progress, N items done]
 - Agents: [list with names]
 - Rules: [list with names]
@@ -224,30 +224,39 @@ Check for required sections:
 □ Architectural Decisions table
 □ Module Relationships (ASCII diagram + cross-module flows)
 □ Project Phases with completion criteria
-□ Progress Log with session entries
+□ Progress Log index table (session, date, summary, log reference)
 ```
 
-**Do NOT modify existing session entries.** Add missing sections at the appropriate location.
+**Do NOT modify existing Progress Log entries.** Add missing sections at the appropriate location.
 
-Add an adaptation session entry at the end of the Progress Log:
+If the Progress Log uses the old format (full session entry blocks), convert it to an index table during this adaptation. Extract session number, date, and 1-line summary from each block. Use `—` for the Log column (no log files exist for old sessions). Preserve old entries below the table as a legacy block.
+
+Add an adaptation row to the Progress Log index table:
+
 ```markdown
-### [date] — Adaptation Session (Framework Upgrade)
+| Adaptation | [date] | Framework upgrade to v[current], retroactive PRD created | — |
+```
 
-**What was done:**
-- Upgraded project documentation to Agentic Engineering Framework v[current]
+Also create a session log in `{CONFIG_DIR}/logs/` with the detailed adaptation record:
+```markdown
+# Adaptation Session — [date]
+
+## Summary
+Upgraded project documentation to Agentic Engineering Framework v[current].
+
+## What was done
 - Added missing sections: [list]
 - Created retroactive PRD from existing codebase analysis
 - Verified: agents, rules, skills, phases structure
 
-**Existing structure preserved:**
-- [N] session entries in project.md
+## Preserved
+- [N] rows in Progress Log index
 - [N] agents: [names]
 - [N] rules: [names]
 - [N] skills: [names]
 
-**PRD version:** v1.0.0 (retroactive — created from codebase analysis)
-
-**Next step:** [first item from pendencias.md]
+## PRD version: v1.0.0 (retroactive — created from codebase analysis)
+## Next session should: [first item from pendencias.md]
 ```
 
 **Step 2.3 — Upgrade pendencias.md (or equivalent):**
@@ -260,7 +269,7 @@ Check and upgrade:
 □ Every task has Complexity classification (routine / logic-heavy / architecture-security)
 □ Every task has acceptance criteria with BUILD:/VERIFY:/QUERY:/REVIEW:/MANUAL: tags
 □ Criteria are at STRONG level (action + expected result + failure signal)
-□ Done section exists (with completed items)
+□ done_tasks.md exists (or legacy Done section — will be migrated by pendencias-updater)
 □ Future Improvements section exists
 □ Dependency mapping (depends:/parallel:) is optional but noted
 □ Evolution classification (FIX/DERIVED/CAPTURED) noted for items that originated from bug fixes or pattern captures during codebase analysis
@@ -547,7 +556,7 @@ grep -c "\[added:" .claude/agents/code-reviewer.md 2>/dev/null || echo "No effic
 - [any other new files]
 
 ### Preserved (not modified):
-- [N] session entries in project.md
+- [N] rows in Progress Log index
 - [N] rules files: [names]
 - [N] existing Known Bug Patterns
 - All existing git history
@@ -623,7 +632,7 @@ Add to project.md: "Upgraded to framework v1.6.0 — 10 process skills extracted
 | PRD | Must exist beforehand | Created retroactively from code |
 | Known Bug Patterns | Empty | Seeded from git fix history |
 | Architecture Patterns | Empty | Populated from codebase structure |
-| Session entries | Session 0 only | All existing entries preserved |
+| Progress Log | Index row only | Existing entries converted to index table |
 | Rules files | Planned for future | Already exist — verified, not modified |
 | Session logs | Empty `.claude/logs/` created | Empty `.claude/logs/` created (same) |
 | Hooks | smart-formatting configured | smart-formatting added if Prettier present |

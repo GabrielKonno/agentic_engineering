@@ -180,7 +180,8 @@ project/
 ├── .claude/                               # (or equivalent for other AI tools)
 │   ├── phases/
 │   │   ├── project.md                     # Handoff document (evolves every session)
-│   │   └── pendencias.md                  # Prioritized backlog with acceptance criteria
+│   │   ├── pendencias.md                  # Prioritized backlog with acceptance criteria
+│   │   └── done_tasks.md                  # Archived completed tasks (not read at session start)
 │   ├── logs/                              # Session logs (one file per session, permanent record)
 │   │   └── YYYYMMDD_sN_slug_commit.md     # e.g., 20260326_s12_financial-sprint_a3f7b2c.md
 │   ├── rules/
@@ -202,7 +203,8 @@ project/
 | `prd.md` | WHAT to build, WHY, and BUSINESS RULES | When the product changes |
 | `CLAUDE.md` | HOW to work in this repo + File Map | When patterns, stack, or file structure change |
 | `project.md` | WHERE we are + TECHNICAL DECISIONS (approved plans, implementation choices) | End of every session |
-| `pendencias.md` | WHAT is left (backlog with verifiable criteria) | End of every session. **If exceeds 30 items:** archive completed items older than 3 sessions to a "Done (archived)" section at the bottom. If "Next Steps" exceeds 15 items: re-evaluate priorities with the user — some items may belong in "Future Improvements" instead. |
+| `pendencias.md` | WHAT is left (backlog with verifiable criteria) | End of every session. Completed tasks are moved immediately to `done_tasks.md` with full metadata. If "Next Steps" exceeds 15 items: re-evaluate priorities with the user — some items may belong in "Future Improvements" instead. |
+| `done_tasks.md` | Archive of completed tasks with full metadata. Not read at session start. Read on-demand by sprint-proposer (dependency checks) or when investigating history. | When tasks are completed (moved by pendencias-updater at end of session or between tasks) |
 | `rules/*.md` | DOMAIN RULES (complex business logic translated into technical rules) | When complex domain logic is established |
 | `agents/code-reviewer.md` | QUALITY checks + Known Bug Patterns + Architecture Patterns (cumulative) | When bugs are fixed, patterns defined, or structural issues found |
 | `agents/security-reviewer.md` | SECURITY checks — OWASP Top 10, injection, auth, data protection (universal, stack-agnostic) | Bootstrap. Covers WHAT to check; stack-specific HOW is in stack skills and Red Team |
@@ -212,7 +214,7 @@ project/
 | `skills/[custom]/SKILL.md` | Custom skills created on-demand for recurring complex processes (Anthropic folder format) | When a technical process repeats 2+ times |
 | `skills/[stack]/SKILL.md` | Stack knowledge (framework-specific patterns for the project's stack) | Created at bootstrap or one-time installation |
 | `assets/examples/` | Reference templates for agents, skills, and rules (copied from framework repo during bootstrap) | Read-only reference. Consult before creating on-demand agents/skills. |
-| `.claude/logs/YYYYMMDD_sN_slug_commit.md` (or `.antigravity/logs/` for Antigravity) | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Not read by AI during normal sessions — exists for human reference, debugging, and project history. | Created automatically at end of every session (item 1). Never edited after creation. |
+| `.claude/logs/YYYYMMDD_sN_slug_commit.md` (or `.antigravity/logs/` for Antigravity) | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Primary detailed record. Read on-demand by AI when investigating past decisions or debugging recurring issues. Not read at session start. | Created automatically at end of every session (item 1). Never edited after creation. |
 
 ---
 
@@ -232,7 +234,7 @@ The PRD defines the product. The project.md tracks the engineering.
 | CURRENT STATUS | project.md | "Inventory ✅, Orders ⏳" |
 | WHAT CHANGED | project.md (sessions) | "Session 5: fixed stock calculation, added bulk import" |
 
-**The technical specification is not a separate document.** It is born in the implementation plan (Execution Protocol, task decomposition step) and recorded in the project.md session entry. The PRD says "stock cannot go negative" (business rule). The project.md says "stock_quantity field with CHECK constraint >= 0, trigger on order_items insert to decrement stock, rollback if insufficient" (technical decision).
+**The technical specification is not a separate document.** It is born in the implementation plan (Execution Protocol, task decomposition step) and recorded in the session log, referenced in the project.md index. The PRD says "stock cannot go negative" (business rule). The project.md says "stock_quantity field with CHECK constraint >= 0, trigger on order_items insert to decrement stock, rollback if insufficient" (technical decision).
 
 ### PRD as a living document
 
@@ -246,9 +248,9 @@ The PRD changes when the PRODUCT changes:
 | Target audience changed | Update Personas + review priorities + changelog | Review backlog |
 | Stack changed | Update Architecture section + changelog | Update architectural decisions |
 | Product pivot | PRD v2.0 — rewrite affected sections + changelog | New phase |
-| Bug fixed | DO NOT update | Record in session entry |
-| Technical decision | DO NOT update | Record in session entry |
-| Module implemented | DO NOT update | Record in session entry |
+| Bug fixed | DO NOT update | Record in session log |
+| Technical decision | DO NOT update | Record in session log |
+| Module implemented | DO NOT update | Record in session log |
 
 ### PRD Versioning
 
@@ -270,16 +272,16 @@ The version number is what the AI agent uses in the PRD sync check to detect cha
 ### At the START of every session:
 
 1. **Read CLAUDE.md** — project overview, patterns, rules
-2. **Check for MODEL SWITCH continuation:** Read last entry of project.md. If it contains a MODEL SWITCH marker:
+2. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in project.md. If one exists:
    - This session is a continuation — skip normal task selection
    - The task to execute and the reason for the model switch are in the marker
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
-3. **Read project.md** — full document on first session. On returning sessions: architectural decisions table + current phase status + last 2 session entries
+3. **Read project.md** — full document on first session. On returning sessions: architectural decisions table + Project Phases status + Progress Log index
 4. **PRD sync check** — if a PRD exists, perform two checks:
-   - **Check A (version-based):** Compare the PRD changelog version with the version recorded in the last project.md session entry (`PRD version: vX.X.X`). If newer → propagate.
+   - **Check A (version-based):** Compare the PRD changelog version with the `**PRD version:**` field in the project.md Overview section. If newer → propagate.
    - **Check B (content-based):** Compare PRD structure (number of modules, scope items, roadmap entries, stack) with what project.md describes. If mismatch → ASK the user before propagating.
-   - If changes detected: read full PRD, update project.md/pendencias.md/CLAUDE.md as needed, ensure changelog is updated, log in session entry.
+   - If changes detected: read full PRD, update project.md/pendencias.md/CLAUDE.md as needed, ensure changelog is updated, log in session log.
    - If ambiguous or contradicts existing decision: ASK the user.
    - If both checks show no changes: skip.
 5. **Read pendencias.md** — what is next and what is in progress
@@ -339,9 +341,7 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
 
 **Priority order** (if context is limited, at minimum do items 1 and 2):
 
-1. **Update project.md** — new session entry: date, what was done, decisions, bugs found/fixed, next step. Always include: `PRD version: vX.X.X`. If a feature was left incomplete, document what was attempted and why it stopped.
-   
-   **Create session log:** After writing the project.md entry, save a permanent copy as a log file in `logs/`. The log contains the same content as the project.md entry PLUS additional detail that would be too verbose for project.md (full reasoning behind decisions, what was tried and failed, exact error messages, alternatives considered).
+1. **Create session log** → primary detailed record in `{CONFIG_DIR}/logs/`: tasks completed, decisions (with reasoning), bugs, discoveries, files changed, evolutions. **Update project.md** → add a concise index row to the Progress Log table (session number, date, 1-line summary, log file reference). Update `**PRD version:**` field and Project Phases status markers (⏳ → ✅).
    
    **Filename format:** `YYYYMMDD_sN_[slug]_[commit].md`
    - `YYYYMMDD` — session date
@@ -385,10 +385,10 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
    
    **Rules:**
    - Logs are **append-only** — never edit a previous session's log
-   - Logs are **not read by the AI** during normal sessions — they exist for human reference
-   - The AI may read logs if the human explicitly asks ("what happened in session 12?" → read the log)
-   - project.md entries can be archived/compressed over time; logs are the permanent record
-2. **Update pendencias.md** — move completed to "Done", update "In progress", add new items. Every new item MUST include:
+   - Logs are **not read at session start** — relevant decisions are propagated to loaded documents by end-of-session skills
+   - The AI reads logs on-demand: when investigating past decisions, debugging recurring issues, or when the human explicitly asks
+   - project.md Progress Log is a concise index; logs are the primary detailed record
+2. **Update pendencias.md** — move completed tasks to `done_tasks.md` (full metadata), update "In progress", add new items. Every new item MUST include:
    - **Context** (why the task exists), **State** (what exists when it starts), **Constraints** (what to avoid)
    - **Acceptance criteria** with `BUILD:`/`VERIFY:`/`QUERY:`/`REVIEW:`/`MANUAL:` tags at STRONG level
    - **Complexity** classification (routine / logic-heavy / architecture-security) — determines reasoning depth for next session
@@ -537,7 +537,7 @@ Include the recommendation in the implementation plan for medium/large tasks. Fo
 ### Estimated scope: [small / medium / large]
 ```
 
-After approval, the plan becomes the technical record. Include summary in the project.md session entry.
+After approval, the plan becomes the technical record. Include summary in the session log.
 
 ### Model switching protocol (when task requires a different model)
 
@@ -545,7 +545,7 @@ When the task complexity classification indicates the current model is insuffici
 
 1. **Save state before switching:**
    - Run end-of-session documentation (at minimum items 1 and 2)
-   - In project.md, add a MODEL SWITCH marker to the session entry:
+   - In project.md, add a MODEL SWITCH block below the Progress Log table (not as a table row):
      ```
      ### [date] — Session N (MODEL SWITCH — continuing in next session)
      **What was done:** [any work completed before the switch]
@@ -779,7 +779,7 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
    - The improvement must prevent the CLASS of failure, not just this instance
    - If the improvement is a new rule in the Execution Protocol: apply it to the config file (CLAUDE.md / GEMINI.md), not just the session log
 
-5. **Log the post-mortem** in the session entry:
+5. **Log the post-mortem** in the session log (and note in the project.md index row):
    ```
    ### Validation Post-Mortem: [task name]
    **Bug found by human:** [description]
@@ -797,7 +797,7 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
 
 **Between tasks (after validation passes, before picking next task):**
 1. Commit (if not already committed): for routine tasks with inline validation, `git add -A && git commit -m "feat: [task name] — validated"`. For subagent-validated tasks, the `feat:` commit was made before Phase B — it already stands.
-2. Update pendencias.md: mark task as Done, confirm next task
+2. Update pendencias.md: move completed task to `done_tasks.md` (full metadata), confirm next task in pendencias.md
 3. If this is task 3+ in the current session: evaluate context health. If degrading → trigger mid-session recovery instead of continuing.
 4. **Sprint-approved mode:** If executing a sprint, pick the next task from the sprint batch and proceed directly to "Before implementing". Do NOT re-propose the sprint or ask for confirmation. If all sprint tasks are done, produce a consolidated sprint report:
    ```
@@ -916,7 +916,7 @@ Resolves conflicts between the validator's judgment and mechanical evidence.
 
 **Three terminal outputs (no recursion):**
 - **UPHOLD ❌:** Validator was right. Implementing agent fixes and re-submits to the validator (not the arbitrator).
-- **OVERRIDE TO ✅:** Validator was wrong. Implementing agent proceeds. Override is logged in the session entry with the arbitrator's justification.
+- **OVERRIDE TO ✅:** Validator was wrong. Implementing agent proceeds. Override is logged in the session log with the arbitrator's justification.
 - **ESCALATE:** Genuinely ambiguous. Goes to the human as last resort.
 
 The arbitrator reads the same checklists, rules, and architectural decisions as the validator. It does NOT read implementation reasoning (same BOUNDARIES).
@@ -1373,7 +1373,7 @@ After creating any agent with `invocation: subagent`, validate it via test scena
 - It exceeds 100 lines (probably a rules file, not a skill)
 - The AI is unfamiliar with the framework (better to skip than invent wrong patterns) — applies to proactive only
 
-Log in session entry: "Created/Updated [component]: [name] — [FIX/DERIVED/CAPTURED]: [justification]" (for evolutions) or "Created skill/agent: [name] — [trigger: proactive/reactive]" (for new creation)
+Log in session log: "Created/Updated [component]: [name] — [FIX/DERIVED/CAPTURED]: [justification]" (for evolutions) or "Created skill/agent: [name] — [trigger: proactive/reactive]" (for new creation)
 
 ### Experimental: External skill evolution engines
 
@@ -1405,7 +1405,7 @@ The config file's Session Protocol contains explicit trigger points:
 - "At session start item 4: run prd-sync-checker"
 - "Before implementing: run criteria-enforcer"
 - "After implementation: run validation-orchestrator"
-- "At session end item 2: run project-md-updater + session-log-creator"
+- "At session end item 2: run session-log-creator + project-md-updater"
 
 These are deterministic — the AI follows the numbered protocol and encounters the trigger.
 

@@ -59,6 +59,7 @@ mkdir -p .antigravity/skills/security-reviewer
 # Copy phases (content is identical, just different location)
 cp .claude/phases/project.md .antigravity/phases/project.md
 cp .claude/phases/pendencias.md .antigravity/phases/pendencias.md 2>/dev/null
+cp .claude/phases/done_tasks.md .antigravity/phases/done_tasks.md 2>/dev/null
 # Handle non-standard backlog naming (copy first match)
 for f in .claude/phases/pendencias*.md; do
   [ -f "$f" ] && [ "$(basename "$f")" != "pendencias.md" ] && cp "$f" .antigravity/phases/pendencias.md 2>/dev/null && break
@@ -134,6 +135,7 @@ mkdir -p .claude/skills
 # Copy phases
 cp .antigravity/phases/project.md .claude/phases/project.md
 cp .antigravity/phases/pendencias.md .claude/phases/pendencias.md
+cp .antigravity/phases/done_tasks.md .claude/phases/done_tasks.md 2>/dev/null
 
 # Copy rules
 cp .antigravity/rules/*.md .claude/rules/
@@ -251,7 +253,7 @@ find .claude -name "*.md" -exec grep -l "\.antigravity/" {} \;
 ```
 
 Also update references in:
-- `project.md` session entries (paths mentioned in logs)
+- `project.md` Progress Log index (log file references) and session logs in `logs/` directory
 - `pendencias.md` task descriptions (if they reference specific paths)
 - `rules/*.md` files (if they reference other docs by path)
 - All agents/skills (`validator.md`, `arbitrator.md`, `code-reviewer.md`, `security-reviewer.md`, etc.) — update `.claude/` ↔ `.antigravity/` and `CLAUDE.md` ↔ `GEMINI.md` in Input sections, BOUNDARIES sections, and context routing paths
@@ -300,25 +302,33 @@ grep "CLAUDE.md" GEMINI.md 2>/dev/null        # Should return nothing
 
 ---
 
-### Step 7 — Add session entry
+### Step 7 — Add migration record
 
-Add a migration session entry to the target project.md:
+Add a migration row to the Progress Log index table in target project.md:
 
 ```markdown
-### [date] — Migration Session ([source] → [target])
+| Migration | [date] | Migrated from [source] to [target], MCPs reconfigured | `logs/[migration-log].md` |
+```
 
-**What was done:**
-- Migrated Agentic Engineering setup from [source tool] to [target tool]
+Create a migration session log in `{CONFIG_DIR}/logs/`:
+
+```markdown
+# Migration Session — [date]
+
+## Summary
+Migrated Agentic Engineering setup from [source tool] to [target tool].
+
+## What was done
 - Copied: phases, rules, skills/agents, logs
 - Created: [GEMINI.md|CLAUDE.md] adapted from [CLAUDE.md|GEMINI.md]
 - Reconfigured MCPs: [list]
 - Updated internal path references
 
-**Source files preserved:** [YES — source .claude/.antigravity folder kept as backup | NO — deleted after verification]
+## Source files preserved
+[YES — source .claude/.antigravity folder kept as backup | NO — deleted after verification]
 
-**PRD version:** v[X.X.X] (unchanged — migration does not affect product scope)
-
-**Next step:** [continue with next task from pendencias.md]
+## PRD version: v[X.X.X] (unchanged — migration does not affect product scope)
+## Next session should: [continue with next task from pendencias.md]
 ```
 
 ---
@@ -343,6 +353,7 @@ ASK the user which option they prefer.
 | (none) | `AGENTS.md` | Cross-tool compat file (Antigravity creates it) |
 | `.claude/phases/project.md` | `.antigravity/phases/project.md` | ✅ Identical content, different path |
 | `.claude/phases/pendencias.md` | `.antigravity/phases/pendencias.md` | ✅ Identical content |
+| `.claude/phases/done_tasks.md` | `.antigravity/phases/done_tasks.md` | ✅ Identical content (may not exist if no tasks completed yet) |
 | `.claude/rules/*.md` | `.antigravity/rules/*.md` | ✅ Identical content |
 | `.claude/agents/code-reviewer.md` | `.antigravity/skills/code-reviewer/SKILL.md` | Same content, different format convention |
 | `.claude/agents/security-reviewer.md` | `.antigravity/skills/security-reviewer/SKILL.md` | Same content, different format convention |

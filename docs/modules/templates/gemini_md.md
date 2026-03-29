@@ -23,12 +23,12 @@ This file provides guidance to Antigravity agents when working with this reposit
 
 ### At the START of every session:
 1. Read `GEMINI.md` (this file)
-2. **Check for MODEL SWITCH continuation:** Read last entry of `.antigravity/phases/project.md`. If it contains a "MODEL SWITCH" marker:
+2. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in `.antigravity/phases/project.md`. If one exists:
    - This session is a continuation — skip normal task selection
    - The task and reason for the switch are in the marker
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
-3. Read `.antigravity/phases/project.md` — full on first session; architectural decisions + status + last 2 entries on returning sessions
+3. Read `.antigravity/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
 4. **PRD sync check** → run `.antigravity/skills/prd-sync-checker/SKILL.md`
    <!-- Compares PRD version/content with project.md, propagates changes -->
 5. Read `.antigravity/phases/pendencias.md` — what is next
@@ -90,8 +90,9 @@ If medium or large, generate Implementation Plan artifact:
   - False ❌ from subagent escalated by arbitrator (genuinely ambiguous — human decides)
 
 **Model switch protocol** (if task is Architecture/Security AND current model is not the most capable):
-1. Save state: run project-md-updater and pendencias-updater skills. Add MODEL SWITCH marker to project.md:
+1. Save state: run session-log-creator, project-md-updater and pendencias-updater skills. The project-md-updater writes a MODEL SWITCH block below the Progress Log table in project.md (not as a table row):
    ```
+   <!-- MODEL SWITCH — active -->
    ### [date] — Session N (MODEL SWITCH — continuing in next session)
    **What was done:** [work before switch]
    **Model switch reason:** Task "[name]" classified as architecture/security
@@ -126,12 +127,12 @@ If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
    - Subagent context incomplete → update context routing rules
    - AI judgment error → inherent limitation, no doc fix
 4. Apply systemic improvement (prevent the CLASS of failure)
-5. Log post-mortem in project.md session entry (under a "Post-Mortem" subsection) AND in the session log (`.antigravity/logs/`)
+5. Log post-mortem in the session log (`.antigravity/logs/`) and note it in the project.md Progress Log index row
 Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ### Between tasks (after validation passes):
 1. Commit if not already committed
-2. Update pendencias.md: mark task as Done, confirm next
+2. Update pendencias.md: move completed task to `done_tasks.md` (full metadata), confirm next in pendencias.md
 3. If task 3+ in session: evaluate context health → mid-session recovery if degrading
 4. **Sprint-approved mode:** pick next task, proceed directly. If all done, produce sprint report:
    ```
@@ -148,10 +149,10 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
 ### At the END of every session (in order):
 1. **Extract patterns** → run `.antigravity/skills/diff-pattern-extractor/SKILL.md`
    <!-- Scans git diff, adds to Known Bug Patterns / Architecture Patterns -->
-2. **Update project.md** → run `.antigravity/skills/project-md-updater/SKILL.md`
-   <!-- Session entry with decisions, bugs, PRD version -->
-   **Create session log** → run `.antigravity/skills/session-log-creator/SKILL.md`
-   <!-- Permanent verbose record in .antigravity/logs/ -->
+2. **Create session log** → run `.antigravity/skills/session-log-creator/SKILL.md`
+   <!-- Primary detailed record in .antigravity/logs/ -->
+   **Update project.md** → run `.antigravity/skills/project-md-updater/SKILL.md`
+   <!-- Concise index row referencing the session log + PRD version + phase status -->
 3. **Update pendencias.md** → run `.antigravity/skills/pendencias-updater/SKILL.md`
    <!-- Move completed to Done, add new items with full criteria -->
 4. **Update GEMINI.md** → run `.antigravity/skills/config-file-updater/SKILL.md`

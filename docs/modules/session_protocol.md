@@ -12,12 +12,12 @@ In v1.6.0, the protocol items that involve multi-step processes are delegated to
 ## At the START of every session:
 
 1. Read `{CONFIG_FILE}` (this file)
-2. **Check for MODEL SWITCH continuation:** Read last entry of `{CONFIG_DIR}/phases/project.md`. If it contains a "MODEL SWITCH" marker:
+2. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in `{CONFIG_DIR}/phases/project.md`. If one exists:
    - This session is a continuation — skip normal task selection
    - The task and reason for the switch are in the marker
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
-3. Read `{CONFIG_DIR}/phases/project.md` — full on first session; architectural decisions + status + last 2 entries on returning sessions
+3. Read `{CONFIG_DIR}/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
 4. **PRD sync check** → run `{CONFIG_DIR}/skills/prd-sync-checker/SKILL.md`
    <!-- Compares PRD version/content with project.md, propagates changes if needed -->
 5. Read `{CONFIG_DIR}/phases/pendencias.md` — what is next
@@ -75,10 +75,10 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
 
 1. **Extract patterns from diff** → run `{CONFIG_DIR}/skills/diff-pattern-extractor/SKILL.md`
    <!-- Scans git diff, adds to Known Bug Patterns / Architecture Patterns -->
-2. **Update project.md** → run `{CONFIG_DIR}/skills/project-md-updater/SKILL.md`
-   <!-- Session entry with decisions, bugs, PRD version, next step -->
-   **Create session log** → run `{CONFIG_DIR}/skills/session-log-creator/SKILL.md`
-   <!-- Permanent verbose record in {CONFIG_DIR}/logs/ -->
+2. **Create session log** → run `{CONFIG_DIR}/skills/session-log-creator/SKILL.md`
+   <!-- Primary detailed record in {CONFIG_DIR}/logs/ -->
+   **Update project.md** → run `{CONFIG_DIR}/skills/project-md-updater/SKILL.md`
+   <!-- Concise index row referencing the session log + PRD version + phase status -->
 3. **Update pendencias.md** → run `{CONFIG_DIR}/skills/pendencias-updater/SKILL.md`
    <!-- Move completed to Done, add new items with full criteria -->
 4. **Update {CONFIG_FILE}** → run `{CONFIG_DIR}/skills/config-file-updater/SKILL.md`
@@ -121,7 +121,7 @@ The agent checks this list before making end-of-session updates. For human-appro
 
 If context window is getting full (forgetting earlier decisions, repeating mistakes, losing track):
 1. STOP implementation
-2. Run end-of-session skills (at minimum project-md-updater and pendencias-updater)
+2. Run end-of-session skills (at minimum session-log-creator, project-md-updater and pendencias-updater)
 3. Commit: `git add -A && git commit -m "wip: [task] — context limit"`
 4. Tell the user: "Context is degrading. I've saved state. Please start a new session to continue with fresh context."
 

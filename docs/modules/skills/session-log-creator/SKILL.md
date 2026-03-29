@@ -3,18 +3,19 @@ name: session-log-creator
 invocation: inline
 effort: medium
 description: >
-  Creates a permanent session log file at end of every session. More verbose than
-  project.md entry — includes reasoning, alternatives, errors, and full git output.
-  MUST run alongside project-md-updater at end of every session. Without logs,
-  debugging "why was this decided?" requires re-reading all session entries.
+  Creates a permanent session log file at end of every session. This is the primary
+  detailed record — includes reasoning, alternatives, errors, and full git output.
+  MUST run at end of every session, BEFORE project-md-updater (which references the
+  log filename in the project.md index row). Without logs, debugging "why was this
+  decided?" requires re-reading all session context.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 1 (log subsection)
+derived_from: session_protocol end-of-session item 2
 ---
 
 # Session Log Creator
 
 ## When to run
-At the END of every session, alongside or immediately after project-md-updater.
+At the END of every session, BEFORE project-md-updater (the project-md-updater needs the log filename to reference in the index row).
 
 ## Process
 
@@ -39,12 +40,18 @@ Save to `.claude/logs/[filename]`:
 # Session [N] — [date]
 
 ## Summary
-[1-2 sentences: goal and outcome]
+[1-2 sentences: goal and outcome. Be specific — include what was the plan, was it
+achieved, and what is the project state now. This may be read by the AI in future
+sessions when investigating past decisions.]
 
 ## Tasks completed
 - [task]: [approach, key decisions]
 
 ## Decisions made (and why)
+[Include enough context for future reference: what was decided, what alternatives were
+considered, what trade-offs drove the choice, and any constraints. This section is the
+primary record of decision reasoning — the Architectural Decisions table in project.md
+captures the WHAT, this section captures the WHY in detail.]
 - [decision]: [reasoning, alternatives, trade-offs]
 
 ## Bugs found and fixed
@@ -68,6 +75,13 @@ Save to `.claude/logs/[filename]`:
 
 ### 3. Rules
 - Logs are **append-only** — never edit old logs
-- Logs are NOT read by AI in normal sessions (human reference only)
-- Logs are a permanent record even when project.md entries are archived
-- More verbose than project.md entries — include reasoning, alternatives, error messages
+- Logs are the **primary detailed record** — project.md Progress Log is a concise index only
+- Logs are **NOT read at session start** — the relevant decisions are already propagated to
+  the documents loaded at session start (Architectural Decisions table, {CONFIG_FILE} Key Patterns,
+  rules files) by the end-of-session skills
+- Logs are **read on-demand** when:
+  - The AI needs to investigate a past decision or debug a recurring issue
+  - The human explicitly asks ("what happened in session 12?" → read the log)
+  - The prd-sync-checker or other skill needs historical context
+- All reasoning, alternatives, error messages, and implementation context lives HERE,
+  not in project.md

@@ -15,6 +15,7 @@
 **Repository:** [if exists]
 **Deploy:** [strategy]
 **Database:** [provider]
+**PRD version:** v1.0.0
 
 ---
 
@@ -60,25 +61,15 @@ Module A ──→ Module B ──→ Module C
 
 ## Progress Log
 
-### [date] — Session 0 (Bootstrap)
+> Concise index. Detailed session records live in `{CONFIG_DIR}/logs/`.
+> Decisions are reflected in the Architectural Decisions table and {CONFIG_FILE}.
 
-**What was done:**
-- PRD read and analyzed
-- {CONFIG_FILE} created with Session Protocol + Execution Protocol
-- project.md created with phases derived from PRD
-- pendencias.md created with prioritized backlog
-- code-reviewer created
-- MCPs installed: [list]
-- Skills installed: [list]
-- Rules planned for future: [list]
+| Session | Date | Summary | Log |
+|---------|------|---------|-----|
+| 0 (Bootstrap) | [date] | PRD analyzed, docs + agents created, stack confirmed | — |
 
-**Decisions made:**
-- [Stack confirmed/defined]
-- [Build order defined]
-
-**PRD version:** v1.0.0
-
-**Next step:** [first real item from Build Order]
+<!-- MODEL SWITCH markers (if any) appear below as full blocks. They are temporary —
+     removed when the continuation session resolves and replaced by a normal index row. -->
 
 ---
 
