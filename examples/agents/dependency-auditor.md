@@ -4,6 +4,10 @@ effort: medium
 description: >
   Audits project dependencies for security vulnerabilities, outdated packages,
   unused imports, and license compliance. Run periodically or before releases.
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Dependency Auditor

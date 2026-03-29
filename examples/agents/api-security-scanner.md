@@ -8,6 +8,10 @@ description: >
   Stack-specific — adapt to project's API framework.
 receives: git diff, security-reviewer.md, stack security skill, rules files, acceptance criteria
 produces: API Security Scan Report with findings table, severity counts, APPROVE/FIX REQUIRED/BLOCK recommendation
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # API Security Scanner

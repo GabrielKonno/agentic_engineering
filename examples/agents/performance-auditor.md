@@ -5,6 +5,10 @@ description: >
   Reviews code for performance issues. Invoked after implementing features
   that involve data fetching, rendering, or heavy computation.
   Adapts checks to the project's stack.
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Performance Auditor

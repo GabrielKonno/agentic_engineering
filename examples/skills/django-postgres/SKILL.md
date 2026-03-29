@@ -4,6 +4,8 @@ effort: medium
 description: >
   Stack patterns for Django + PostgreSQL projects.
   Includes ORM patterns, security settings, middleware, and testing conventions.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # Django + PostgreSQL Patterns

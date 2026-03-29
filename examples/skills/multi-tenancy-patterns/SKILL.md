@@ -4,6 +4,8 @@ effort: high
 description: >
   Patterns for implementing multi-tenant SaaS applications.
   Covers isolation strategies, data model, auth scoping, and common pitfalls.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # Multi-Tenancy Patterns

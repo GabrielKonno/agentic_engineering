@@ -5,6 +5,10 @@ description: >
   Verifies state machine implementations for completeness, invalid transitions,
   and edge cases. Use when implementing status workflows (orders, appointments,
   tickets, subscriptions, payments).
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # State Machine Verifier

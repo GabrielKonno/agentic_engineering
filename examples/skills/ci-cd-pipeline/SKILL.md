@@ -4,6 +4,8 @@ effort: medium
 description: >
   CI/CD pipeline patterns for automated testing, building, and deployment.
   Covers GitHub Actions, environment management, and deployment strategies.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # CI/CD Pipeline Patterns

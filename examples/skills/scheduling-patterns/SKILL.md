@@ -4,6 +4,8 @@ effort: high
 description: >
   Test patterns and business rules for scheduling features: appointments,
   calendars, availability, recurring events, timezone handling, conflicts.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # Scheduling Domain Patterns

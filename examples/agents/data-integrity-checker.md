@@ -5,6 +5,10 @@ description: >
   Verifies data integrity across related tables and operations.
   Use when implementing features that create, update, or delete data
   across multiple tables (cascades, transactions, denormalized data).
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Data Integrity Checker

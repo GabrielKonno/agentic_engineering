@@ -5,6 +5,10 @@ description: >
   Guides safe database migration execution. Verifies migration files,
   checks for destructive operations, validates rollback paths, and
   confirms data integrity post-migration.
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Migration Runner

@@ -4,6 +4,8 @@ effort: medium
 description: >
   Stack patterns for Express.js + MongoDB (Mongoose) projects.
   Includes middleware patterns, schema design, security, and API conventions.
+created: example (framework reference template)
+derived_from: null
 ---
 
 # Express + MongoDB Patterns

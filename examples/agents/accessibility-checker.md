@@ -4,6 +4,10 @@ effort: medium
 description: >
   Reviews UI components and pages for WCAG 2.1 AA compliance.
   Invoked when implementing or modifying user-facing interfaces.
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Accessibility Checker

@@ -4,6 +4,10 @@ effort: medium
 description: >
   Reviews test code for quality, coverage gaps, and false-positive risk.
   Invoked when tests are written or modified, especially for business logic.
+created: example (framework reference template)
+last_eval: none (reference template — eval at project creation)
+fixes: []
+derived_from: null
 ---
 
 # Test Quality Reviewer

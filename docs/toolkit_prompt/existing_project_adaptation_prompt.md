@@ -574,6 +574,46 @@ grep -c "\[added:" .claude/agents/code-reviewer.md 2>/dev/null || echo "No effic
 
 ---
 
+## v1.5.0 → v1.6.0 Upgrade Checklist
+
+Projects bootstrapped with v1.5.0 can upgrade to v1.6.0 by:
+
+### 1. Copy pre-built process skills
+
+```bash
+cp -r [framework-root]/docs/modules/skills/* .claude/skills/
+```
+
+This adds 10 process skills that were previously inline in CLAUDE.md:
+- prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator
+- diff-pattern-extractor, project-md-updater, pendencias-updater
+- claude-md-updater, rules-agents-updater, session-log-creator
+
+### 2. Slim down CLAUDE.md
+
+Compare current CLAUDE.md against `[framework-root]/docs/modules/templates/claude_md.md`.
+Replace inline process descriptions with skill triggers (see template for format).
+Keep all project-specific sections (Architecture, Key Patterns, File Map, etc.) unchanged.
+
+### 3. Verify skill triggers
+
+After slimming CLAUDE.md, verify that each trigger in Session Protocol references
+a skill that exists in `.claude/skills/`:
+- Session start: prd-sync-checker, sprint-proposer
+- Before implementing: criteria-enforcer
+- During implementation: validation-orchestrator
+- Session end: diff-pattern-extractor, project-md-updater, pendencias-updater, claude-md-updater, rules-agents-updater, session-log-creator
+
+### 4. For Antigravity projects
+
+Same process but with `.antigravity/skills/` paths and `docs/modules/templates/gemini_md.md` as the reference template.
+
+### 5. Log the upgrade
+
+Add to project.md: "Upgraded to framework v1.6.0 — 10 process skills extracted, CLAUDE.md slimmed from ~500 to ~200 lines"
+
+---
+
 ## Quick Reference: What this prompt does vs session0
 
 | Aspect | session0 (greenfield) | This prompt (existing project) |

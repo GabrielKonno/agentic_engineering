@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v1.5.0
+# Agentic Engineering Framework v1.6.0
 
 A methodology for AI-assisted software development where the AI implements, validates, and reports with evidence — and the human approves and directs.
 
@@ -53,11 +53,17 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
+│   ├── modules/                            ← Single source of truth (v1.6.0)
+│   │   ├── session_protocol.md             ← Session Protocol (START, END, recovery)
+│   │   ├── execution_protocol.md           ← Execution Protocol (validation loop)
+│   │   ├── templates/                      ← Document and agent templates
+│   │   └── skills/                         ← 10 pre-built process skills
+│   │
 │   ├── bootstrap_claude/
-│   │   └── session0_bootstrap_prompt.md    ← Bootstrap prompt for Claude Code
+│   │   └── session0_bootstrap_prompt.md    ← Bootstrap for Claude Code (references modules)
 │   │
 │   ├── bootstrap_antigravity/
-│   │   └── session0_bootstrap_antigravity.md ← Bootstrap prompt for Antigravity
+│   │   └── session0_bootstrap_antigravity.md ← Bootstrap for Antigravity (references modules)
 │   │
 │   └── toolkit_prompt/
 │       ├── prd_planning_prompt.md              ← Create a PRD from scratch
