@@ -89,19 +89,39 @@ Construct subagent prompt with: role definition, files to read (explicit paths),
 
 **Context routing — ALWAYS include:**
 - Agent's own .md file
-- All rules files
+- All `.claude/rules/*.md` files
 - CLAUDE.md: Key Patterns, Architecture
 - project.md: Architectural Decisions table ONLY
 
+**IF security-relevant:**
+- `.claude/agents/security-reviewer.md`
+- Stack security skill in `.claude/skills/*/SKILL.md` (if exists)
+
+**IF UI task:**
+- Design System section of CLAUDE.md
+
 **NEVER include (anti-bias firewall):**
 - project.md Progress Log
-- Session logs
+- `.claude/logs/*.md` (session history)
 - Sprint proposals or implementation plans
+- Any file the implementing agent wrote as part of the task explanation
 
 **Sequencing (Route B):** code-reviewer → validator
 **Sequencing (Route C):** code-reviewer → security-reviewer → Red Team → validator → arbitrator (if needed) → Blue Team
 
-**Retry flow:** Fix → commit "fix: [task] — validation fix N" → re-spawn from step 1. Max 3 cycles.
+**Retry flow:** Fix → commit "fix: [task] — validation fix N" → re-spawn from step 1. Max 3 cycles. After limit: STOP and escalate to human:
+```
+## Validation Escalation: [task name]
+### Retry cycles exhausted: 3/3
+### Persistent failures:
+- [category]: [what keeps failing and why]
+### What was tried:
+- Fix 1: [description] → [result]
+- Fix 2: [description] → [result]
+- Fix 3: [description] → [result]
+### Diagnosis: [root cause hypothesis]
+### Recommendation: [what the human should decide]
+```
 
 ## Validation report format
 

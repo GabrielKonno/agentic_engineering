@@ -31,6 +31,7 @@ Example: `20260326_s12_financial-closing-sprint_a3f7b2c.md`
 Get commit hash: `git log --oneline -1 | cut -d' ' -f1`
 
 Or run: `bash .claude/skills/session-log-creator/scripts/create-log.sh [session_number] [slug]`
+(Scripts require bash — Git Bash on Windows, native on macOS/Linux. If unavailable, the AI executes the equivalent steps manually.)
 
 ### 2. Write log file
 
@@ -77,7 +78,7 @@ captures the WHAT, this section captures the WHY in detail.]
 - Logs are **append-only** — never edit old logs
 - Logs are the **primary detailed record** — project.md Progress Log is a concise index only
 - Logs are **NOT read at session start** — the relevant decisions are already propagated to
-  the documents loaded at session start (Architectural Decisions table, {CONFIG_FILE} Key Patterns,
+  the documents loaded at session start (Architectural Decisions table, CLAUDE.md Key Patterns,
   rules files) by the end-of-session skills
 - Logs are **read on-demand** when:
   - The AI needs to investigate a past decision or debug a recurring issue

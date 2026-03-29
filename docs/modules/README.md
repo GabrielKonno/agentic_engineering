@@ -25,8 +25,9 @@ Shared protocols use placeholders for tool-specific paths:
 |-------------|------------|-------------|
 | `{CONFIG_FILE}` | `CLAUDE.md` | `GEMINI.md` |
 | `{CONFIG_DIR}` | `.claude/` | `.antigravity/` |
-| `{AGENTS_PATH}` | `.claude/agents/` | `.antigravity/skills/` |
 | `{SUBAGENT_TOOL}` | Task tool | Agent Manager |
+
+Note: Agent templates use `{CONFIG_DIR}/agents/` for their path. In Antigravity, review agents are stored as skills in `{CONFIG_DIR}/skills/` (using the same folder format).
 
 Each bootstrap provides the mapping. Templates in `templates/` have tool-specific variants where needed (`claude_md.md` vs `gemini_md.md`).
 

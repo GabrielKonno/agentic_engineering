@@ -189,6 +189,8 @@ project/
 │   ├── agents/
 │   │   ├── code-reviewer.md              # Quality checks + Known Bug Patterns + Architecture Patterns
 │   │   ├── security-reviewer.md          # OWASP Top 10, injection, auth, data protection (universal, stack-agnostic)
+│   │   ├── validator.md                  # Independent validation agent — verifies with isolated context
+│   │   ├── arbitrator.md                 # Resolves conflicts between validator judgment and mechanical evidence
 │   │   ├── red-team.md                   # (conditional) Adversarial security tester — stack-specific attack vectors
 │   │   └── blue-team.md                  # (conditional) Defensive security verifier — validates defenses
 │   ├── skills/                           # Anthropic folder format: name/SKILL.md
@@ -285,7 +287,7 @@ The version number is what the AI agent uses in the PRD sync check to detect cha
    - If ambiguous or contradicts existing decision: ASK the user.
    - If both checks show no changes: skip.
 5. **Read pendencias.md** — what is next and what is in progress
-6. **Propose sprint (Level 4):** Based on pendencias.md, propose a batch of tasks for this session:
+6. **Propose sprint:** Based on pendencias.md, propose a batch of tasks for this session:
    ```
    ## Sprint Proposal: Session N
    
@@ -324,7 +326,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 #### Evolution classification
 
-Every evolution in items 3-8 below must be classified by its trigger mode:
+Every evolution in items 4-5 below must be classified by its trigger mode:
 
 | Mode | Trigger | Examples |
 |------|---------|----------|
@@ -341,104 +343,112 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
 
 **Priority order** (if context is limited, at minimum do items 1 and 2):
 
-1. **Create session log** → primary detailed record in `{CONFIG_DIR}/logs/`: tasks completed, decisions (with reasoning), bugs, discoveries, files changed, evolutions. **Update project.md** → add a concise index row to the Progress Log table (session number, date, 1-line summary, log file reference). Update `**PRD version:**` field and Project Phases status markers (⏳ → ✅).
-   
+In v1.6.0, each end-of-session item is implemented by a pre-built process skill (see `modules/skills/`). The sequence below defines the order and triggers; the skills contain the detailed how-to.
+
+1. **Extract patterns from diff** → run `diff-pattern-extractor` skill
+
+   Review the git diff of this session. For each non-trivial fix or implementation, ask three questions:
+   - **Bug fixed → Could this recur?** Add CORRECT pattern to Known Bug Patterns with efficacy tracking: `[added: sN | triggered: never | false-positive: 0]`
+   - **Mistake corrected mid-task → What was the wrong instinct?** Add a check that catches the wrong approach.
+   - **Structural decision worth preserving?** Add to Architecture Patterns.
+
+   **This is a systematic diff scan, not optional introspection.** The diff is the source of truth.
+
+   **Known Bug Patterns cap:** Max 20 patterns. At 15+: promote related patterns to rules files (3+ from same domain → `rules/[domain]-rules.md`). Remove patterns enforced by linting or tests. Use efficacy data: no `triggered` history → remove first; frequent `triggered` → promote.
+
+   **Efficacy tracking:** Each Known Bug Pattern includes:
+   ```
+   - [ ] Date formatting: use local parsing, not toISOString()
+     [added: s3 | triggered: s5, s8 | false-positive: 0]
+   ```
+   The code-reviewer subagent reports which patterns were triggered. The implementing agent updates tracking fields here.
+
+   **Periodic review (every 10 sessions):** `triggered: never` after 10+ sessions → removal candidate. Frequent `false-positive` → refine. Frequent `triggered` → promote to rules file.
+
+2. **Create session log + update project.md** → run `session-log-creator` then `project-md-updater` skills
+
+   **Session log:** Primary detailed record in `.claude/logs/` (or `.antigravity/logs/`): tasks completed, decisions (with reasoning), bugs, discoveries, files changed, evolutions.
+
    **Filename format:** `YYYYMMDD_sN_[slug]_[commit].md`
    - `YYYYMMDD` — session date
    - `sN` — session number (s1, s2, ... s24)
-   - `[slug]` — 2-4 word kebab-case summary of main accomplishment (e.g., `auth-rls-setup`, `financial-sprint`, `dashboard-redesign`)
-   - `[commit]` — short hash (7 chars) of the last commit in this session
-   
-   Example: `20260326_s12_financial-closing-sprint_a3f7b2c.md`
-   
+   - `[slug]` — 2-4 word kebab-case summary (e.g., `auth-rls-setup`, `financial-sprint`)
+   - `[commit]` — short hash (7 chars) of the last commit
+
    **Log template:**
    ```markdown
    # Session [N] — [date]
-   
+
    ## Summary
    [1-2 sentences: what was the goal, was it achieved]
-   
+
    ## Tasks completed
    - [task name]: [what was implemented, key decisions, approach taken]
-   
+
    ## Decisions made (and why)
    - [decision]: [reasoning, alternatives considered, trade-offs]
-   
+
    ## Bugs found and fixed
    - [bug]: [root cause, how it was found, fix applied, pattern added to code-reviewer?]
-   
+
    ## Discoveries
    - [anything unexpected: missing API, schema issue, performance problem, security finding]
-   
+
    ## Files changed
    [output of `git diff --stat` for this session's commits]
-   
+
    ## Commits
    [output of `git log --oneline` for this session's commits]
-   
+
    ## Evolutions applied
    - [FIX/DERIVED/CAPTURED]: [component] — [what changed and why]
 
    ## PRD version: v[X.X.X]
    ## Next session should: [specific next step]
    ```
-   
+
    **Rules:**
    - Logs are **append-only** — never edit a previous session's log
    - Logs are **not read at session start** — relevant decisions are propagated to loaded documents by end-of-session skills
    - The AI reads logs on-demand: when investigating past decisions, debugging recurring issues, or when the human explicitly asks
    - project.md Progress Log is a concise index; logs are the primary detailed record
-2. **Update pendencias.md** — move completed tasks to `done_tasks.md` (full metadata), update "In progress", add new items. Every new item MUST include:
+
+   **project.md update:** Add a concise index row to the Progress Log table (session number, date, 1-line summary, log file reference). Update `**PRD version:**` field and Project Phases status markers (⏳ → ✅).
+
+3. **Update pendencias.md** → run `pendencias-updater` skill
+
+   Move completed tasks to `done_tasks.md` (full metadata), update "In progress", add new items. Every new item MUST include:
    - **Context** (why the task exists), **State** (what exists when it starts), **Constraints** (what to avoid)
    - **Acceptance criteria** with `BUILD:`/`VERIFY:`/`QUERY:`/`REVIEW:`/`MANUAL:` tags at STRONG level
    - **Complexity** classification (routine / logic-heavy / architecture-security) — determines reasoning depth for next session
    - `QUERY:` and `VERIFY:` criteria involving business logic flagged as candidates for executable tests
    If a task hit the retry limit: mark as "⚠️ Blocked: [reason]" — not completed, not removed.
-3. **Update CLAUDE.md** — if module status, patterns, rules, or file structure changed.
-4. **Update rules files** — if domain logic was established. **Trigger: create a new `rules/[domain]-rules.md` (inside the tool's config directory) when any of these occur:**
-   - A module has 3+ business rules that affect how code should be written (not just what it does)
-   - The same calculation logic or business constraint was referenced 2+ times across sessions
-   - A bug was caused by misunderstanding domain logic (the fix requires understanding the "why", not just the "what")
-   - The code-reviewer's Known Bug Patterns has 3+ entries from the same domain (consolidate into a rules file)
-5. **Update code-reviewer (diff-based pattern extraction):** Review the git diff of this session (`git diff` of commits made in this session). For each non-trivial fix or implementation:
-   - **Bug fixed → Could this recur?** If yes, add the CORRECT pattern (not the mistake) to Known Bug Patterns. Example: fixed a timezone bug → add "Date operations: verify timezone handling, use local formatting not toISOString()".
-   - **Mistake corrected mid-task → What was the wrong instinct?** Add a check that catches the wrong approach. Example: initially used string concatenation for SQL → add "All database queries use parameterized inputs".
-   - **Structural decision worth preserving?** Add to Architecture Patterns. Example: split a 400-line handler into subdomain files → add "Handler files: max ~30 functions, split by subdomain when exceeding".
-   
-   **This is a systematic diff scan, not optional introspection.** The diff is the source of truth, not memory of what happened.
-   
-   **Known Bug Patterns cap:** Max 20 patterns. When reaching 15+, aggressively promote related patterns to rules files: if 3+ patterns share a domain (dates, currency, auth), consolidate into a `rules/[domain]-rules.md` and remove from Known Bug Patterns. Rules files have no limit and serve as long-term memory. Remove patterns now enforced by linting or tests.
 
-   **Efficacy tracking:** Each Known Bug Pattern includes tracking metadata:
+4. **Update CLAUDE.md** → run `config-file-updater` skill
 
-   ```
-   - [ ] Date formatting: use local parsing, not toISOString()
-     [added: s3 | triggered: s5, s8 | false-positive: 0]
-   ```
+   If module status, patterns, rules, or file structure changed. Do NOT update Session Protocol or Execution Protocol (behavior change — requires human approval).
 
-   - `added` — session when the pattern was created
-   - `triggered` — sessions where this pattern actually caught a problem during review
-   - `false-positive` — count of times the pattern flagged something that wasn't a real issue
+5. **Update rules/agents/skills/PRD** → run `rules-agents-updater` skill
 
-   The code-reviewer subagent reports which Known Bug Patterns were triggered in its Code Review Report. The implementing agent updates the tracking fields in this end-of-session step.
+   **Rules files** — create a new `rules/[domain]-rules.md` when:
+   - A module has 3+ business rules that affect how code should be written
+   - Same logic referenced 2+ times across sessions
+   - A bug was caused by misunderstanding domain logic
+   - 3+ Known Bug Patterns from the same domain (DERIVED promotion)
 
-   **Periodic review (every 10 sessions or via maintenance):**
-   - `triggered: never` after 10+ sessions → candidate for removal (bug class may be eliminated, or pattern too specific)
-   - Frequent `false-positive` → needs refinement (pattern too broad)
-   - Frequent `triggered` → working well, candidate for DERIVED promotion to rules file
+   **Existing agents and skills** — update if a discovery belongs to their scope:
+   - New RLS edge case → add to **red-team.md**
+   - Framework pitfall → add to **stack skill**
+   - New attack vector → add to **security-reviewer.md**
+   - Verified defense → update **blue-team.md** Defense Inventory
 
-   Efficacy data informs the cap management: instead of arbitrary selection when promoting at 15+, patterns with evidence of effectiveness are preserved while patterns with no evidence of impact are removed first.
-6. **Update existing agents and skills** — if a discovery from this session belongs to the scope of an existing agent or skill (not the code-reviewer), update that file directly. Examples:
-   - Found a new RLS edge case during implementation → add to **red-team.md** (new Tier 1 or Tier 2 test)
-   - Discovered a framework-specific pitfall → add to **stack skill** (`skills/[stack]/SKILL.md`, new entry in Common Pitfalls table)
-   - Found a new attack vector during security review → add to **security-reviewer.md** (new checklist item in the relevant section)
-   - Blue Team verified a new defense → update **blue-team.md** Defense Inventory
-   
-   **The test:** "If I were starting a new session and reading this agent/skill, would I miss the pattern I just discovered?" If yes, add it now. Agents and skills that don't evolve with the project become stale references that the AI reads but doesn't trust.
-7. **Update PRD** — ONLY if product scope changed. Always update the changelog with new version.
-8. **Create skills or agents on-demand** — if a recurring pattern was identified. Before creating, consult `assets/examples/` for quality reference (see [On-Demand Creation](#on-demand-skill-and-agent-creation)).
+   **The test:** "If I were starting a new session and reading this agent/skill, would I miss the pattern I just discovered?" If yes, add it now.
 
-**Documentation updates are mandatory.** Items 3-8 can be deferred to the next session if context window is running low.
+   **PRD** — ONLY if product scope changed. Always update changelog.
+
+   **On-demand creation** — if a recurring pattern was identified. Before creating, consult `assets/examples/` for quality reference (see [On-Demand Creation](#on-demand-skill-and-agent-creation)).
+
+**Documentation updates are mandatory.** Items 4-5 can be deferred to the next session if context window is running low.
 
 ### Auto-evolution boundaries
 

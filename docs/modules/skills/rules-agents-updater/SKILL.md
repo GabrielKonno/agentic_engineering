@@ -8,7 +8,7 @@ description: >
   MUST evaluate at end of every session (item 5). Without this, agents and rules
   become stale and stop matching the project's actual patterns.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session items 4,6,7,8
+derived_from: session_protocol end-of-session item 5
 ---
 
 # Rules, Agents, and Skills Updater

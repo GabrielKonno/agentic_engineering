@@ -246,4 +246,4 @@ For the full methodology, concepts, and design rationale:
 
 **Read:** `docs/agentic_engineering_framework.md`
 
-This is the tool-agnostic reference document (1500+ lines) covering: problem definition, maturity model, project structure, document boundaries, session protocol, execution protocol, validation orchestration protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.
+This is the tool-agnostic reference document (1700+ lines) covering: problem definition, maturity model, project structure, document boundaries, session protocol, execution protocol, validation orchestration protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.
