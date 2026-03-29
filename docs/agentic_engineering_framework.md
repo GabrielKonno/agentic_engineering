@@ -19,12 +19,13 @@ Tool-agnostic in concepts. Reference implementations provided for Claude Code (`
 9. [Browser Automation Guidelines](#browser-automation-guidelines)
 10. [MCP and Tool Discovery](#mcp-and-tool-discovery)
 11. [On-Demand Skill and Agent Creation](#on-demand-skill-and-agent-creation)
-12. [Task Parallelism](#task-parallelism)
-13. [Test Automation Guidance](#test-automation-guidance)
-14. [Security Testing Tiers](#security-testing-tiers)
-15. [Risks and Mitigations](#risks-and-mitigations)
-16. [Principles](#principles)
-17. [Implementation](#implementation)
+12. [Undertriggering Mitigation](#undertriggering-mitigation)
+13. [Task Parallelism](#task-parallelism)
+14. [Test Automation Guidance](#test-automation-guidance)
+15. [Security Testing Tiers](#security-testing-tiers)
+16. [Risks and Mitigations](#risks-and-mitigations)
+17. [Principles](#principles)
+18. [Implementation](#implementation)
 
 ---
 

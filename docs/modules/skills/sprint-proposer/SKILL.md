@@ -15,6 +15,7 @@ derived_from: session_protocol item 6
 ## When to run
 At the START of every session, after reading pendencias.md (item 6 in Session Protocol).
 Skip if MODEL SWITCH continuation is active (item 2 already selected the task).
+**After a model switch restart:** do NOT resume the previous sprint — propose a new one. The previous sprint was interrupted and context has changed.
 
 ## Process
 

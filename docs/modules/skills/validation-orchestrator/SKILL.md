@@ -132,3 +132,6 @@ Construct subagent prompt with: role definition, files to read (explicit paths),
 - Business logic with test framework → Tests MUST be ✅ or ❌
 - QUERY: criteria with DB tool → DB MUST be ✅ or ❌
 - ⏭️ means "not applicable" — NOT "I couldn't do it"
+
+## Actionable findings rule
+If during ANY step of the validation loop the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking.
