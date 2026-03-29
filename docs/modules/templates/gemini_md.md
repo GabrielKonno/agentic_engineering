@@ -40,8 +40,10 @@ This file provides guidance to Antigravity agents when working with this reposit
 10. **Codebase discovery** (if first session or unfamiliar module):
     ```bash
     find . -maxdepth 2 -type d -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | head -40
+    find . -type f -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.go" -o -name "*.rb" -o -name "*.java" -o -name "*.vue" -o -name "*.svelte" 2>/dev/null | grep -v node_modules | grep -v .next | wc -l
+    ls -la package.json tsconfig.json next.config.* nuxt.config.* vite.config.* manage.py pyproject.toml go.mod Cargo.toml Gemfile docker-compose.yml 2>/dev/null
     ```
-    File Map in GEMINI.md is a quick pointer; codebase discovery is the source of truth. If they conflict, trust discovery and update File Map.
+    Explore deeper based on framework detected. File Map in GEMINI.md is a quick pointer; codebase discovery is the source of truth. If they conflict, trust discovery and update File Map.
 
 ### Task limit per session:
 Maximum 3-5 tasks per session. Up to 7 if all small+related. 1 if large.
@@ -109,6 +111,23 @@ Before writing code: `git add -A && git commit -m "checkpoint: before [task name
 ### During implementation:
 - **Validation loop** → run `.antigravity/skills/validation-orchestrator/SKILL.md`
   <!-- Phase A (implement + commit) then Phase B (graduated validation by complexity) -->
+- **Actionable findings rule:** If during ANY validation step the AI identifies a bug, better approach, missing edge case, or improvement NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible.
+
+### Validation Failure Post-Mortem (when human finds bug in a ✅ task):
+If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
+1. Identify which validation step should have caught it
+2. Diagnose why that step declared ✅
+3. Classify root cause → route improvement to correct document:
+   - Weak criterion → improve criteria quality rules
+   - Multi-step criterion partially verified → strengthen criteria check
+   - Tool silenced error → add Known Bug Pattern
+   - Review missed pattern → update code-reviewer checklist
+   - Test not written for testable logic → refine test skip conditions
+   - Subagent context incomplete → update context routing rules
+   - AI judgment error → inherent limitation, no doc fix
+4. Apply systemic improvement (prevent the CLASS of failure)
+5. Log post-mortem in session entry
+Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ### Between tasks (after validation passes):
 1. Commit if not already committed
@@ -140,6 +159,11 @@ Before writing code: `git add -A && git commit -m "checkpoint: before [task name
 5. **Update rules/skills/PRD** → run `.antigravity/skills/rules-agents-updater/SKILL.md`
    <!-- Create rules files, update skills with discoveries, on-demand creation -->
 
+### Documentation quality:
+- Specific: "Fixed reopenMonth deleting only unpaid" NOT "Fixed a bug"
+- Include WHY: "Added parseLocal() because toISOString() shifts dates in UTC-3 timezone"
+- Constraints go in rules files, not just session logs
+
 ### Mid-session context recovery:
 If context is degrading (contradicting earlier decisions, repeating mistakes):
 1. STOP implementation
@@ -155,6 +179,10 @@ If context is degrading (contradicting earlier decisions, repeating mistakes):
 - lint
 - migrations (if applicable)
 - test (if applicable)
+
+## MCP Servers
+
+[Filled in Step 6]
 
 ## Skills
 
