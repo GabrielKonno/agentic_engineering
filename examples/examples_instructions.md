@@ -67,7 +67,7 @@ The framework instructs the AI to check `assets/examples/` before creating any n
   - **Process skills** (workflow steps): pushy format — `[What]. MUST [trigger]. [Consequence of skipping].`
   - **Knowledge skills** (reference patterns): contextual format — explains when the skill is useful, no imperative trigger
 - `invocation:` — how the agent/skill is activated:
-  - `subagent` — spawned as an independent process via Task tool (Claude Code) or Agent Manager (Antigravity). Isolated context, no access to implementing agent's reasoning. Required for all validation/review/security agents.
+  - `subagent` — spawned as an independent process via Task tool. Isolated context, no access to implementing agent's reasoning. Required for all validation/review/security agents.
   - `inline` — read as a reference document by another agent. Default for skills and knowledge documents.
 - `receives:` — (subagent only) what the orchestrating agent passes: git diff, reports, criteria, file paths
 - `produces:` — (subagent only) what the subagent returns: structured report format

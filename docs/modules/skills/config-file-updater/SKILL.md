@@ -3,14 +3,14 @@ name: config-file-updater
 invocation: inline
 effort: medium
 description: >
-  Updates CLAUDE.md/GEMINI.md when module status, patterns, rules, or File Map change.
+  Updates CLAUDE.md when module status, patterns, rules, or File Map change.
   Runs at end of session (item 4) when relevant changes occurred. Keeps the project
   contract accurate — stale config means the AI works with wrong assumptions next session.
 created: framework-v1.6.0 (pre-validated)
 derived_from: session_protocol end-of-session item 4
 ---
 
-# Config File Updater (CLAUDE.md / GEMINI.md)
+# Config File Updater (CLAUDE.md)
 
 ## When to run
 At the END of every session, after pendencias-updater. Only if changes are relevant.

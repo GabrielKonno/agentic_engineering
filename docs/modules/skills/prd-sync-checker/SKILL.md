@@ -38,7 +38,7 @@ If mismatch detected → ASK user before propagating.
 1. Read full PRD
 2. Update project.md — add changes to Architectural Decisions if stack changed
 3. Update pendencias.md — add new tasks for new features, remove tasks for removed features
-4. Update CLAUDE.md/GEMINI.md — if architecture or key patterns changed
+4. Update CLAUDE.md — if architecture or key patterns changed
 5. Ensure PRD changelog is updated
 6. Log in session log: `"PRD synced: vX.X.X → vY.Y.Y — [changes]"`
 

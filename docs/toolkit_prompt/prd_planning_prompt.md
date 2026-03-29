@@ -147,7 +147,7 @@ Bad examples (WEAK — vague, no failure signal):
 
 ## 5. Architecture and Stack
 
-**Note:** This section defines high-level choices and justifications (the WHY of the stack). Implementation details (specific patterns, code conventions, technical decisions during development) go in project.md and the main config file (CLAUDE.md / GEMINI.md), not here.
+**Note:** This section defines high-level choices and justifications (the WHY of the stack). Implementation details (specific patterns, code conventions, technical decisions during development) go in project.md and CLAUDE.md, not here.
 
 ### 5.1 Suggested Stack
 [Frontend, backend, database, auth, deploy, CI/CD — with justification]

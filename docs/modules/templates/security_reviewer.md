@@ -1,6 +1,6 @@
 # Template: security-reviewer agent
 
-> Create at `{CONFIG_DIR}/agents/security-reviewer.md` (Claude Code) or `{CONFIG_DIR}/skills/security-reviewer/SKILL.md` (Antigravity)
+> Create at `.claude/agents/security-reviewer.md`
 
 ```markdown
 ---
@@ -25,9 +25,9 @@ derived_from: null
 ## Input
 When invoked as subagent:
 - **Git diff** — read via `git diff HEAD~1`
-- **Stack security skill** — in `{CONFIG_DIR}/skills/*/SKILL.md` (if exists)
-- **Rules files** — all `{CONFIG_DIR}/rules/*.md`
-- **{CONFIG_FILE}** — Key Patterns and Architecture sections
+- **Stack security skill** — in `.claude/skills/*/SKILL.md` (if exists)
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
 
 ## Output
 When invoked as subagent, produce:
@@ -43,8 +43,8 @@ When invoked as subagent, produce:
 
 ## BOUNDARIES
 When invoked as subagent, do NOT read:
-- `{CONFIG_DIR}/phases/project.md` Progress Log
-- `{CONFIG_DIR}/logs/*.md`
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md`
 - Sprint proposals or implementation plans
 
 ## When this agent is invoked
@@ -178,7 +178,7 @@ If any answer reveals a risk: address it before proceeding.
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff introducing an endpoint with string-concatenated SQL, no auth check, and hardcoded API key — should flag all three
    - **Scenario B (negative):** A git diff with parameterized queries, auth middleware, and env-var secrets — should APPROVE
-2. Spawn security-reviewer via {SUBAGENT_TOOL} against each scenario
+2. Spawn security-reviewer via Task tool against each scenario
 3. Verify: A → issues detected, B → no false flags
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`

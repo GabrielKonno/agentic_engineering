@@ -1,6 +1,6 @@
 # Template: code-reviewer agent
 
-> Create at `{CONFIG_DIR}/agents/code-reviewer.md` (Claude Code) or `{CONFIG_DIR}/skills/code-reviewer/SKILL.md` (Antigravity)
+> Create at `.claude/agents/code-reviewer.md`
 
 ```markdown
 ---
@@ -24,8 +24,8 @@ derived_from: null
 ## Input
 When invoked as subagent:
 - **Git diff** — read via `git diff HEAD~1`
-- **Rules files** — all `{CONFIG_DIR}/rules/*.md`
-- **{CONFIG_FILE}** — Key Patterns and Architecture sections
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
 - **project.md** — Architectural Decisions table ONLY
 
 ## Output
@@ -35,7 +35,7 @@ When invoked as subagent, produce:
 ### Findings:
 | # | Severity | Category | Finding | File:Line | Recommendation |
 |---|----------|----------|---------|-----------|---------------|
-### Pattern violations: [list any {CONFIG_FILE}/rules violations]
+### Pattern violations: [list any CLAUDE.md/rules violations]
 ### Known Bug Patterns triggered: [list patterns that matched this diff, by name — used to update efficacy tracking]
 ### Architecture: [file size, cross-module imports, structure issues]
 ### Recommendation: APPROVE / FIX REQUIRED
@@ -43,14 +43,14 @@ When invoked as subagent, produce:
 
 ## BOUNDARIES
 When invoked as subagent, do NOT read:
-- `{CONFIG_DIR}/phases/project.md` Progress Log
-- `{CONFIG_DIR}/logs/*.md`
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md`
 - Sprint proposals or implementation plans
 
 ## Project Patterns
-- Follows patterns in {CONFIG_FILE}?
+- Follows patterns in CLAUDE.md?
 - Consults design system for visual decisions?
-- Consults {CONFIG_DIR}/rules/*.md for domain rules?
+- Consults .claude/rules/*.md for domain rules?
 
 ## Type Safety (adapt to project language)
 - Avoids type-system bypasses (type casts, ignore directives, unsafe coercions)
@@ -67,14 +67,14 @@ When invoked as subagent, do NOT read:
 - N+1 queries?
 - Unnecessary imports or heavy dependencies?
 - Code running on client/frontend that could run on server/backend?
-- Consult {CONFIG_DIR}/skills/*/SKILL.md for framework-specific rules
+- Consult .claude/skills/*/SKILL.md for framework-specific rules
 
 ## Security
 - Inputs validated
 - Sensitive data not exposed to client
 - Parameterized queries
 - No hardcoded secrets
-- For detailed checks, consult `{CONFIG_DIR}/agents/security-reviewer.md`
+- For detailed checks, consult `.claude/agents/security-reviewer.md`
 
 ## Architecture Patterns (check when creating new files/modules)
 
@@ -116,7 +116,7 @@ When invoked as subagent, do NOT read:
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff containing a SQL string concatenation vulnerability and an N+1 query — code-reviewer should flag both
    - **Scenario B (negative):** A clean git diff with parameterized queries and proper patterns — code-reviewer should APPROVE with no false flags
-2. Spawn code-reviewer via {SUBAGENT_TOOL} against each scenario
+2. Spawn code-reviewer via Task tool against each scenario
 3. Verify: A → issues detected, B → no false flags
 4. If any result is wrong: improve the agent and re-test
 5. Update lineage: `last_eval: s0 (2/2 passed)`

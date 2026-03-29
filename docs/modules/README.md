@@ -11,28 +11,26 @@ Single source of truth for all templates and protocols used by bootstrap prompts
 
 ## How bootstraps use modules
 
-Bootstrap prompts (`session0_bootstrap_prompt.md`, `session0_bootstrap_antigravity.md`) reference modules instead of containing templates inline. Each step:
+The bootstrap prompt (`session0_bootstrap_prompt.md`) references modules instead of containing templates inline. Each step:
 
 1. Reads the relevant module file
 2. Adapts placeholders with PRD data and project-specific values
 3. Creates the file at the project path
 
-## Tool-agnostic placeholders
+## Tool values
 
-Shared protocols use placeholders for tool-specific paths:
+Protocols and templates use these Claude Code paths:
 
-| Placeholder | Claude Code | Antigravity |
-|-------------|------------|-------------|
-| `{CONFIG_FILE}` | `CLAUDE.md` | `GEMINI.md` |
-| `{CONFIG_DIR}` | `.claude/` | `.antigravity/` |
-| `{SUBAGENT_TOOL}` | Task tool | Agent Manager |
+| Value | Path |
+|-------|------|
+| Config file | `CLAUDE.md` |
+| Config directory | `.claude/` |
+| Subagent tool | Task tool |
 
-Note: Agent templates use `{CONFIG_DIR}/agents/` for their path. In Antigravity, review agents are stored as skills in `{CONFIG_DIR}/skills/` (using the same folder format).
-
-Each bootstrap provides the mapping. Templates in `templates/` have tool-specific variants where needed (`claude_md.md` vs `gemini_md.md`).
+Agent templates are stored at `.claude/agents/[name].md`.
 
 ## Editing rules
 
 - **Modify modules here** — this is the single source of truth
 - **Never inline templates in bootstrap prompts** — always reference modules
-- **After modifying a module**, verify both bootstrap prompts still work (they reference the same modules)
+- **After modifying a module**, verify the bootstrap prompt still works (it references the same modules)

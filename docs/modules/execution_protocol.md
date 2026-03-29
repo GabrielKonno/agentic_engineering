@@ -1,9 +1,6 @@
 # Execution Protocol
 
-> Shared module — tool-agnostic. Both bootstrap prompts reference this file.
-> Placeholders: `{CONFIG_FILE}`, `{CONFIG_DIR}`, `{SUBAGENT_TOOL}`
-
-This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. It is embedded into the project's config file ({CONFIG_FILE}) during bootstrap.
+This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. It is embedded into the project's config file (CLAUDE.md) during bootstrap.
 
 In v1.6.0, key processes within this protocol are delegated to pre-built process skills. The `criteria-enforcer` skill handles criteria quality. The `validation-orchestrator` skill handles the validation loop (Phase A + Phase B).
 
@@ -15,7 +12,7 @@ In v1.6.0, key processes within this protocol are delegated to pre-built process
 
 **For ALL tasks (before determining complexity):**
 
-**Enforce criteria quality** → run `{CONFIG_DIR}/skills/criteria-enforcer/SKILL.md`
+**Enforce criteria quality** → run `.claude/skills/criteria-enforcer/SKILL.md`
 <!-- Rewrites WEAK criteria to STRONG, runs adversarial review (sabotage, transformation, boundary, data origin tests) -->
 
 **Classify task complexity for model/effort:**
@@ -47,7 +44,7 @@ For architecture/security: trigger the model switch protocol.
 - False ❌ from subagent escalated by arbitrator (genuinely ambiguous — human decides)
 
 If medium or large (Level 3, or large tasks within sprint):
-1. Read relevant `{CONFIG_DIR}/rules/*.md`
+1. Read relevant `.claude/rules/*.md`
 2. Codebase discovery on affected files
 3. Propose plan:
    ```
@@ -90,7 +87,7 @@ This enables clean rollback if the task needs to be reverted.
 
 ## During implementation (validation loop)
 
-**Run validation** → run `{CONFIG_DIR}/skills/validation-orchestrator/SKILL.md`
+**Run validation** → run `.claude/skills/validation-orchestrator/SKILL.md`
 <!-- Orchestrates Phase A (implementation) and Phase B (graduated validation by complexity) -->
 
 The validation-orchestrator skill contains the full validation loop detail. Below is the structural overview:
@@ -156,7 +153,7 @@ If any ❌ after max retry cycles: STOP and escalate to human with diagnosis.
 
 ## Validation Orchestration (subagent mechanics)
 
-When spawning validation subagents (Routes B and C), construct the {SUBAGENT_TOOL} prompt following this template:
+When spawning validation subagents (Routes B and C), construct the Task tool prompt following this template:
 
 ```
 1. Role definition — "You are the [agent name]. Your role is [purpose]."
@@ -173,20 +170,20 @@ The implementing agent does NOT package file contents into the prompt. It provid
 ```
 ALWAYS instruct the subagent to read:
   - The agent's own .md file (code-reviewer reads code-reviewer.md, etc.)
-  - {CONFIG_DIR}/rules/*.md (ALL rules files — cost is low, risk of omission is high)
-  - {CONFIG_FILE} sections: Key Patterns, Architecture
+  - .claude/rules/*.md (ALL rules files — cost is low, risk of omission is high)
+  - CLAUDE.md sections: Key Patterns, Architecture
   - project.md: Architectural Decisions table ONLY
 
 IF security-relevant:
-  - {CONFIG_DIR}/agents/security-reviewer.md
-  - Stack security skill in {CONFIG_DIR}/skills/*/SKILL.md (if exists)
+  - .claude/agents/security-reviewer.md
+  - Stack security skill in .claude/skills/*/SKILL.md (if exists)
 
 IF UI task:
-  - Design System section of {CONFIG_FILE}
+  - Design System section of CLAUDE.md
 
 NEVER instruct the subagent to read (anti-bias firewall):
   - project.md Progress Log (contains implementation reasoning)
-  - {CONFIG_DIR}/logs/*.md (session history)
+  - .claude/logs/*.md (session history)
   - Sprint proposals or implementation plans
   - Any file the implementing agent wrote as part of the task explanation
 ```
@@ -206,7 +203,7 @@ Architecture/security tasks (Route C):
   6. Blue Team subagent (after validation passes, if Red Team ran) → Defense Assessment
 ```
 
-Each subagent is a fresh {SUBAGENT_TOOL} instance — isolated context, no carryover between invocations.
+Each subagent is a fresh Task tool instance — isolated context, no carryover between invocations.
 
 **Retry flow:** When validator returns ❌: fix → commit `"fix: [task] — validation fix N"` → re-spawn from step 1 of subagent sequence. Max 3 retry cycles. After limit: STOP and escalate to human with diagnosis.
 
@@ -225,7 +222,7 @@ If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
    - **Subagent context incomplete** → update context routing rules
    - AI judgment error → inherent limitation, no doc fix
 4. Apply the systemic improvement (prevent the CLASS of failure, not just this instance)
-5. Log the post-mortem in the session log (`{CONFIG_DIR}/logs/`) and note it in the project.md Progress Log index row
+5. Log the post-mortem in the session log (`.claude/logs/`) and note it in the project.md Progress Log index row
 Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ---

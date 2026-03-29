@@ -62,14 +62,10 @@ agentic_engineering/
 │   ├── bootstrap_claude/
 │   │   └── session0_bootstrap_prompt.md    ← Bootstrap for Claude Code (references modules)
 │   │
-│   ├── bootstrap_antigravity/
-│   │   └── session0_bootstrap_antigravity.md ← Bootstrap for Antigravity (references modules)
-│   │
 │   └── toolkit_prompt/
 │       ├── prd_planning_prompt.md              ← Create a PRD from scratch
 │       ├── prd_change_prompt.md                ← Modify an existing PRD
 │       ├── existing_project_adaptation_prompt.md ← Adapt existing project
-│       └── cross_tool_migration_prompt.md      ← Migrate between tools
 │
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── examples_instructions.md        ← Conventions for creating agents/skills
@@ -209,7 +205,6 @@ The framework learns from your project:
 | **Session 0 Bootstrap** | Starting a new project | PRD at `assets/docs/prd.md` | Full project documentation structure |
 | **Existing Project Adaptation** | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
 | **PRD Change** | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
-| **Cross-Tool Migration** | Switching between Claude Code and Antigravity | Existing project setup | Migrated setup in target tool's format |
 
 ---
 
