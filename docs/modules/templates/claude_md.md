@@ -153,7 +153,7 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    <!-- Permanent verbose record in .claude/logs/ -->
 3. **Update pendencias.md** → run `.claude/skills/pendencias-updater/SKILL.md`
    <!-- Move completed to Done, add new items with full criteria -->
-4. **Update CLAUDE.md** → run `.claude/skills/claude-md-updater/SKILL.md`
+4. **Update CLAUDE.md** → run `.claude/skills/config-file-updater/SKILL.md`
    <!-- When module status, patterns, rules, or File Map changed -->
 5. **Update rules/agents/skills/PRD** → run `.claude/skills/rules-agents-updater/SKILL.md`
    <!-- Create rules files, update agents with discoveries, on-demand creation -->
@@ -190,7 +190,7 @@ If context is degrading (contradicting earlier decisions, repeating mistakes):
 **Process skills (copied from framework):**
 - prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator
 - diff-pattern-extractor, project-md-updater, pendencias-updater
-- claude-md-updater, rules-agents-updater, session-log-creator
+- config-file-updater, rules-agents-updater, session-log-creator
 
 ## Hooks
 

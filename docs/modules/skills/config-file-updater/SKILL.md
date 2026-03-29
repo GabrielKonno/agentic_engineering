@@ -1,5 +1,5 @@
 ---
-name: claude-md-updater
+name: config-file-updater
 invocation: inline
 effort: medium
 description: >
@@ -37,7 +37,7 @@ Review git diff for changes that affect config file sections.
 ### 3. File Map accuracy
 If new files were created, update the File Map section. Run file-map-scan.sh if available:
 ```bash
-bash .claude/skills/claude-md-updater/scripts/file-map-scan.sh
+bash .claude/skills/config-file-updater/scripts/file-map-scan.sh
 ```
 
 ### 4. Do NOT update

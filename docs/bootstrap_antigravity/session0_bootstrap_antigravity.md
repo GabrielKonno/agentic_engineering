@@ -141,13 +141,17 @@ Copy the framework's process skills to the project:
 cp -r docs/modules/skills/* projects/[project-name]/.antigravity/skills/
 ```
 
+After copying, translate `.claude/` paths to `.antigravity/` in all skill files:
+
+```bash
+find projects/[project-name]/.antigravity/skills -type f \( -name "SKILL.md" -o -name "*.sh" \) -exec sed -i 's/\.claude\//\.antigravity\//g' {} \;
+```
+
 This copies 10 process skills that implement the Session Protocol and Execution Protocol:
 - **Session start:** prd-sync-checker, sprint-proposer
 - **Before implementing:** criteria-enforcer
 - **During implementation:** validation-orchestrator
-- **Session end:** diff-pattern-extractor, project-md-updater, pendencias-updater, claude-md-updater, rules-agents-updater, session-log-creator
-
-**Note:** The skills use `.claude/` paths internally. For Antigravity, the agent should interpret these as `.antigravity/` equivalents. The process logic is identical across tools.
+- **Session end:** diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
 Register all 10 in GEMINI.md "Skills" section under "Process skills (copied from framework)".
 
@@ -230,14 +234,18 @@ Note: In Antigravity, all review/validation agents use the skill format (`.antig
 **If it does not exist:** Read the template at `docs/modules/templates/code_reviewer.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.antigravity/`
 - Replace `{CONFIG_FILE}` with `GEMINI.md`
-- Replace `{AGENTS_PATH}` with `.antigravity/skills/`
+- Replace `{SUBAGENT_TOOL}` with `Agent Manager`
 - Create at `.antigravity/skills/code-reviewer/SKILL.md`
 
 **Creation eval (DEFERRABLE):** See template for eval scenarios. Use Agent Manager for spawning.
 
 ### Step 9 — Create security-reviewer skill
 
-Universal skill for ALL projects. Read `docs/modules/templates/security_reviewer.md`. Adapt paths. Create at `.antigravity/skills/security-reviewer/SKILL.md`.
+Universal skill for ALL projects. Read `docs/modules/templates/security_reviewer.md`. Adapt:
+- Replace `{CONFIG_DIR}` with `.antigravity/`
+- Replace `{CONFIG_FILE}` with `GEMINI.md`
+- Replace `{SUBAGENT_TOOL}` with `Agent Manager`
+- Create at `.antigravity/skills/security-reviewer/SKILL.md`
 
 **Creation eval (DEFERRABLE):** See template for eval scenarios.
 
@@ -262,7 +270,11 @@ Mandatory for ALL projects. Read `docs/modules/templates/validator.md`. Adapt:
 
 ### Step 12 — Create arbitrator skill
 
-Mandatory for ALL projects. Read `docs/modules/templates/arbitrator.md`. Adapt paths. Create at `.antigravity/skills/arbitrator/SKILL.md`.
+Mandatory for ALL projects. Read `docs/modules/templates/arbitrator.md`. Adapt:
+- Replace `{CONFIG_DIR}` with `.antigravity/`
+- Replace `{CONFIG_FILE}` with `GEMINI.md`
+- Replace `{SUBAGENT_TOOL}` with `Agent Manager`
+- Create at `.antigravity/skills/arbitrator/SKILL.md`.
 
 ---
 
@@ -327,7 +339,7 @@ mkdir -p .antigravity/logs
 ### Process skills: copied from framework (Step 5.7):
 - prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator
 - diff-pattern-extractor, project-md-updater, pendencias-updater
-- claude-md-updater, rules-agents-updater, session-log-creator
+- config-file-updater, rules-agents-updater, session-log-creator
 
 ### MCPs configured:
 - [name]: [WORKING / ERROR: detail]
