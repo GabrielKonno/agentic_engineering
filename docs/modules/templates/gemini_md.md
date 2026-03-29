@@ -126,7 +126,7 @@ If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
    - Subagent context incomplete → update context routing rules
    - AI judgment error → inherent limitation, no doc fix
 4. Apply systemic improvement (prevent the CLASS of failure)
-5. Log post-mortem in session entry
+5. Log post-mortem in project.md session entry (under a "Post-Mortem" subsection) AND in the session log (`.antigravity/logs/`)
 Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ### Between tasks (after validation passes):
@@ -183,6 +183,10 @@ If context is degrading (contradicting earlier decisions, repeating mistakes):
 ## MCP Servers
 
 [Filled in Step 6]
+
+## Hooks
+
+Antigravity does not use file-based hooks configuration. All hooks, formatting, and automation are managed via the Antigravity UI settings panel. For equivalent functionality to Claude Code's smart-formatting hook (auto-Prettier on save), configure the formatter in Antigravity's editor settings.
 
 ## Skills
 

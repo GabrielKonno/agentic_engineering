@@ -125,7 +125,7 @@ If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
    - Subagent context incomplete → update context routing rules
    - AI judgment error → inherent limitation, no doc fix
 4. Apply systemic improvement (prevent the CLASS of failure, not just this instance)
-5. Log post-mortem in session entry
+5. Log post-mortem in project.md session entry (under a "Post-Mortem" subsection) AND in the session log (`.claude/logs/`)
 Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ### Between tasks (after validation passes):
