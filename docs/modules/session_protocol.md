@@ -1,7 +1,7 @@
 # Session Protocol
 
 > Shared module — tool-agnostic. Both bootstrap prompts reference this file.
-> Placeholders: `{CONFIG_FILE}`, `{CONFIG_DIR}`, `{AGENTS_PATH}`, `{SUBAGENT_TOOL}`
+> Placeholders: `{CONFIG_FILE}`, `{CONFIG_DIR}`, `{SUBAGENT_TOOL}`
 
 This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. It is embedded into the project's config file ({CONFIG_FILE}) during bootstrap.
 

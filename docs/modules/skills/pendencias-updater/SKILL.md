@@ -20,7 +20,7 @@ Also runs between tasks during a sprint (to move completed tasks immediately).
 ## Process
 
 ### 1. Move completed tasks to done_tasks.md
-Move tasks completed this session from "In Progress" or "Next Steps" to `{CONFIG_DIR}/phases/done_tasks.md`.
+Move tasks completed this session from "In Progress" or "Next Steps" to `.claude/phases/done_tasks.md`.
 
 **Move the FULL task block** — all metadata intact (Context, State, Constraints, Complexity, Changes, Acceptance criteria). Mark all criteria as checked (`[x]`). Add a completion header:
 

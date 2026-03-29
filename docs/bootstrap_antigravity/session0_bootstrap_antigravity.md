@@ -141,11 +141,14 @@ Copy the framework's process skills to the project:
 cp -r docs/modules/skills/* projects/[project-name]/.antigravity/skills/
 ```
 
-After copying, translate `.claude/` paths to `.antigravity/` in all skill files:
+After copying, translate `.claude/` paths to `.antigravity/` and `CLAUDE.md` to `GEMINI.md` in all skill files:
 
 ```bash
 find projects/[project-name]/.antigravity/skills -type f \( -name "SKILL.md" -o -name "*.sh" \) -exec sed -i 's/\.claude\//\.antigravity\//g' {} \;
+find projects/[project-name]/.antigravity/skills -type f \( -name "SKILL.md" -o -name "*.sh" \) -exec sed -i 's/CLAUDE\.md\/GEMINI\.md/__DUAL_REF__/g; s/CLAUDE\.md/GEMINI.md/g; s/__DUAL_REF__/CLAUDE.md\/GEMINI.md/g' {} \;
 ```
+
+The second sed preserves dual references (`CLAUDE.md/GEMINI.md`) while replacing standalone `CLAUDE.md` → `GEMINI.md`.
 
 This copies 10 process skills that implement the Session Protocol and Execution Protocol:
 - **Session start:** prd-sync-checker, sprint-proposer

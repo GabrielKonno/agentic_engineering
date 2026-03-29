@@ -8,7 +8,7 @@ description: >
   the project gets smarter session over session — without it, every bug is fixed once
   and forgotten.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 5
+derived_from: session_protocol end-of-session item 1
 ---
 
 # Diff-based Pattern Extractor

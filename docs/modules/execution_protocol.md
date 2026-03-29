@@ -1,7 +1,7 @@
 # Execution Protocol
 
 > Shared module — tool-agnostic. Both bootstrap prompts reference this file.
-> Placeholders: `{CONFIG_FILE}`, `{CONFIG_DIR}`, `{AGENTS_PATH}`, `{SUBAGENT_TOOL}`
+> Placeholders: `{CONFIG_FILE}`, `{CONFIG_DIR}`, `{SUBAGENT_TOOL}`
 
 This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. It is embedded into the project's config file ({CONFIG_FILE}) during bootstrap.
 
@@ -178,7 +178,7 @@ ALWAYS instruct the subagent to read:
   - project.md: Architectural Decisions table ONLY
 
 IF security-relevant:
-  - {AGENTS_PATH}/security-reviewer.md
+  - {CONFIG_DIR}/agents/security-reviewer.md
   - Stack security skill in {CONFIG_DIR}/skills/*/SKILL.md (if exists)
 
 IF UI task:

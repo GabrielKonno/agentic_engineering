@@ -7,7 +7,7 @@ description: >
   Runs at end of session (item 4) when relevant changes occurred. Keeps the project
   contract accurate — stale config means the AI works with wrong assumptions next session.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 3
+derived_from: session_protocol end-of-session item 4
 ---
 
 # Config File Updater (CLAUDE.md / GEMINI.md)
@@ -39,6 +39,7 @@ If new files were created, update the File Map section. Run file-map-scan.sh if 
 ```bash
 bash .claude/skills/config-file-updater/scripts/file-map-scan.sh
 ```
+(Scripts require bash — Git Bash on Windows, native on macOS/Linux. If unavailable, the AI executes the equivalent steps manually.)
 
 ### 4. Do NOT update
 - Session Protocol (behavior change — requires human approval)

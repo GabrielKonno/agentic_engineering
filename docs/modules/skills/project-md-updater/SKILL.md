@@ -22,7 +22,7 @@ At the END of every session, AFTER session-log-creator (needs the log filename t
 - What tasks were completed (from pendencias.md changes)
 - Session number
 - Date
-- Log filename (from session-log-creator — the most recent file in `{CONFIG_DIR}/logs/`)
+- Log filename (from session-log-creator — the most recent file in `.claude/logs/`)
 
 ### 2. Write concise index row
 Add a new row to the Progress Log table in project.md:
@@ -79,3 +79,4 @@ If `scripts/session-entry.sh` exists, run it to get git stats for the session lo
 ```bash
 bash .claude/skills/project-md-updater/scripts/session-entry.sh
 ```
+(Scripts require bash — Git Bash on Windows, native on macOS/Linux. If unavailable, the AI executes the equivalent steps manually.)
