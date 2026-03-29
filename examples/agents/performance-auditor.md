@@ -1,5 +1,6 @@
 ---
 name: performance-auditor
+invocation: subagent
 effort: medium
 description: >
   Reviews code for performance issues. Invoked after implementing features

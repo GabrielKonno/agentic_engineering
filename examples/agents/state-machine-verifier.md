@@ -1,5 +1,6 @@
 ---
 name: state-machine-verifier
+invocation: subagent
 effort: high
 description: >
   Verifies state machine implementations for completeness, invalid transitions,

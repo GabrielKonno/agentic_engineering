@@ -1,5 +1,6 @@
 ---
 name: multi-tenancy-auditor
+invocation: subagent
 effort: high
 description: >
   Audits multi-tenant implementations for data isolation, cross-tenant leaks,

@@ -1,5 +1,6 @@
 ---
 name: data-integrity-checker
+invocation: subagent
 effort: high
 description: >
   Verifies data integrity across related tables and operations.

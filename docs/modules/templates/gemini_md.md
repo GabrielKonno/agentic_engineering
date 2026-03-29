@@ -157,7 +157,7 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    <!-- Move completed to Done, add new items with full criteria -->
 4. **Update GEMINI.md** → run `.antigravity/skills/config-file-updater/SKILL.md`
    <!-- When module status, patterns, rules, or File Map changed -->
-5. **Update rules/skills/PRD** → run `.antigravity/skills/rules-agents-updater/SKILL.md`
+5. **Update rules/agents/skills/PRD** → run `.antigravity/skills/rules-agents-updater/SKILL.md`
    <!-- Create rules files, update skills with discoveries, on-demand creation -->
 
 ### Documentation quality:
