@@ -59,16 +59,72 @@ Signals of exceeding: contradicting earlier findings, skipping validation steps,
 - **Classify task complexity:**
   - Routine → current model + reasoning fine
   - Logic-heavy → recommend increased reasoning depth
-  - Architecture/Security → trigger model switch protocol
+  - Architecture/Security → trigger model switch protocol (below)
 - **Complexity threshold:**
   - Small: use Fast Mode → implement directly. No plan needed.
   - Medium: use Plan Mode → generate plan → wait for approval.
   - Large: use Plan Mode → plan with risks → wait for approval.
-- **Sprint-approved mode:** Medium tasks proceed without waiting. Large still need approval. Cap: max 3 discoveries per sprint.
+
+If medium or large, generate Implementation Plan artifact:
+```
+## Implementation Plan: [feature name]
+### Changes needed:
+1. [file] — [what changes and why]
+### Migration needed: [yes/no]
+### Risks: [what could break]
+### Validation strategy: [which criteria, which tools]
+### Estimated scope: [small / medium / large]
+```
+
+**Sprint-approved mode (Level 4):** If human approved a sprint batch:
+- Small: implement directly. Medium: proceed without approval. Large: still need approval.
+- Discoveries: add to pendencias.md. Cap: max 3 per sprint.
+- **Exception stops** (sprint pauses only for these):
+  - ❌ after 3 retry cycles
+  - PRD ambiguity or contradiction with existing decision
+  - MANUAL: criteria (flag in report, continue with next task)
+  - Context degradation (trigger mid-session recovery)
+  - Current task blocked by a discovery requiring human input
+  - False ❌ from subagent escalated by arbitrator (genuinely ambiguous — human decides)
+
+**Model switch protocol** (if task is Architecture/Security AND current model is not the most capable):
+1. Save state: run project-md-updater and pendencias-updater skills. Add MODEL SWITCH marker to project.md:
+   ```
+   ### [date] — Session N (MODEL SWITCH — continuing in next session)
+   **What was done:** [work before switch]
+   **Model switch reason:** Task "[name]" classified as architecture/security
+   **Continue with:** Task [N] from pendencias — [task name]
+   **Settings changed:** model → [target], reasoning → maximum
+   **PRD version:** vX.X.X
+   ```
+2. Commit: `git add -A && git commit -m "wip: model switch for [task name]"`
+   If triggered during a sprint: add `**Sprint interrupted:** Yes — remaining tasks: [list]` to marker. After restart, propose new sprint (do NOT resume previous).
+3. Update model configuration in Antigravity settings
+4. Tell user: "Task [name] requires [model]. Settings updated. Please restart."
+5. After task complete: if next task is routine → revert settings. If next also needs this model → keep.
+
+### Git checkpoint (medium and large tasks):
+Before writing code: `git add -A && git commit -m "checkpoint: before [task name]"`
 
 ### During implementation:
 - **Validation loop** → run `.antigravity/skills/validation-orchestrator/SKILL.md`
   <!-- Phase A (implement + commit) then Phase B (graduated validation by complexity) -->
+
+### Between tasks (after validation passes):
+1. Commit if not already committed
+2. Update pendencias.md: mark task as Done, confirm next
+3. If task 3+ in session: evaluate context health → mid-session recovery if degrading
+4. **Sprint-approved mode:** pick next task, proceed directly. If all done, produce sprint report:
+   ```
+   ## Sprint Report: Session N
+   ### Tasks completed: [N/N]
+   | Task | Result | Issues |
+   |------|--------|--------|
+   | [name] | ✅/❌ | [MANUAL: items or notes] |
+   ### Discoveries added to backlog: [N]
+   ### Known Bug Patterns added: [N]
+   ### Next sprint suggestion: [top 3-5 tasks]
+   ```
 
 ### At the END of every session (in order):
 1. **Extract patterns** → run `.antigravity/skills/diff-pattern-extractor/SKILL.md`
