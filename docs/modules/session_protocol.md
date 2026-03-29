@@ -1,38 +1,35 @@
 # Session Protocol
 
-> Shared module — tool-agnostic. Both bootstrap prompts reference this file.
-> Placeholders: `{CONFIG_FILE}`, `{CONFIG_DIR}`, `{SUBAGENT_TOOL}`
+This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. It is embedded into the project's config file (CLAUDE.md) during bootstrap.
 
-This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. It is embedded into the project's config file ({CONFIG_FILE}) during bootstrap.
-
-In v1.6.0, the protocol items that involve multi-step processes are delegated to pre-built process skills (in `{CONFIG_DIR}/skills/`). The protocol retains the sequence and triggers; the skills contain the how-to.
+In v1.6.0, the protocol items that involve multi-step processes are delegated to pre-built process skills (in `.claude/skills/`). The protocol retains the sequence and triggers; the skills contain the how-to.
 
 ---
 
 ## At the START of every session:
 
-1. Read `{CONFIG_FILE}` (this file)
-2. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in `{CONFIG_DIR}/phases/project.md`. If one exists:
+1. Read `CLAUDE.md` (this file)
+2. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:
    - This session is a continuation — skip normal task selection
    - The task and reason for the switch are in the marker
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
-3. Read `{CONFIG_DIR}/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
-4. **PRD sync check** → run `{CONFIG_DIR}/skills/prd-sync-checker/SKILL.md`
+3. Read `.claude/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
+4. **PRD sync check** → run `.claude/skills/prd-sync-checker/SKILL.md`
    <!-- Compares PRD version/content with project.md, propagates changes if needed -->
-5. Read `{CONFIG_DIR}/phases/pendencias.md` — what is next
-6. **Propose sprint** → run `{CONFIG_DIR}/skills/sprint-proposer/SKILL.md`
+5. Read `.claude/phases/pendencias.md` — what is next
+6. **Propose sprint** → run `.claude/skills/sprint-proposer/SKILL.md`
    <!-- Selects 3-5 tasks, orders by dependency, presents for approval -->
-7. Read `{CONFIG_DIR}/rules/*.md` relevant to current task
+7. Read `.claude/rules/*.md` relevant to current task
 8. Read design system if modifying UI
-9. Read `{CONFIG_DIR}/skills/*/SKILL.md` if relevant skill exists for current task
+9. Read `.claude/skills/*/SKILL.md` if relevant skill exists for current task
 10. **Codebase discovery** (if first session or unfamiliar module):
     ```bash
     find . -maxdepth 2 -type d -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | head -40
     find . -type f -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.go" -o -name "*.rb" -o -name "*.java" -o -name "*.vue" -o -name "*.svelte" 2>/dev/null | grep -v node_modules | grep -v .next | wc -l
     ls -la package.json tsconfig.json next.config.* nuxt.config.* vite.config.* manage.py pyproject.toml go.mod Cargo.toml Gemfile docker-compose.yml 2>/dev/null
     ```
-    Explore deeper based on framework detected. File Map in {CONFIG_FILE} is a quick pointer; codebase discovery is the source of truth. If they conflict, trust discovery and update File Map.
+    Explore deeper based on framework detected. File Map in CLAUDE.md is a quick pointer; codebase discovery is the source of truth. If they conflict, trust discovery and update File Map.
 
 ### Task limit per session:
 
@@ -73,17 +70,17 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
 
 **Priority order** (if context limited, at minimum do items 1 and 2):
 
-1. **Extract patterns from diff** → run `{CONFIG_DIR}/skills/diff-pattern-extractor/SKILL.md`
+1. **Extract patterns from diff** → run `.claude/skills/diff-pattern-extractor/SKILL.md`
    <!-- Scans git diff, adds to Known Bug Patterns / Architecture Patterns -->
-2. **Create session log** → run `{CONFIG_DIR}/skills/session-log-creator/SKILL.md`
-   <!-- Primary detailed record in {CONFIG_DIR}/logs/ -->
-   **Update project.md** → run `{CONFIG_DIR}/skills/project-md-updater/SKILL.md`
+2. **Create session log** → run `.claude/skills/session-log-creator/SKILL.md`
+   <!-- Primary detailed record in .claude/logs/ -->
+   **Update project.md** → run `.claude/skills/project-md-updater/SKILL.md`
    <!-- Concise index row referencing the session log + PRD version + phase status -->
-3. **Update pendencias.md** → run `{CONFIG_DIR}/skills/pendencias-updater/SKILL.md`
+3. **Update pendencias.md** → run `.claude/skills/pendencias-updater/SKILL.md`
    <!-- Move completed to Done, add new items with full criteria -->
-4. **Update {CONFIG_FILE}** → run `{CONFIG_DIR}/skills/config-file-updater/SKILL.md`
+4. **Update CLAUDE.md** → run `.claude/skills/config-file-updater/SKILL.md`
    <!-- When module status, patterns, rules, or File Map changed -->
-5. **Update rules/agents/skills/PRD** → run `{CONFIG_DIR}/skills/rules-agents-updater/SKILL.md`
+5. **Update rules/agents/skills/PRD** → run `.claude/skills/rules-agents-updater/SKILL.md`
    <!-- Create rules files, update agents with discoveries, on-demand creation -->
 
 **Documentation updates are mandatory.** Items 4-5 can be deferred if context window is low.
@@ -97,8 +94,8 @@ The rule: if the evolution changes **DATA** (what the agent knows), it is safe f
 **Agent evolves autonomously (no human approval needed):**
 - Known Bug Patterns (factual — derived from diffs)
 - Architecture Patterns (factual — derived from structural decisions)
-- File Map in {CONFIG_FILE} (factual — reflects filesystem)
-- Commands section in {CONFIG_FILE} (factual — reflects what works)
+- File Map in CLAUDE.md (factual — reflects filesystem)
+- Commands section in CLAUDE.md (factual — reflects what works)
 - Skills content (knowledge/process — errors are caught by eval loops)
 - Agent checklist items — **ADDING** new checks (from real bugs via FIX mechanism)
 - Lineage metadata (append-only)
@@ -125,7 +122,7 @@ If context window is getting full (forgetting earlier decisions, repeating mista
 3. Commit: `git add -A && git commit -m "wip: [task] — context limit"`
 4. Tell the user: "Context is degrading. I've saved state. Please start a new session to continue with fresh context."
 
-Signals: contradicting earlier decisions, re-asking answered questions, forgetting patterns from {CONFIG_FILE}, inconsistent validation results.
+Signals: contradicting earlier decisions, re-asking answered questions, forgetting patterns from CLAUDE.md, inconsistent validation results.
 The user can also trigger this by saying "save state and start fresh".
 
 ---

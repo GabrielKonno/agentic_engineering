@@ -6,8 +6,8 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 
 These 10 skills implement the framework's Session Protocol and Execution Protocol as reusable, evolvable components. They were inline instructions in v1.5.0 (hardcoded in CLAUDE.md templates). In v1.6.0, they are pre-built skills that are:
 
-1. **Copied** to each project's `.claude/skills/` (or `.antigravity/skills/`) at bootstrap
-2. **Triggered** explicitly by the Session Protocol in CLAUDE.md/GEMINI.md
+1. **Copied** to each project's `.claude/skills/` at bootstrap
+2. **Triggered** explicitly by the Session Protocol in CLAUDE.md
 3. **Evolvable** via the standard evolution mechanisms (FIX/DERIVED/CAPTURED)
 
 ## Skills list
@@ -33,7 +33,7 @@ These 10 skills implement the framework's Session Protocol and Execution Protoco
 
 ## Scripts
 
-Skills with `scripts/` subdirectories contain bash helper scripts for deterministic operations. These scripts require bash (already a Claude Code requirement; Antigravity uses terminal). The SKILL.md contains the full process — scripts are optional automation, not dependencies.
+Skills with `scripts/` subdirectories contain bash helper scripts for deterministic operations. These scripts require bash (already a Claude Code requirement). The SKILL.md contains the full process — scripts are optional automation, not dependencies.
 
 ## Bootstrap copy command
 

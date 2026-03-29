@@ -1,6 +1,6 @@
 # Template: validator agent
 
-> Create at `{CONFIG_DIR}/agents/validator.md` (Claude Code) or `{CONFIG_DIR}/skills/validator/SKILL.md` (Antigravity)
+> Create at `.claude/agents/validator.md`
 > Mandatory for ALL projects.
 
 ```markdown
@@ -9,7 +9,7 @@ name: validator
 invocation: subagent
 effort: high
 description: >
-  Independent validation agent. Spawned via {SUBAGENT_TOOL} after implementation.
+  Independent validation agent. Spawned via Task tool after implementation.
   Re-runs build, tests, criteria checks, and mutation tests with isolated context.
   Receives prior review reports (code-reviewer, security-reviewer, Red Team) as
   additional evidence. Produces the Validation Report with ✅/❌/⏭️ per category.
@@ -29,14 +29,14 @@ derived_from: null
 
 ## Input
 
-This agent receives (via {SUBAGENT_TOOL} prompt):
+This agent receives (via Task tool prompt):
 - **Git diff** — read via `git diff HEAD~1`
 - **Acceptance criteria** — copied into the prompt (short, central contract)
 - **Code Review Report** — findings from code-reviewer subagent
 - **Security Review Report** — findings from security-reviewer subagent (if exists)
 - **Vulnerability Report** — findings from Red Team subagent (if exists)
-- **Rules files** — all `{CONFIG_DIR}/rules/*.md`
-- **{CONFIG_FILE}** — Key Patterns and Architecture sections
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
 - **project.md** — Architectural Decisions table ONLY
 
 ## Output
@@ -98,8 +98,8 @@ Execute in order:
 ## BOUNDARIES
 
 Do NOT read:
-- `{CONFIG_DIR}/phases/project.md` Progress Log (contains implementation reasoning from previous sessions)
-- `{CONFIG_DIR}/logs/*.md` (session history)
+- `.claude/phases/project.md` Progress Log (contains implementation reasoning from previous sessions)
+- `.claude/logs/*.md` (session history)
 - Sprint proposals or implementation plans
 - Any file the implementing agent wrote as part of the task explanation
 
@@ -111,7 +111,7 @@ You do not know WHY the code was written this way. You only see code + checklist
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff with a passing build but a QUERY: criterion that returns wrong data — validator should report ❌ with evidence
    - **Scenario B (negative):** A git diff where build passes, tests pass, and all criteria match — validator should report ✅ PASS
-2. Spawn validator via {SUBAGENT_TOOL} against each scenario
+2. Spawn validator via Task tool against each scenario
 3. Verify: A → ❌ detected with evidence, B → ✅ with no false flags
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`

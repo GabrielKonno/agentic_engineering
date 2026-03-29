@@ -123,7 +123,7 @@ Based on the answers, present an impact analysis BEFORE drafting:
 ### Impact on engineering documents:
 - project.md: [what to update — phases, decisions, module relationships]
 - pendencias.md: [tasks to add/remove/reprioritize]
-- Main config file (CLAUDE.md / GEMINI.md): [Build Order, Architecture, Key Patterns — if affected]
+- CLAUDE.md: [Build Order, Architecture, Key Patterns — if affected]
 - rules/*.md: [domain rules affected]
 
 ### Impact on existing code:
@@ -157,7 +157,7 @@ After confirmation, draft changes for each affected document:
 **In engineering documents (if affected):**
 - project.md: update phases, decisions, module relationships
 - pendencias.md: add/remove/reprioritize tasks with acceptance criteria
-- Main config file (CLAUDE.md / GEMINI.md): update Build Order, Architecture, Key Patterns if needed
+- CLAUDE.md: update Build Order, Architecture, Key Patterns if needed
 - rules/*.md: update domain rules if needed
 
 **For each change, show:**

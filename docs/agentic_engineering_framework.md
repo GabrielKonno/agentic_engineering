@@ -2,7 +2,7 @@
 
 A general-purpose methodology for AI-assisted software development. Moves from "autocreate" (AI writes code, human tests) to "auto-execute" (AI implements, validates, and reports with evidence; human approves).
 
-Tool-agnostic in concepts. Reference implementations provided for Claude Code (`session0_bootstrap_prompt.md`) and Antigravity (`session0_bootstrap_antigravity.md`).
+Tool-agnostic in concepts. Reference implementation provided for Claude Code (`session0_bootstrap_prompt.md`). Adaptable to other AI tools by mapping to their config format.
 
 ---
 
@@ -147,12 +147,9 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   └── skills/                           # 10 pre-built process skills (copied to projects)
 │   ├── bootstrap_claude/
 │   │   └── session0_bootstrap_prompt.md      # Bootstrap for Claude Code (references modules)
-│   ├── bootstrap_antigravity/
-│   │   └── session0_bootstrap_antigravity.md # Bootstrap for Antigravity (references modules)
 │   └── toolkit_prompt/
 │       ├── prd_planning_prompt.md             # PRD creation prompt
 │       ├── prd_change_prompt.md               # PRD modification prompt
-│       ├── cross_tool_migration_prompt.md     # Tool migration prompt
 │       └── existing_project_adaptation_prompt.md # Adapt existing project to framework
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
@@ -216,7 +213,7 @@ project/
 | `skills/[custom]/SKILL.md` | Custom skills created on-demand for recurring complex processes (Anthropic folder format) | When a technical process repeats 2+ times |
 | `skills/[stack]/SKILL.md` | Stack knowledge (framework-specific patterns for the project's stack) | Created at bootstrap or one-time installation |
 | `assets/examples/` | Reference templates for agents, skills, and rules (copied from framework repo during bootstrap) | Read-only reference. Consult before creating on-demand agents/skills. |
-| `.claude/logs/YYYYMMDD_sN_slug_commit.md` (or `.antigravity/logs/` for Antigravity) | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Primary detailed record. Read on-demand by AI when investigating past decisions or debugging recurring issues. Not read at session start. | Created automatically at end of every session (item 1). Never edited after creation. |
+| `.claude/logs/YYYYMMDD_sN_slug_commit.md` | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Primary detailed record. Read on-demand by AI when investigating past decisions or debugging recurring issues. Not read at session start. | Created automatically at end of every session (item 1). Never edited after creation. |
 
 ---
 
@@ -269,7 +266,7 @@ The version number is what the AI agent uses in the PRD sync check to detect cha
 
 ## Session Protocol
 
-> **Terminology:** This section uses `CLAUDE.md` and `.claude/` as the reference convention. For Antigravity, read as `GEMINI.md` and `.antigravity/`. For other tools, adapt to the tool's config format. See Implementation section for tool-specific mappings.
+> **Terminology:** This section uses `CLAUDE.md` and `.claude/` as the reference convention. For other tools, adapt to the tool's config format.
 
 ### At the START of every session:
 
@@ -367,7 +364,7 @@ In v1.6.0, each end-of-session item is implemented by a pre-built process skill 
 
 2. **Create session log + update project.md** → run `session-log-creator` then `project-md-updater` skills
 
-   **Session log:** Primary detailed record in `.claude/logs/` (or `.antigravity/logs/`): tasks completed, decisions (with reasoning), bugs, discoveries, files changed, evolutions.
+   **Session log:** Primary detailed record in `.claude/logs/`: tasks completed, decisions (with reasoning), bugs, discoveries, files changed, evolutions.
 
    **Filename format:** `YYYYMMDD_sN_[slug]_[commit].md`
    - `YYYYMMDD` — session date
@@ -487,7 +484,7 @@ When the context window is getting full (AI starts forgetting earlier decisions,
 **Signals that context is degrading:**
 - AI proposes changes that contradict earlier decisions in the same session
 - AI asks questions it already answered earlier
-- AI forgets patterns from CLAUDE.md / GEMINI.md
+- AI forgets patterns from the config file
 - AI stops referencing rules or Known Bug Patterns it checked earlier
 - Validation loop results become inconsistent
 
@@ -787,7 +784,7 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
 4. **Apply the systemic improvement** (not just a point fix):
    - Route to the correct document based on the classification above
    - The improvement must prevent the CLASS of failure, not just this instance
-   - If the improvement is a new rule in the Execution Protocol: apply it to the config file (CLAUDE.md / GEMINI.md), not just the session log
+   - If the improvement is a new rule in the Execution Protocol: apply it to the config file (CLAUDE.md), not just the session log
 
 5. **Log the post-mortem** in the session log (and note in the project.md index row):
    ```
@@ -865,7 +862,7 @@ The NEVER list is as important as the ALWAYS list — it is the anti-bias firewa
 
 ### Subagent instruction template
 
-The implementing agent constructs a prompt for the tool's subagent mechanism (Claude Code: Task tool; Antigravity: Agent Manager). The prompt follows this structure:
+The implementing agent constructs a prompt for the tool's subagent mechanism (e.g., Claude Code's Task tool). The prompt follows this structure:
 
 ```
 1. Role definition — "You are the [agent name]. Your role is [purpose]."
@@ -956,10 +953,9 @@ Each call gets a fresh context. Only use when the combined scope would strain a 
 The concepts in this protocol are tool-agnostic. The mechanics are tool-specific:
 
 - **Claude Code:** Subagents are spawned via the **Task tool**. Each Task tool call creates a new conversation with isolated context.
-- **Antigravity:** Subagents are spawned via the **Agent Manager**. Adapt the instruction template to Agent Manager's prompt format.
 - **Other tools:** Adapt to the tool's subagent/subprocess mechanism. If the tool does not support subagents, fall back to inline validation (Route A behavior for all tasks) and note the limitation.
 
-The bootstrap files (`session0_bootstrap_prompt.md` and `session0_bootstrap_antigravity.md`) contain the tool-specific implementation with exact templates and commands.
+The bootstrap file (`session0_bootstrap_prompt.md`) contains the Claude Code implementation with exact templates and commands. For other tools, adapt to the tool's configuration format.
 
 ---
 
@@ -1299,7 +1295,7 @@ Some skills emerge from real project experience — they require observed repeti
 
 Every agent and skill declares how it is activated via `invocation` frontmatter:
 
-- `invocation: subagent` — spawned as an independent process (Claude Code: Task tool; Antigravity: Agent Manager; other tools: adapt). The subagent receives instructions, reads files from the filesystem, and returns a structured report. It operates with **isolated context** — no access to the implementing agent's reasoning or conversation history.
+- `invocation: subagent` — spawned as an independent process via the tool's subagent mechanism (e.g., Claude Code's Task tool). The subagent receives instructions, reads files from the filesystem, and returns a structured report. It operates with **isolated context** — no access to the implementing agent's reasoning or conversation history.
 - `invocation: inline` — read as a reference document by another agent (implementing agent, validator, or any subagent that needs the knowledge). Skills are typically `inline`. Knowledge documents, design systems, and stack references are `inline`.
 
 **All validation/review/security agents are `subagent`:** code-reviewer, security-reviewer, red-team, blue-team, validator, arbitrator, and on-demand agents created for specialized review roles.
@@ -1360,7 +1356,7 @@ After creating any agent with `invocation: subagent`, validate it via test scena
 1. Generate 2 test scenarios relevant to the agent's purpose:
    - **Scenario A:** contains a clear issue the agent should detect (positive case)
    - **Scenario B:** clean code/input with no issues (negative case — should not trigger false flags)
-2. Spawn the agent via the tool's subagent mechanism (Task tool, Agent Manager, etc.) against each scenario
+2. Spawn the agent via the tool's subagent mechanism (e.g., Task tool) against each scenario
 3. Verify: A → issue detected, B → no false flags
 4. If any result is wrong: improve the agent and re-test
 5. Update lineage: `last_eval: sN (2/2 passed)`
@@ -1391,7 +1387,7 @@ For mature projects (10+ sessions, 5+ custom skills), external skill evolution t
 
 **What external tools add:** automatic skill performance tracking (error rates, success rates), auto-fix for broken skills, auto-improve from successful patterns, new skill capture from observed usage.
 
-**What external tools do NOT replace:** Agent evolution, rules file evolution, config file (CLAUDE.md/GEMINI.md) evolution, Known Bug Patterns management. The framework's end-of-session protocol handles all non-skill evolution.
+**What external tools do NOT replace:** Agent evolution, rules file evolution, config file evolution, Known Bug Patterns management. The framework's end-of-session protocol handles all non-skill evolution.
 
 **If using an external skill manager:**
 - Restrict it to a dedicated namespace (e.g., `.claude/skills/external-*/`) to avoid dual-authority conflicts
@@ -1409,7 +1405,7 @@ AI agents sometimes fail to invoke skills they should use — a problem known as
 
 The framework uses dual-layer protection for all fixed process skills:
 
-### Layer 1 — Explicit triggers in CLAUDE.md/GEMINI.md (deterministic)
+### Layer 1 — Explicit triggers in the config file (deterministic)
 
 The config file's Session Protocol contains explicit trigger points:
 - "At session start item 4: run prd-sync-checker"
@@ -1449,7 +1445,7 @@ This convention applies to **process skills** (workflow steps). Knowledge skills
 
 ## Task Parallelism
 
-For AI tools that support multi-agent execution (Antigravity Agent Manager, Codex subagents), tasks can run in parallel IF they have no dependencies on each other.
+For AI tools that support multi-agent execution (e.g., Codex subagents), tasks can run in parallel IF they have no dependencies on each other.
 
 ### Dependency mapping in pendencias.md
 
@@ -1735,9 +1731,7 @@ This framework is tool-agnostic. The concepts apply to any AI coding agent.
 | `prd_planning_prompt.md` | Prompt to create a PRD from scratch (before session 0) | No — works with any AI |
 | `prd_change_prompt.md` | Prompt to modify an existing PRD (classify → investigate → impact → draft) | No — works with any AI |
 | `session0_bootstrap_prompt.md` | Prompt to bootstrap a new project in session 0 (creates all files, installs tools) | Yes — Claude Code specific |
-| `session0_bootstrap_antigravity.md` | Prompt to bootstrap a new project in session 0 for Antigravity | Yes — Antigravity specific |
-| `existing_project_adaptation_prompt.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | Partial — scans both `.claude/` and `.antigravity/` but flow is Claude Code-oriented. Adapt for other tools. |
-| `cross_tool_migration_prompt.md` | Prompt to migrate setup between Claude Code and Antigravity | Yes — bidirectional |
+| `existing_project_adaptation_prompt.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | Yes — Claude Code specific |
 
 **Path context:** The PRD prompts reference `assets/docs/prd.md` relative to the project root. When using the framework repository structure (with `projects/` directory), the full path from the framework root is `projects/[project-name]/assets/docs/prd.md`. The session0 prompts handle this mapping — no changes to the PRD prompts are needed.
 
@@ -1746,11 +1740,5 @@ For Claude Code implementation, see `session0_bootstrap_prompt.md` which provide
 - MCP installation commands
 - Skill discovery and installation process
 - Session Protocol and Execution Protocol embedded in the CLAUDE.md template
-
-For Antigravity implementation, see `session0_bootstrap_antigravity.md` which provides:
-- Exact file templates (GEMINI.md, AGENTS.md, project.md, pendencias.md, skills)
-- Planning Mode and Browser Subagent integration
-- Antigravity-native MCP and skill configuration
-- Session Protocol and Execution Protocol embedded in the GEMINI.md template
 
 For other AI tools (Cursor, Windsurf, Codex, Cline), adapt the session0 prompt to the tool's configuration format while preserving the concepts from this framework.

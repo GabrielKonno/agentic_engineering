@@ -1,6 +1,6 @@
 # Template: project.md
 
-> Create at `{CONFIG_DIR}/phases/project.md`
+> Create at `.claude/phases/project.md`
 
 ```markdown
 # [Name] — Handoff Document
@@ -61,8 +61,8 @@ Module A ──→ Module B ──→ Module C
 
 ## Progress Log
 
-> Concise index. Detailed session records live in `{CONFIG_DIR}/logs/`.
-> Decisions are reflected in the Architectural Decisions table and {CONFIG_FILE}.
+> Concise index. Detailed session records live in `.claude/logs/`.
+> Decisions are reflected in the Architectural Decisions table and CLAUDE.md.
 
 | Session | Date | Summary | Log |
 |---------|------|---------|-----|

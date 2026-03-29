@@ -1,6 +1,6 @@
 # Template: pendencias.md
 
-> Create at `{CONFIG_DIR}/phases/pendencias.md`
+> Create at `.claude/phases/pendencias.md`
 
 ```markdown
 # [Project] — Backlog
@@ -73,7 +73,7 @@ parallel: false
 - [ ] `BUILD:` Project builds with zero errors
 - [ ] `VERIFY:` Dev server starts → index page renders with framework default content (not a blank page or error)
 - [ ] `QUERY:` Database connection works: `SELECT 1` → returns 1 (if applicable)
-- [ ] `MANUAL:` Project structure matches architecture in {CONFIG_FILE} — verify folder layout and key files exist
+- [ ] `MANUAL:` Project structure matches architecture in CLAUDE.md — verify folder layout and key files exist
 
 ### 2. [First module from Build Order]
 depends: [1]
@@ -92,7 +92,7 @@ parallel: true (if independent of task 3)
 - [ ] `VERIFY:` [page/endpoint/command] → [main action] → [expected result with specific values/elements]
 - [ ] `VERIFY:` [page/endpoint/command] → empty state → [specific empty state message/response]
 - [ ] `QUERY:` [specific query] → [specific expected value — this criterion should also become an executable test]
-- [ ] `REVIEW:` API handlers follow authentication and authorization patterns defined in {CONFIG_FILE}
+- [ ] `REVIEW:` API handlers follow authentication and authorization patterns defined in CLAUDE.md
 - [ ] `MANUAL:` Visual matches design system
 
 ### 3. [Second module]
@@ -109,7 +109,7 @@ parallel: true (if independent of task 3)
 
 ## Done
 
-> Completed tasks are moved to `{CONFIG_DIR}/phases/done_tasks.md` with full metadata intact.
+> Completed tasks are moved to `.claude/phases/done_tasks.md` with full metadata intact.
 > This section stays empty between sessions. The pendencias-updater skill handles the move
 > at end of every session (or between tasks during a sprint).
 > To check completed tasks: read `done_tasks.md`. To check dependencies on old tasks:

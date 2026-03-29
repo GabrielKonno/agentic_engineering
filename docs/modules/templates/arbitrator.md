@@ -1,6 +1,6 @@
 # Template: arbitrator agent
 
-> Create at `{CONFIG_DIR}/agents/arbitrator.md` (Claude Code) or `{CONFIG_DIR}/skills/arbitrator/SKILL.md` (Antigravity)
+> Create at `.claude/agents/arbitrator.md`
 > Mandatory for ALL projects.
 
 ```markdown
@@ -40,8 +40,8 @@ Do NOT spawn when validator ❌ AND mechanical evidence also indicates a problem
 - **Mechanical evidence** — build output, test results, query results that suggest ✅
 - **Git diff** — read via `git diff HEAD~1`
 - **Acceptance criteria** — copied into prompt
-- **Rules files** — all `{CONFIG_DIR}/rules/*.md`
-- **{CONFIG_FILE}** — Key Patterns and Architecture sections
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md** — Key Patterns and Architecture sections
 - **project.md** — Architectural Decisions table ONLY
 
 ## Output — Three Terminal Rulings (no recursion)
@@ -74,8 +74,8 @@ Genuinely ambiguous. Neither the validator nor mechanical evidence is clearly ri
 ## BOUNDARIES
 
 Do NOT read:
-- `{CONFIG_DIR}/phases/project.md` Progress Log (contains implementation reasoning)
-- `{CONFIG_DIR}/logs/*.md` (session history)
+- `.claude/phases/project.md` Progress Log (contains implementation reasoning)
+- `.claude/logs/*.md` (session history)
 - Sprint proposals or implementation plans
 - Any file the implementing agent wrote as part of the task explanation
 
@@ -87,7 +87,7 @@ Same anti-bias firewall as the validator. You judge the CODE against CRITERIA, n
 1. Generate 2 test scenarios:
    - **Scenario A (UPHOLD ❌):** Validator says ❌, build passes but test assertions are superficial — arbitrator should UPHOLD
    - **Scenario B (OVERRIDE TO ✅):** Validator says ❌ but build passes, tests pass with strong assertions, and query returns exact expected value — arbitrator should OVERRIDE TO ✅
-2. Spawn arbitrator via {SUBAGENT_TOOL} against each scenario
+2. Spawn arbitrator via Task tool against each scenario
 3. Verify: A → UPHOLD ❌, B → OVERRIDE TO ✅
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`

@@ -37,22 +37,22 @@ Read the entire existing structure before making any changes. This is the most i
 find . -name "*.md" -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' | sort
 
 # Read the main config file
-cat CLAUDE.md 2>/dev/null || cat GEMINI.md 2>/dev/null || echo "NO CONFIG FILE FOUND"
+cat CLAUDE.md 2>/dev/null || echo "NO CONFIG FILE FOUND"
 
 # Read project history
-cat .claude/phases/project.md 2>/dev/null || cat .antigravity/phases/project.md 2>/dev/null
+cat .claude/phases/project.md 2>/dev/null
 
 # Read backlog (may have non-standard names)
-find .claude/phases/ .antigravity/phases/ -name "*.md" -not -name "project.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find .claude/phases/ -name "*.md" -not -name "project.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 
 # Read all agents
-find .claude/agents/ .antigravity/skills/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find .claude/agents/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 
 # Read all rules
-find .claude/rules/ .antigravity/rules/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find .claude/rules/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 
 # Read all skills
-find .claude/skills/ .antigravity/skills/ -name "*.md" -o -name "SKILL.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find .claude/skills/ -name "*.md" -o -name "SKILL.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 ```
 
 **Step 1.2 — Read codebase structure:**
@@ -122,7 +122,7 @@ Before proceeding, present a summary of everything you read:
 - Modules identified: [list]
 
 ### Existing framework docs:
-- CLAUDE.md / GEMINI.md: [exists/missing] — [summary of content]
+- CLAUDE.md: [exists/missing] — [summary of content]
 - project.md: [exists/missing] — [N rows in Progress Log index, last session date]
 - pendencias/backlog: [filename] — [N items in progress, N items done]
 - Agents: [list with names]
@@ -148,7 +148,7 @@ Before proceeding, present a summary of everything you read:
 
 For every document that already exists: **DO NOT overwrite.** Read it, identify what's missing compared to the current framework, and add only the missing sections. Preserve all existing content, history, and patterns.
 
-**Step 2.1 — Upgrade CLAUDE.md (or GEMINI.md):**
+**Step 2.1 — Upgrade CLAUDE.md:**
 
 Compare the existing config file against this checklist. Add any missing section:
 
@@ -192,13 +192,13 @@ Required sections:
 - Sprint report template in "Between tasks" item 4
 - Diff-based pattern extraction in end-of-session item 5
 - Agent/skill evolution in end-of-session item 6 (update existing agents/skills with session discoveries)
-- Session logs (`.claude/logs/` or `.antigravity/logs/`) — permanent record per session
+- Session logs (`.claude/logs/`) — permanent record per session
 - Hooks section in config file (smart-formatting PostToolUse hook)
 - "2 per-session moments" Level 4 flow (if Level 4 content is missing entirely)
 - **Graduated validation depth** (routine=inline, logic-heavy=2 subagents, arch/security=full chain) — Phase A/B split
 - **Validation Orchestration section** (context routing rules, sequencing, retry flow, subagent mechanics)
-- **validator agent/skill** (`.claude/agents/validator.md` or `.antigravity/skills/validator/SKILL.md`) — independent validation
-- **arbitrator agent/skill** (`.claude/agents/arbitrator.md` or `.antigravity/skills/arbitrator/SKILL.md`) — conflict resolution
+- **validator agent** (`.claude/agents/validator.md`) — independent validation
+- **arbitrator agent** (`.claude/agents/arbitrator.md`) — conflict resolution
 - **`invocation:` frontmatter** on all review/validation agents/skills (`subagent` or `inline`)
 - **`receives:` / `produces:` frontmatter** on `invocation: subagent` agents/skills (I/O contract)
 - **Subagent context incomplete** root cause in Validation Failure Post-Mortem
@@ -208,7 +208,7 @@ Required sections:
 - **"Known Bug Patterns triggered"** field in Code Review Report output format
 - **"Evolutions applied"** section in session log template
 - **Auto-evolution boundaries** section (DATA = autonomous, BEHAVIOR = human approval)
-- **Skill Creator plugin** reference (Claude Code only — `/plugin install skill-creator@claude-plugins-official`)
+- **Skill Creator plugin** reference (`/plugin install skill-creator@claude-plugins-official`)
 - **Creation eval** substeps for subagent agents (2 test scenarios per agent, DEFERRABLE)
 
 **For each addition, log:**
@@ -237,7 +237,7 @@ Add an adaptation row to the Progress Log index table:
 | Adaptation | [date] | Framework upgrade to v[current], retroactive PRD created | — |
 ```
 
-Also create a session log in `{CONFIG_DIR}/logs/` with the detailed adaptation record:
+Also create a session log in `.claude/logs/` with the detailed adaptation record:
 ```markdown
 # Adaptation Session — [date]
 
@@ -409,7 +409,7 @@ Create `assets/docs/prd.md` with this approach:
 | 1.0.0 | [date] | Retroactive PRD — created from codebase analysis during framework adaptation | AI + [owner] |
 ```
 
-**After creating the PRD:** update CLAUDE.md/GEMINI.md to reference it (`**PRD:** See assets/docs/prd.md`).
+**After creating the PRD:** update CLAUDE.md to reference it (`**PRD:** See assets/docs/prd.md`).
 
 ---
 
@@ -433,7 +433,7 @@ If framework root is not accessible: note in the report that `assets/examples/` 
 
 ```bash
 # Create logs directory
-mkdir -p .claude/logs 2>/dev/null || mkdir -p .antigravity/logs 2>/dev/null
+mkdir -p .claude/logs 2>/dev/null
 
 # Create settings.json if missing (Claude Code only)
 if [ ! -f ".claude/settings.json" ] && [ -d ".claude" ]; then
@@ -520,8 +520,8 @@ for f in .claude/agents/*.md; do
 done
 
 echo "=== Validator and arbitrator exist? ==="
-ls .claude/agents/validator.md .antigravity/skills/validator/SKILL.md 2>/dev/null || echo "MISSING validator"
-ls .claude/agents/arbitrator.md .antigravity/skills/arbitrator/SKILL.md 2>/dev/null || echo "MISSING arbitrator"
+ls .claude/agents/validator.md 2>/dev/null || echo "MISSING validator"
+ls .claude/agents/arbitrator.md 2>/dev/null || echo "MISSING arbitrator"
 
 echo "=== Skills use folder format? ==="
 for f in .claude/skills/*.md; do
@@ -613,11 +613,7 @@ a skill that exists in `.claude/skills/`:
 - During implementation: validation-orchestrator
 - Session end: diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
-### 4. For Antigravity projects
-
-Same process but with `.antigravity/skills/` paths and `docs/modules/templates/gemini_md.md` as the reference template.
-
-### 5. Log the upgrade
+### 4. Log the upgrade
 
 Add to project.md: "Upgraded to framework v1.6.0 — 10 process skills extracted, CLAUDE.md slimmed from ~500 to ~200 lines"
 

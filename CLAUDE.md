@@ -20,7 +20,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   ├── session_protocol.md             # Session Protocol (START, END, recovery)
 │   │   ├── execution_protocol.md           # Execution Protocol (validation loop, orchestration)
 │   │   ├── templates/                      # Document and agent templates for bootstrap
-│   │   │   ├── claude_md.md, gemini_md.md  # Config file templates (orchestrator format)
+│   │   │   ├── claude_md.md                # Config file template (orchestrator format)
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
 │   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
 │   │   │   ├── validator.md, arbitrator.md # Validation agent templates
@@ -34,12 +34,9 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │       └── ... (6 more)
 │   ├── bootstrap_claude/
 │   │   └── session0_bootstrap_prompt.md    # Bootstrap for Claude Code (references modules)
-│   ├── bootstrap_antigravity/
-│   │   └── session0_bootstrap_antigravity.md # Bootstrap for Antigravity (references modules)
 │   └── toolkit_prompt/
 │       ├── prd_planning_prompt.md              # Create a PRD from scratch
 │       ├── prd_change_prompt.md                # Modify an existing PRD
-│       ├── cross_tool_migration_prompt.md      # Migrate between Claude Code ↔ Antigravity
 │       └── existing_project_adaptation_prompt.md # Upgrade existing project to framework
 ├── examples/                               # Quality reference for agents, skills, rules
 │   ├── agents/                             # Agent templates by category
@@ -71,7 +68,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 The user will say something like: "Bootstrap project X" or send the session0 prompt.
 
 **Process:**
-1. Read `docs/bootstrap_claude/session0_bootstrap_prompt.md` (or the Antigravity variant in `docs/bootstrap_antigravity/`)
+1. Read `docs/bootstrap_claude/session0_bootstrap_prompt.md`
 2. Create the project folder: `projects/[project-name]/`
 3. Verify the PRD exists: `projects/[project-name]/assets/docs/prd.md`
 4. Execute the session0 prompt — all files created inside `projects/[project-name]/`
@@ -106,14 +103,6 @@ The user wants to define a product before bootstrapping.
 1. Read `docs/toolkit_prompt/prd_planning_prompt.md` (creation) or `docs/toolkit_prompt/prd_change_prompt.md` (modification)
 2. Follow the interactive process in the prompt
 3. Save the result to `projects/[project-name]/assets/docs/prd.md`
-
-### 4. Migrate between tools
-
-The user wants to switch a project from Claude Code to Antigravity or vice versa.
-
-**Process:**
-1. Read `docs/toolkit_prompt/cross_tool_migration_prompt.md`
-2. This runs from the project root
 
 ## Rules
 

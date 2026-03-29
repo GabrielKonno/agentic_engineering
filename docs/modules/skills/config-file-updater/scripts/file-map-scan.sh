@@ -16,7 +16,6 @@ find . -maxdepth "$DEPTH" -type f \
   -not -path '*/dist/*' \
   -not -path '*/build/*' \
   -not -path '*/.claude/logs/*' \
-  -not -path '*/.antigravity/logs/*' \
   -not -name '*.pyc' \
   -not -name '.DS_Store' \
   | sort

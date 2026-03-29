@@ -1,6 +1,6 @@
 # Template: Red Team agent
 
-> Create at `{CONFIG_DIR}/agents/red-team.md` (Claude Code) or `{CONFIG_DIR}/skills/red-team/SKILL.md` (Antigravity)
+> Create at `.claude/agents/red-team.md`
 > Only create if PRD indicates security risk (auth, multi-tenancy, payments, AI/LLM, sensitive data, external APIs, file uploads).
 
 ```markdown
@@ -125,7 +125,7 @@ NEVER proceed with Tier 3 without explicit approval in the current session.
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff introducing an RLS-protected endpoint where the policy has a gap — Red Team should identify the bypass vector
    - **Scenario B (negative):** A git diff with correct RLS policies and no bypass paths — Red Team should report no findings
-2. Spawn Red Team via {SUBAGENT_TOOL} against each scenario
+2. Spawn Red Team via Task tool against each scenario
 3. Verify: A → vulnerability detected, B → no false flags
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`

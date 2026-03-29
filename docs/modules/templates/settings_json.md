@@ -1,7 +1,6 @@
 # Template: settings.json
 
-> Create at `{CONFIG_DIR}/settings.json`
-> Claude Code only — Antigravity uses UI-based settings.
+> Create at `.claude/settings.json`
 
 ```json
 {

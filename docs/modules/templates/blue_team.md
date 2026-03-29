@@ -1,6 +1,6 @@
 # Template: Blue Team agent
 
-> Create at `{CONFIG_DIR}/agents/blue-team.md` (Claude Code) or `{CONFIG_DIR}/skills/blue-team/SKILL.md` (Antigravity)
+> Create at `.claude/agents/blue-team.md`
 > Only create if Red Team was created (Step 9).
 
 ```markdown
