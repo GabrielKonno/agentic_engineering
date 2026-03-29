@@ -1,17 +1,45 @@
 # Agentic Engineering Framework v1.6.0
 
-A methodology for AI-assisted software development where the AI implements, validates, and reports with evidence — and the human approves and directs.
+A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
-Instead of the human testing in the browser, taking screenshots, and reporting bugs, the AI runs a two-phase validation loop — implements and commits, then spawns independent subagents for review and verification with isolated context. The human exits the "test and report" loop and enters the "approve and direct" loop.
+**This repository does not contain application code.** It contains everything needed to *bootstrap* a project: document templates, process skills, validation agents, quality examples, and interactive prompts. You run the bootstrap once; it creates a self-contained project with its own AI instructions. From that point, the AI develops the project autonomously — implementing, validating via independent subagents, and reporting with evidence. The human approves and directs.
 
 ---
 
-## How it works
+## What This Framework Does
+
+This repo is a **factory for AI-ready projects**. It reads your product requirements and generates a complete AI workspace:
 
 ```
-Human defines task with criteria → AI implements →
-AI self-reviews → AI tests (browser + DB) →
-AI verifies criteria → AI reports with evidence →
+  YOUR PRD               FRAMEWORK MODULES               BOOTSTRAPPED PROJECT
+  (what to build)        (templates + protocols           (ready for development)
+                          + skills + examples)
+  +-------------+        +--------------------+           +---------------------+
+  |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
+  +-------------+        |                    |           | project.md          |
+                         | Reads:             |           | pendencias.md       |
+                         |  - 9 templates     |           | 6+ agent .md files  |
+                         |  - 2 protocols     |           | 10+ process skills  |
+                         |  - 10 skills       |           | examples/ (copy)    |
+                         |  - examples/       |           | settings.json       |
+                         +--------------------+           +---------------------+
+                                                                    |
+                                                          cd projects/my-project
+                                                          claude
+```
+
+### Two operating modes
+
+**Bootstrap mode** (this repo) — The AI reads your PRD, reads the framework's templates and protocols, and creates all project files inside `projects/[name]/`. Run once per project. Triggered by the session0 bootstrap prompt.
+
+**Development mode** (inside the project) — The AI reads the project's own CLAUDE.md, follows the Session Protocol, proposes sprints, implements tasks, validates via subagents, and reports with evidence. The framework repo is no longer involved.
+
+### How development works (inside a bootstrapped project)
+
+```
+Human defines task with criteria --> AI implements -->
+AI self-reviews --> AI tests (browser + DB) -->
+AI verifies criteria --> AI reports with evidence -->
 Human approves or redirects
 ```
 
@@ -27,9 +55,11 @@ At Level 4 (Auto Pilot), the AI proposes sprints, executes 3-5 tasks autonomousl
 1. Clone this repo
 2. Create a PRD for your project (use the PRD planning prompt)
 3. Run Claude Code from the repo root
-4. Send the session0 bootstrap prompt
+4. Copy the content of docs/bootstrap_claude/session0_bootstrap_prompt.md and paste it
 5. Extract the project to its own repo
 ```
+
+After extraction, the framework repo is no longer needed for this project — development happens entirely from within the project folder.
 
 ### Existing project (has code, needs framework)
 
@@ -79,6 +109,79 @@ agentic_engineering/
 
 ---
 
+## What Bootstrap Creates
+
+When you run the bootstrap prompt, the AI creates these files *inside your project* (not in this repo):
+
+| Created file | Source in this repo | Purpose |
+|---|---|---|
+| `CLAUDE.md` | `modules/templates/claude_md.md` | AI instructions — embeds Session Protocol + Execution Protocol |
+| `.claude/phases/project.md` | `modules/templates/project_md.md` | Engineering handoff (architectural decisions, phase status, progress log) |
+| `.claude/phases/pendencias.md` | `modules/templates/pendencias_md.md` | Prioritized backlog with verifiable acceptance criteria |
+| `.claude/agents/code-reviewer.md` | `modules/templates/code_reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
+| `.claude/agents/validator.md` | `modules/templates/validator.md` | Independent validation subagent — verifies with isolated context |
+| `.claude/agents/arbitrator.md` | `modules/templates/arbitrator.md` | Resolves conflicts between validator judgment and mechanical evidence |
+| `.claude/agents/security-reviewer.md` | `modules/templates/security_reviewer.md` | OWASP Top 10 checklist |
+| `.claude/agents/red-team.md` | `modules/templates/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
+| `.claude/agents/blue-team.md` | `modules/templates/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
+| `.claude/skills/*` (10 skills) | `modules/skills/*` | Process skills — copied entirely, one per protocol step |
+| `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
+| `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
+
+### Why files in this repo reference things that don't exist here
+
+Templates and protocols reference paths like `.claude/agents/code-reviewer.md` and `.claude/skills/prd-sync-checker/SKILL.md`. These files do not exist in this repo — they are created during bootstrap inside the project folder.
+
+Templates are blueprints. The paths they contain are the paths those files will have *after bootstrap creates them*. When reading a template, the context is the future project directory, not the framework root.
+
+**Files created only during development** (not at bootstrap):
+- `.claude/phases/done_tasks.md` — archive of completed tasks (created when first task completes)
+- `.claude/rules/*.md` — domain-specific rules (created when 3+ patterns accumulate from the same domain)
+- `.claude/logs/*.md` — session logs (one per session, first created at end of session 0)
+
+---
+
+## How Modules Interact
+
+The framework has five component types, each serving a distinct role:
+
+```
+TOOLKIT PROMPTS          TEMPLATES               PROTOCOLS
+(human entry points)     (what to create)        (when things happen)
+
+  session0_bootstrap --> claude_md.md -------.   session_protocol.md
+  prd_planning_prompt    project_md.md       |   execution_protocol.md
+  prd_change_prompt      pendencias_md.md    |        |
+  existing_adaptation    agent templates (6) |   embedded in project's
+                              |              |   CLAUDE.md at bootstrap
+                     created at bootstrap    |        |
+                              |              |        v
+                              v              |   PROCESS SKILLS
+                        PROJECT FILES        |   (how to execute)
+                        (instances in the    |   10 pre-built skills
+                         bootstrapped        |   that implement each
+                         project)            |   protocol step
+                                             |        |
+                        EXAMPLES             |   trigger at runtime
+                        (copied to project's |        |
+                         assets/examples/)   |        v
+                              |              |   AGENTS (subagent .md)
+                        read-only reference  |   code-reviewer, validator,
+                        for on-demand        |   security-reviewer, etc.
+                        creation             |        |
+                                             |   consult at runtime
+                                             |        v
+                                             |   RULES (domain logic)
+                                             |   created during development
+                                             '--------'
+```
+
+**Dependency flow:** PRD --> bootstrap prompt reads PRD --> creates project files from templates. Templates embed protocols --> protocols trigger skills. Skills orchestrate agents --> agents consult rules. Examples are copied to the project as reference for creating new agents/skills on demand.
+
+For the full architecture diagram and bootstrap pipeline details, see [Framework Architecture](docs/agentic_engineering_framework.md#framework-architecture) in the deep reference.
+
+---
+
 ## Workflow
 
 ### 1. Create the PRD
@@ -95,21 +198,7 @@ Run Claude Code from the repo root and send the bootstrap prompt:
 
 **Open:** `docs/bootstrap_claude/session0_bootstrap_prompt.md`
 
-The AI reads the PRD and creates the entire project structure:
-
-| Created | Purpose |
-|---------|---------|
-| `CLAUDE.md` | Session Protocol + Execution Protocol (how the AI works in this project) |
-| `project.md` | Handoff document (decisions, status, session history) |
-| `pendencias.md` | Prioritized backlog with verifiable acceptance criteria |
-| `code-reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
-| `security-reviewer.md` | OWASP Top 10 checklist |
-| `red-team.md` / `blue-team.md` | Adversarial security testing (if project has auth, payments, etc.) |
-| `validator.md` | Independent validation agent — verifies implementation with isolated context |
-| `arbitrator.md` | Resolves conflicts between validator judgment and mechanical evidence |
-| `.claude/settings.json` | Permissions + auto-formatting hook (Claude Code only) |
-| `assets/examples/` | Agent/skill templates for future reference |
-| `.claude/logs/` | Session log directory |
+The AI reads the PRD and creates the entire project structure — see [What Bootstrap Creates](#what-bootstrap-creates) above for the full list of files and their sources.
 
 ### 3. Extract to its own repo
 
@@ -233,6 +322,10 @@ Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is
 
 **Session Logs** — Permanent record of every session (what was done, decisions made, reasoning, git diff). Not read by the AI during normal sessions — exists for human reference and project history.
 
+**Graduated Validation** — Validation depth scales with task risk. Routine tasks (UI text, config changes) use inline checklists — low cost, fast. Logic-heavy tasks (business rules, calculations) spawn 2 independent subagents (code-reviewer + validator). Architecture and security tasks spawn the full chain — up to 5 subagents (code-reviewer, security-reviewer, Red Team, validator, Blue Team). The AI classifies each task and routes to the appropriate depth automatically.
+
+**Anti-Bias Firewall** — When validation subagents are spawned, they receive the code diff, checklists, and acceptance criteria — but NOT the implementing agent's reasoning, session logs, or implementation plans. This context isolation prevents confirmation bias: the validating agent judges the code against the criteria without knowing WHY it was written that way.
+
 ---
 
 ## Deep Dive
@@ -241,4 +334,4 @@ For the full methodology, concepts, and design rationale:
 
 **Read:** `docs/agentic_engineering_framework.md`
 
-This is the tool-agnostic reference document (1700+ lines) covering: problem definition, maturity model, project structure, document boundaries, session protocol, execution protocol, validation orchestration protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.
+This is the tool-agnostic reference document (1900+ lines) covering: repository orientation, problem definition, maturity model, project structure, framework architecture (component types, bootstrap pipeline, two-repo architecture), document boundaries, session protocol, execution protocol, validation orchestration protocol, 6 evolutions, browser automation, MCP discovery, on-demand creation, task parallelism, test automation, security testing tiers, risks and mitigations, and principles.

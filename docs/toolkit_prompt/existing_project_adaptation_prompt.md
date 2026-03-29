@@ -18,6 +18,8 @@ Use this prompt with Claude Code when you have a project that already has partia
 
 **Project folder:** `[CONFIGURE: path to project root — e.g., "." if running from the project root, or "projects/kyojin-system" if running from the framework root]`
 
+**Framework root:** `[CONFIGURE: path to the agentic_engineering repo — e.g., "../.." if project is at projects/[name]/ within the framework, or "~/agentic_engineering" if standalone. Used for copying examples, skills, and templates]`
+
 This session reads the existing codebase and documentation, then upgrades everything to the current Agentic Engineering Framework version. NO application code will be written or modified. Only documentation and configuration.
 
 **Output language:** All documents are written in English for consistency. Conversational output should be in [CONFIGURE: your preferred language, e.g., "Brazilian Portuguese"]. Replace this placeholder before sending.
@@ -128,6 +130,7 @@ Before proceeding, present a summary of everything you read:
 - Agents: [list with names]
 - Rules: [list with names]
 - Skills: [list with names]
+- Process skills: [N of 10 installed] — [list missing: prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator, diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator]
 - PRD: [exists/missing]
 
 ### What needs to be created:
@@ -153,27 +156,23 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections:
-□ Project Overview (name, state, PRD reference, pending tasks reference)
-□ Session Protocol — START (10 items including MODEL SWITCH check, PRD sync, sprint proposal)
+Required sections (compare against docs/modules/templates/claude_md.md):
+□ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
+□ Session Protocol — START (10 items including MODEL SWITCH check, PRD sync skill, sprint proposal skill)
 □ Session Protocol — Task limit per session
 □ Three mechanisms for reasoning depth
-□ Before implementing (complexity classification, complexity threshold, sprint-approved mode, exception stops)
+□ Before implementing (criteria-enforcer skill, complexity classification, complexity threshold, sprint-approved mode, exception stops)
 □ Model switch protocol (5 steps + sprint interaction)
 □ Git checkpoint strategy
-□ During implementation — Phase A (implementation) + Phase B (validation) with graduated depth
-□ Graduated validation depth (routine=inline, logic-heavy=2 subagents, arch/security=full chain)
-□ Validation Orchestration (context routing rules, sequencing, retry flow)
-□ ⏭️ enforcement rules
-□ Between tasks (4 items including sprint report, subagent-aware commit flow)
-□ Validation Failure Post-Mortem (including "subagent context incomplete" root cause)
-□ Session Protocol — END (8 items including diff-based pattern extraction and agent/skill evolution)
+□ During implementation (validation-orchestrator skill trigger + actionable findings rule)
+□ Validation Failure Post-Mortem (7 root causes including "subagent context incomplete")
+□ Between tasks (4 items including sprint report)
+□ Session Protocol — END (5 items, priority-ordered, delegated to process skills)
 □ Mid-session context recovery (4 steps + signals)
 □ Documentation quality rules
-□ PRD sync check — edge cases
 □ Commands section
 □ MCP Servers section
-□ Skills section
+□ Skills section (including 10 process skills list)
 □ Hooks section
 □ Architecture section
 □ Key Patterns section
@@ -184,32 +183,37 @@ Required sections:
 ```
 
 **Key additions likely missing from older versions:**
-- Sprint proposal (Level 4) in Session Protocol START item 6
-- Sprint-approved mode in "Before implementing" section
+
+*Session Protocol additions:*
+- Sprint proposal (Level 4) in Session Protocol START item 6 — skill trigger: sprint-proposer
+- Sprint-approved mode in "Before implementing" section (Level 4 auto-pilot)
 - Exception stops list (including "False ❌ from subagent escalated by arbitrator")
 - Sprint interaction note in model switch protocol
 - Discovery cap (max 3 per sprint)
 - Sprint report template in "Between tasks" item 4
-- Diff-based pattern extraction in end-of-session item 5
-- Agent/skill evolution in end-of-session item 6 (update existing agents/skills with session discoveries)
+- Diff-based pattern extraction in end-of-session **item 1** (first priority) — skill trigger: diff-pattern-extractor
+- Agent/skill evolution in end-of-session **item 5** — skill trigger: rules-agents-updater
 - Session logs (`.claude/logs/`) — permanent record per session
 - Hooks section in config file (smart-formatting PostToolUse hook)
-- "2 per-session moments" Level 4 flow (if Level 4 content is missing entirely)
-- **Graduated validation depth** (routine=inline, logic-heavy=2 subagents, arch/security=full chain) — Phase A/B split
-- **Validation Orchestration section** (context routing rules, sequencing, retry flow, subagent mechanics)
-- **validator agent** (`.claude/agents/validator.md`) — independent validation
-- **arbitrator agent** (`.claude/agents/arbitrator.md`) — conflict resolution
+
+*Validation additions (in CLAUDE.md as skill triggers, detail lives in skills):*
+- Criteria-enforcer skill trigger in "Before implementing" section
+- Validation-orchestrator skill trigger in "During implementation" section
+- Validation Failure Post-Mortem section (7 root causes including "subagent context incomplete")
+
+*Agent/skill infrastructure (verified in Steps 2.4-2.8, not CLAUDE.md sections):*
+- **validator agent** (`.claude/agents/validator.md`) — mandatory, independent verification
+- **arbitrator agent** (`.claude/agents/arbitrator.md`) — mandatory, conflict resolution
 - **`invocation:` frontmatter** on all review/validation agents/skills (`subagent` or `inline`)
 - **`receives:` / `produces:` frontmatter** on `invocation: subagent` agents/skills (I/O contract)
-- **Subagent context incomplete** root cause in Validation Failure Post-Mortem
-- **Evolution classification table** in end-of-session (FIX/DERIVED/CAPTURED modes with follow-up actions)
 - **Lineage frontmatter** on all agents/skills (`created:`, `last_eval:`, `fixes:`, `derived_from:`)
 - **Efficacy tracking** on Known Bug Patterns (`[added: sN | triggered: sN | false-positive: N]`)
 - **"Known Bug Patterns triggered"** field in Code Review Report output format
 - **"Evolutions applied"** section in session log template
-- **Auto-evolution boundaries** section (DATA = autonomous, BEHAVIOR = human approval)
-- **Skill Creator plugin** reference (`/plugin install skill-creator@claude-plugins-official`)
-- **Creation eval** substeps for subagent agents (2 test scenarios per agent, DEFERRABLE)
+
+*Process skills (copied in Step 2.9 — the v1.6.0 slim orchestrator delegates to these):*
+- 10 process skills implementing Session Protocol and Execution Protocol steps
+- Without these skills, every skill trigger in CLAUDE.md is a broken reference
 
 **For each addition, log:**
 ```
@@ -277,6 +281,8 @@ Check and upgrade:
 
 **For existing tasks without these fields:** Add them based on the task description and your understanding of the codebase. Mark additions with `← added during adaptation` so the user can review.
 
+**Before Steps 2.4-2.8:** If `assets/examples/examples_instructions.md` exists, read it for conventions (frontmatter fields, structure, output format, invocation types). Use these conventions when creating or upgrading any agent or skill.
+
 **Step 2.4 — Upgrade code-reviewer agent/skill:**
 
 Check for:
@@ -337,19 +343,31 @@ Add missing sections. **Do NOT remove existing customizations** — they may con
 
 If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, `produces:`, and lineage fields (`created:`, `last_eval:`, `fixes:`, `derived_from:`) in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
 
-If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them.
+If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them. Read templates at `docs/modules/templates/red_team.md` and `docs/modules/templates/blue_team.md`. Replace `{CONFIG_DIR}` with `.claude/`, `{CONFIG_FILE}` with `CLAUDE.md`, `{SUBAGENT_TOOL}` with `Task tool`.
 
 **Step 2.6.1 — Verify validator agent/skill:**
 
 If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, Input, Output, Verification Process, and BOUNDARIES sections. Add if missing.
 
-If it doesn't exist: create it. The validator is mandatory for ALL projects — it performs independent verification of the implementing agent's work. Use the template from the bootstrap prompt (session0) as reference.
+If it doesn't exist: create it. The validator is mandatory for ALL projects. Read the template at `docs/modules/templates/validator.md`. Adapt:
+- Replace `{CONFIG_DIR}` with `.claude/`
+- Replace `{CONFIG_FILE}` with `CLAUDE.md`
+- Replace `{SUBAGENT_TOOL}` with `Task tool`
+- Create at `.claude/agents/validator.md`
+
+**Creation eval (DEFERRABLE if context is low):** See agent template for 2 test scenarios. Update lineage after eval.
 
 **Step 2.6.2 — Verify arbitrator agent/skill:**
 
 If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, three terminal rulings (UPHOLD/OVERRIDE/ESCALATE), and BOUNDARIES sections.
 
-If it doesn't exist: create it. The arbitrator is mandatory for ALL projects — it resolves conflicts between the validator's judgment and mechanical evidence. Use the template from the bootstrap prompt (session0) as reference.
+If it doesn't exist: create it. The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/templates/arbitrator.md`. Adapt:
+- Replace `{CONFIG_DIR}` with `.claude/`
+- Replace `{CONFIG_FILE}` with `CLAUDE.md`
+- Replace `{SUBAGENT_TOOL}` with `Task tool`
+- Create at `.claude/agents/arbitrator.md`
+
+**Creation eval (DEFERRABLE if context is low):** See agent template for 2 test scenarios. Update lineage after eval.
 
 **Step 2.7 — Verify rules files:**
 
@@ -373,6 +391,34 @@ for skill in .claude/skills/*.md; do
 done
 ```
 After migration, update any references in CLAUDE.md from `.claude/skills/[name].md` to `.claude/skills/[name]/SKILL.md`.
+
+**Step 2.9 — Copy pre-built process skills:**
+
+The v1.6.0 CLAUDE.md template references 10 process skills by path (e.g., `.claude/skills/prd-sync-checker/SKILL.md`). Without these skills, every skill trigger in Session Protocol is a broken reference.
+
+Copy from the framework (adjust `[FRAMEWORK_ROOT]` to your `agentic_engineering` clone path):
+```bash
+# Copy each process skill, preserving any project-customized versions
+for skill_dir in [FRAMEWORK_ROOT]/docs/modules/skills/*/; do
+  skill_name=$(basename "$skill_dir")
+  if [ ! -d ".claude/skills/$skill_name" ]; then
+    cp -r "$skill_dir" ".claude/skills/$skill_name"
+    echo "Copied: $skill_name"
+  else
+    echo "SKIPPED (already exists): $skill_name — verify manually against framework version"
+  fi
+done
+```
+
+If the framework root is not accessible: note in the report that the 10 process skills must be copied manually from `docs/modules/skills/` in the framework repository.
+
+**Expected skills (all 10 must be present after this step):**
+- **Session start:** prd-sync-checker, sprint-proposer
+- **Before implementing:** criteria-enforcer
+- **During implementation:** validation-orchestrator
+- **Session end:** diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+
+Register all 10 in CLAUDE.md "Skills" section under "Process skills (copied from framework)".
 
 ---
 
@@ -422,14 +468,16 @@ Create `assets/docs/prd.md` with this approach:
 ls assets/examples/ 2>/dev/null || echo "MISSING"
 ```
 
-If missing and framework root is accessible (assumes project is at `projects/[name]/` within the framework — adjust path if running from a standalone project):
+If missing, copy from the framework root (using the `[FRAMEWORK_ROOT]` configured at the top):
 ```bash
-cp -r ../../examples/ assets/examples/ 2>/dev/null || echo "Framework examples not accessible — copy manually from the framework's examples/ directory"
+cp -r [FRAMEWORK_ROOT]/examples/ assets/examples/ 2>/dev/null || echo "Framework examples not accessible — copy manually from the framework's examples/ directory"
 ```
 
-If framework root is not accessible: note in the report that `assets/examples/` should be copied manually.
+If the framework root is not accessible: note in the report that `assets/examples/` should be copied manually from the framework repository.
 
 **Step 4.2 — Create settings.json and initialize logs (if missing):**
+
+Read the template at `docs/modules/templates/settings_json.md` for the reference configuration. If `.claude/settings.json` or `.claude/settings.local.json` already exists, **merge** the keys rather than overwriting.
 
 ```bash
 # Create logs directory
@@ -473,16 +521,73 @@ fi
 
 **Note:** The smart-formatting hook requires Prettier. If the project doesn't use Prettier, create settings.json with only the `permissions` block and skip the `hooks` section.
 
-**Step 4.3 — Verify MCP configuration:**
+**Step 4.3 — Discover and install MCPs:**
 
-List installed MCPs and compare against the stack:
+**4.3a. Check existing MCPs:**
 ```bash
 cat .claude/settings.json 2>/dev/null | grep -A5 "mcpServers"
-# Or check for MCP config in settings.local.json
 cat .claude/settings.local.json 2>/dev/null
 ```
 
-Report which MCPs are installed and whether any are missing based on the stack.
+**4.3b. Install browser automation (default for every project):**
+```bash
+npx @anthropic-ai/claude-code mcp add playwright -- npx -y @anthropic-ai/mcp-server-playwright
+```
+
+**4.3c. Install stack-based MCPs** based on the stack identified in Phase 1:
+
+| Stack includes | Recommended MCP | When to install |
+|---------------|----------------|-----------------|
+| Supabase | supabase MCP | If Supabase project exists |
+| PostgreSQL (not Supabase) | postgres MCP | If database exists |
+| GitHub repo | github MCP | If repo exists |
+| React/Next.js/Vue with libs | context7 MCP | Yes |
+
+**4.3d. Security validation (MANDATORY before installing any MCP):**
+```
+□ Trusted source? (official org, verified publisher, >10k downloads)
+□ Actively maintained? (published within last 6 months)
+□ Reasonable permissions? (read-only by default)
+□ Open source? (public repo with auditable code)
+□ Actually relevant? (solves concrete problem for this stack)
+```
+
+If any fails: do not install, log reason. If uncertain: ASK user. Max 5 MCPs on day 1.
+
+Register installed MCPs in CLAUDE.md "MCP Servers" section.
+
+**Step 4.4 — Install Skill Creator plugin:**
+
+```bash
+/plugin install skill-creator@claude-plugins-official
+```
+
+**If installation succeeds:** Log "Skill Creator plugin installed."
+
+**If installation fails** (plugin not available, network error, unsupported environment): Log "Skill Creator plugin unavailable — framework creation eval protocol will be used instead." Continue normally.
+
+**Step 4.5 — Discover and install stack skills:**
+
+Search for available skills relevant to the project stack:
+```bash
+npx claude-code-templates@latest --list-skills 2>/dev/null || echo "CLI not available"
+```
+
+If the stack has framework-specific patterns AND no pre-made skill was found, create a stack skill:
+```bash
+mkdir -p .claude/skills/[stack-name]
+# Create .claude/skills/[stack-name]/SKILL.md with key patterns, common mistakes, security settings
+```
+
+Register in CLAUDE.md "Skills" section.
+
+**Step 4.6 — Identify future rules:**
+
+Analyze the retroactive PRD (created in Phase 3) for modules with complex business logic (3+ business rules). For each, register in pendencias.md:
+```
+- Create `.claude/rules/[module]-rules.md` when starting implementation of [module]
+```
+Do NOT create rules now — wait until implementation when the details are known.
 
 ---
 
@@ -533,6 +638,11 @@ find .claude/skills -name "SKILL.md" 2>/dev/null | while read f; do
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
 
+echo "=== All 10 process skills present? ==="
+for skill in prd-sync-checker sprint-proposer criteria-enforcer validation-orchestrator diff-pattern-extractor project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator; do
+  ls ".claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
+done
+
 echo "=== Known Bug Patterns have efficacy tracking? ==="
 grep -c "\[added:" .claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
 ```
@@ -553,7 +663,12 @@ grep -c "\[added:" .claude/agents/code-reviewer.md 2>/dev/null || echo "No effic
 ### Documents created:
 - assets/docs/prd.md (retroactive — [N] sections populated, [N] TBD)
 - .claude/logs/ (initialized — session logs start from next session)
+- .claude/agents/validator.md (if created)
+- .claude/agents/arbitrator.md (if created)
 - [any other new files]
+
+### Process skills: [N of 10 copied from framework]
+- [list copied / list skipped (already existed)]
 
 ### Preserved (not modified):
 - [N] rows in Progress Log index
@@ -589,8 +704,18 @@ Projects bootstrapped with v1.5.0 can upgrade to v1.6.0 by:
 
 ### 1. Copy pre-built process skills
 
+`[framework-root]` = path to your `agentic_engineering` repo clone (e.g., `~/agentic_engineering`).
+
 ```bash
-cp -r [framework-root]/docs/modules/skills/* .claude/skills/
+# Copy each skill, preserving project-customized versions
+for skill_dir in [framework-root]/docs/modules/skills/*/; do
+  skill_name=$(basename "$skill_dir")
+  if [ ! -d ".claude/skills/$skill_name" ]; then
+    cp -r "$skill_dir" ".claude/skills/$skill_name"
+  else
+    echo "SKIPPED (already exists): $skill_name — verify manually"
+  fi
+done
 ```
 
 This adds 10 process skills that were previously inline in CLAUDE.md:
@@ -629,7 +754,10 @@ Add to project.md: "Upgraded to framework v1.6.0 — 10 process skills extracted
 | Known Bug Patterns | Empty | Seeded from git fix history |
 | Architecture Patterns | Empty | Populated from codebase structure |
 | Progress Log | Index row only | Existing entries converted to index table |
+| Process skills | Copied from framework | Copied from framework + existing project skills preserved |
 | Rules files | Planned for future | Already exist — verified, not modified |
 | Session logs | Empty `.claude/logs/` created | Empty `.claude/logs/` created (same) |
+| MCPs | Discovered and installed | Discovered, installed + existing verified |
+| Stack skills | Created if stack detected | Created if stack detected (same) |
 | Hooks | smart-formatting configured | smart-formatting added if Prettier present |
 | File naming | Standard names | Adapts to non-standard names |
