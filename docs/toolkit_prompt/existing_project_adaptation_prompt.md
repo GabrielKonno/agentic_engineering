@@ -587,7 +587,7 @@ cp -r [framework-root]/docs/modules/skills/* .claude/skills/
 This adds 10 process skills that were previously inline in CLAUDE.md:
 - prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator
 - diff-pattern-extractor, project-md-updater, pendencias-updater
-- claude-md-updater, rules-agents-updater, session-log-creator
+- config-file-updater, rules-agents-updater, session-log-creator
 
 ### 2. Slim down CLAUDE.md
 
@@ -602,7 +602,7 @@ a skill that exists in `.claude/skills/`:
 - Session start: prd-sync-checker, sprint-proposer
 - Before implementing: criteria-enforcer
 - During implementation: validation-orchestrator
-- Session end: diff-pattern-extractor, project-md-updater, pendencias-updater, claude-md-updater, rules-agents-updater, session-log-creator
+- Session end: diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
 ### 4. For Antigravity projects
 

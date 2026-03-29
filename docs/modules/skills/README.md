@@ -21,7 +21,7 @@ These 10 skills implement the framework's Session Protocol and Execution Protoco
 | 5 | diff-pattern-extractor | Process + judgment | End of session (item 1) |
 | 6 | project-md-updater | Process + judgment | End of session (item 2) |
 | 7 | pendencias-updater | Process + judgment | End of session (item 3) |
-| 8 | claude-md-updater | Process + judgment | End of session (item 4) |
+| 8 | config-file-updater | Process + judgment | End of session (item 4) |
 | 9 | rules-agents-updater | Process + judgment | End of session (item 5) |
 | 10 | session-log-creator | Process pure | End of session (with item 2) |
 

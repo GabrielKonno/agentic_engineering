@@ -359,7 +359,7 @@ ASK the user which option they prefer.
 
 **Frontmatter preservation:** When migrating agents/skills, preserve all frontmatter fields including `invocation:`, `receives:`, `produces:`, and **lineage fields** (`created:`, `last_eval:`, `fixes:`, `derived_from:`). These define the subagent I/O contract and evolution history — they are tool-agnostic and apply to both Claude Code (Task tool) and Antigravity (Agent Manager). Only path references inside the content need updating (`.claude/` ↔ `.antigravity/`, `CLAUDE.md` ↔ `GEMINI.md`).
 
-**Process skills (v1.6.0):** The 10 pre-built process skills (prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator, diff-pattern-extractor, project-md-updater, pendencias-updater, claude-md-updater, rules-agents-updater, session-log-creator) migrate by copying from `.claude/skills/` to `.antigravity/skills/` (or vice versa). The skills use generic relative paths internally — the agent interprets `.claude/` paths as `.antigravity/` equivalents automatically.
+**Process skills (v1.6.0):** The 10 pre-built process skills (prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator, diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator) migrate by copying from `.claude/skills/` to `.antigravity/skills/` (or vice versa). The skills use generic relative paths internally — the agent interprets `.claude/` paths as `.antigravity/` equivalents automatically.
 
 ## When to migrate vs when to start fresh
 

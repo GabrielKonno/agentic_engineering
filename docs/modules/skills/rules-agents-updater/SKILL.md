@@ -14,7 +14,7 @@ derived_from: session_protocol end-of-session items 4,6,7,8
 # Rules, Agents, and Skills Updater
 
 ## When to run
-At the END of every session, after claude-md-updater.
+At the END of every session, after config-file-updater.
 
 ## Process
 

@@ -181,7 +181,7 @@ This copies 10 process skills that implement the Session Protocol and Execution 
 - **Session start:** prd-sync-checker, sprint-proposer
 - **Before implementing:** criteria-enforcer
 - **During implementation:** validation-orchestrator
-- **Session end:** diff-pattern-extractor, project-md-updater, pendencias-updater, claude-md-updater, rules-agents-updater, session-log-creator
+- **Session end:** diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
 These skills are referenced by the Session Protocol in CLAUDE.md (created in Step 2). They contain the detailed process instructions for each workflow step.
 
@@ -380,7 +380,7 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 ### Process skills: copied from framework (Step 5.7):
 - prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator
 - diff-pattern-extractor, project-md-updater, pendencias-updater
-- claude-md-updater, rules-agents-updater, session-log-creator
+- config-file-updater, rules-agents-updater, session-log-creator
 
 ### Hooks configured:
 - smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]

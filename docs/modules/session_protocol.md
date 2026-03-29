@@ -81,7 +81,7 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
    <!-- Permanent verbose record in {CONFIG_DIR}/logs/ -->
 3. **Update pendencias.md** → run `{CONFIG_DIR}/skills/pendencias-updater/SKILL.md`
    <!-- Move completed to Done, add new items with full criteria -->
-4. **Update {CONFIG_FILE}** → run `{CONFIG_DIR}/skills/claude-md-updater/SKILL.md`
+4. **Update {CONFIG_FILE}** → run `{CONFIG_DIR}/skills/config-file-updater/SKILL.md`
    <!-- When module status, patterns, rules, or File Map changed -->
 5. **Update rules/agents/skills/PRD** → run `{CONFIG_DIR}/skills/rules-agents-updater/SKILL.md`
    <!-- Create rules files, update agents with discoveries, on-demand creation -->
