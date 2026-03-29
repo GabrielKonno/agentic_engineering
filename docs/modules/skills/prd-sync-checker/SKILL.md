@@ -20,7 +20,7 @@ At the START of every session, after reading project.md (item 4 in Session Proto
 If `assets/docs/prd.md` does not exist: skip entirely.
 
 ### Check A — Version comparison
-Compare PRD changelog version with `PRD version:` in the last project.md session entry.
+Compare PRD changelog version with the `**PRD version:**` field in the project.md Overview section.
 - If PRD version is newer → changes exist, proceed to propagation
 - If versions match → proceed to Check B (version match doesn't guarantee content match)
 
@@ -40,7 +40,7 @@ If mismatch detected → ASK user before propagating.
 3. Update pendencias.md — add new tasks for new features, remove tasks for removed features
 4. Update CLAUDE.md/GEMINI.md — if architecture or key patterns changed
 5. Ensure PRD changelog is updated
-6. Log in session entry: `"PRD synced: vX.X.X → vY.Y.Y — [changes]"`
+6. Log in session log: `"PRD synced: vX.X.X → vY.Y.Y — [changes]"`
 
 ### Edge cases
 - PRD without changelog → add one with version 1.0, run Check B

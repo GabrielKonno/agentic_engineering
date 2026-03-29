@@ -80,14 +80,14 @@ Create the file at the project root as `CLAUDE.md`.
 
 ### Step 3 — Create project.md
 
-**If `.claude/phases/project.md` already exists:** Do NOT overwrite. Add a new session entry for this migration/bootstrap session. Verify it has the required sections (Architectural Decisions, Module Relationships, Progress Log). Add missing sections.
+**If `.claude/phases/project.md` already exists:** Do NOT overwrite. Add a new index row to the Progress Log table for this migration/bootstrap session. Verify it has the required sections (Architectural Decisions, Module Relationships, Progress Log index table). Add missing sections.
 
 **If it does not exist:** Read the template at `docs/modules/templates/project_md.md`. Adapt with PRD data:
-- Fill Overview from PRD sections 1.1, 1.2, 1.3
+- Fill Overview from PRD sections 1.1, 1.2, 1.3 (including `**PRD version:** v1.0.0`)
 - Fill Architectural Decisions table with stack decisions from PRD
 - Fill Module Relationships with dependencies from PRD
 - Fill Project Phases from Build Order
-- Add Session 0 entry to Progress Log
+- Add Session 0 row to Progress Log index table: `| 0 (Bootstrap) | [date] | PRD analyzed, docs + agents created, stack confirmed | — |`
 
 Create at `.claude/phases/project.md`.
 

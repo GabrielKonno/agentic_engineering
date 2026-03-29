@@ -108,13 +108,13 @@ All documents are in English. Conversational output should follow the language p
 
 ### Step 4 — Create project.md
 
-**If `.antigravity/phases/project.md` already exists:** Do NOT overwrite. Add a new session entry. Verify required sections exist.
+**If `.antigravity/phases/project.md` already exists:** Do NOT overwrite. Add a new index row to the Progress Log table. Verify required sections exist.
 
 **If it does not exist:** Read the template at `docs/modules/templates/project_md.md`. Adapt with PRD data:
 - Replace `{CONFIG_DIR}` with `.antigravity/`
 - Replace `{CONFIG_FILE}` with `GEMINI.md`
-- Fill Overview, Architectural Decisions, Module Relationships, Project Phases from PRD
-- Add Session 0 entry to Progress Log (include "GEMINI.md created", "AGENTS.md created")
+- Fill Overview (including `**PRD version:** v1.0.0`), Architectural Decisions, Module Relationships, Project Phases from PRD
+- Add Session 0 row to Progress Log index table: `| 0 (Bootstrap) | [date] | PRD analyzed, GEMINI.md + AGENTS.md + agents created | — |`
 
 Create at `.antigravity/phases/project.md`.
 

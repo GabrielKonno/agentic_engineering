@@ -11,7 +11,7 @@ In v1.6.0, key processes within this protocol are delegated to pre-built process
 
 ## Before implementing any feature
 
-**This is where technical specification happens.** There is no separate spec document. The PRD defines WHAT. This step translates into HOW. The approved plan is recorded in project.md.
+**This is where technical specification happens.** There is no separate spec document. The PRD defines WHAT. This step translates into HOW. The approved plan is recorded in the session log, referenced in the project.md index.
 
 **For ALL tasks (before determining complexity):**
 
@@ -63,11 +63,12 @@ If medium or large (Level 3, or large tasks within sprint):
    - "go" → implement → validation loop
    - "adjust X" → revise → wait again
 
-After approval: the plan becomes the technical record. Include summary in project.md session entry.
+After approval: the plan becomes the technical record. Include summary in the session log.
 
 **Model switch protocol (if task classified as Architecture/Security AND current model is not the most capable):**
-1. Save state: run end-of-session project-md-updater and pendencias-updater skills. Add MODEL SWITCH marker to project.md:
+1. Save state: run session-log-creator, project-md-updater and pendencias-updater skills. The project-md-updater writes a MODEL SWITCH block below the Progress Log table in project.md (not as a table row):
    ```
+   <!-- MODEL SWITCH — active -->
    ### [date] — Session N (MODEL SWITCH — continuing in next session)
    **What was done:** [work before switch]
    **Model switch reason:** Task "[name]" classified as architecture/security — requires most capable model + high effort
@@ -224,7 +225,7 @@ If the human reports a bug in a task that was validated as ✅, BEFORE fixing:
    - **Subagent context incomplete** → update context routing rules
    - AI judgment error → inherent limitation, no doc fix
 4. Apply the systemic improvement (prevent the CLASS of failure, not just this instance)
-5. Log the post-mortem in the session entry
+5. Log the post-mortem in the session log (`{CONFIG_DIR}/logs/`) and note it in the project.md Progress Log index row
 Then fix the bug normally. The validation loop improves before the bug is fixed.
 
 ---
@@ -232,7 +233,7 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
 ## Between tasks (after validation passes, before picking next task):
 
 1. Commit (if not already committed): for routine tasks with inline validation, `git add -A && git commit -m "feat: [task name] — validated"`. For subagent-validated tasks, the `feat:` commit was made before Phase B — it already stands.
-2. Update pendencias.md: mark task as Done, confirm next task
+2. Update pendencias.md: move completed task to `done_tasks.md` (full metadata), confirm next task in pendencias.md
 3. If this is task 3+ in the current session: evaluate context health. If degrading → trigger mid-session recovery instead of continuing.
 4. **Sprint-approved mode:** If executing a sprint, pick next task from the batch and proceed directly to "Before implementing". Do NOT re-propose the sprint or ask for confirmation. If all sprint tasks are done, produce a consolidated sprint report:
    ```

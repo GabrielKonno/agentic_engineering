@@ -22,7 +22,8 @@ Skip if MODEL SWITCH continuation is active (item 2 already selected the task).
 ### 1. Analyze pendencias.md
 - Read all items in "Next Steps" and "In Progress"
 - Check dependency graph (`depends:` fields)
-- Identify which tasks have satisfied dependencies
+- Identify which tasks have satisfied dependencies (a task in "Next Steps" or "In Progress" whose dependencies are all completed)
+- If a `depends:` references a task number not found in pendencias.md, check `{CONFIG_DIR}/phases/done_tasks.md` — the dependency may have been archived there. If found in done_tasks.md, the dependency is satisfied.
 - Note complexity classification of each task
 
 ### 2. Select tasks

@@ -109,5 +109,11 @@ parallel: true (if independent of task 3)
 
 ## Done
 
+> Completed tasks are moved to `{CONFIG_DIR}/phases/done_tasks.md` with full metadata intact.
+> This section stays empty between sessions. The pendencias-updater skill handles the move
+> at end of every session (or between tasks during a sprint).
+> To check completed tasks: read `done_tasks.md`. To check dependencies on old tasks:
+> the sprint-proposer will check `done_tasks.md` automatically.
+
 - [x] PRD created and approved
 ```

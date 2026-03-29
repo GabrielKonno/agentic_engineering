@@ -54,7 +54,7 @@ The validator was right. The mechanical evidence is insufficient or misleading.
 ### OVERRIDE TO ✅
 The validator was wrong. The code correctly satisfies the criterion.
 **Required:** Justification explaining what the validator missed or misinterpreted.
-**Next action:** Implementing agent proceeds. The override is logged in the session entry.
+**Next action:** Implementing agent proceeds. The override is logged in the session log.
 
 ### ESCALATE
 Genuinely ambiguous. Neither the validator nor mechanical evidence is clearly right.
