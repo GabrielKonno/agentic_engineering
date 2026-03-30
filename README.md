@@ -18,9 +18,9 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 9 templates     |           | 6+ agent .md files  |
-                         |  - 2 protocols     |           | 10+ process skills  |
-                         |  - 10 skills       |           | examples/ (copy)    |
+                         |  - 12 templates    |           | 9+ agent .md files  |
+                         |  - 2 protocols     |           | 7 process skills    |
+                         |  - 7 skills        |           | examples/ (copy)    |
                          |  - examples/       |           | settings.json       |
                          +--------------------+           +---------------------+
                                                                     |
@@ -132,13 +132,14 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/security-reviewer.md` | `modules/templates/security_reviewer.md` | OWASP Top 10 checklist |
 | `.claude/agents/red-team.md` | `modules/templates/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
 | `.claude/agents/blue-team.md` | `modules/templates/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
-| `.claude/skills/*` (10 skills) | `modules/skills/*` | Process skills — copied entirely, one per protocol step |
+| `.claude/skills/*` (7 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
+| `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/templates/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
 
 ### Why files in this repo reference things that don't exist here
 
-Templates and protocols reference paths like `.claude/agents/code-reviewer.md` and `.claude/skills/prd-sync-checker/SKILL.md`. These files do not exist in this repo — they are created during bootstrap inside the project folder.
+Templates and protocols reference paths like `.claude/agents/code-reviewer.md` and `.claude/agents/prd-sync-checker.md`. These files do not exist in this repo — they are created during bootstrap inside the project folder.
 
 Templates are blueprints. The paths they contain are the paths those files will have *after bootstrap creates them*. When reading a template, the context is the future project directory, not the framework root.
 

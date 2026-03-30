@@ -25,13 +25,12 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
 │   │   │   ├── validator.md, arbitrator.md # Validation agent templates
 │   │   │   ├── red_team.md, blue_team.md   # Security agent templates
+│   │   │   ├── prd_sync_checker.md, criteria_enforcer.md, diff_pattern_extractor.md  # Process agent templates
 │   │   │   └── settings_json.md            # Settings + hooks template
-│   │   └── skills/                         # Pre-built process skills (copied to projects)
-│   │       ├── prd-sync-checker/           # 10 process skills implementing
+│   │   └── skills/                         # Pre-built inline process skills (7, copied to projects)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
-│   │       ├── criteria-enforcer/          # as reusable, evolvable components
-│   │       ├── validation-orchestrator/    # (see skills/README.md for full list)
-│   │       └── ... (6 more)
+│   │       ├── validation-orchestrator/    # as reusable, evolvable components
+│   │       └── ... (5 more)               # (see skills/README.md for full list)
 ├── examples/                               # Quality reference for agents, skills, rules
 │   ├── agents/                             # Agent templates by category
 │   ├── skills/                             # Skill templates by type

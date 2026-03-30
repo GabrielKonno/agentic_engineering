@@ -179,7 +179,7 @@ Required sections (compare against docs/modules/templates/claude_md.md):
 □ Documentation quality rules
 □ Commands section
 □ MCP Servers section
-□ Skills section (including 10 process skills list)
+□ Skills section (7 inline process skills + 3 process agents listed separately)
 □ Hooks section
 □ Architecture section
 □ Key Patterns section
@@ -218,9 +218,9 @@ Required sections (compare against docs/modules/templates/claude_md.md):
 - **"Known Bug Patterns triggered"** field in Code Review Report output format
 - **"Evolutions applied"** section in session log template
 
-*Process skills (copied in Step 2.9 — the v1.6.0 slim orchestrator delegates to these):*
-- 10 process skills implementing Session Protocol and Execution Protocol steps
-- Without these skills, every skill trigger in CLAUDE.md is a broken reference
+*Process components (copied in Step 2.9 — the v1.6.0 slim orchestrator delegates to these):*
+- 7 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) implementing Session Protocol and Execution Protocol steps
+- Without these, every trigger in CLAUDE.md is a broken reference
 
 **For each addition, log:**
 ```
@@ -399,31 +399,43 @@ done
 ```
 After migration, update any references in CLAUDE.md from `.claude/skills/[name].md` to `.claude/skills/[name]/SKILL.md`.
 
-**Step 2.9 — Copy pre-built process skills:**
+**Step 2.9 — Copy pre-built process skills and process agents:**
 
-The v1.6.0 CLAUDE.md template references 10 process skills by path (e.g., `.claude/skills/prd-sync-checker/SKILL.md`). Without these skills, every skill trigger in Session Protocol is a broken reference.
+The v1.6.0 CLAUDE.md template references process agents (`.claude/agents/prd-sync-checker.md`, etc.) and process skills (`.claude/skills/sprint-proposer/SKILL.md`, etc.). Without these, every trigger in Session Protocol is a broken reference.
 
-Copy from the framework:
+**Copy process skills (7 inline — to `.claude/skills/`):**
 ```bash
-# Copy each process skill, preserving any project-customized versions
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
   if [ ! -d "projects/$ARGUMENTS/.claude/skills/$skill_name" ]; then
     cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"
-    echo "Copied: $skill_name"
+    echo "Copied skill: $skill_name"
   else
     echo "SKIPPED (already exists): $skill_name — verify manually against framework version"
   fi
 done
 ```
 
-**Expected skills (all 10 must be present after this step):**
-- **Session start:** prd-sync-checker, sprint-proposer
-- **Before implementing:** criteria-enforcer
-- **During implementation:** validation-orchestrator
-- **Session end:** diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+**Copy process agents (3 subagents — to `.claude/agents/`):**
+```bash
+for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
+  dest_name=$(echo "$agent" | tr '_' '-')
+  if [ ! -f "projects/$ARGUMENTS/.claude/agents/$dest_name.md" ]; then
+    cp "docs/modules/templates/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"
+    echo "Copied agent: $dest_name"
+  else
+    echo "SKIPPED (already exists): $dest_name.md — verify manually"
+  fi
+done
+```
 
-Register all 10 in CLAUDE.md "Skills" section under "Process skills (copied from framework)".
+**Expected after this step:**
+- **Process skills (7):** sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+- **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
+
+Register in CLAUDE.md "Skills" section:
+- "Process skills (7 — copied from framework):" list the 7 inline skills
+- "Process agents (3 — invoked as subagents):" list the 3 process agents
 
 ---
 
@@ -643,9 +655,14 @@ find projects/$ARGUMENTS/.claude/skills -name "SKILL.md" 2>/dev/null | while rea
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
 
-echo "=== All 10 process skills present? ==="
-for skill in prd-sync-checker sprint-proposer criteria-enforcer validation-orchestrator diff-pattern-extractor project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator; do
+echo "=== All 7 process skills present? ==="
+for skill in sprint-proposer validation-orchestrator project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator; do
   ls "projects/$ARGUMENTS/.claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
+done
+
+echo "=== All 3 process agents present? ==="
+for agent in prd-sync-checker criteria-enforcer diff-pattern-extractor; do
+  ls "projects/$ARGUMENTS/.claude/agents/$agent.md" 2>/dev/null || echo "MISSING process agent: $agent"
 done
 
 echo "=== Known Bug Patterns have efficacy tracking? ==="

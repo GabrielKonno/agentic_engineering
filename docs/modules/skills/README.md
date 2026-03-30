@@ -1,10 +1,15 @@
 # Pre-built Process Skills
 
-Framework workflow skills — copied to projects during bootstrap Step 5.7.
+Framework workflow skills (inline) — copied to projects during bootstrap Step 5.7.
+
+> **Note:** 3 process components that produce decisions or analyses were converted to proper agents:
+> `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
+> They live in `docs/modules/templates/` and are copied to `.claude/agents/` during bootstrap.
+> This directory contains the 7 **inline** skills only.
 
 ## What these are
 
-These 10 skills implement the framework's Session Protocol and Execution Protocol as reusable, evolvable components. They were inline instructions in v1.5.0 (hardcoded in CLAUDE.md templates). In v1.6.0, they are pre-built skills that are:
+These 7 skills implement inline steps of the Session Protocol and Execution Protocol. The main agent reads the SKILL.md and follows the steps in its own context. They were inline instructions in v1.5.0 (hardcoded in CLAUDE.md templates). In v1.6.0, they are pre-built skills that are:
 
 1. **Copied** to each project's `.claude/skills/` at bootstrap
 2. **Triggered** explicitly by the Session Protocol in CLAUDE.md
@@ -14,16 +19,13 @@ These 10 skills implement the framework's Session Protocol and Execution Protoco
 
 | # | Skill | Type | When triggered |
 |---|-------|------|---------------|
-| 1 | prd-sync-checker | Process pure | Start of session (item 4) |
-| 2 | sprint-proposer | Process + judgment | Start of session (item 6) |
-| 3 | criteria-enforcer | Process + judgment | Before implementing |
-| 4 | validation-orchestrator | Process + judgment | During implementation |
-| 5 | diff-pattern-extractor | Process + judgment | End of session (item 1) |
-| 6 | project-md-updater | Process + judgment | End of session (item 2) |
-| 7 | pendencias-updater | Process + judgment | End of session (item 3) |
-| 8 | config-file-updater | Process + judgment | End of session (item 4) |
-| 9 | rules-agents-updater | Process + judgment | End of session (item 5) |
-| 10 | session-log-creator | Process pure | End of session (with item 2) |
+| 1 | sprint-proposer | Process + judgment | Start of session (item 6) |
+| 2 | validation-orchestrator | Process + judgment | During implementation |
+| 3 | project-md-updater | Process + judgment | End of session (item 2) |
+| 4 | pendencias-updater | Process + judgment | End of session (item 3) |
+| 5 | config-file-updater | Process + judgment | End of session (item 4) |
+| 6 | rules-agents-updater | Process + judgment | End of session (item 5) |
+| 7 | session-log-creator | Process pure | End of session (with item 2) |
 
 ## Skill Creator usage
 

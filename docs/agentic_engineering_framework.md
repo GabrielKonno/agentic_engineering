@@ -42,7 +42,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | Directory | Contains | Role in the system |
 |-----------|----------|--------------------|
 | `docs/modules/templates/` | Document and agent blueprints (`.md` files) | Used by the bootstrap prompt to generate project files. Templates reference paths like `.claude/agents/code-reviewer.md` — these paths will exist inside the bootstrapped project, not in this repo. |
-| `docs/modules/skills/` | 10 pre-built process skills (prd-sync-checker, sprint-proposer, validation-orchestrator, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol or Execution Protocol. |
+| `docs/modules/skills/` | 10 pre-built process skills (prd-sync-checker, sprint-proposer, validation-orchestrator, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol or Execution Protocol. 3 skills (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) have `invocation: subagent` — invoked via Agent tool. The remaining 7 run inline. |
 | `docs/modules/session_protocol.md` | Session Protocol (START, END, recovery) | Defines WHEN things happen during development sessions. Embedded into each project's CLAUDE.md during bootstrap. |
 | `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
 | `examples/` | Quality reference templates for agents (10), skills (9), and rules (3) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
@@ -261,7 +261,8 @@ The framework has five types of components. Each answers a different question:
 |----------------|----------|---------------------|-------------|
 | **Protocols** | `modules/session_protocol.md`, `modules/execution_protocol.md` | WHEN do things happen? | Development sessions |
 | **Templates** | `modules/templates/*.md` | WHAT gets created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (10 skills) | HOW are protocol steps executed? | Development sessions |
+| **Process Skills** | `modules/skills/*/SKILL.md` (7 inline skills) | HOW are inline protocol steps executed? | Development sessions |
+| **Process Agents** | `modules/templates/prd_sync_checker.md`, `criteria_enforcer.md`, `diff_pattern_extractor.md` | Decision/analysis steps that run as isolated subagents | Development sessions |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
@@ -328,7 +329,10 @@ Step     Source (framework repo)                     Output (project folder)
 4        modules/templates/pendencias_md.md      --> .claude/phases/pendencias.md
 5        (external: npm registry, CLI tools)     --> MCP servers installed
 5.5      (external: skill-creator plugin)        --> Plugin installed (optional)
-5.7      modules/skills/*                        --> .claude/skills/* (copy 10 skills)
+5.7      modules/skills/*                        --> .claude/skills/* (copy 7 inline skills)
+         modules/templates/prd_sync_checker.md  --> .claude/agents/prd-sync-checker.md
+         modules/templates/criteria_enforcer.md --> .claude/agents/criteria-enforcer.md
+         modules/templates/diff_pattern_extractor.md --> .claude/agents/diff-pattern-extractor.md
 6        (external: skill registries)            --> Stack-specific skills (optional)
 7        modules/templates/code_reviewer.md      --> .claude/agents/code-reviewer.md
 8        modules/templates/security_reviewer.md  --> .claude/agents/security-reviewer.md
@@ -367,15 +371,15 @@ The framework's `.gitignore` contains `projects/` — framework git never tracks
 
 ### Why templates reference files that don't exist in this repo
 
-Templates in `docs/modules/templates/` contain paths such as `.claude/skills/prd-sync-checker/SKILL.md` and `.claude/agents/code-reviewer.md`. These paths do **not** resolve in the framework repository — they resolve in the bootstrapped project.
+Templates in `docs/modules/templates/` contain paths such as `.claude/agents/prd-sync-checker.md` and `.claude/agents/code-reviewer.md`. These paths do **not** resolve in the framework repository — they resolve in the bootstrapped project.
 
 This is intentional: templates are blueprints for project files. The paths they contain are the paths those files will have *after bootstrap creates them*. When reading a template, the context is the future project directory, not the framework root.
 
 **Example:** `templates/claude_md.md` contains:
 
-> "4. PRD sync check — run `.claude/skills/prd-sync-checker/SKILL.md`"
+> "4. PRD sync check — invoke `.claude/agents/prd-sync-checker.md` as subagent"
 
-This path does not exist in the framework repo. It will exist at `projects/[name]/.claude/skills/prd-sync-checker/SKILL.md` after Step 5.7 copies the process skills from `docs/modules/skills/`.
+This path does not exist in the framework repo. It will exist at `projects/[name]/.claude/agents/prd-sync-checker.md` after Step 5.7 copies it from `docs/modules/templates/prd_sync_checker.md`.
 
 **Files that only exist after bootstrap:**
 - `.claude/phases/project.md`, `pendencias.md` — created at Steps 3-4
@@ -395,29 +399,29 @@ During development sessions, the protocols and skills interact in this sequence:
 
 ```
 SESSION START (Session Protocol):
-  Read CLAUDE.md --> prd-sync-checker --> sprint-proposer --> approve sprint
+  Read CLAUDE.md --> prd-sync-checker [subagent] --> sprint-proposer --> approve sprint
 
 PER TASK (Execution Protocol):
-  criteria-enforcer --> implement --> validation-orchestrator
-                                          |
-                          .----- Route by complexity -----.
-                          |               |               |
-                      Route A         Route B         Route C
-                      (routine)       (logic-heavy)   (arch/security)
-                          |               |               |
-                      inline          code-reviewer   code-reviewer
-                      checklist       validator        security-reviewer
-                                                       red-team
-                                                       validator
-                                                       arbitrator (if conflict)
-                                                       blue-team
+  criteria-enforcer [subagent] --> implement --> validation-orchestrator
+                                                        |
+                                        .----- Route by complexity -----.
+                                        |               |               |
+                                    Route A         Route B         Route C
+                                    (routine)       (logic-heavy)   (arch/security)
+                                        |               |               |
+                                    inline          code-reviewer   code-reviewer
+                                    checklist       validator        security-reviewer
+                                                                     red-team
+                                                                     validator
+                                                                     arbitrator (if conflict)
+                                                                     blue-team
 
 SESSION END (Session Protocol):
-  diff-pattern-extractor --> session-log-creator --> project-md-updater
+  diff-pattern-extractor [subagent] --> session-log-creator --> project-md-updater
   --> pendencias-updater --> config-file-updater --> rules-agents-updater
 ```
 
-Each skill in the sequence is a `.claude/skills/[name]/SKILL.md` file. Each agent is a `.claude/agents/[name].md` file. Both were created during bootstrap and evolve during development.
+Skills marked `[subagent]` are invoked via Agent tool — the main agent does not proceed until the subagent returns. Skills without a marker run inline. Each skill in the sequence is a `.claude/skills/[name]/SKILL.md` file. Each agent is a `.claude/agents/[name].md` file. Both were created during bootstrap and evolve during development.
 
 ---
 

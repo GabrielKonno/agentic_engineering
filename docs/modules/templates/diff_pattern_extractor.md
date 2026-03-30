@@ -1,12 +1,14 @@
 ---
 name: diff-pattern-extractor
-invocation: inline
-effort: medium
 description: >
-  Extracts patterns from session git diffs into Known Bug Patterns and Architecture
-  Patterns. MUST run at end of every session (first end-of-session item). This is how
-  the project gets smarter session over session — without it, every bug is fixed once
-  and forgotten.
+  Extracts patterns from session git diffs into Known Bug Patterns and Architecture Patterns
+  in code-reviewer.md. Must run at end of every session (first end-of-session item) — this
+  is how the project accumulates institutional knowledge session over session.
+tools: Read, Write, Bash
+effort: medium
+invocation: subagent
+receives: no extra context needed — reads git diff and .claude/agents/code-reviewer.md autonomously
+produces: summary of patterns added/modified/removed, with FIX/DERIVED/CAPTURED classification for each
 created: framework-v1.6.0 (pre-validated)
 derived_from: session_protocol end-of-session item 1
 ---
@@ -43,3 +45,15 @@ Review the Code Review Report from this session. For each Known Bug Pattern list
 
 ### 5. Log evolutions
 For each pattern added/modified, log: `"[FIX/DERIVED/CAPTURED]: [component] — [what changed and why]"`
+
+## Output
+
+Return to the main agent:
+```
+## Diff Pattern Extraction Result
+- Patterns added: [N] — [list with FIX/DERIVED/CAPTURED classification]
+- Patterns modified: [N] — [list]
+- Patterns removed: [N] — [list with reason]
+- Efficacy updates: [list sessions appended to triggered/false-positive fields, or "none"]
+```
+If no patterns extracted: return "No extractable patterns in this session's diff."

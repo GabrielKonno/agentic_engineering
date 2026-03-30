@@ -12,8 +12,8 @@ In v1.6.0, key processes within this protocol are delegated to pre-built process
 
 **For ALL tasks (before determining complexity):**
 
-**Enforce criteria quality** → run `.claude/skills/criteria-enforcer/SKILL.md`
-<!-- Rewrites WEAK criteria to STRONG, runs adversarial review (sabotage, transformation, boundary, data origin tests) -->
+**Enforce criteria quality** → invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task name]`
+<!-- Rewrites WEAK criteria to STRONG, runs adversarial review — runs in isolated context, returns upgrade summary -->
 
 **Classify task complexity for model/effort:**
 Based on task content, classify and recommend:
