@@ -1,7 +1,7 @@
 ---
 name: prd-sync-checker
 description: >
-  MUST run at session start (item 4) before task selection — invoked as subagent,
+  Runs at session start (step 3, opt-in) before task selection — invoked as subagent,
   no session context. Checks PRD version + content against project.md.
   Skipping risks implementing against stale requirements.
 tools: Read, Write
@@ -10,7 +10,7 @@ invocation: subagent
 receives: no extra context needed — reads assets/docs/prd.md and .claude/phases/project.md autonomously
 produces: one of three outcomes — "synced vX→vY [changes]", "no changes detected", or "mismatch found — awaiting user input"
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol item 4
+derived_from: session_protocol step 3
 ---
 
 # PRD Sync Checker

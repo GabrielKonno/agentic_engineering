@@ -476,51 +476,48 @@ The version number is what the AI agent uses in the PRD sync check to detect cha
 
 > **Terminology:** This section uses `CLAUDE.md` and `.claude/` as the reference convention. For other tools, adapt to the tool's config format.
 
-### At the START of every session:
+### At the START of implementation sessions:
 
-1. **Read CLAUDE.md** — project overview, patterns, rules
-2. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in project.md. If one exists:
+> **Note:** Claude Code automatically handles CLAUDE.md reading, rules loading (via `applies_to` globs), skill/agent discovery (via `description:` frontmatter), and codebase exploration. The steps below cover what Claude Code does NOT do automatically. Non-implementation sessions (planning, task management, quick fixes) do not need this ceremony.
+
+1. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in project.md. If one exists:
    - This session is a continuation — skip normal task selection
    - The task to execute and the reason for the model switch are in the marker
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
-3. **Read project.md** — full document on first session. On returning sessions: architectural decisions table + Project Phases status + Progress Log index
-4. **PRD sync check** — if a PRD exists, perform two checks:
+2. **Read project.md** — full document on first session. On returning sessions: architectural decisions table + Project Phases status + Progress Log index
+3. **PRD sync check (opt-in)** — ask the user if they want to run the sync check. If yes and a PRD exists, invoke the prd-sync-checker subagent which performs two checks:
    - **Check A (version-based):** Compare the PRD changelog version with the `**PRD version:**` field in the project.md Overview section. If newer → propagate.
    - **Check B (content-based):** Compare PRD structure (number of modules, scope items, roadmap entries, stack) with what project.md describes. If mismatch → ASK the user before propagating.
    - If changes detected: read full PRD, update project.md/pendencias.md/CLAUDE.md as needed, ensure changelog is updated, log in session log.
    - If ambiguous or contradicts existing decision: ASK the user.
    - If both checks show no changes: skip.
-5. **Read pendencias.md** — what is next and what is in progress
-6. **Propose sprint:** Based on pendencias.md, propose a batch of tasks for this session:
+4. **Read pendencias.md** — what is next and what is in progress
+5. **Propose sprint:** Based on pendencias.md, propose a batch of tasks for this session:
    ```
    ## Sprint Proposal: Session N
-   
+
    ### Tasks selected (N):
    1. Task [N] — [name] (complexity, estimated scope)
    2. Task [N] — [name] (complexity, estimated scope)
    3. Task [N] — [name] (complexity, estimated scope)
-   
+
    ### Execution order: [N → N → N] (sequential, dependency-safe)
    ### Reasoning depth: [recommendations per task, if any]
    ### Risks: [anything that might cause a stop]
-   
+
    ### What I need from you:
-   - Approve this sprint (I will execute all tasks without asking for 
+   - Approve this sprint (I will execute all tasks without asking for
      individual plan approval, stopping only on exceptions)
    - OR adjust: remove/add/reorder tasks
    ```
-   
+
    **Sprint rules:**
    - Respect task limit (3-5 per session, 1 for large tasks, up to 7 for related small tasks)
    - Only include tasks whose dependencies are satisfied
    - Order by dependency, then priority
    - If human approves → enter sprint-approved mode (see Execution Protocol)
    - If human wants individual approval → proceed as Level 3 (task-by-task approval)
-7. **Read relevant rules files** for the current task
-8. **Read design system** if modifying UI
-9. **Read relevant skills** if creating components or optimizing
-10. **Codebase discovery** (if first session or unfamiliar module) — run filesystem commands adapted to the project's framework to understand structure. The File Map in CLAUDE.md is a quick pointer; codebase discovery is the source of truth. If they conflict, trust discovery and update File Map at end of session.
 
 ### Task limit per session:
 Maximum 3-5 tasks per session. If backlog has more: complete 3-5, run end-of-session docs, commit, and start a new session for the next batch. Exceptions: if all tasks are small (single file, bug fix) and related, up to 7 is acceptable. If a single task is large (new module), 1 task per session is appropriate.
@@ -1616,7 +1613,7 @@ The framework uses dual-layer protection for all fixed process skills:
 ### Layer 1 — Explicit triggers in the config file (deterministic)
 
 The config file's Session Protocol contains explicit trigger points:
-- "At session start item 4: run prd-sync-checker"
+- "At session start step 3: run prd-sync-checker (opt-in)"
 - "Before implementing: run criteria-enforcer"
 - "After implementation: run validation-orchestrator"
 - "At session end item 2: run session-log-creator + project-md-updater"
@@ -1638,7 +1635,7 @@ description: >
   false-positive validation results.
 ```
 
-When the AI reads the skill list during session start (item 9), the pushy descriptions reinforce the trigger points.
+When Claude Code auto-discovers skills via `description:` frontmatter, the pushy descriptions reinforce the trigger points.
 
 ### Convention for new skills
 

@@ -22,7 +22,7 @@ These 10 skills implement steps of the Session Protocol and Execution Protocol. 
 | 1 | session-start | Process + judgment | Start of session (user-triggered) |
 | 2 | session-end | Process + judgment | End of session (user-triggered) |
 | 3 | context-recovery | Process pure | Mid-session emergency (user-triggered) |
-| 4 | sprint-proposer | Process + judgment | Start of session (called by session-start, item 6) |
+| 4 | sprint-proposer | Process + judgment | Start of session (called by session-start, step 5) |
 | 5 | validation-orchestrator | Process + judgment | Before + during implementation |
 | 6 | project-md-updater | Process + judgment | End of session (called by session-end, item 2) |
 | 7 | pendencias-updater | Process + judgment | End of session (called by session-end, item 3) |

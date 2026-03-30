@@ -11,10 +11,10 @@ applies_to: "**/*"
 
 # Session Rules
 
-## Mandatory session lifecycle
+## Session lifecycle
 
-- Every session MUST start with `/session-start`
-- Every session MUST end with `/session-end`
+- Before implementation work, run `/session-start` (loads project state, syncs PRD, proposes sprint)
+- Every session with implementation work MUST end with `/session-end`
 - If context degrades mid-session, run `/context-recovery`
 
 ## Task limits

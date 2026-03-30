@@ -198,7 +198,7 @@ cp docs/modules/templates/criteria_enforcer.md projects/$ARGUMENTS/.claude/agent
 cp docs/modules/templates/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/agents/diff-pattern-extractor.md
 ```
 
-- **Session start:** prd-sync-checker (called by session-start skill, item 4)
+- **Session start:** prd-sync-checker (called by session-start skill, step 3, opt-in)
 - **Before implementing:** criteria-enforcer (called by validation-orchestrator skill)
 - **Session end:** diff-pattern-extractor (called by session-end skill, item 1)
 
