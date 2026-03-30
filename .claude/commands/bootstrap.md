@@ -1,36 +1,40 @@
-# Session 0 — Project Bootstrap
+# Bootstrap Session
 
-Send this entire file as a prompt to Claude Code from the framework repository root.
-The project will be created inside `projects/[project-name]/`.
+This is a **bootstrap session** (Session 0) for project **$ARGUMENTS**.
 
-**Before starting:**
-1. Create the project folder: `projects/[project-name]/`
-2. Place the PRD at `projects/[project-name]/assets/docs/prd.md` (create one using `/prd_planning [project-name]`)
-3. If no PRD exists, the session still works — PRD-derived sections will be marked "to be defined"
-4. Run Claude Code from the framework root: `cd agentic_engineering && claude`
-5. Send this prompt, specifying the project name
+**Project path:** `projects/$ARGUMENTS/`
+**PRD path:** `projects/$ARGUMENTS/assets/docs/prd.md`
 
----
+## Authorized Operations
 
-## Prompt starts below. Copy everything from here.
+- Create all project files inside `projects/$ARGUMENTS/`
+- Install MCPs and plugins for the project
+- Copy examples and skills from the framework into the project
+- No files outside `projects/$ARGUMENTS/` should be created or modified
 
----
+## Rules
 
-## Session 0 — Bootstrap from PRD
+- All documents (CLAUDE.md, project.md, pendencias.md, code-reviewer.md, PRD) are written in English for consistency
+- Conversational output (reports, questions, summaries) should be in Brazilian Portuguese
+- Never modify files in `docs/` or `examples/` (framework read-only references)
+- No application code will be written — only documentation and configuration
 
-**Project folder:** `projects/[CONFIGURE: project-name]` — replace this placeholder before sending.
+## Setup
 
-This session creates the project's documentation structure and installs tools inside the project folder. NO application code will be written. Only documentation and configuration.
+Before starting the process:
 
-**Output language:** All documents (CLAUDE.md, project.md, pendencias.md, code-reviewer.md, PRD) are written in English for consistency. Conversational output (reports, questions, summaries) should be in [CONFIGURE: your preferred language, e.g., "English", "Brazilian Portuguese", "Spanish"]. Replace this placeholder before sending.
+1. If `projects/$ARGUMENTS/` does not exist, create it and `projects/$ARGUMENTS/assets/docs/`
+2. If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, the session still works — PRD-derived sections will be marked "to be defined"
 
 Execute in order. Report results after each part.
 
 ---
 
+## Process
+
 ### Step 1 — Read the PRD
 
-If `projects/[project-name]/assets/docs/prd.md` exists, read it completely. Extract:
+If `projects/$ARGUMENTS/assets/docs/prd.md` exists, read it completely. Extract:
 - Product name and description
 - Target audience
 - MVP modules/features with priorities
@@ -41,7 +45,7 @@ If `projects/[project-name]/assets/docs/prd.md` exists, read it completely. Extr
 - External integrations
 - Business model
 
-If `projects/[project-name]/assets/docs/prd.md` does not exist, skip this step. Use information from the user or CLAUDE.md to populate documents. Mark unknown sections as "to be defined".
+If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. Use information from the user or CLAUDE.md to populate documents. Mark unknown sections as "to be defined".
 
 ---
 
@@ -50,7 +54,7 @@ If `projects/[project-name]/assets/docs/prd.md` does not exist, skip this step. 
 Copy the framework's examples directory into the project for future reference:
 
 ```bash
-cp -r examples/ projects/[project-name]/assets/examples/
+cp -r examples/ projects/$ARGUMENTS/assets/examples/
 ```
 
 These examples serve as quality reference for creating agents, skills, and rules — both during this bootstrap AND during on-demand creation in future sessions. They are read-only templates, not active configuration.
@@ -59,7 +63,7 @@ These examples serve as quality reference for creating agents, skills, and rules
 
 ### Step 2 — Create CLAUDE.md
 
-**All files from Step 2 onwards are created inside `projects/[project-name]/`.** Paths in this prompt (e.g., `CLAUDE.md`, `.claude/phases/`) are relative to the project root.
+**All files from Step 2 onwards are created inside `projects/$ARGUMENTS/`.** Paths in this prompt (e.g., `CLAUDE.md`, `.claude/phases/`) are relative to the project root.
 
 **If CLAUDE.md already exists:** Do NOT overwrite. Instead, compare the existing content with the template. Add missing sections and update outdated sections. Report what was added/changed.
 
@@ -174,7 +178,7 @@ Install the Skill Creator plugin for automated skill evaluation:
 Copy the framework's process skills to the project:
 
 ```bash
-cp -r docs/modules/skills/* projects/[project-name]/.claude/skills/
+cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 ```
 
 This copies 10 process skills that implement the Session Protocol and Execution Protocol:

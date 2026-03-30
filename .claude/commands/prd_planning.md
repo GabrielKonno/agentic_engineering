@@ -1,13 +1,35 @@
-# PRD Planning Prompt
+# PRD Planning Session
 
-Use this prompt with any AI assistant (chat or planning mode) BEFORE the session 0 bootstrap.
-The output is the PRD that feeds the entire project structure.
+This is a **PRD planning session** for project **$ARGUMENTS**.
+
+**Project path:** `projects/$ARGUMENTS/`
+**PRD path:** `projects/$ARGUMENTS/assets/docs/prd.md`
+
+## Authorized Operations
+
+- Create folder `projects/$ARGUMENTS/` and `projects/$ARGUMENTS/assets/docs/` if they do not exist
+- Create or edit `projects/$ARGUMENTS/assets/docs/prd.md`
+- No other files should be created or modified
+
+## Rules
+
+- All documents (PRD) are written in English for consistency
+- Conversational output (reports, questions, summaries) should be in Brazilian Portuguese
+- Never modify files in `docs/` or `examples/` (framework read-only references)
+- Never create application code — this is a planning session only
+
+## Setup
+
+Before starting the process:
+
+1. If `projects/$ARGUMENTS/` does not exist, create it and `projects/$ARGUMENTS/assets/docs/`
+2. If `projects/$ARGUMENTS/assets/docs/prd.md` already exists, this is a **continuation session** — activate Session Recovery (see below). Do NOT start from scratch.
+3. If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, start fresh from Phase 1.
 
 ---
 
-## Prompt
+## Process
 
-```
 We are creating a PRD (Product Requirements Document) for a new project. This document will be the central product reference — everything built must align with it.
 
 I will describe the project. You will act as a product co-creator — not just an interviewer filling out a form. Your role is to:
@@ -74,7 +96,7 @@ Ask about (adapt order based on the conversation — follow what is most interes
 
 **Exit:** You can articulate the product vision, who it serves, why it is different, and what the boundaries are. I confirm the summary.
 
-**Incremental write:** After I confirm, write the PRD file with:
+**Incremental write:** After I confirm, write the PRD file at `projects/$ARGUMENTS/assets/docs/prd.md` with:
 - Document header (product name, version 1.0.0, date, author, status)
 - Section 1 (Product Vision — Problem, Solution, Target Audience, Differentiator)
 - Section 2 (Scope — In Scope MVP, Out of Scope, Constraints)
@@ -388,82 +410,8 @@ Bad examples (WEAK — vague, no failure signal):
 
 The version check is primary. Content check is a safety net for structural changes (modules added/removed) but may miss subtle changes (internal business rules). **Always update the changelog.**
 
-To modify this PRD after approval, use the `prd_change_prompt.md` which guides the full process of classification → investigation → impact → drafting → validation.
+To modify this PRD after approval, use the `/prd_change $ARGUMENTS` command which guides the full process of classification → investigation → impact → drafting → validation.
 
 | Version | Date | Change | Author |
 |---------|------|--------|--------|
 | 1.0.0 | [date] | Initial version | [name] |
-```
-
----
-
-## Tips for the Process
-
-**During Phase 1 (Discovery):**
-- Be specific about business rules (e.g., "commission is fixed per service, not percentage" saves hours of rework)
-- Say what is OUT of scope — as important as what is in scope
-- If unsure about the stack, ask for a suggestion based on the product type
-- If you have visual references (sites, apps), mention them
-
-**During Phase 2 (Architecture):**
-- Think about module dependencies — which parts of the product can only work after others exist
-- If you have preferences about tech choices, state them with reasons
-- Mention any external services you already have accounts/contracts with
-
-**During Phase 3 (Deep Dive):**
-- For each module, think about the "first use" experience — what does the user see when there is no data yet?
-- Think about error scenarios — what can go wrong? How should the system respond?
-- When the AI proposes acceptance criteria, evaluate honestly: is the criterion specific enough that someone could verify it with no ambiguity?
-
-**About proactive suggestions:**
-- The AI will suggest ideas, features, and patterns — evaluate them honestly. Good suggestions can save significant design time later. But say "no" without hesitation to anything that doesn't fit.
-- Pay special attention to edge case suggestions — these often catch issues that would only surface during implementation.
-
-**When reviewing the draft (Phase 4-5):**
-- Check that each module has clear business rules (not just vague features)
-- Check that flows make sense from the user's perspective
-- Check that priorities are correct (High = MVP mandatory)
-- Verify acceptance criteria have all 3 parts (action + expected result + failure signal)
-- Add constraints you forgot to mention
-
-**About incremental writing:**
-- The AI writes sections as they are confirmed — do not wait until the end
-- This protects against session breaks and context limitations
-- Review each section when presented; it is easier to fix early than to review a massive document at the end
-- If a session breaks, start a new one and point the AI to the partial PRD — it will resume where it left off
-
-**After approval:**
-- Save as `assets/docs/prd.md` in the project
-- This document will be read by the AI agent in session 0
-- Update the changelog whenever scope changes
-
----
-
-## When to Update the PRD
-
-The PRD is a **living document** that changes when the PRODUCT changes:
-
-| Event | PRD action |
-|-------|-----------|
-| New feature requested | Add to Functional Requirements + update Roadmap + Build Order + changelog |
-| Feature removed | Move to "Out of scope" + update dependency graph + changelog |
-| Business rule changed | Update in module rules + update acceptance criteria + changelog |
-| Target audience changed | Update Personas + review priorities + changelog |
-| Stack changed | Update section 5 + changelog |
-| Product pivot | PRD v2.0 — rewrite affected sections + changelog |
-| Bug fixed | DO NOT update (goes in project.md) |
-| Technical decision | DO NOT update (goes in project.md) |
-| Module implemented | DO NOT update (goes in project.md) |
-
-**Rule of thumb:** If the change affects WHAT to build → PRD. If it affects HOW to build → project.md.
-
-### If you edit the PRD manually (without the change prompt)
-
-Update the changelog. It is the fastest and most reliable way to ensure propagation.
-
-If you forget, the AI agent has a fallback: it compares PRD structure vs project docs. This catches structural changes (modules added/removed) but may miss subtle ones (internal rule changes within an existing module).
-
-**Rule:** After ANY manual edit, add a changelog line:
-```
-| [version] | [date] | [what changed] | [your name] |
-```

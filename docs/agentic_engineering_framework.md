@@ -46,7 +46,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/session_protocol.md` | Session Protocol (START, END, recovery) | Defines WHEN things happen during development sessions. Embedded into each project's CLAUDE.md during bootstrap. |
 | `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
 | `examples/` | Quality reference templates for agents (10), skills (9), and rules (3) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
-| `docs/toolkit_prompt/` | Interactive prompts (PRD creation, PRD change, project adaptation) | Entry points for human-AI sessions. The human copies a prompt and pastes it to the AI tool. |
+| `.claude/commands/` | Slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. |
 | `docs/bootstrap_claude/` | Bootstrap prompt (`session0_bootstrap_prompt.md`) | The 15-step pipeline that reads all components above and generates a complete project. |
 | `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo after extraction. |
 
@@ -183,12 +183,8 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   ├── execution_protocol.md             # Execution Protocol (tool-agnostic)
 │   │   ├── templates/                        # Document and agent templates for bootstrap
 │   │   └── skills/                           # 10 pre-built process skills (copied to projects)
-│   ├── bootstrap_claude/
-│   │   └── session0_bootstrap_prompt.md      # Bootstrap for Claude Code (references modules)
-│   └── toolkit_prompt/
-│       ├── prd_planning_prompt.md             # PRD creation prompt
-│       ├── prd_change_prompt.md               # PRD modification prompt
-│       └── existing_project_adaptation_prompt.md # Adapt existing project to framework
+│   └── bootstrap_claude/
+│       └── session0_bootstrap_prompt.md      # Bootstrap for Claude Code (references modules)
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
 │   ├── agents/                              # Agent templates (flat .md)
@@ -269,7 +265,7 @@ The framework has five types of components. Each answers a different question:
 | **Templates** | `modules/templates/*.md` | WHAT gets created? | Bootstrap (session 0) |
 | **Process Skills** | `modules/skills/*/SKILL.md` (10 skills) | HOW are protocol steps executed? | Development sessions |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
-| **Toolkit Prompts** | `toolkit_prompt/*.md`, `bootstrap_claude/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
+| **Slash Commands** | `.claude/commands/*.md` + `bootstrap_claude/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
 ### How components reference each other
 

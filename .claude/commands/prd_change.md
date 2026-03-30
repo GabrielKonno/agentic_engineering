@@ -1,13 +1,36 @@
-# PRD Change Prompt
+# PRD Change Session
 
-Use this prompt with any AI assistant whenever you want to propose a change to an existing PRD.
-The AI will classify, investigate, and register the change in the correct place.
+This is a **PRD change session** for project **$ARGUMENTS**.
+
+**Project path:** `projects/$ARGUMENTS/`
+**PRD path:** `projects/$ARGUMENTS/assets/docs/prd.md`
+
+## Authorized Operations
+
+- Modify `projects/$ARGUMENTS/assets/docs/prd.md`
+- Modify engineering documents inside `projects/$ARGUMENTS/` (project.md, pendencias.md, CLAUDE.md, rules)
+- No other files outside `projects/$ARGUMENTS/` should be modified
+
+## Rules
+
+- All documents are written in English for consistency
+- Conversational output (reports, questions, summaries) should be in Brazilian Portuguese
+- Never modify files in `docs/` or `examples/` (framework read-only references)
+- Never create application code — this is a change planning session only
+- **Collect MAXIMUM detail** during Phase 2 (Investigation) — dig deeper, ask follow-ups, challenge vague statements. The quality of the PRD change depends on the depth of information gathered.
+
+## Setup
+
+Before starting the process:
+
+1. Verify `projects/$ARGUMENTS/` exists. If not, stop and tell the user: "Project '$ARGUMENTS' not found in projects/. Create it first with `/prd_planning $ARGUMENTS`."
+2. Verify `projects/$ARGUMENTS/assets/docs/prd.md` exists. If not, stop and tell the user: "No PRD found for project '$ARGUMENTS'. Create one first with `/prd_planning $ARGUMENTS`."
+3. Read `projects/$ARGUMENTS/assets/docs/prd.md` completely before starting Phase 1.
 
 ---
 
-## Prompt
+## Process
 
-```
 I want to propose a change to the product. Before modifying any document, follow this process:
 
 ### Phase 1 — Classification
@@ -38,7 +61,7 @@ Tell me:
 2. Which documents will be affected
 3. If ambiguous, ask before proceeding
 
-If the proposal does NOT go in the PRD: explain where to register it (project.md, pendencias.md, rules) and help draft the entry. Do not proceed to Phase 2.
+If the proposal does NOT go in the PRD: explain where to register it (`projects/$ARGUMENTS/.claude/phases/project.md`, `projects/$ARGUMENTS/.claude/phases/pendencias.md`, rules) and help draft the entry. Do not proceed to Phase 2.
 
 If the proposal DOES go in the PRD: proceed to Phase 2.
 
@@ -160,7 +183,7 @@ Present this analysis and ask for confirmation before drafting.
 
 After confirmation, draft changes for each affected document:
 
-**In the PRD (`assets/docs/prd.md`):**
+**In the PRD (`projects/$ARGUMENTS/assets/docs/prd.md`):**
 1. Modify ONLY the sections listed in the impact analysis
 2. Keep the rest of the document intact
 3. Update the Changelog:
@@ -170,10 +193,10 @@ After confirmation, draft changes for each affected document:
 4. Increment version: patch for clarifications, minor for features/rules, major for pivots
 
 **In engineering documents (if affected):**
-- project.md: update phases, decisions, module relationships
-- pendencias.md: add/remove/reprioritize tasks with acceptance criteria
-- CLAUDE.md: update Build Order, Architecture, Key Patterns if needed
-- rules/*.md: update domain rules if needed
+- `projects/$ARGUMENTS/.claude/phases/project.md`: update phases, decisions, module relationships
+- `projects/$ARGUMENTS/.claude/phases/pendencias.md`: add/remove/reprioritize tasks with acceptance criteria
+- `projects/$ARGUMENTS/CLAUDE.md`: update Build Order, Architecture, Key Patterns if needed
+- `projects/$ARGUMENTS/.claude/rules/*.md`: update domain rules if needed
 
 **For each change, show:**
 ```
@@ -210,75 +233,3 @@ After approval, run this checklist:
 ```
 
 Summarize: "PRD updated from vX.X.X to vY.Y.Y. In the next AI agent session, the PRD sync check will detect and propagate automatically."
-```
-
----
-
-## Shortcuts for Common Changes
-
-### Quick new feature:
-```
-I want to add [feature] to the product.
-Context: [why, who asked, what problem it solves]
-Priority: [MVP / Phase 2 / Phase 3]
-Dependencies: [which modules must exist first | "none"]
-Data entities: [new tables/fields introduced, or "uses existing"]
-Integration: [external APIs or modules it calls | "none"]
-```
-
-### Remove feature:
-```
-I want to remove [feature] from scope.
-Reason: [why]
-Existing code for [feature] should: [keep / remove / move to separate branch]
-```
-
-### Change business rule:
-```
-The rule for [module/feature] needs to change.
-Before: [old rule]
-Now: [new rule]
-Reason: [why]
-```
-
-### Change stack:
-```
-I want to switch [current technology] for [new technology].
-Reason: [why]
-What has been implemented with [current]: [list]
-```
-
-Even with shortcuts, the AI will follow the full process (classify → investigate → impact → draft → validate). The shortcut saves time on the initial description, not on the rigor.
-
----
-
-## Versioning Reference
-
-| Change type | Increment | Example |
-|------------|-----------|---------|
-| Typo, clarification | Patch: 1.0.0 → 1.0.1 | Fix spelling |
-| New feature, removed feature, rule changed | Minor: 1.0.0 → 1.1.0 | Add reports module |
-| Audience or stack changed | Minor: 1.1.0 → 1.2.0 | Switch database |
-| Product pivot | Major: 1.x.x → 2.0.0 | From SaaS to marketplace |
-
-### Automation flow
-
-```
-You change PRD (via this prompt or manually)
-  ↓
-Changelog updated with new version (REQUIRED)
-  ↓
-Next AI agent session starts
-  ↓
-PRD sync check: reads Changelog → detects new version
-  ↓
-Agent reads full PRD → identifies changes
-  ↓
-Propagates to: project.md, pendencias.md, CLAUDE.md (Build Order, Architecture), rules
-  ↓
-Logs in session: "PRD vX.X.X → vY.Y.Y — propagated: [list]"
-```
-
-### If you edit the PRD manually (without this prompt)
-
-Update the changelog. The agent has a fallback content-based check that catches structural changes (modules added/removed, stack changed) but may miss subtle rule changes within existing modules. The changelog is the reliable path.
