@@ -32,8 +32,6 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │       ├── criteria-enforcer/          # as reusable, evolvable components
 │   │       ├── validation-orchestrator/    # (see skills/README.md for full list)
 │   │       └── ... (6 more)
-│   └── bootstrap_claude/
-│       └── session0_bootstrap_prompt.md    # Bootstrap for Claude Code (references modules)
 ├── examples/                               # Quality reference for agents, skills, rules
 │   ├── agents/                             # Agent templates by category
 │   ├── skills/                             # Skill templates by type
@@ -71,7 +69,7 @@ This repository supports 5 session modes, each activated by its slash command:
 
 Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
 
-**Alternative (non-Claude Code):** The bootstrap prompt in `docs/bootstrap_claude/` can still be used manually with any AI tool via copy-paste.
+**Alternative (non-Claude Code):** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 
 ## What You Do Here
 

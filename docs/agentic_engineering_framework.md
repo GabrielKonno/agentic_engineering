@@ -2,7 +2,7 @@
 
 A meta-framework for AI-assisted software development. Provides templates, protocols, validation agents, process skills, and quality examples that bootstrap a project with built-in autonomous verification. Moves from "autocomplete" (AI writes code, human tests) to "auto-execute" (AI implements, validates, and reports with evidence; human approves).
 
-Tool-agnostic in concepts. Reference implementation provided for Claude Code (`session0_bootstrap_prompt.md`). Adaptable to other AI tools by mapping to their config format.
+Tool-agnostic in concepts. Reference implementation provided for Claude Code (`.claude/commands/bootstrap.md`). Adaptable to other AI tools by mapping to their config format.
 
 ---
 
@@ -47,7 +47,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
 | `examples/` | Quality reference templates for agents (10), skills (9), and rules (3) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | Slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. |
-| `docs/bootstrap_claude/` | Bootstrap prompt (`session0_bootstrap_prompt.md`) | The 15-step pipeline that reads all components above and generates a complete project. |
+| `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
 | `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo after extraction. |
 
 ### Suggested reading order
@@ -183,8 +183,6 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   ├── execution_protocol.md             # Execution Protocol (tool-agnostic)
 │   │   ├── templates/                        # Document and agent templates for bootstrap
 │   │   └── skills/                           # 10 pre-built process skills (copied to projects)
-│   └── bootstrap_claude/
-│       └── session0_bootstrap_prompt.md      # Bootstrap for Claude Code (references modules)
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
 │   ├── agents/                              # Agent templates (flat .md)
@@ -265,7 +263,7 @@ The framework has five types of components. Each answers a different question:
 | **Templates** | `modules/templates/*.md` | WHAT gets created? | Bootstrap (session 0) |
 | **Process Skills** | `modules/skills/*/SKILL.md` (10 skills) | HOW are protocol steps executed? | Development sessions |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
-| **Slash Commands** | `.claude/commands/*.md` + `bootstrap_claude/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
+| **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
 ### How components reference each other
 
@@ -273,10 +271,10 @@ The framework has five types of components. Each answers a different question:
 TOOLKIT PROMPTS                 TEMPLATES                    PROTOCOLS
 (human entry points)            (document blueprints)        (behavioral rules)
 
-  session0_bootstrap ---------> claude_md.md -----------.    session_protocol.md
-  prd_planning_prompt           project_md.md           |    execution_protocol.md
-  prd_change_prompt             pendencias_md.md        |         |
-  existing_adaptation           code_reviewer.md        |         |
+  /bootstrap -----------------> claude_md.md -----------.    session_protocol.md
+  /prd_planning                 project_md.md           |    execution_protocol.md
+  /prd_change                   pendencias_md.md        |         |
+  /existing_adaptation          code_reviewer.md        |         |
                                 security_reviewer.md    |    embedded in project's
                                 validator.md            |    CLAUDE.md at bootstrap
                                 arbitrator.md           |         |
@@ -318,7 +316,7 @@ TOOLKIT PROMPTS                 TEMPLATES                    PROTOCOLS
 
 ### The bootstrap pipeline
 
-The bootstrap prompt (`session0_bootstrap_prompt.md`) is a 15-step pipeline that transforms a PRD into a complete AI workspace. Each step reads from the framework (read-only) and writes to the project folder:
+The bootstrap prompt (`.claude/commands/bootstrap.md`) is a 15-step pipeline that transforms a PRD into a complete AI workspace. Each step reads from the framework (read-only) and writes to the project folder:
 
 ```
 Step     Source (framework repo)                     Output (project folder)
@@ -1161,7 +1159,7 @@ The concepts in this protocol are tool-agnostic. The mechanics are tool-specific
 - **Claude Code:** Subagents are spawned via the **Task tool**. Each Task tool call creates a new conversation with isolated context.
 - **Other tools:** Adapt to the tool's subagent/subprocess mechanism. If the tool does not support subagents, fall back to inline validation (Route A behavior for all tasks) and note the limitation.
 
-The bootstrap file (`session0_bootstrap_prompt.md`) contains the Claude Code implementation with exact templates and commands. For other tools, adapt to the tool's configuration format.
+The bootstrap file (`.claude/commands/bootstrap.md`) contains the Claude Code implementation with exact templates and commands. For other tools, adapt to the tool's configuration format.
 
 ---
 
@@ -1936,12 +1934,12 @@ This framework is tool-agnostic. The concepts apply to any AI coding agent.
 |----------|---------|---------------|
 | `prd_planning_prompt.md` | Prompt to create a PRD from scratch (before session 0) | No — works with any AI |
 | `prd_change_prompt.md` | Prompt to modify an existing PRD (classify → investigate → impact → draft) | No — works with any AI |
-| `session0_bootstrap_prompt.md` | Prompt to bootstrap a new project in session 0 (creates all files, installs tools) | Yes — Claude Code specific |
+| `.claude/commands/bootstrap.md` | Prompt to bootstrap a new project in session 0 (creates all files, installs tools) | Yes — Claude Code specific |
 | `existing_project_adaptation_prompt.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | Yes — Claude Code specific |
 
 **Path context:** The PRD prompts reference `assets/docs/prd.md` relative to the project root. When using the framework repository structure (with `projects/` directory), the full path from the framework root is `projects/[project-name]/assets/docs/prd.md`. The session0 prompts handle this mapping — no changes to the PRD prompts are needed.
 
-For Claude Code implementation, see `session0_bootstrap_prompt.md` which provides:
+For Claude Code implementation, see `.claude/commands/bootstrap.md` which provides:
 - Exact file templates (CLAUDE.md, project.md, pendencias.md, code-reviewer.md)
 - MCP installation commands
 - Skill discovery and installation process

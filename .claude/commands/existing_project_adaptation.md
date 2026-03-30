@@ -559,15 +559,17 @@ If any fails: do not install, log reason. If uncertain: ASK user. Max 5 MCPs on 
 
 Register installed MCPs in CLAUDE.md "MCP Servers" section.
 
-**Step 4.4 — Install Skill Creator plugin:**
+**Step 4.4 — Enable Skill Creator plugin:**
 
-```bash
-/plugin install skill-creator@claude-plugins-official
-```
-
-**If installation succeeds:** Log "Skill Creator plugin installed."
-
-**If installation fails** (plugin not available, network error, unsupported environment): Log "Skill Creator plugin unavailable — framework creation eval protocol will be used instead." Continue normally.
+1. Check if already installed: `grep -r "skill-creator" ~/.claude/plugins/installed_plugins.json 2>/dev/null`
+2. If not installed: `/plugin install skill-creator@claude-plugins-official`
+3. Enable in project settings.json — merge this key into the existing file:
+   ```json
+   "enabledPlugins": {
+     "skill-creator@claude-plugins-official": true
+   }
+   ```
+4. **If installation fails** (plugin not available, network error, unsupported environment): Log "Skill Creator plugin unavailable — framework creation eval protocol will be used instead." Continue normally.
 
 **Step 4.5 — Discover and install stack skills:**
 
