@@ -1,9 +1,9 @@
 ---
 name: criteria-enforcer
 description: >
-  Enforces criteria quality before any implementation. Upgrades WEAK to STRONG criteria
-  via 3-part standard and adversarial review. Must run before implementing any task —
-  pass "Task: [task name]" in prompt. Skipping is the #1 cause of false-positive validation.
+  MUST run before implementing any task — invoke as subagent passing "Task: [task name]".
+  Upgrades WEAK acceptance criteria to STRONG via 3-part standard + adversarial review.
+  Skipping is the #1 cause of false-positive validation results.
 tools: Read, Write
 effort: high
 invocation: subagent
@@ -15,8 +15,8 @@ derived_from: execution_protocol "Before implementing"
 
 # Criteria Enforcer
 
-## When to run
-Before implementing ANY task. The main agent passes the task name in the invocation prompt:
+## Invocation
+The main agent passes the task name in the prompt:
 ```
 Task: [task name exactly as in pendencias.md]
 ```

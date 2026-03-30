@@ -1,9 +1,9 @@
 ---
 name: diff-pattern-extractor
 description: >
-  Extracts patterns from session git diffs into Known Bug Patterns and Architecture Patterns
-  in code-reviewer.md. Must run at end of every session (first end-of-session item) — this
-  is how the project accumulates institutional knowledge session over session.
+  MUST run at end of every session (item 1, before all other end-of-session steps) —
+  invoked as subagent. Extracts bug + architecture patterns from git diff into
+  code-reviewer.md. Without this, every bug is fixed once and forgotten.
 tools: Read, Write, Bash
 effort: medium
 invocation: subagent
@@ -14,9 +14,6 @@ derived_from: session_protocol end-of-session item 1
 ---
 
 # Diff-based Pattern Extractor
-
-## When to run
-At the END of every session, BEFORE updating project.md (first end-of-session action).
 
 ## Process
 
