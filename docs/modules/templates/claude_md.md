@@ -29,8 +29,8 @@ This file provides guidance to Claude Code when working with this repository.
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
 3. Read `.claude/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
-4. **PRD sync check** → run `.claude/skills/prd-sync-checker/SKILL.md`
-   <!-- Compares PRD version/content with project.md, propagates changes -->
+4. **PRD sync check** → invoke `.claude/agents/prd-sync-checker.md` as subagent
+   <!-- Compares PRD version/content with project.md, propagates changes —— runs in isolated context -->
 5. Read `.claude/phases/pendencias.md` — what is next
 6. **Propose sprint** → run `.claude/skills/sprint-proposer/SKILL.md`
    <!-- Selects 3-5 tasks, orders by dependency, presents for approval -->
@@ -55,8 +55,8 @@ Signals of exceeding: contradicting earlier findings, skipping validation steps,
 3. **Session-level model switch (5 seconds):** AI saves state with MODEL SWITCH marker → edits settings → requests restart.
 
 ### Before implementing any feature:
-- **Enforce criteria quality** → run `.claude/skills/criteria-enforcer/SKILL.md`
-  <!-- Rewrites WEAK criteria to STRONG, runs adversarial review -->
+- **Enforce criteria quality** → invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task name]`
+  <!-- Rewrites WEAK criteria to STRONG, runs adversarial review — runs in isolated context -->
 - **Classify task complexity:**
   - Routine → current model + effort fine
   - Logic-heavy → recommend `/effort high`
@@ -146,8 +146,19 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    ```
 
 ### At the END of every session (in order):
-1. **Extract patterns** → run `.claude/skills/diff-pattern-extractor/SKILL.md`
-   <!-- Scans git diff, adds to Known Bug Patterns / Architecture Patterns -->
+
+<!-- Create task list before starting — ensures no step is skipped: -->
+<!-- TaskCreate: end-of-session checklist -->
+<!--   [ ] diff-pattern-extractor (subagent — invoke via Agent tool) -->
+<!--   [ ] session-log-creator -->
+<!--   [ ] project-md-updater -->
+<!--   [ ] pendencias-updater -->
+<!--   [ ] config-file-updater -->
+<!--   [ ] rules-agents-updater -->
+<!-- Mark each task complete only after the skill finishes. -->
+
+1. **Extract patterns** → invoke `.claude/agents/diff-pattern-extractor.md` as subagent
+   <!-- Scans git diff, adds to Known Bug Patterns / Architecture Patterns — runs in isolated context -->
 2. **Create session log** → run `.claude/skills/session-log-creator/SKILL.md`
    <!-- Primary detailed record in .claude/logs/ -->
    **Update project.md** → run `.claude/skills/project-md-updater/SKILL.md`
@@ -188,10 +199,12 @@ If context is degrading (contradicting earlier decisions, repeating mistakes):
 
 [Filled in Step 6 below]
 
-**Process skills (copied from framework):**
-- prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator
-- diff-pattern-extractor, project-md-updater, pendencias-updater
+**Process skills — inline (7, in `.claude/skills/`):**
+- sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater
 - config-file-updater, rules-agents-updater, session-log-creator
+
+**Process agents — subagent (3, in `.claude/agents/`):**
+- prd-sync-checker (session start), criteria-enforcer (before implementing), diff-pattern-extractor (session end)
 
 ## Hooks
 

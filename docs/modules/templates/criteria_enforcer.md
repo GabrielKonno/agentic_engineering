@@ -1,11 +1,14 @@
 ---
 name: criteria-enforcer
-invocation: inline
-effort: high
 description: >
-  Enforces criteria quality before implementation. Rewrites WEAK criteria to STRONG.
-  Runs adversarial review on each criterion. MUST run before implementing any task.
-  Skipping this is the #1 cause of false-positive validation results.
+  Enforces criteria quality before any implementation. Upgrades WEAK to STRONG criteria
+  via 3-part standard and adversarial review. Must run before implementing any task —
+  pass "Task: [task name]" in prompt. Skipping is the #1 cause of false-positive validation.
+tools: Read, Write
+effort: high
+invocation: subagent
+receives: "Task: [task name exactly as in pendencias.md]" — passed by main agent in prompt
+produces: criteria upgrade summary — list of upgraded criteria (WEAK→STRONG) or "all STRONG — no changes"
 created: framework-v1.6.0 (pre-validated)
 derived_from: execution_protocol "Before implementing"
 ---
@@ -13,7 +16,13 @@ derived_from: execution_protocol "Before implementing"
 # Criteria Enforcer
 
 ## When to run
-Before implementing ANY task, after reading the task from pendencias.md.
+Before implementing ANY task. The main agent passes the task name in the invocation prompt:
+```
+Task: [task name exactly as in pendencias.md]
+```
+Read `.claude/phases/pendencias.md`, locate the task, apply the process below, write upgraded criteria back to the file. Return a summary of what was upgraded (or "all STRONG").
+
+The main agent proceeds to implementation ONLY after receiving this result.
 
 ## Process
 
@@ -49,3 +58,15 @@ Every criterion must be at least as precise as its source (PRD, design system, r
 
 ### 5. Log result
 Log which criteria were upgraded and why. If all criteria were already STRONG: log "Criteria verified — all STRONG".
+
+## Output
+
+Return to the main agent:
+```
+## Criteria Enforcement Result: [task name]
+- Criteria evaluated: [N]
+- Upgraded (WEAK→STRONG): [N] — [list criterion tags and what changed]
+- Already STRONG: [N]
+- File modified: .claude/phases/pendencias.md [yes/no]
+```
+The main agent proceeds to implementation only after receiving this result.

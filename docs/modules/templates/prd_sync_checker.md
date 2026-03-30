@@ -1,11 +1,14 @@
 ---
 name: prd-sync-checker
-invocation: inline
-effort: medium
 description: >
   Checks PRD version and content against project.md at session start.
-  MUST run at session start (item 4). Skipping risks building on outdated
-  requirements — the most expensive type of wasted work.
+  Run as subagent at session start (item 4) — reads PRD and project.md in isolated
+  context, without session bias, to detect and propagate requirement changes.
+tools: Read, Write
+effort: medium
+invocation: subagent
+receives: no extra context needed — reads assets/docs/prd.md and .claude/phases/project.md autonomously
+produces: one of three outcomes — "synced vX→vY [changes]", "no changes detected", or "mismatch found — awaiting user input"
 created: framework-v1.6.0 (pre-validated)
 derived_from: session_protocol item 4
 ---
@@ -14,6 +17,18 @@ derived_from: session_protocol item 4
 
 ## When to run
 At the START of every session, after reading project.md (item 4 in Session Protocol).
+
+## BOUNDARIES
+
+Do NOT read (anti-bias firewall — these contain implementation reasoning that could skew the sync decision):
+- `.claude/phases/project.md` Progress Log section
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+
+Read ONLY:
+- `assets/docs/prd.md`
+- `.claude/phases/project.md` — Overview section (PRD version field) + Architectural Decisions table only
+- `.claude/phases/pendencias.md` — only if propagation requires task changes
 
 ## Process
 
@@ -52,3 +67,14 @@ If mismatch detected → ASK user before propagating.
 - If changes are clear and non-contradicting → propagate automatically
 - If ambiguous or contradicts existing architectural decision → ASK user
 - If both checks show no changes → skip (log nothing)
+
+## Output
+
+Return to the main agent:
+```
+## PRD Sync Result
+- Outcome: [synced vX.X.X → vY.Y.Y | no changes detected | mismatch — awaiting user input]
+- Changes propagated: [list or "none"]
+- Files modified: [list or "none"]
+- Action required from main agent: [none | ask user: [question]]
+```

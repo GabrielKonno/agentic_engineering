@@ -15,8 +15,8 @@ In v1.6.0, the protocol items that involve multi-step processes are delegated to
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
 3. Read `.claude/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
-4. **PRD sync check** → run `.claude/skills/prd-sync-checker/SKILL.md`
-   <!-- Compares PRD version/content with project.md, propagates changes if needed -->
+4. **PRD sync check** → invoke `.claude/agents/prd-sync-checker.md` as subagent
+   <!-- Compares PRD version/content with project.md — runs in isolated context, no session bias -->
 5. Read `.claude/phases/pendencias.md` — what is next
 6. **Propose sprint** → run `.claude/skills/sprint-proposer/SKILL.md`
    <!-- Selects 3-5 tasks, orders by dependency, presents for approval -->
@@ -36,6 +36,15 @@ In v1.6.0, the protocol items that involve multi-step processes are delegated to
 Maximum 3-5 tasks per session. If backlog has more: complete 3-5, run end-of-session docs, commit, and start a new session for the next batch. Exceptions: if all tasks are small (single file, bug fix) and related, up to 7 is acceptable. If a single task is large (new module), 1 task per session is appropriate.
 
 Signals that you've exceeded the limit: contradicting earlier self-review findings, skipping validation steps, producing ⏭️ on steps that should be ✅ or ❌.
+
+### Process component types
+
+**Skills (7, in `.claude/skills/`):** inline — main agent reads SKILL.md and follows steps in its own context.
+
+**Process agents (3, in `.claude/agents/`):** subagent — main agent invokes via Agent tool; isolated context, no session bias. Main agent does NOT proceed until the subagent returns.
+- `prd-sync-checker` — session start (item 4)
+- `criteria-enforcer` — before implementing (pass `Task: [task name]` in prompt)
+- `diff-pattern-extractor` — session end (item 1)
 
 ### Three mechanisms for reasoning depth (complementary):
 
@@ -70,8 +79,18 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
 
 **Priority order** (if context limited, at minimum do items 1 and 2):
 
-1. **Extract patterns from diff** → run `.claude/skills/diff-pattern-extractor/SKILL.md`
-   <!-- Scans git diff, adds to Known Bug Patterns / Architecture Patterns -->
+<!-- Before running any skill, create a task list to ensure no step is skipped: -->
+<!-- TaskCreate: end-of-session checklist -->
+<!--   [ ] diff-pattern-extractor (subagent — invoke via Agent tool) -->
+<!--   [ ] session-log-creator -->
+<!--   [ ] project-md-updater -->
+<!--   [ ] pendencias-updater -->
+<!--   [ ] config-file-updater -->
+<!--   [ ] rules-agents-updater -->
+<!-- Mark each task complete only after the skill finishes. -->
+
+1. **Extract patterns from diff** → invoke `.claude/agents/diff-pattern-extractor.md` as subagent
+   <!-- Scans git diff, adds to Known Bug Patterns / Architecture Patterns — runs in isolated context -->
 2. **Create session log** → run `.claude/skills/session-log-creator/SKILL.md`
    <!-- Primary detailed record in .claude/logs/ -->
    **Update project.md** → run `.claude/skills/project-md-updater/SKILL.md`
