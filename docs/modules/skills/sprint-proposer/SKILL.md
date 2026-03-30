@@ -6,16 +6,16 @@ description: >
   Proposes a sprint batch at session start. Reads pendencias.md, selects 3-5 tasks,
   orders by dependency, presents for approval. Also manages sprint-approved mode
   (exception stops, between-tasks workflow, sprint reports). MUST run at session
-  start (item 6). Without this, you work task-by-task instead of efficient batches.
+  start (step 5). Without this, you work task-by-task instead of efficient batches.
 created: framework-v1.7.0 (pre-validated)
-derived_from: session_protocol item 6, execution_protocol "Sprint-approved mode" and "Between tasks"
+derived_from: session_protocol step 5, execution_protocol "Sprint-approved mode" and "Between tasks"
 ---
 
 # Sprint Proposer
 
 ## When to run
-At the START of every session, after reading pendencias.md (item 6 in Session Protocol).
-Skip if MODEL SWITCH continuation is active (item 2 already selected the task).
+At the START of implementation sessions, after reading pendencias.md (step 5 in session-start).
+Skip if MODEL SWITCH continuation is active (step 1 already selected the task).
 **After a model switch restart:** do NOT resume the previous sprint — propose a new one. The previous sprint was interrupted and context has changed.
 
 ## Process

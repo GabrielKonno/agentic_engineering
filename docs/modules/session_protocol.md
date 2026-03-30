@@ -3,7 +3,7 @@
 This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. This is the architectural reference — WHAT happens and WHY.
 
 In v1.7.0, all protocol logic is implemented as skills. CLAUDE.md contains pointers only:
-- `session-start` skill: START-of-session (10 steps + model switch continuation)
+- `session-start` skill: START-of-session (5 steps + model switch continuation)
 - `session-end` skill: END-of-session (6 skills/agents orchestrated in sequence)
 - `context-recovery` skill: mid-session emergency save
 - `sprint-proposer` skill: sprint proposal + sprint-approved mode + between-tasks workflow
@@ -12,30 +12,19 @@ In v1.7.0, all protocol logic is implemented as skills. CLAUDE.md contains point
 
 ---
 
-## At the START of every session:
+## At the START of implementation sessions:
 
-1. Read `CLAUDE.md` (this file)
-2. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:
+> **Note:** Claude Code automatically handles CLAUDE.md reading, rules loading (via `applies_to` globs), skill/agent discovery (via `description:` frontmatter), and codebase exploration. The steps below cover what Claude Code does NOT do automatically.
+
+1. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:
    - This session is a continuation — skip normal task selection
    - The task and reason for the switch are in the marker
    - Log: "Continuing: [task name] (model switched from [source] to [target])"
    - Proceed directly to "Before implementing" with the specified task
-3. Read `.claude/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
-4. **PRD sync check** → invoke `.claude/agents/prd-sync-checker.md` as subagent
-   <!-- Compares PRD version/content with project.md — runs in isolated context, no session bias -->
-5. Read `.claude/phases/pendencias.md` — what is next
-6. **Propose sprint** → run `.claude/skills/sprint-proposer/SKILL.md`
-   <!-- Selects 3-5 tasks, orders by dependency, presents for approval -->
-7. Read `.claude/rules/*.md` relevant to current task
-8. Read design system if modifying UI
-9. Read `.claude/skills/*/SKILL.md` if relevant skill exists for current task
-10. **Codebase discovery** (if first session or unfamiliar module):
-    ```bash
-    find . -maxdepth 2 -type d -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | head -40
-    find . -type f -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.go" -o -name "*.rb" -o -name "*.java" -o -name "*.vue" -o -name "*.svelte" 2>/dev/null | grep -v node_modules | grep -v .next | wc -l
-    ls -la package.json tsconfig.json next.config.* nuxt.config.* vite.config.* manage.py pyproject.toml go.mod Cargo.toml Gemfile docker-compose.yml 2>/dev/null
-    ```
-    Explore deeper based on framework detected. File Map in CLAUDE.md is a quick pointer; codebase discovery is the source of truth. If they conflict, trust discovery and update File Map.
+2. Read `.claude/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
+3. **PRD sync check (opt-in)** — ask user if they want to run the sync check. If yes, invoke `.claude/agents/prd-sync-checker.md` as subagent. If no, skip.
+4. Read `.claude/phases/pendencias.md` — what is next
+5. **Propose sprint** → run `.claude/skills/sprint-proposer/SKILL.md`
 
 ### Task limit per session:
 
@@ -52,7 +41,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 - **Session end (5, called by session-end):** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
 **Process agents (3, in `.claude/agents/`):** subagent — main agent invokes via Agent tool; isolated context, no session bias. Main agent does NOT proceed until the subagent returns.
-- `prd-sync-checker` — session start (item 4)
+- `prd-sync-checker` — session start (step 3, opt-in)
 - `criteria-enforcer` — before implementing (pass `Task: [task name]` in prompt)
 - `diff-pattern-extractor` — session end (item 1)
 
