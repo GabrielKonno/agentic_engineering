@@ -1,9 +1,9 @@
 ---
 name: prd-sync-checker
 description: >
-  Checks PRD version and content against project.md at session start.
-  Run as subagent at session start (item 4) — reads PRD and project.md in isolated
-  context, without session bias, to detect and propagate requirement changes.
+  MUST run at session start (item 4) before task selection — invoked as subagent,
+  no session context. Checks PRD version + content against project.md.
+  Skipping risks implementing against stale requirements.
 tools: Read, Write
 effort: medium
 invocation: subagent
@@ -14,9 +14,6 @@ derived_from: session_protocol item 4
 ---
 
 # PRD Sync Checker
-
-## When to run
-At the START of every session, after reading project.md (item 4 in Session Protocol).
 
 ## BOUNDARIES
 
