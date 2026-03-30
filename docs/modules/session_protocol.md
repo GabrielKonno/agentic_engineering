@@ -1,8 +1,14 @@
 # Session Protocol
 
-This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. It is embedded into the project's config file (CLAUDE.md) during bootstrap.
+This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. This is the architectural reference — WHAT happens and WHY.
 
-In v1.6.0, the protocol items that involve multi-step processes are delegated to pre-built process skills (in `.claude/skills/`). The protocol retains the sequence and triggers; the skills contain the how-to.
+In v1.7.0, all protocol logic is implemented as skills. CLAUDE.md contains pointers only:
+- `session-start` skill: START-of-session (10 steps + model switch continuation)
+- `session-end` skill: END-of-session (6 skills/agents orchestrated in sequence)
+- `context-recovery` skill: mid-session emergency save
+- `sprint-proposer` skill: sprint proposal + sprint-approved mode + between-tasks workflow
+- `validation-orchestrator` skill: before-implementing + validation loop + post-mortem
+- `.claude/rules/session-rules.md`: task limits, documentation quality, reasoning depth
 
 ---
 
@@ -39,7 +45,11 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 ### Process component types
 
-**Skills (7, in `.claude/skills/`):** inline — main agent reads SKILL.md and follows steps in its own context.
+**Skills (10, in `.claude/skills/`):** inline — main agent reads SKILL.md and follows steps in its own context.
+- **Session lifecycle (3, user-triggered):** session-start, session-end, context-recovery
+- **Session start (1):** sprint-proposer
+- **During implementation (1):** validation-orchestrator
+- **Session end (5, called by session-end):** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
 **Process agents (3, in `.claude/agents/`):** subagent — main agent invokes via Agent tool; isolated context, no session bias. Main agent does NOT proceed until the subagent returns.
 - `prd-sync-checker` — session start (item 4)

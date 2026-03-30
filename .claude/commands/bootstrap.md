@@ -74,11 +74,11 @@ These examples serve as quality reference for creating agents, skills, and rules
 - Fill Build Order from PRD module dependencies
 - Fill Design System reference
 - Fill Environment Variables from stack requirements
-- Leave Commands, MCP Servers, Skills, Hooks empty (filled in later steps)
+- Leave Commands, MCP Servers, Skills & Agents, Hooks empty (filled in later steps)
 
 Create the file at the project root as `CLAUDE.md`.
 
-**The template references process agents** (`.claude/agents/prd-sync-checker.md`, etc.) and process skills (`.claude/skills/sprint-proposer/SKILL.md`, etc.) in the Session Protocol. These are copied in Step 5.7 below.
+**The template is a slim orchestrator** (~90 lines). It contains project identity and pointers to skills/rules. Protocol logic lives in process skills (copied in Step 5.7) and session rules (also copied in Step 5.7).
 
 ---
 
@@ -177,14 +177,15 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ---
 
-### Step 5.7 — Copy pre-built process skills and process agents
+### Step 5.7 — Copy pre-built process skills, process agents, and session rules
 
-**Process skills (7 — inline, copied to `.claude/skills/`):**
+**Process skills (10 — inline, copied to `.claude/skills/`):**
 
 ```bash
 cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 ```
 
+- **Session lifecycle (user-triggered):** session-start, session-end, context-recovery
 - **Session start:** sprint-proposer
 - **During implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
@@ -197,15 +198,23 @@ cp docs/modules/templates/criteria_enforcer.md projects/$ARGUMENTS/.claude/agent
 cp docs/modules/templates/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/agents/diff-pattern-extractor.md
 ```
 
-- **Session start:** prd-sync-checker (item 4)
-- **Before implementing:** criteria-enforcer
-- **Session end:** diff-pattern-extractor (item 1)
+- **Session start:** prd-sync-checker (called by session-start skill, item 4)
+- **Before implementing:** criteria-enforcer (called by validation-orchestrator skill)
+- **Session end:** diff-pattern-extractor (called by session-end skill, item 1)
 
-These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 7 run inline (main agent reads SKILL.md and follows steps in its own context).
+These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 10 run inline (main agent reads SKILL.md and follows steps in its own context).
 
-Register in CLAUDE.md "Skills" section:
-- Under "Process skills (7 — copied from framework):" list the 7 inline skills
-- Under "Process agents (3 — invoked as subagents):" list prd-sync-checker, criteria-enforcer, diff-pattern-extractor
+**Session rules (copied to `.claude/rules/`):**
+
+```bash
+mkdir -p projects/$ARGUMENTS/.claude/rules
+# Extract content between the markdown fences in the template
+sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
+```
+
+This creates the session-rules.md rule file with task limits, documentation quality, and reasoning depth rules.
+
+Skills and agents are auto-discovered by Claude Code from `.claude/skills/` and `.claude/agents/`. No explicit listing is needed in CLAUDE.md.
 
 ---
 
@@ -398,13 +407,17 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 - assets/examples/ (copied from framework — Step 1.5)
 
 ### Process skills: copied from framework (Step 5.7):
-- sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater
-- config-file-updater, rules-agents-updater, session-log-creator
+- **Session lifecycle:** session-start, session-end, context-recovery
+- **Implementation:** sprint-proposer, validation-orchestrator
+- **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
 ### Process agents: copied from framework templates (Step 5.7):
 - .claude/agents/prd-sync-checker.md (session start — subagent)
 - .claude/agents/criteria-enforcer.md (before implementing — subagent)
 - .claude/agents/diff-pattern-extractor.md (session end — subagent)
+
+### Session rules: copied from framework (Step 5.7):
+- .claude/rules/session-rules.md (task limits, documentation quality, reasoning depth)
 
 ### Hooks configured:
 - smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]

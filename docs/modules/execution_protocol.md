@@ -1,8 +1,13 @@
 # Execution Protocol
 
-This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. It is embedded into the project's config file (CLAUDE.md) during bootstrap.
+This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. This is the architectural reference — WHAT happens and WHY.
 
-In v1.6.0, key processes within this protocol are delegated to pre-built process skills. The `criteria-enforcer` skill handles criteria quality. The `validation-orchestrator` skill handles the validation loop (Phase A + Phase B).
+In v1.7.0, all protocol logic is implemented in skills:
+- `validation-orchestrator` skill: before-implementing (criteria enforcement, complexity classification, plan proposal), during-implementation (Phase A + Phase B validation loop), and validation failure post-mortem
+- `sprint-proposer` skill: between-tasks workflow (commit, update pendencias, context health check, sprint report)
+- `criteria-enforcer` agent: criteria quality enforcement (subagent, called by validation-orchestrator)
+
+CLAUDE.md contains pointers only. The content below is the architectural reference describing the design and rationale.
 
 ---
 
