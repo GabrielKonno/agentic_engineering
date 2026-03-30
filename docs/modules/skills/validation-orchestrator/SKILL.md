@@ -3,18 +3,71 @@ name: validation-orchestrator
 invocation: inline
 effort: high
 description: >
-  Orchestrates the two-phase validation loop after implementation. Routes to
-  inline validation (routine), 2-subagent pair (logic-heavy), or full chain
-  (architecture/security). MUST run after every implementation. Skipping this
-  means the human finds the bugs instead of the framework.
-created: framework-v1.6.0 (pre-validated)
-derived_from: execution_protocol "During implementation"
+  Orchestrates the full implementation lifecycle: before implementing (criteria
+  enforcement, complexity classification, plan proposal), during implementation
+  (two-phase validation loop), and post-mortem diagnosis. Routes to inline
+  validation (routine), 2-subagent pair (logic-heavy), or full chain
+  (architecture/security). MUST run for every task. Skipping this means the
+  human finds the bugs instead of the framework.
+created: framework-v1.7.0 (pre-validated)
+derived_from: execution_protocol "Before implementing", "During implementation", "Validation Failure Post-Mortem"
 ---
 
 # Validation Orchestrator
 
 ## When to run
-After writing code for any task, BEFORE reporting to the user.
+
+This skill covers the full implementation lifecycle for each task:
+1. **Before implementing:** criteria enforcement, complexity classification, plan proposal
+2. **During implementation:** two-phase validation loop (Phase A + Phase B)
+3. **After validation failure:** post-mortem diagnosis (when human reports bug in ✅ task)
+
+Run this skill when a task is selected for implementation.
+
+---
+
+## Before Implementing
+
+### 1. Enforce criteria quality
+
+Invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task name]`. This rewrites WEAK criteria to STRONG and runs adversarial review. Runs in isolated context.
+
+### 2. Classify task complexity
+
+Based on task content, classify and recommend:
+- **Routine** (UI changes, simple CRUD, text updates) → current model + effort is fine
+- **Logic-heavy** (business rules, calculations, state machines, financial) → recommend `/effort high`
+- **Architecture/Security** (new module, cross-module, security audit) → trigger model switch protocol (see `session-start` skill)
+
+### 3. Complexity threshold
+
+- **Small** (single file, bug fix, text update): implement directly → validation loop. No plan needed.
+- **Medium** (2-5 files, new component, schema change): propose plan → wait for approval.
+- **Large** (new module, cross-module, architectural): propose plan with risks → wait for approval.
+
+**Sprint-approved mode:** Medium tasks proceed without approval. Large tasks still need approval. See `sprint-proposer` skill.
+
+### 4. Plan template (medium and large tasks)
+
+If medium or large, propose:
+```
+## Implementation Plan: [feature name]
+### Changes needed:
+1. [file] — [what changes and why]
+### Migration needed: [yes/no]
+### Risks: [what could break]
+### Validation strategy: [which criteria, which tools]
+### Estimated scope: [small / medium / large]
+```
+
+Wait for user approval. After approval: the plan becomes the technical record. Include summary in the session log.
+
+### Git checkpoint (medium and large tasks)
+
+Before writing code: `git add -A && git commit -m "checkpoint: before [task name]"`
+This enables clean rollback if the task needs to be reverted.
+
+---
 
 ## Phase A — Implementation (all complexity levels)
 
@@ -155,3 +208,26 @@ Construct subagent prompt with: role definition, files to read (explicit paths),
 
 ## Actionable findings rule
 If during ANY step of the validation loop the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking.
+
+---
+
+## Validation Failure Post-Mortem
+
+**Trigger:** The human reports a bug in a task that was validated as ✅.
+
+BEFORE fixing the bug, diagnose and improve the validation loop:
+
+1. **Identify** which validation step should have caught it
+2. **Diagnose** why that step declared ✅ (partial execution? silent failure? missing criterion? weak criterion?)
+3. **Classify** the root cause and route the improvement to the correct document:
+   - Weak/incomplete criterion → improve criteria quality rules
+   - Partially verified multi-step criterion → strengthen Phase B criteria check
+   - Tool silenced an error → add Known Bug Pattern
+   - Review missed a pattern → update code-reviewer checklist
+   - Test not written for testable logic → refine Phase A Step 2 skip conditions
+   - Subagent context incomplete → update context routing rules
+   - AI judgment error → inherent limitation, no doc fix
+4. **Apply** the systemic improvement (prevent the CLASS of failure, not just this instance)
+5. **Log** the post-mortem in the session log (`.claude/logs/`) and note it in the project.md Progress Log index row
+
+Then fix the bug normally. The validation loop improves before the bug is fixed.

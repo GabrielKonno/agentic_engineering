@@ -137,7 +137,9 @@ Before proceeding, present a summary of everything you read:
 - Agents: [list with names]
 - Rules: [list with names]
 - Skills: [list with names]
-- Process skills: [N of 10 installed] — [list missing: prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator, diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator]
+- Process skills: [N of 10 installed] — [list missing: session-start, session-end, context-recovery, sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator]
+- Process agents: [N of 3 installed] — [list missing: prd-sync-checker, criteria-enforcer, diff-pattern-extractor]
+- Session rules: [exists/missing] — .claude/rules/session-rules.md
 - PRD: [exists/missing]
 
 ### What needs to be created:
@@ -163,23 +165,12 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md):
+Required sections (compare against docs/modules/templates/claude_md.md — v1.7.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
-□ Session Protocol — START (10 items including MODEL SWITCH check, PRD sync skill, sprint proposal skill)
-□ Session Protocol — Task limit per session
-□ Three mechanisms for reasoning depth
-□ Before implementing (criteria-enforcer skill, complexity classification, complexity threshold, sprint-approved mode, exception stops)
-□ Model switch protocol (5 steps + sprint interaction)
-□ Git checkpoint strategy
-□ During implementation (validation-orchestrator skill trigger + actionable findings rule)
-□ Validation Failure Post-Mortem (7 root causes including "subagent context incomplete")
-□ Between tasks (4 items including sprint report)
-□ Session Protocol — END (5 items, priority-ordered, delegated to process skills)
-□ Mid-session context recovery (4 steps + signals)
-□ Documentation quality rules
+□ Session Protocol (pointers to /session-start, /session-end, /context-recovery, session-rules.md)
 □ Commands section
 □ MCP Servers section
-□ Skills section (7 inline process skills + 3 process agents listed separately)
+□ Skills & Agents section (auto-discovery note, no explicit listing)
 □ Hooks section
 □ Architecture section
 □ Key Patterns section
@@ -189,26 +180,18 @@ Required sections (compare against docs/modules/templates/claude_md.md):
 □ Environment Variables section
 ```
 
+**Migration from v1.6.0 to v1.7.0:** If the CLAUDE.md contains inline Session Protocol (10 start steps, end steps, model switch protocol, validation failure post-mortem, sprint-approved mode, etc.), these should be REMOVED. All protocol logic now lives in process skills (session-start, session-end, context-recovery, sprint-proposer, validation-orchestrator) and session rules (.claude/rules/session-rules.md). Replace inline protocol sections with the slim Session Protocol pointers from the v1.7.0 template.
+
 **Key additions likely missing from older versions:**
 
-*Session Protocol additions:*
-- Sprint proposal (Level 4) in Session Protocol START item 6 — skill trigger: sprint-proposer
-- Sprint-approved mode in "Before implementing" section (Level 4 auto-pilot)
-- Exception stops list (including "False ❌ from subagent escalated by arbitrator")
-- Sprint interaction note in model switch protocol
-- Discovery cap (max 3 per sprint)
-- Sprint report template in "Between tasks" item 4
-- Diff-based pattern extraction in end-of-session **item 1** (first priority) — skill trigger: diff-pattern-extractor
-- Agent/skill evolution in end-of-session **item 5** — skill trigger: rules-agents-updater
-- Session logs (`.claude/logs/`) — permanent record per session
-- Hooks section in config file (smart-formatting PostToolUse hook)
+*v1.7.0 structural change:*
+- CLAUDE.md is now a slim orchestrator (~90 lines). All protocol logic lives in skills and rules.
+- Session Protocol section is 5 lines of pointers, not inline protocol steps.
+- Skills & Agents section uses auto-discovery (no explicit listing).
+- Session rules live in `.claude/rules/session-rules.md` (task limits, doc quality, reasoning depth).
+- If the existing CLAUDE.md has inline protocol sections, they should be replaced with pointers.
 
-*Validation additions (in CLAUDE.md as skill triggers, detail lives in skills):*
-- Criteria-enforcer skill trigger in "Before implementing" section
-- Validation-orchestrator skill trigger in "During implementation" section
-- Validation Failure Post-Mortem section (7 root causes including "subagent context incomplete")
-
-*Agent/skill infrastructure (verified in Steps 2.4-2.8, not CLAUDE.md sections):*
+*Agent/skill infrastructure (verified in Steps 2.4-2.8):*
 - **validator agent** (`.claude/agents/validator.md`) — mandatory, independent verification
 - **arbitrator agent** (`.claude/agents/arbitrator.md`) — mandatory, conflict resolution
 - **`invocation:` frontmatter** on all review/validation agents/skills (`subagent` or `inline`)
@@ -218,9 +201,9 @@ Required sections (compare against docs/modules/templates/claude_md.md):
 - **"Known Bug Patterns triggered"** field in Code Review Report output format
 - **"Evolutions applied"** section in session log template
 
-*Process components (copied in Step 2.9 — the v1.6.0 slim orchestrator delegates to these):*
-- 7 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) implementing Session Protocol and Execution Protocol steps
-- Without these, every trigger in CLAUDE.md is a broken reference
+*Process components (copied in Step 2.9):*
+- 10 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + session rules (`.claude/rules/`)
+- Without these, the skill pointers in CLAUDE.md are broken references
 
 **For each addition, log:**
 ```
@@ -399,11 +382,11 @@ done
 ```
 After migration, update any references in CLAUDE.md from `.claude/skills/[name].md` to `.claude/skills/[name]/SKILL.md`.
 
-**Step 2.9 — Copy pre-built process skills and process agents:**
+**Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v1.6.0 CLAUDE.md template references process agents (`.claude/agents/prd-sync-checker.md`, etc.) and process skills (`.claude/skills/sprint-proposer/SKILL.md`, etc.). Without these, every trigger in Session Protocol is a broken reference.
+The v1.7.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
-**Copy process skills (7 inline — to `.claude/skills/`):**
+**Copy process skills (10 inline — to `.claude/skills/`):**
 ```bash
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
@@ -429,13 +412,23 @@ for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
 done
 ```
 
-**Expected after this step:**
-- **Process skills (7):** sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
-- **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
+**Copy session rules (to `.claude/rules/`):**
+```bash
+mkdir -p projects/$ARGUMENTS/.claude/rules
+if [ ! -f "projects/$ARGUMENTS/.claude/rules/session-rules.md" ]; then
+  sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
+  echo "Copied session rules"
+else
+  echo "SKIPPED (already exists): session-rules.md — verify manually"
+fi
+```
 
-Register in CLAUDE.md "Skills" section:
-- "Process skills (7 — copied from framework):" list the 7 inline skills
-- "Process agents (3 — invoked as subagents):" list the 3 process agents
+**Expected after this step:**
+- **Process skills (10):** session-start, session-end, context-recovery, sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+- **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
+- **Session rules (1):** session-rules.md
+
+Skills and agents are auto-discovered by Claude Code. No explicit listing is needed in CLAUDE.md.
 
 ---
 
@@ -655,10 +648,13 @@ find projects/$ARGUMENTS/.claude/skills -name "SKILL.md" 2>/dev/null | while rea
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
 
-echo "=== All 7 process skills present? ==="
-for skill in sprint-proposer validation-orchestrator project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator; do
+echo "=== All 10 process skills present? ==="
+for skill in session-start session-end context-recovery sprint-proposer validation-orchestrator project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator; do
   ls "projects/$ARGUMENTS/.claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
 done
+
+echo "=== Session rules present? ==="
+ls "projects/$ARGUMENTS/.claude/rules/session-rules.md" 2>/dev/null || echo "MISSING session rules"
 
 echo "=== All 3 process agents present? ==="
 for agent in prd-sync-checker criteria-enforcer diff-pattern-extractor; do
@@ -690,7 +686,12 @@ grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/nu
 - [any other new files]
 
 ### Process skills: [N of 10 copied from framework]
+- **Session lifecycle:** session-start, session-end, context-recovery
+- **Implementation:** sprint-proposer, validation-orchestrator
+- **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - [list copied / list skipped (already existed)]
+
+### Session rules: .claude/rules/session-rules.md [CREATED / SKIPPED]
 
 ### Preserved (not modified):
 - [N] rows in Progress Log index
