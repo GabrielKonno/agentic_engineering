@@ -32,12 +32,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │       ├── criteria-enforcer/          # as reusable, evolvable components
 │   │       ├── validation-orchestrator/    # (see skills/README.md for full list)
 │   │       └── ... (6 more)
-│   ├── bootstrap_claude/
-│   │   └── session0_bootstrap_prompt.md    # Bootstrap for Claude Code (references modules)
-│   └── toolkit_prompt/
-│       ├── prd_planning_prompt.md              # Create a PRD from scratch
-│       ├── prd_change_prompt.md                # Modify an existing PRD
-│       └── existing_project_adaptation_prompt.md # Upgrade existing project to framework
+│   └── bootstrap_claude/
+│       └── session0_bootstrap_prompt.md    # Bootstrap for Claude Code (references modules)
 ├── examples/                               # Quality reference for agents, skills, rules
 │   ├── agents/                             # Agent templates by category
 │   ├── skills/                             # Skill templates by type
@@ -61,20 +57,34 @@ agentic_engineering/                        ← Cloned once, kept permanently
 - **Development happens here** — `cd projects/[project-name] && claude`
 - **Two git repos coexist:** framework git ignores the folder, project git only sees itself
 
+## Session Modes
+
+This repository supports 5 session modes, each activated by its slash command:
+
+| Mode | Command | Purpose |
+|------|---------|---------|
+| **PRD Planning** | `/prd_planning [project-name]` | Create a new PRD interactively |
+| **PRD Change** | `/prd_change [project-name]` | Modify an existing PRD with impact analysis |
+| **Bootstrap** | `/bootstrap [project-name]` | Create project structure from PRD (Session 0) |
+| **Existing Project Adaptation** | `/existing_project_adaptation [project-name]` | Upgrade existing project to current framework |
+| **Framework Maintenance** | `/maintenance` | Edit framework docs/examples (no project work) |
+
+Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
+
+**Alternative (non-Claude Code):** The bootstrap prompt in `docs/bootstrap_claude/` can still be used manually with any AI tool via copy-paste.
+
 ## What You Do Here
 
 ### 1. Bootstrap a new project (most common)
 
-The user will say something like: "Bootstrap project X" or send the session0 prompt.
+The user will say something like: "Bootstrap project X" or use the `/bootstrap` command.
 
 **Process:**
-1. Read `docs/bootstrap_claude/session0_bootstrap_prompt.md`
-2. Create the project folder: `projects/[project-name]/`
-3. Verify the PRD exists: `projects/[project-name]/assets/docs/prd.md`
-4. Execute the session0 prompt — all files created inside `projects/[project-name]/`
-5. Report bootstrap results
+1. Run `/bootstrap [project-name]`
+2. The command creates the project folder, reads the PRD, and executes all bootstrap steps inside `projects/[project-name]/`
+3. Report bootstrap results
 
-**If no PRD exists:** Tell the user to create one first using `docs/toolkit_prompt/prd_planning_prompt.md` (they can do this in a chat tool like claude.ai, then paste the result as `prd.md`).
+**If no PRD exists:** Tell the user to create one first with `/prd_planning [project-name]`. Alternatively, the bootstrap works without PRD — sections will be marked "to be defined".
 
 **After bootstrap, the user will:**
 ```bash
@@ -89,28 +99,28 @@ From this point, development happens from inside the project folder with its own
 
 ### 2. Adapt an existing project
 
-The user has a project with existing code and partial framework structure.
+The user has a project with existing code and partial framework structure placed inside `projects/[project-name]/`.
 
 **Process:**
-1. Read `docs/toolkit_prompt/existing_project_adaptation_prompt.md`
-2. This runs from the **project root** (not the framework root) — the user should `cd` into the project first
+1. Run `/existing_project_adaptation [project-name]`
+2. The command reads the entire codebase, upgrades docs, creates a retroactive PRD, and fills gaps
 
 ### 3. Create or refine a PRD
 
 The user wants to define a product before bootstrapping.
 
 **Process:**
-1. Read `docs/toolkit_prompt/prd_planning_prompt.md` (creation) or `docs/toolkit_prompt/prd_change_prompt.md` (modification)
-2. Follow the interactive process in the prompt
-3. Save the result to `projects/[project-name]/assets/docs/prd.md`
+1. Run `/prd_planning [project-name]` (creation) or `/prd_change [project-name]` (modification)
+2. The command guides an interactive process of discovery, architecture, and deep-dive
+3. PRD is saved to `projects/[project-name]/assets/docs/prd.md`
 
 ## Rules
 
-- **Never modify files in `docs/` or `examples/` during bootstrap operations** — these are 
-  read-only references for project creation. Exception: framework maintenance sessions 
-  (when the user explicitly states this is a maintenance session, or provides a correction 
-  plan / audit report targeting these files).
+- **Never modify files in `docs/` or `examples/` during bootstrap operations** — these are
+  read-only references for project creation. Exception: framework maintenance sessions
+  (activate with `/maintenance` command, or when the user explicitly states this is a
+  maintenance session / provides a correction plan targeting these files).
 - **Always work inside `projects/[project-name]/`** when creating project files
 - **Copy `examples/` into the project** during bootstrap (Step 1.5) — projects get their own copy
 - **Each project is self-contained** — after bootstrap, development happens from within the project folder with its own CLAUDE.md
-- **This CLAUDE.md is for bootstrap operations only** — project development uses the project's own CLAUDE.md
+- **This CLAUDE.md is for framework operations only** — project development uses the project's own CLAUDE.md

@@ -53,9 +53,9 @@ At Level 4 (Auto Pilot), the AI proposes sprints, executes 3-5 tasks autonomousl
 
 ```
 1. Clone this repo
-2. Create a PRD for your project (use the PRD planning prompt)
-3. Run Claude Code from the repo root
-4. Copy the content of docs/bootstrap_claude/session0_bootstrap_prompt.md and paste it
+2. Run Claude Code from the repo root: claude
+3. Create a PRD: /prd_planning my-project
+4. Bootstrap the project: /bootstrap my-project
 5. Extract the project to its own repo
 ```
 
@@ -65,10 +65,26 @@ After extraction, the framework repo is no longer needed for this project — de
 
 ```
 1. Clone this repo
-2. Open docs/toolkit_prompt/existing_project_adaptation_prompt.md — copy its content
-3. Run Claude Code from your project root
-4. Paste the adaptation prompt — the AI reads your codebase and creates/upgrades docs
+2. Place your project in projects/[name]/
+3. Run Claude Code from the repo root: claude
+4. Run: /existing_project_adaptation [name]
 ```
+
+---
+
+## Available Commands
+
+Run these from the framework root with Claude Code:
+
+| Command | Arguments | Purpose |
+|---------|-----------|---------|
+| `/prd_planning` | project name | Create PRD interactively — creates `projects/[name]/assets/docs/prd.md` |
+| `/prd_change` | project name | Modify existing PRD with full impact analysis |
+| `/bootstrap` | project name | Bootstrap project from PRD (Session 0) |
+| `/existing_project_adaptation` | project name | Upgrade existing project to framework |
+| `/maintenance` | (none) | Edit framework docs, examples, CLAUDE.md |
+
+**Alternative:** The bootstrap prompt in `docs/bootstrap_claude/` can still be used manually via copy-paste with any AI tool (Claude.ai, ChatGPT, Cursor, etc.).
 
 ---
 
@@ -89,13 +105,8 @@ agentic_engineering/
 │   │   ├── templates/                      ← Document and agent templates
 │   │   └── skills/                         ← 10 pre-built process skills
 │   │
-│   ├── bootstrap_claude/
-│   │   └── session0_bootstrap_prompt.md    ← Bootstrap for Claude Code (references modules)
-│   │
-│   └── toolkit_prompt/
-│       ├── prd_planning_prompt.md              ← Create a PRD from scratch
-│       ├── prd_change_prompt.md                ← Modify an existing PRD
-│       ├── existing_project_adaptation_prompt.md ← Adapt existing project
+│   └── bootstrap_claude/
+│       └── session0_bootstrap_prompt.md    ← Bootstrap for Claude Code (references modules)
 │
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── examples_instructions.md        ← Conventions for creating agents/skills
@@ -186,17 +197,17 @@ For the full architecture diagram and bootstrap pipeline details, see [Framework
 
 ### 1. Create the PRD
 
-Before bootstrapping, define what you're building. Use the PRD planning prompt with any AI chat tool (Claude.ai, ChatGPT, etc.):
+Before bootstrapping, define what you're building:
 
-**Open:** `docs/toolkit_prompt/prd_planning_prompt.md`
+**Run:** `/prd_planning [project-name]`
 
-The AI asks questions about the product, then generates a structured PRD with modules, business rules, acceptance criteria, stack, and roadmap. Save the result as `projects/[name]/assets/docs/prd.md`.
+The AI asks questions about the product, then generates a structured PRD with modules, business rules, acceptance criteria, stack, and roadmap. The PRD is saved to `projects/[name]/assets/docs/prd.md`.
 
 ### 2. Bootstrap the project
 
-Run Claude Code from the repo root and send the bootstrap prompt:
+Run Claude Code from the repo root:
 
-**Open:** `docs/bootstrap_claude/session0_bootstrap_prompt.md`
+**Run:** `/bootstrap [project-name]`
 
 The AI reads the PRD and creates the entire project structure — see [What Bootstrap Creates](#what-bootstrap-creates) above for the full list of files and their sources.
 
@@ -286,14 +297,14 @@ The framework learns from your project:
 
 ---
 
-## What each prompt does
+## What each command does
 
-| Prompt | When to use | Input | Output |
-|--------|-------------|-------|--------|
-| **PRD Planning** | Before starting any project | Your product description | Structured PRD document |
-| **Session 0 Bootstrap** | Starting a new project | PRD at `assets/docs/prd.md` | Full project documentation structure |
-| **Existing Project Adaptation** | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
-| **PRD Change** | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
+| Command | When to use | Input | Output |
+|---------|-------------|-------|--------|
+| `/prd_planning [name]` | Before starting any project | Your product description | Structured PRD document |
+| `/bootstrap [name]` | Starting a new project | PRD at `assets/docs/prd.md` | Full project documentation structure |
+| `/existing_project_adaptation [name]` | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
+| `/prd_change [name]` | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
 
 ---
 

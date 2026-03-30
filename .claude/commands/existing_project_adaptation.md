@@ -1,30 +1,38 @@
-# Existing Project Adaptation Prompt
+# Existing Project Adaptation Session
 
-Use this prompt with Claude Code when you have a project that already has partial Agentic Engineering structure and needs to be upgraded to the current framework version.
+This is an **existing project adaptation session** for project **$ARGUMENTS**.
 
-**When to use this instead of session0_bootstrap_prompt.md:**
-- Project already has `.claude/` folder with agents, rules, skills, phases
-- Project has existing code and implementation history
-- No PRD exists (or PRD is outdated)
-- You want to upgrade docs to current framework version without losing history
+**Project path:** `projects/$ARGUMENTS/`
+**Framework root:** `.` (current directory — the agentic_engineering repository root)
 
----
+## Authorized Operations
 
-## Prompt starts below. Copy everything from here.
+- Read and modify documentation files inside `projects/$ARGUMENTS/`
+- Create missing documentation files inside `projects/$ARGUMENTS/`
+- Copy examples and skills from the framework into the project
+- Install MCPs and plugins for the project
+- No application code will be written or modified — only documentation and configuration
 
----
+## Rules
 
-## Existing Project Adaptation
+- All documents are written in English for consistency
+- Conversational output (reports, questions, summaries) should be in Brazilian Portuguese
+- Never modify files in `docs/` or `examples/` (framework read-only references)
+- For every document that already exists: **DO NOT overwrite** — read it, identify what's missing, and add only the missing sections. Preserve all existing content, history, and patterns.
 
-**Project folder:** `[CONFIGURE: path to project root — e.g., "." if running from the project root, or "projects/kyojin-system" if running from the framework root]`
+## Setup
 
-**Framework root:** `[CONFIGURE: path to the agentic_engineering repo — e.g., "../.." if project is at projects/[name]/ within the framework, or "~/agentic_engineering" if standalone. Used for copying examples, skills, and templates]`
+Before starting the process:
 
-This session reads the existing codebase and documentation, then upgrades everything to the current Agentic Engineering Framework version. NO application code will be written or modified. Only documentation and configuration.
-
-**Output language:** All documents are written in English for consistency. Conversational output should be in [CONFIGURE: your preferred language, e.g., "Brazilian Portuguese"]. Replace this placeholder before sending.
+1. Verify `projects/$ARGUMENTS/` exists. If not, stop and tell the user: "Project '$ARGUMENTS' not found in projects/. Use `/bootstrap $ARGUMENTS` for a new project or place the existing project in `projects/$ARGUMENTS/`."
 
 Execute in order. Report results after each part.
+
+---
+
+## Process
+
+This session reads the existing codebase and documentation, then upgrades everything to the current Agentic Engineering Framework version. NO application code will be written or modified. Only documentation and configuration.
 
 ---
 
@@ -36,70 +44,69 @@ Read the entire existing structure before making any changes. This is the most i
 
 ```bash
 # Find all markdown docs
-find . -name "*.md" -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' | sort
+find projects/$ARGUMENTS -name "*.md" -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' | sort
 
 # Read the main config file
-cat CLAUDE.md 2>/dev/null || echo "NO CONFIG FILE FOUND"
+cat projects/$ARGUMENTS/CLAUDE.md 2>/dev/null || echo "NO CONFIG FILE FOUND"
 
 # Read project history
-cat .claude/phases/project.md 2>/dev/null
+cat projects/$ARGUMENTS/.claude/phases/project.md 2>/dev/null
 
 # Read backlog (may have non-standard names)
-find .claude/phases/ -name "*.md" -not -name "project.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find projects/$ARGUMENTS/.claude/phases/ -name "*.md" -not -name "project.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 
 # Read all agents
-find .claude/agents/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find projects/$ARGUMENTS/.claude/agents/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 
 # Read all rules
-find .claude/rules/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find projects/$ARGUMENTS/.claude/rules/ -name "*.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 
 # Read all skills
-find .claude/skills/ -name "*.md" -o -name "SKILL.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
+find projects/$ARGUMENTS/.claude/skills/ -name "*.md" -o -name "SKILL.md" 2>/dev/null | while read f; do echo "=== $f ==="; cat "$f"; done
 ```
 
 **Step 1.2 — Read codebase structure:**
 
 ```bash
 # Project structure
-find . -maxdepth 3 -type d -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | head -60
+find projects/$ARGUMENTS -maxdepth 3 -type d -not -path '*/node_modules/*' -not -path '*/.next/*' -not -path '*/.git/*' -not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/dist/*' -not -path '*/build/*' | head -60
 
 # Config files (identify stack)
-ls -la package.json tsconfig.json next.config.* nuxt.config.* vite.config.* manage.py pyproject.toml go.mod Cargo.toml Gemfile docker-compose.yml .env.example .env.local 2>/dev/null
+ls -la projects/$ARGUMENTS/package.json projects/$ARGUMENTS/tsconfig.json projects/$ARGUMENTS/next.config.* projects/$ARGUMENTS/nuxt.config.* projects/$ARGUMENTS/vite.config.* projects/$ARGUMENTS/manage.py projects/$ARGUMENTS/pyproject.toml projects/$ARGUMENTS/go.mod projects/$ARGUMENTS/Cargo.toml projects/$ARGUMENTS/Gemfile projects/$ARGUMENTS/docker-compose.yml projects/$ARGUMENTS/.env.example projects/$ARGUMENTS/.env.local 2>/dev/null
 
 # Source file count by type
 for ext in ts tsx js jsx py go rb java vue svelte; do
-  count=$(find . -name "*.$ext" -not -path '*/node_modules/*' -not -path '*/.next/*' 2>/dev/null | wc -l)
+  count=$(find projects/$ARGUMENTS -name "*.$ext" -not -path '*/node_modules/*' -not -path '*/.next/*' 2>/dev/null | wc -l)
   [ "$count" -gt 0 ] && echo "$ext: $count files"
 done
 
 # Key architectural files (routes, models, schemas, migrations)
-find . -type f \( -name "schema.*" -o -name "route.*" -o -name "routes.*" -o -name "model.*" -o -name "models.*" -o -name "migration*" -o -name "middleware.*" \) -not -path '*/node_modules/*' 2>/dev/null | head -30
+find projects/$ARGUMENTS -type f \( -name "schema.*" -o -name "route.*" -o -name "routes.*" -o -name "model.*" -o -name "models.*" -o -name "migration*" -o -name "middleware.*" \) -not -path '*/node_modules/*' 2>/dev/null | head -30
 
 # Database schema if available
-find . -name "schema.prisma" -o -name "schema.sql" -o -name "models.py" -o -name "*.entity.ts" 2>/dev/null | head -10
+find projects/$ARGUMENTS -name "schema.prisma" -o -name "schema.sql" -o -name "models.py" -o -name "*.entity.ts" 2>/dev/null | head -10
 ```
 
 **Step 1.3 — Read git history:**
 
 ```bash
 # Recent history (last 20 commits)
-git log --oneline -20 2>/dev/null
+cd projects/$ARGUMENTS && git log --oneline -20 2>/dev/null; cd -
 
 # Contributors
-git shortlog -sn 2>/dev/null | head -5
+cd projects/$ARGUMENTS && git shortlog -sn 2>/dev/null | head -5; cd -
 
 # When was first and last commit?
-echo "First: $(git log --reverse --format='%ai' | head -1)"
-echo "Last: $(git log --format='%ai' -1)"
+cd projects/$ARGUMENTS && echo "First: $(git log --reverse --format='%ai' | head -1)" && echo "Last: $(git log --format='%ai' -1)" 2>/dev/null; cd -
 
 # Bug fix patterns (for seeding Known Bug Patterns)
-git log --oneline --all 2>/dev/null | grep -iE "fix|bug|hotfix|patch|revert" | head -15
+cd projects/$ARGUMENTS && git log --oneline --all 2>/dev/null | grep -iE "fix|bug|hotfix|patch|revert" | head -15; cd -
 ```
 
 **Step 1.4 — Read existing PRD (if it exists):**
 
 ```bash
-find . -name "prd.md" -o -name "PRD.md" -o -name "prd_*.md" -o -name "requirements.md" 2>/dev/null
+find projects/$ARGUMENTS -name "prd.md" -o -name "PRD.md" -o -name "prd_*.md" -o -name "requirements.md" 2>/dev/null
 ```
 
 If found: read it. If not found: this is expected — we will create a retroactive PRD in Phase 3.
@@ -307,7 +314,7 @@ Check for:
 If the Known Bug Patterns section is empty or sparse, analyze the git log fix commits (from Step 1.3) and the codebase to propose initial patterns:
 ```bash
 # Read recent fix commits for pattern extraction
-git log --oneline --all | grep -iE "fix|bug|hotfix|patch" | head -10
+cd projects/$ARGUMENTS && git log --oneline --all | grep -iE "fix|bug|hotfix|patch" | head -10; cd -
 ```
 For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the mistake) with efficacy tracking metadata: `[added: adaptation | triggered: never | false-positive: 0]`.
 
@@ -381,12 +388,12 @@ Read each skill. Verify frontmatter has `effort:` field. Add if missing (most sk
 
 **Flat→folder migration (Claude Code skills):** If any skills exist as flat files (`.claude/skills/[name].md`), migrate to the Anthropic folder format:
 ```bash
-for skill in .claude/skills/*.md; do
+for skill in projects/$ARGUMENTS/.claude/skills/*.md; do
   if [ -f "$skill" ]; then
     name=$(basename "$skill" .md)
-    mkdir -p ".claude/skills/$name"
-    mv "$skill" ".claude/skills/$name/SKILL.md"
-    echo "Migrated: $skill → .claude/skills/$name/SKILL.md"
+    mkdir -p "projects/$ARGUMENTS/.claude/skills/$name"
+    mv "$skill" "projects/$ARGUMENTS/.claude/skills/$name/SKILL.md"
+    echo "Migrated: $skill → projects/$ARGUMENTS/.claude/skills/$name/SKILL.md"
   fi
 done
 ```
@@ -396,21 +403,19 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 The v1.6.0 CLAUDE.md template references 10 process skills by path (e.g., `.claude/skills/prd-sync-checker/SKILL.md`). Without these skills, every skill trigger in Session Protocol is a broken reference.
 
-Copy from the framework (adjust `[FRAMEWORK_ROOT]` to your `agentic_engineering` clone path):
+Copy from the framework:
 ```bash
 # Copy each process skill, preserving any project-customized versions
-for skill_dir in [FRAMEWORK_ROOT]/docs/modules/skills/*/; do
+for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
-  if [ ! -d ".claude/skills/$skill_name" ]; then
-    cp -r "$skill_dir" ".claude/skills/$skill_name"
+  if [ ! -d "projects/$ARGUMENTS/.claude/skills/$skill_name" ]; then
+    cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"
     echo "Copied: $skill_name"
   else
     echo "SKIPPED (already exists): $skill_name — verify manually against framework version"
   fi
 done
 ```
-
-If the framework root is not accessible: note in the report that the 10 process skills must be copied manually from `docs/modules/skills/` in the framework repository.
 
 **Expected skills (all 10 must be present after this step):**
 - **Session start:** prd-sync-checker, sprint-proposer
@@ -426,7 +431,7 @@ Register all 10 in CLAUDE.md "Skills" section under "Process skills (copied from
 
 The PRD does not need to be speculative — it describes what already exists plus what is planned.
 
-Create `assets/docs/prd.md` with this approach:
+Create `projects/$ARGUMENTS/assets/docs/prd.md` with this approach:
 
 **Sections to populate from codebase analysis (what IS):**
 - 1.1 Problem — infer from the project's purpose
@@ -465,27 +470,25 @@ Create `assets/docs/prd.md` with this approach:
 
 ```bash
 # Check if examples exist
-ls assets/examples/ 2>/dev/null || echo "MISSING"
+ls projects/$ARGUMENTS/assets/examples/ 2>/dev/null || echo "MISSING"
 ```
 
-If missing, copy from the framework root (using the `[FRAMEWORK_ROOT]` configured at the top):
+If missing, copy from the framework root:
 ```bash
-cp -r [FRAMEWORK_ROOT]/examples/ assets/examples/ 2>/dev/null || echo "Framework examples not accessible — copy manually from the framework's examples/ directory"
+cp -r ./examples/ projects/$ARGUMENTS/assets/examples/ 2>/dev/null || echo "Framework examples not accessible — copy manually from the framework's examples/ directory"
 ```
-
-If the framework root is not accessible: note in the report that `assets/examples/` should be copied manually from the framework repository.
 
 **Step 4.2 — Create settings.json and initialize logs (if missing):**
 
-Read the template at `docs/modules/templates/settings_json.md` for the reference configuration. If `.claude/settings.json` or `.claude/settings.local.json` already exists, **merge** the keys rather than overwriting.
+Read the template at `docs/modules/templates/settings_json.md` for the reference configuration. If `projects/$ARGUMENTS/.claude/settings.json` or `projects/$ARGUMENTS/.claude/settings.local.json` already exists, **merge** the keys rather than overwriting.
 
 ```bash
 # Create logs directory
-mkdir -p .claude/logs 2>/dev/null
+mkdir -p projects/$ARGUMENTS/.claude/logs 2>/dev/null
 
 # Create settings.json if missing (Claude Code only)
-if [ ! -f ".claude/settings.json" ] && [ -d ".claude" ]; then
-  cat > .claude/settings.json << 'SETTINGS'
+if [ ! -f "projects/$ARGUMENTS/.claude/settings.json" ] && [ -d "projects/$ARGUMENTS/.claude" ]; then
+  cat > projects/$ARGUMENTS/.claude/settings.json << 'SETTINGS'
 {
   "permissions": {
     "defaultMode": "bypassPermissions",
@@ -525,8 +528,8 @@ fi
 
 **4.3a. Check existing MCPs:**
 ```bash
-cat .claude/settings.json 2>/dev/null | grep -A5 "mcpServers"
-cat .claude/settings.local.json 2>/dev/null
+cat projects/$ARGUMENTS/.claude/settings.json 2>/dev/null | grep -A5 "mcpServers"
+cat projects/$ARGUMENTS/.claude/settings.local.json 2>/dev/null
 ```
 
 **4.3b. Install browser automation (default for every project):**
@@ -575,8 +578,8 @@ npx claude-code-templates@latest --list-skills 2>/dev/null || echo "CLI not avai
 
 If the stack has framework-specific patterns AND no pre-made skill was found, create a stack skill:
 ```bash
-mkdir -p .claude/skills/[stack-name]
-# Create .claude/skills/[stack-name]/SKILL.md with key patterns, common mistakes, security settings
+mkdir -p projects/$ARGUMENTS/.claude/skills/[stack-name]
+# Create projects/$ARGUMENTS/.claude/skills/[stack-name]/SKILL.md with key patterns, common mistakes, security settings
 ```
 
 Register in CLAUDE.md "Skills" section.
@@ -597,54 +600,54 @@ Do NOT create rules now — wait until implementation when the details are known
 
 ```bash
 echo "=== File structure ==="
-find .claude -name "*.md" -o -name "*.json" | sort
+find projects/$ARGUMENTS/.claude -name "*.md" -o -name "*.json" | sort
 
 echo "=== CLAUDE.md references valid files? ==="
 # Check that referenced paths exist
-grep -oP '`[^`]*\.md`' CLAUDE.md | sort -u | while read ref; do
+grep -oP '`[^`]*\.md`' projects/$ARGUMENTS/CLAUDE.md | sort -u | while read ref; do
   path=$(echo "$ref" | tr -d '`')
-  [ ! -f "$path" ] && echo "BROKEN REF: $path"
+  [ ! -f "projects/$ARGUMENTS/$path" ] && echo "BROKEN REF: $path"
 done
 
 echo "=== PRD exists? ==="
-ls assets/docs/prd.md 2>/dev/null && echo "YES" || echo "NO"
+ls projects/$ARGUMENTS/assets/docs/prd.md 2>/dev/null && echo "YES" || echo "NO"
 
 echo "=== All agents have effort: frontmatter? ==="
-for f in .claude/agents/*.md; do
+for f in projects/$ARGUMENTS/.claude/agents/*.md; do
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
 
 echo "=== All agents have invocation: frontmatter? ==="
-for f in .claude/agents/*.md; do
+for f in projects/$ARGUMENTS/.claude/agents/*.md; do
   grep -q "invocation:" "$f" 2>/dev/null || echo "MISSING invocation: in $f"
 done
 
 echo "=== All agents have lineage frontmatter? ==="
-for f in .claude/agents/*.md; do
+for f in projects/$ARGUMENTS/.claude/agents/*.md; do
   grep -q "created:" "$f" 2>/dev/null || echo "MISSING lineage (created:) in $f"
 done
 
 echo "=== Validator and arbitrator exist? ==="
-ls .claude/agents/validator.md 2>/dev/null || echo "MISSING validator"
-ls .claude/agents/arbitrator.md 2>/dev/null || echo "MISSING arbitrator"
+ls projects/$ARGUMENTS/.claude/agents/validator.md 2>/dev/null || echo "MISSING validator"
+ls projects/$ARGUMENTS/.claude/agents/arbitrator.md 2>/dev/null || echo "MISSING arbitrator"
 
 echo "=== Skills use folder format? ==="
-for f in .claude/skills/*.md; do
+for f in projects/$ARGUMENTS/.claude/skills/*.md; do
   [ -f "$f" ] && echo "FLAT FORMAT (needs migration): $f"
 done 2>/dev/null
 
 echo "=== All skills have effort: frontmatter? ==="
-find .claude/skills -name "SKILL.md" 2>/dev/null | while read f; do
+find projects/$ARGUMENTS/.claude/skills -name "SKILL.md" 2>/dev/null | while read f; do
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
 
 echo "=== All 10 process skills present? ==="
 for skill in prd-sync-checker sprint-proposer criteria-enforcer validation-orchestrator diff-pattern-extractor project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator; do
-  ls ".claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
+  ls "projects/$ARGUMENTS/.claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
 done
 
 echo "=== Known Bug Patterns have efficacy tracking? ==="
-grep -c "\[added:" .claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
+grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
 ```
 
 **Step 5.2 — Produce the adaptation report:**
@@ -695,69 +698,3 @@ grep -c "\[added:" .claude/agents/code-reviewer.md 2>/dev/null || echo "No effic
 - Review TBD sections in PRD
 - [first item from pendencias]
 ```
-
----
-
-## v1.5.0 → v1.6.0 Upgrade Checklist
-
-Projects bootstrapped with v1.5.0 can upgrade to v1.6.0 by:
-
-### 1. Copy pre-built process skills
-
-`[framework-root]` = path to your `agentic_engineering` repo clone (e.g., `~/agentic_engineering`).
-
-```bash
-# Copy each skill, preserving project-customized versions
-for skill_dir in [framework-root]/docs/modules/skills/*/; do
-  skill_name=$(basename "$skill_dir")
-  if [ ! -d ".claude/skills/$skill_name" ]; then
-    cp -r "$skill_dir" ".claude/skills/$skill_name"
-  else
-    echo "SKIPPED (already exists): $skill_name — verify manually"
-  fi
-done
-```
-
-This adds 10 process skills that were previously inline in CLAUDE.md:
-- prd-sync-checker, sprint-proposer, criteria-enforcer, validation-orchestrator
-- diff-pattern-extractor, project-md-updater, pendencias-updater
-- config-file-updater, rules-agents-updater, session-log-creator
-
-### 2. Slim down CLAUDE.md
-
-Compare current CLAUDE.md against `[framework-root]/docs/modules/templates/claude_md.md`.
-Replace inline process descriptions with skill triggers (see template for format).
-Keep all project-specific sections (Architecture, Key Patterns, File Map, etc.) unchanged.
-
-### 3. Verify skill triggers
-
-After slimming CLAUDE.md, verify that each trigger in Session Protocol references
-a skill that exists in `.claude/skills/`:
-- Session start: prd-sync-checker, sprint-proposer
-- Before implementing: criteria-enforcer
-- During implementation: validation-orchestrator
-- Session end: diff-pattern-extractor, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
-
-### 4. Log the upgrade
-
-Add to project.md: "Upgraded to framework v1.6.0 — 10 process skills extracted, CLAUDE.md slimmed from ~500 to ~200 lines"
-
----
-
-## Quick Reference: What this prompt does vs session0
-
-| Aspect | session0 (greenfield) | This prompt (existing project) |
-|--------|----------------------|-------------------------------|
-| Reads codebase | No code exists | Full codebase scan + git history |
-| Creates docs | From scratch | Upgrades existing, fills gaps |
-| PRD | Must exist beforehand | Created retroactively from code |
-| Known Bug Patterns | Empty | Seeded from git fix history |
-| Architecture Patterns | Empty | Populated from codebase structure |
-| Progress Log | Index row only | Existing entries converted to index table |
-| Process skills | Copied from framework | Copied from framework + existing project skills preserved |
-| Rules files | Planned for future | Already exist — verified, not modified |
-| Session logs | Empty `.claude/logs/` created | Empty `.claude/logs/` created (same) |
-| MCPs | Discovered and installed | Discovered, installed + existing verified |
-| Stack skills | Created if stack detected | Created if stack detected (same) |
-| Hooks | smart-formatting configured | smart-formatting added if Prettier present |
-| File naming | Standard names | Adapts to non-standard names |
