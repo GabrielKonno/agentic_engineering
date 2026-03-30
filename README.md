@@ -84,7 +84,7 @@ Run these from the framework root with Claude Code:
 | `/existing_project_adaptation` | project name | Upgrade existing project to framework |
 | `/maintenance` | (none) | Edit framework docs, examples, CLAUDE.md |
 
-**Alternative:** The bootstrap prompt in `docs/bootstrap_claude/` can still be used manually via copy-paste with any AI tool (Claude.ai, ChatGPT, Cursor, etc.).
+**Alternative:** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 
 ---
 
@@ -105,9 +105,6 @@ agentic_engineering/
 │   │   ├── templates/                      ← Document and agent templates
 │   │   └── skills/                         ← 10 pre-built process skills
 │   │
-│   └── bootstrap_claude/
-│       └── session0_bootstrap_prompt.md    ← Bootstrap for Claude Code (references modules)
-│
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── examples_instructions.md        ← Conventions for creating agents/skills
 │   ├── agents/                         ← 10 agent templates (quality, domain, ops, security)
@@ -160,10 +157,10 @@ The framework has five component types, each serving a distinct role:
 TOOLKIT PROMPTS          TEMPLATES               PROTOCOLS
 (human entry points)     (what to create)        (when things happen)
 
-  session0_bootstrap --> claude_md.md -------.   session_protocol.md
-  prd_planning_prompt    project_md.md       |   execution_protocol.md
-  prd_change_prompt      pendencias_md.md    |        |
-  existing_adaptation    agent templates (6) |   embedded in project's
+  /bootstrap ----------> claude_md.md -------.   session_protocol.md
+  /prd_planning          project_md.md       |   execution_protocol.md
+  /prd_change            pendencias_md.md    |        |
+  /existing_adaptation   agent templates (6) |   embedded in project's
                               |              |   CLAUDE.md at bootstrap
                      created at bootstrap    |        |
                               |              |        v

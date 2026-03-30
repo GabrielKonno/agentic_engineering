@@ -11,7 +11,7 @@ Single source of truth for all templates and protocols used by bootstrap prompts
 
 ## How bootstraps use modules
 
-The bootstrap prompt (`session0_bootstrap_prompt.md`) references modules instead of containing templates inline. Each step:
+The bootstrap command (`.claude/commands/bootstrap.md`) references modules instead of containing templates inline. Each step:
 
 1. Reads the relevant module file
 2. Adapts placeholders with PRD data and project-specific values

@@ -159,15 +159,19 @@ If any fails: do not install, log reason. If uncertain: ASK user.
 
 ---
 
-### Step 5.5 — Install Skill Creator plugin
+### Step 5.5 — Enable Skill Creator plugin
 
-Install the Skill Creator plugin for automated skill evaluation:
+Enable the Skill Creator plugin for automated skill evaluation:
 
-```bash
-/plugin install skill-creator@claude-plugins-official
-```
-
-**If installation succeeds:** Log "Skill Creator plugin installed. Will be used for skill eval in Steps 7-12 and on-demand creation."
+1. Check if already installed: `grep -r "skill-creator" ~/.claude/plugins/installed_plugins.json 2>/dev/null`
+2. If not installed: `/plugin install skill-creator@claude-plugins-official`
+3. Enable in project settings.json — merge this key into the existing file:
+   ```json
+   "enabledPlugins": {
+     "skill-creator@claude-plugins-official": true
+   }
+   ```
+4. Log "Skill Creator plugin enabled. Will be used for skill eval in Steps 7-12 and on-demand creation."
 
 **If installation fails** (plugin not available, network error, unsupported environment): Log "Skill Creator plugin unavailable — framework creation eval protocol will be used instead." Continue with Step 5.7. The framework's manual creation eval (2 test scenarios per agent) provides the same quality gate without the plugin.
 
