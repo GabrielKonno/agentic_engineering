@@ -6,7 +6,9 @@ Single source of truth for all templates and protocols used by bootstrap prompts
 
 - `session_protocol.md` — Session Protocol (START, END, between-tasks, mid-session recovery)
 - `execution_protocol.md` — Execution Protocol (before implementing, validation loop, validation orchestration)
-- `templates/` — Document and agent templates used at bootstrap
+- `templates/` — Document and config templates used at bootstrap (CLAUDE.md, project.md, pendencias.md, settings.json)
+- `agents/` — Agent templates (code-reviewer, validator, security-reviewer, etc.) copied to `.claude/agents/`
+- `rules/` — Rules templates (session-rules, evolution-policy) copied to `.claude/rules/`
 - `skills/` — Pre-built process skills copied to projects at bootstrap Step 5.7
 
 ## How bootstraps use modules

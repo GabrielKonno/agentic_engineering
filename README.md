@@ -103,7 +103,9 @@ agentic_engineering/
 │   ├── modules/                            ← Single source of truth (v1.6.0)
 │   │   ├── session_protocol.md             ← Session Protocol (START, END, recovery)
 │   │   ├── execution_protocol.md           ← Execution Protocol (validation loop)
-│   │   ├── templates/                      ← Document and agent templates
+│   │   ├── templates/                      ← Document and config templates
+│   │   ├── agents/                         ← Agent templates (9 agents)
+│   │   ├── rules/                          ← Rules templates (2 rules files)
 │   │   └── skills/                         ← 10 pre-built process skills
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
@@ -127,16 +129,16 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `CLAUDE.md` | `modules/templates/claude_md.md` | AI instructions — embeds Session Protocol + Execution Protocol |
 | `.claude/phases/project.md` | `modules/templates/project_md.md` | Engineering handoff (architectural decisions, phase status, progress log) |
 | `.claude/phases/pendencias.md` | `modules/templates/pendencias_md.md` | Prioritized backlog with verifiable acceptance criteria |
-| `.claude/agents/code-reviewer.md` | `modules/templates/code_reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
-| `.claude/agents/validator.md` | `modules/templates/validator.md` | Independent validation subagent — verifies with isolated context |
-| `.claude/agents/arbitrator.md` | `modules/templates/arbitrator.md` | Resolves conflicts between validator judgment and mechanical evidence |
-| `.claude/agents/security-reviewer.md` | `modules/templates/security_reviewer.md` | OWASP Top 10 checklist |
-| `.claude/agents/red-team.md` | `modules/templates/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
-| `.claude/agents/blue-team.md` | `modules/templates/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
+| `.claude/agents/code-reviewer.md` | `modules/agents/code_reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
+| `.claude/agents/validator.md` | `modules/agents/validator.md` | Independent validation subagent — verifies with isolated context |
+| `.claude/agents/arbitrator.md` | `modules/agents/arbitrator.md` | Resolves conflicts between validator judgment and mechanical evidence |
+| `.claude/agents/security-reviewer.md` | `modules/agents/security_reviewer.md` | OWASP Top 10 checklist |
+| `.claude/agents/red-team.md` | `modules/agents/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
+| `.claude/agents/blue-team.md` | `modules/agents/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
 | `.claude/skills/*` (10 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
-| `.claude/rules/session-rules.md` | `modules/templates/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
-| `.claude/rules/evolution-policy.md` | `modules/templates/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
-| `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/templates/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
+| `.claude/rules/session-rules.md` | `modules/rules/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
+| `.claude/rules/evolution-policy.md` | `modules/rules/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
+| `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/agents/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
 

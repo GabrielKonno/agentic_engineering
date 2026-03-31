@@ -335,13 +335,13 @@ Add missing sections. **Do NOT remove existing customizations** — they may con
 
 If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, `produces:`, and lineage fields (`created:`, `last_eval:`, `fixes:`, `derived_from:`) in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
 
-If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them. Read templates at `docs/modules/templates/red_team.md` and `docs/modules/templates/blue_team.md`. Replace `{CONFIG_DIR}` with `.claude/`, `{CONFIG_FILE}` with `CLAUDE.md`, `{SUBAGENT_TOOL}` with `Task tool`.
+If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them. Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Replace `{CONFIG_DIR}` with `.claude/`, `{CONFIG_FILE}` with `CLAUDE.md`, `{SUBAGENT_TOOL}` with `Task tool`.
 
 **Step 2.6.1 — Verify validator agent/skill:**
 
 If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, Input, Output, Verification Process, and BOUNDARIES sections. Add if missing.
 
-If it doesn't exist: create it. The validator is mandatory for ALL projects. Read the template at `docs/modules/templates/validator.md`. Adapt:
+If it doesn't exist: create it. The validator is mandatory for ALL projects. Read the template at `docs/modules/agents/validator.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - Replace `{SUBAGENT_TOOL}` with `Task tool`
@@ -353,7 +353,7 @@ If it doesn't exist: create it. The validator is mandatory for ALL projects. Rea
 
 If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, three terminal rulings (UPHOLD/OVERRIDE/ESCALATE), and BOUNDARIES sections.
 
-If it doesn't exist: create it. The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/templates/arbitrator.md`. Adapt:
+If it doesn't exist: create it. The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/agents/arbitrator.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - Replace `{SUBAGENT_TOOL}` with `Task tool`
@@ -406,7 +406,7 @@ done
 for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
   dest_name=$(echo "$agent" | tr '_' '-')
   if [ ! -f "projects/$ARGUMENTS/.claude/agents/$dest_name.md" ]; then
-    cp "docs/modules/templates/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"
+    cp "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"
     echo "Copied agent: $dest_name"
   else
     echo "SKIPPED (already exists): $dest_name.md — verify manually"
@@ -420,7 +420,7 @@ mkdir -p projects/$ARGUMENTS/.claude/rules
 for tmpl in session_rules evolution_policy; do
   target=$(echo "$tmpl" | tr '_' '-')
   if [ ! -f "projects/$ARGUMENTS/.claude/rules/${target}.md" ]; then
-    sed -n '/^```markdown$/,/^```$/p' "docs/modules/templates/${tmpl}.md" | sed '1d;$d' > "projects/$ARGUMENTS/.claude/rules/${target}.md"
+    sed -n '/^```markdown$/,/^```$/p' "docs/modules/rules/${tmpl}.md" | sed '1d;$d' > "projects/$ARGUMENTS/.claude/rules/${target}.md"
     echo "Copied ${target}.md"
   else
     echo "SKIPPED (already exists): ${target}.md — verify manually"

@@ -4,7 +4,7 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 
 > **Note:** 3 process components that produce decisions or analyses are proper agents:
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
-> They live in `docs/modules/templates/` and are copied to `.claude/agents/` during bootstrap.
+> They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
 > This directory contains the 10 **inline** skills (7 implementation + 3 session lifecycle).
 
 ## What these are

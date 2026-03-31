@@ -19,15 +19,19 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   ├── modules/                            # Shared templates and skills (single source of truth)
 │   │   ├── session_protocol.md             # Session Protocol (START, END, recovery)
 │   │   ├── execution_protocol.md           # Execution Protocol (validation loop, orchestration)
-│   │   ├── templates/                      # Document and agent templates for bootstrap
+│   │   ├── templates/                      # Document and config templates for bootstrap
 │   │   │   ├── claude_md.md                # Config file template (orchestrator format)
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
+│   │   │   └── settings_json.md            # Settings + hooks template
+│   │   ├── agents/                         # Agent templates (copied to .claude/agents/)
 │   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
 │   │   │   ├── validator.md, arbitrator.md # Validation agent templates
 │   │   │   ├── red_team.md, blue_team.md   # Security agent templates
-│   │   │   ├── prd_sync_checker.md, criteria_enforcer.md, diff_pattern_extractor.md  # Process agent templates
-│   │   │   └── settings_json.md            # Settings + hooks template
-│   │   └── skills/                         # Pre-built inline process skills (7, copied to projects)
+│   │   │   └── prd_sync_checker.md, criteria_enforcer.md, diff_pattern_extractor.md  # Process agent templates
+│   │   ├── rules/                          # Rules templates (copied to .claude/rules/)
+│   │   │   ├── session_rules.md            # Task limits, reasoning depth, scripts convention
+│   │   │   └── evolution_policy.md         # Evolution classification + auto-evolution boundaries
+│   │   └── skills/                         # Pre-built inline process skills (10, copied to projects)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components
 │   │       └── ... (5 more)               # (see skills/README.md for full list)
