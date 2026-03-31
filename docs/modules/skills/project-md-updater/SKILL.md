@@ -4,9 +4,8 @@ invocation: inline
 effort: medium
 description: >
   Updates project.md with a concise index row and PRD version at end of every session.
-  Detailed session records are written by session-log-creator. MUST run at end of
-  every session (item 2), AFTER session-log-creator. Without this, the next session
-  has no context of what happened.
+  Detailed records are in session logs. MUST run AFTER session-log-creator. Without
+  this, the next session has no context of what happened.
 created: framework-v1.6.0 (pre-validated)
 derived_from: session_protocol end-of-session item 2
 ---
@@ -14,35 +13,29 @@ derived_from: session_protocol end-of-session item 2
 # project.md Updater
 
 ## When to run
-At the END of every session, AFTER session-log-creator (needs the log filename to reference).
+At the END of every session, AFTER session-log-creator (needs the log filename).
 
 ## Process
 
-### 1. Gather session data
-- What tasks were completed (from pendencias.md changes)
-- Session number
-- Date
-- Log filename (from session-log-creator — the most recent file in `.claude/logs/`)
+### 1. Write concise index row
 
-### 2. Write concise index row
 Add a new row to the Progress Log table in project.md:
 
 ```markdown
-| N | YYYY-MM-DD | [1-line summary: tasks done + key outcome] | `logs/[filename].md` |
+| N | YYYY-MM-DD | [1-line specific summary] | `logs/[filename].md` |
 ```
 
-The 1-line summary should be specific: "Financial module CRUD + auth middleware" not "Worked on features."
+### 2. Update PRD version
 
-### 3. Update PRD version
-Update the `**PRD version:**` field in the project.md Overview section with the current PRD version.
+Update the `**PRD version:**` field in project.md Overview with the current PRD version.
 
-### 4. Update Project Phases
+### 3. Update Project Phases
+
 Update phase status markers (⏳ → ✅) if a phase was completed this session.
-This section is the primary progress tracker and must stay accurate.
 
-### 5. MODEL SWITCH entries
-If this is a model switch (not a normal session end), write the full MODEL SWITCH block
-**below** the Progress Log table (not as a table row):
+### 4. MODEL SWITCH entries
+
+If this is a model switch (not normal session end), write the full MODEL SWITCH block **below** the Progress Log table:
 
 ```markdown
 <!-- MODEL SWITCH — active -->
@@ -54,29 +47,16 @@ If this is a model switch (not a normal session end), write the full MODEL SWITC
 **PRD version:** vX.X.X
 ```
 
-Do NOT add an index row yet. The index row is added when the continuation session resolves the switch.
-When the continuation session starts and completes the task, REMOVE the MODEL SWITCH block and add a normal index row.
+Do NOT add an index row yet. The continuation session adds the row when the task completes and removes the MODEL SWITCH block.
 
-### 6. If feature incomplete
-Ensure the session log (written by session-log-creator) captures what was attempted and why
-it stopped. The index row summary should note the incompleteness: "Auth module — partial,
-RLS policy blocked by schema issue."
+If sprint was interrupted: add `**Sprint interrupted:** Yes — remaining tasks: [list]`
 
-### 7. Backward compatibility
-If the Progress Log is in the old format (individual session entry blocks with "What was done",
-"Decisions made", "Bugs found", etc., instead of an index table), convert it during the first
-session-end update:
-1. Extract session number, date, and 1-line summary from each block
-2. Create the index table with these entries (use `—` for the Log column since no log files exist for old sessions)
-3. Keep the old entries below the table as a clearly marked legacy block:
-   ```markdown
-   <!-- Legacy entries (pre-index format) — preserved for reference, will not be updated -->
-   ```
-This is a one-time migration.
+### 5. Incomplete features
 
-### 8. Run session-entry.sh (optional)
-If `scripts/session-entry.sh` exists, run it to get git stats for the session log:
-```bash
-bash .claude/skills/project-md-updater/scripts/session-entry.sh
-```
-(Scripts require bash — Git Bash on Windows, native on macOS/Linux. If unavailable, the AI executes the equivalent steps manually.)
+If a feature stopped mid-session, the index row summary should note it: "Auth module — partial, blocked by schema issue."
+
+---
+
+## Legacy migration (one-time)
+
+If the Progress Log uses the old format (individual session blocks instead of an index table), convert it on first run: extract session data into table rows, keep old entries below as a `<!-- Legacy entries -->` block.

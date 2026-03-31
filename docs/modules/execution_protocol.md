@@ -3,7 +3,7 @@
 This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. This is the architectural reference — WHAT happens and WHY.
 
 In v1.7.0, all protocol logic is implemented in skills:
-- `validation-orchestrator` skill: before-implementing (criteria enforcement, complexity classification, plan proposal), during-implementation (Phase A + Phase B validation loop), and validation failure post-mortem
+- `validation-orchestrator` skill: before-implementing (criteria enforcement, complexity classification, plan proposal), during-implementation (Phase A + Phase B with 2 validation routes: inline for routine, subagent for logic-heavy/architecture/security), and validation failure post-mortem
 - `sprint-proposer` skill: between-tasks workflow (commit, update pendencias, context health check, sprint report)
 - `criteria-enforcer` agent: criteria quality enforcement (subagent, called by validation-orchestrator)
 
@@ -99,21 +99,17 @@ The validation-orchestrator skill contains the full validation loop detail. Belo
 
 After writing code and BEFORE reporting to the user, execute two phases. The implementing agent handles Phase A. Phase B is graduated by task complexity — routine tasks use inline validation, logic-heavy and architecture/security tasks use independent subagents.
 
-### Graduated validation depth
+### Graduated validation depth (2 routes)
 
 ```
-Routine task (UI text, config, styling, simple CRUD)
+Route 1 — Inline (routine tasks: UI text, config, styling, simple CRUD)
   → Phase B uses inline checklist. No subagent.
   → Bias risk near-zero. Token cost: ~5-10k.
 
-Logic-heavy task (business rules, calculations, state machines, financial)
-  → Phase B spawns code-reviewer subagent + validator subagent (2 calls)
-  → Token cost: ~50-65k. Acceptable for where bias matters.
-
-Architecture/security task (new module, cross-module, Red Team trigger)
-  → Phase B spawns full chain: code-reviewer + security-reviewer +
-    Red Team + validator + Blue Team (up to 5 calls)
-  → Token cost: ~120-150k. Worth it for high-risk tasks.
+Route 2 — Subagent (logic-heavy + architecture/security)
+  → Always: code-reviewer + validator subagents
+  → If security-relevant: add security-reviewer (+ Red Team/Blue Team for high-risk)
+  → Token cost: ~50-150k depending on security depth.
 ```
 
 ### Validation report format (all routes)
@@ -193,19 +189,21 @@ NEVER instruct the subagent to read (anti-bias firewall):
   - Any file the implementing agent wrote as part of the task explanation
 ```
 
-**Sequencing:**
+**Sequencing (Route 2 — subagent):**
 ```
-Logic-heavy tasks (Route B):
+Always:
   1. code-reviewer subagent → Code Review Report
   2. validator subagent (receives Code Review Report) → Validation Report
 
-Architecture/security tasks (Route C):
-  1. code-reviewer subagent → Code Review Report
-  2. security-reviewer subagent → Security Review Report
-  3. Red Team subagent (if triggered) → Vulnerability Report
-  4. validator subagent (receives all prior reports) → Validation Report
-  5. arbitrator subagent (only if validator ❌ contradicts mechanical evidence)
-  6. Blue Team subagent (after validation passes, if Red Team ran) → Defense Assessment
+If security-relevant, insert between 1 and 2:
+  - security-reviewer subagent → Security Review Report
+  - Red Team subagent (if auth/RLS/payment/AI) → Vulnerability Report
+
+After validation passes (if Red Team ran):
+  - Blue Team subagent → Defense Assessment
+
+If ❌ contradicts mechanical evidence:
+  - arbitrator subagent
 ```
 
 Each subagent is a fresh Task tool instance — isolated context, no carryover between invocations.

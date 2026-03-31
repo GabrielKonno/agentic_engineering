@@ -4,8 +4,9 @@ This module defines the START-of-session, END-of-session, between-tasks, and mid
 
 In v1.7.0, all protocol logic is implemented as skills. CLAUDE.md contains pointers only:
 - `session-start` skill: START-of-session (5 steps + model switch continuation)
-- `session-end` skill: END-of-session (6 skills/agents orchestrated in sequence)
-- `context-recovery` skill: mid-session emergency save
+- `session-end` skill: END-of-session (5 skills/agents orchestrated in sequence)
+- `context-recovery` skill: mid-session emergency save (calls 3 sub-skills directly, not session-end)
+- `.claude/rules/evolution-policy.md`: evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries
 - `sprint-proposer` skill: sprint proposal + sprint-approved mode + between-tasks workflow
 - `validation-orchestrator` skill: before-implementing + validation loop + post-mortem
 - `.claude/rules/session-rules.md`: task limits, documentation quality, reasoning depth

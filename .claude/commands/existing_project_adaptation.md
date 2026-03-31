@@ -140,6 +140,7 @@ Before proceeding, present a summary of everything you read:
 - Process skills: [N of 10 installed] — [list missing: session-start, session-end, context-recovery, sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator]
 - Process agents: [N of 3 installed] — [list missing: prd-sync-checker, criteria-enforcer, diff-pattern-extractor]
 - Session rules: [exists/missing] — .claude/rules/session-rules.md
+- Evolution policy: [exists/missing] — .claude/rules/evolution-policy.md
 - PRD: [exists/missing]
 
 ### What needs to be created:
@@ -188,7 +189,8 @@ Required sections (compare against docs/modules/templates/claude_md.md — v1.7.
 - CLAUDE.md is now a slim orchestrator (~90 lines). All protocol logic lives in skills and rules.
 - Session Protocol section is 5 lines of pointers, not inline protocol steps.
 - Skills & Agents section uses auto-discovery (no explicit listing).
-- Session rules live in `.claude/rules/session-rules.md` (task limits, doc quality, reasoning depth).
+- Session rules live in `.claude/rules/session-rules.md` (task limits, doc quality, reasoning depth, scripts convention).
+- Evolution policy lives in `.claude/rules/evolution-policy.md` (FIX/DERIVED/CAPTURED classification, auto-evolution boundaries).
 - If the existing CLAUDE.md has inline protocol sections, they should be replaced with pointers.
 
 *Agent/skill infrastructure (verified in Steps 2.4-2.8):*
@@ -202,7 +204,7 @@ Required sections (compare against docs/modules/templates/claude_md.md — v1.7.
 - **"Evolutions applied"** section in session log template
 
 *Process components (copied in Step 2.9):*
-- 10 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + session rules (`.claude/rules/`)
+- 10 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 2 rules files (`.claude/rules/`)
 - Without these, the skill pointers in CLAUDE.md are broken references
 
 **For each addition, log:**
@@ -412,21 +414,24 @@ for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
 done
 ```
 
-**Copy session rules (to `.claude/rules/`):**
+**Copy rules files (to `.claude/rules/`):**
 ```bash
 mkdir -p projects/$ARGUMENTS/.claude/rules
-if [ ! -f "projects/$ARGUMENTS/.claude/rules/session-rules.md" ]; then
-  sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
-  echo "Copied session rules"
-else
-  echo "SKIPPED (already exists): session-rules.md — verify manually"
-fi
+for tmpl in session_rules evolution_policy; do
+  target=$(echo "$tmpl" | tr '_' '-')
+  if [ ! -f "projects/$ARGUMENTS/.claude/rules/${target}.md" ]; then
+    sed -n '/^```markdown$/,/^```$/p' "docs/modules/templates/${tmpl}.md" | sed '1d;$d' > "projects/$ARGUMENTS/.claude/rules/${target}.md"
+    echo "Copied ${target}.md"
+  else
+    echo "SKIPPED (already exists): ${target}.md — verify manually"
+  fi
+done
 ```
 
 **Expected after this step:**
 - **Process skills (10):** session-start, session-end, context-recovery, sprint-proposer, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
-- **Session rules (1):** session-rules.md
+- **Rules (2):** session-rules.md, evolution-policy.md
 
 Skills and agents are auto-discovered by Claude Code. No explicit listing is needed in CLAUDE.md.
 
@@ -653,8 +658,9 @@ for skill in session-start session-end context-recovery sprint-proposer validati
   ls "projects/$ARGUMENTS/.claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
 done
 
-echo "=== Session rules present? ==="
-ls "projects/$ARGUMENTS/.claude/rules/session-rules.md" 2>/dev/null || echo "MISSING session rules"
+echo "=== Rules files present? ==="
+ls "projects/$ARGUMENTS/.claude/rules/session-rules.md" 2>/dev/null || echo "MISSING session-rules.md"
+ls "projects/$ARGUMENTS/.claude/rules/evolution-policy.md" 2>/dev/null || echo "MISSING evolution-policy.md"
 
 echo "=== All 3 process agents present? ==="
 for agent in prd-sync-checker criteria-enforcer diff-pattern-extractor; do
@@ -691,7 +697,9 @@ grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/nu
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - [list copied / list skipped (already existed)]
 
-### Session rules: .claude/rules/session-rules.md [CREATED / SKIPPED]
+### Rules:
+- .claude/rules/session-rules.md [CREATED / SKIPPED]
+- .claude/rules/evolution-policy.md [CREATED / SKIPPED]
 
 ### Preserved (not modified):
 - [N] rows in Progress Log index

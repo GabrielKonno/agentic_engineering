@@ -6,9 +6,9 @@ description: >
   Orchestrates the full implementation lifecycle: before implementing (criteria
   enforcement, complexity classification, plan proposal), during implementation
   (two-phase validation loop), and post-mortem diagnosis. Routes to inline
-  validation (routine), 2-subagent pair (logic-heavy), or full chain
-  (architecture/security). MUST run for every task. Skipping this means the
-  human finds the bugs instead of the framework.
+  validation (routine) or subagent chain (logic-heavy/architecture/security).
+  MUST run for every task. Skipping this means the human finds the bugs instead
+  of the framework.
 created: framework-v1.7.0 (pre-validated)
 derived_from: execution_protocol "Before implementing", "During implementation", "Validation Failure Post-Mortem"
 ---
@@ -22,159 +22,84 @@ This skill covers the full implementation lifecycle for each task:
 2. **During implementation:** two-phase validation loop (Phase A + Phase B)
 3. **After validation failure:** post-mortem diagnosis (when human reports bug in ✅ task)
 
-Run this skill when a task is selected for implementation.
-
 ---
 
 ## Before Implementing
 
 ### 1. Enforce criteria quality
 
-Invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task name]`. This rewrites WEAK criteria to STRONG and runs adversarial review. Runs in isolated context.
+Invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task name]`. Rewrites WEAK criteria to STRONG. Isolated context.
 
-### 2. Classify task complexity
+### 2. Classify and route
 
-Based on task content, classify and recommend:
-- **Routine** (UI changes, simple CRUD, text updates) → current model + effort is fine
-- **Logic-heavy** (business rules, calculations, state machines, financial) → recommend `/effort high`
-- **Architecture/Security** (new module, cross-module, security audit) → trigger model switch protocol (see `session-start` skill)
+**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. Architecture/Security triggers model switch protocol (see `session-start` skill).
 
-### 3. Complexity threshold
+**Threshold:** Small (single file) → implement directly. Medium (2-5 files) → propose plan, wait for approval. Large (new module, cross-module) → propose plan with risks, wait for approval.
 
-- **Small** (single file, bug fix, text update): implement directly → validation loop. No plan needed.
-- **Medium** (2-5 files, new component, schema change): propose plan → wait for approval.
-- **Large** (new module, cross-module, architectural): propose plan with risks → wait for approval.
+**Sprint-approved mode:** Medium tasks proceed without approval. Large still need approval. See `sprint-proposer` skill.
 
-**Sprint-approved mode:** Medium tasks proceed without approval. Large tasks still need approval. See `sprint-proposer` skill.
+### 3. Git checkpoint (medium and large)
 
-### 4. Plan template (medium and large tasks)
-
-If medium or large, propose:
-```
-## Implementation Plan: [feature name]
-### Changes needed:
-1. [file] — [what changes and why]
-### Migration needed: [yes/no]
-### Risks: [what could break]
-### Validation strategy: [which criteria, which tools]
-### Estimated scope: [small / medium / large]
-```
-
-Wait for user approval. After approval: the plan becomes the technical record. Include summary in the session log.
-
-### Git checkpoint (medium and large tasks)
-
-Before writing code: `git add -A && git commit -m "checkpoint: before [task name]"`
-This enables clean rollback if the task needs to be reverted.
+Commit current state before writing code to enable clean rollback.
 
 ---
 
-## Phase A — Implementation (all complexity levels)
+## Phase A — Implementation
 
-**Step 1 — Build check:**
-Run the project build command. If errors: fix and rebuild. Do NOT proceed with build errors.
+**Build:** Run the project build command. Fix errors before proceeding.
 
-**Step 2 — Write tests** (if task involves business logic, integrations, or state changes):
-Translate `QUERY:` and `VERIFY:` criteria into executable tests. Run tests — they must pass.
-Skip for: simple CRUD with no logic, scaffolding, UI styling, configuration.
+**Tests:** Write tests for testable criteria (`QUERY:`/`VERIFY:` tags with business logic). Run and verify they pass. Skip for tasks with no testable logic (pure styling, config, scaffolding).
 
-If test framework is not yet configured AND task involves business logic:
-1. Install and configure the test framework (see stack skill)
-2. Write ONE test for the simplest QUERY: criterion
-3. Run it — confirm the framework works
-4. Proceed with implementation. Log: "Test framework configured: [name]"
+**Commit:** Commit implementation before validation. For routine tasks using inline validation, commit can be deferred until after Phase B.
 
-**Step 3 — Commit implementation:**
-```bash
-git add -A && git commit -m "feat: [task name] — pending validation"
-```
-For routine tasks using inline validation (Route A): commit can be deferred until after Phase B.
+---
 
-## Phase B — Validation (graduated by complexity)
+## Phase B — Validation
 
-### Route A — Routine tasks (inline validation)
+### Route 1 — Inline (routine tasks)
 
-**Step 4 — Self-review:** Read `.claude/agents/code-reviewer.md` as a checklist:
-- Project patterns, domain rules, Known Bug Patterns, Architecture Patterns
-- **Security** — ALWAYS read security-reviewer.md section headers. If changes touch user input, auth, database, APIs, AI/LLM, secrets, or HTML rendering: read FULL checklist.
-- Edge cases: empty? null? zero? negative?
+Self-review using `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, edge cases. Always check security-reviewer.md headers — if changes touch user input, auth, database, APIs, secrets, or HTML rendering, do the full security review.
 
-**Step 5 — UI verification** (web projects, if UI was modified):
-Health check first: `curl -s -o /dev/null -w "%{http_code}" http://localhost:[PORT]`
-If running: navigate → action → verify → screenshot. Max 3 attempts.
-If not running and UI was modified: ❌ with reason.
+If UI was modified: verify changes are working. If dev server is not running: ❌.
 
-**Step 6 — Check acceptance criteria** by tag type. Passing tests count as verification.
-Then run **regression:** full test suite or re-execute QUERY: criteria from last 2-3 tasks.
+Check all acceptance criteria by tag type. Run regression (full test suite or re-check last 2-3 tasks' criteria). Produce report.
 
-**Step 7 — Report** (see report format below).
+### Route 2 — Subagent (logic-heavy + architecture/security)
 
-### Route B — Logic-heavy tasks (2 subagents)
+**Always spawn:**
+1. **code-reviewer subagent** — Input: git diff, rules files, Key Patterns, Architectural Decisions.
+2. **validator subagent** — Input: git diff, acceptance criteria, Code Review Report, rules files.
 
-**Step 4 — Spawn code-reviewer subagent:**
-Input: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table.
-Output: Code Review Report.
+**If security-relevant** (auth, RLS, payment, AI/LLM, multi-tenancy, file upload, secrets):
+- Add **security-reviewer subagent** before validator.
+- If high-risk (auth/RLS/payment/AI): add **Red Team subagent**.
+- After validation passes (if Red Team ran): run **Blue Team subagent**.
 
-**Step 5 — Spawn validator subagent:**
-Input: git diff, acceptance criteria, Code Review Report, rules files, Architectural Decisions table.
-Output: Validation Report with ✅/❌/⏭️ per category.
+**If ❌ contradicts mechanical evidence:** spawn **arbitrator subagent**.
 
-**Step 6 — Process report:**
-- All ✅ → proceed to report
-- Any ❌ AND mechanical evidence contradicts → spawn arbitrator
-- Any ❌ AND evidence agrees → fix → commit → re-spawn from Step 4. Max 3 retries.
+**Process report:** All ✅ → done. Any ❌ → fix, commit, re-spawn validation. Max 3 retries. After limit: STOP and escalate to human with diagnosis of what keeps failing and what was tried.
 
-**Step 7 — Report.**
-
-### Route C — Architecture/security tasks (full chain)
-
-**Step 4 — code-reviewer subagent** (same as Route B)
-**Step 5 — security-reviewer subagent:** Input: git diff, security-reviewer.md, stack skill, rules.
-**Step 6 — Red Team** (if triggered by auth/RLS/payment/AI/multi-tenancy/file-upload changes)
-**Step 7 — validator subagent** (receives all prior reports)
-**Step 8 — Process report** (same as Route B Step 6)
-**Step 9 — Blue Team** (after validation passes, if Red Team ran)
-**Step 10 — Report.**
+---
 
 ## Subagent mechanics
-
-Construct subagent prompt with: role definition, files to read (explicit paths), evidence to evaluate, prior reports, report format, BOUNDARIES.
 
 **Context routing — ALWAYS include:**
 - Agent's own .md file
 - All `.claude/rules/*.md` files
 - CLAUDE.md: Key Patterns, Architecture
 - project.md: Architectural Decisions table ONLY
-
-**IF security-relevant:**
-- `.claude/agents/security-reviewer.md`
-- Stack security skill in `.claude/skills/*/SKILL.md` (if exists)
-
-**IF UI task:**
-- Design System section of CLAUDE.md
+- IF security-relevant: security-reviewer.md + stack security skill
+- IF UI task: Design System section
 
 **NEVER include (anti-bias firewall):**
 - project.md Progress Log
 - `.claude/logs/*.md` (session history)
 - Sprint proposals or implementation plans
-- Any file the implementing agent wrote as part of the task explanation
+- Files the implementing agent wrote as task explanation
 
-**Sequencing (Route B):** code-reviewer → validator
-**Sequencing (Route C):** code-reviewer → security-reviewer → Red Team → validator → arbitrator (if needed) → Blue Team
+Each subagent is a fresh Agent tool instance — isolated context. Code-reviewer runs first, validator runs last, receiving all prior reports.
 
-**Retry flow:** Fix → commit "fix: [task] — validation fix N" → re-spawn from step 1. Max 3 cycles. After limit: STOP and escalate to human:
-```
-## Validation Escalation: [task name]
-### Retry cycles exhausted: 3/3
-### Persistent failures:
-- [category]: [what keeps failing and why]
-### What was tried:
-- Fix 1: [description] → [result]
-- Fix 2: [description] → [result]
-- Fix 3: [description] → [result]
-### Diagnosis: [root cause hypothesis]
-### Recommendation: [what the human should decide]
-```
+---
 
 ## Validation report format
 
@@ -200,34 +125,29 @@ Construct subagent prompt with: role definition, files to read (explicit paths),
 - [next task]
 ```
 
-## ⏭️ rules
-- UI modified → MUST be ✅ or ❌, never ⏭️
-- Business logic with test framework → Tests MUST be ✅ or ❌
-- QUERY: criteria with DB tool → DB MUST be ✅ or ❌
-- ⏭️ means "not applicable" — NOT "I couldn't do it"
+⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css` was modified, or for Tests if business logic + test framework exists. ⏭️ is NOT "I skipped it."
 
-## Actionable findings rule
-If during ANY step of the validation loop the AI identifies a bug, a better approach, a missing edge case, or an improvement opportunity that is NOT fixed in the current task — it MUST create a task in pendencias.md with full Context/State/Constraints/Complexity/Criteria. Findings that die in report prose are invisible. If it's worth mentioning, it's worth tracking.
+If any finding is worth mentioning in the report, create a task in pendencias.md for it. Findings that die in prose are invisible.
 
 ---
 
 ## Validation Failure Post-Mortem
 
-**Trigger:** The human reports a bug in a task that was validated as ✅.
+**Trigger:** Human reports a bug in a task validated as ✅.
 
-BEFORE fixing the bug, diagnose and improve the validation loop:
+BEFORE fixing, diagnose and improve the validation loop:
 
-1. **Identify** which validation step should have caught it
-2. **Diagnose** why that step declared ✅ (partial execution? silent failure? missing criterion? weak criterion?)
-3. **Classify** the root cause and route the improvement to the correct document:
-   - Weak/incomplete criterion → improve criteria quality rules
-   - Partially verified multi-step criterion → strengthen Phase B criteria check
-   - Tool silenced an error → add Known Bug Pattern
-   - Review missed a pattern → update code-reviewer checklist
-   - Test not written for testable logic → refine Phase A Step 2 skip conditions
+1. Identify which step should have caught it
+2. Diagnose why it declared ✅
+3. Classify root cause → route improvement:
+   - Weak criterion → improve criteria rules
+   - Partially verified criterion → strengthen Phase B check
+   - Tool silenced error → add Known Bug Pattern
+   - Review missed pattern → update code-reviewer checklist
+   - Test not written → refine Phase A test guidance
    - Subagent context incomplete → update context routing rules
    - AI judgment error → inherent limitation, no doc fix
-4. **Apply** the systemic improvement (prevent the CLASS of failure, not just this instance)
-5. **Log** the post-mortem in the session log (`.claude/logs/`) and note it in the project.md Progress Log index row
+4. Apply systemic improvement (prevent the class of failure)
+5. Log in session log and project.md
 
-Then fix the bug normally. The validation loop improves before the bug is fixed.
+Then fix the bug normally.

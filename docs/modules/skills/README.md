@@ -13,7 +13,7 @@ These 10 skills implement steps of the Session Protocol and Execution Protocol. 
 
 1. **Copied** to each project's `.claude/skills/` at bootstrap
 2. **Triggered** by convention (session-start/session-end are user-invoked; others are called by orchestrating skills)
-3. **Evolvable** via the standard evolution mechanisms (FIX/DERIVED/CAPTURED)
+3. **Evolvable** via the standard evolution mechanisms (FIX/DERIVED/CAPTURED — see `.claude/rules/evolution-policy.md`)
 
 ## Skills list
 
