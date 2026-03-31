@@ -60,7 +60,7 @@ Commit current state before writing code to enable clean rollback.
 
 Self-review using `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, edge cases. Always check security-reviewer.md headers — if changes touch user input, auth, database, APIs, secrets, or HTML rendering, do the full security review.
 
-If UI was modified: verify changes are working. If dev server is not running: ❌.
+If UI was modified: use browser automation tools to verify changes visually — code review alone is NOT sufficient for UI verification. Health check dev server first. If dev server unavailable: ❌. If browser automation tools unavailable: ❌ with reason, list VERIFY: criteria as MANUAL:.
 
 Check all acceptance criteria by tag type. Run regression (full test suite or re-check last 2-3 tasks' criteria). Produce report.
 
@@ -79,6 +79,8 @@ Check all acceptance criteria by tag type. Run regression (full test suite or re
 
 **Process report:** All ✅ → done. Any ❌ → fix, commit, re-spawn validation. Max 3 retries. After limit: STOP and escalate to human with diagnosis of what keeps failing and what was tried.
 
+**UI tasks in Route 2:** The validator subagent handles UI verification via browser automation. Ensure the subagent prompt includes that UI files were modified and which VERIFY: criteria require browser verification.
+
 ---
 
 ## Subagent mechanics
@@ -89,7 +91,7 @@ Check all acceptance criteria by tag type. Run regression (full test suite or re
 - CLAUDE.md: Key Patterns, Architecture
 - project.md: Architectural Decisions table ONLY
 - IF security-relevant: security-reviewer.md + stack security skill
-- IF UI task: Design System section
+- IF UI task: Design System section + instruct subagent that UI files were modified and browser automation is required for VERIFY: criteria (subagent's CLAUDE.md lists available browser tools under MCP Servers)
 
 **NEVER include (anti-bias firewall):**
 - project.md Progress Log
@@ -125,7 +127,7 @@ Each subagent is a fresh Agent tool instance — isolated context. Code-reviewer
 - [next task]
 ```
 
-⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css` was modified, or for Tests if business logic + test framework exists. ⏭️ is NOT "I skipped it."
+⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css/.html` or template files were modified, or for Tests if business logic + test framework exists. ⏭️ is NOT "I skipped it." If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 attempts): use ❌ with reason, list VERIFY: criteria as MANUAL:.
 
 If any finding is worth mentioning in the report, create a task in pendencias.md for it. Findings that die in prose are invisible.
 
