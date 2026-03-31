@@ -87,7 +87,7 @@ Execute in order:
    - Are assertions checking real values, not just "no error thrown"?
    - Are edge cases covered (empty, null, zero, negative)?
    - If test quality is insufficient: report as ❌ with explanation
-4. **UI verification (web projects):** Navigate browser for VERIFY: criteria. Health check dev server first. If UI was modified and server unavailable: mark as ❌.
+4. **UI verification (web projects):** Use browser automation tools to verify VERIFY: criteria visually — code review or inference is NOT sufficient. Health check dev server first. If dev server unavailable: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:. If browser automation tools not available: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:. Available browser tools are listed in the project's CLAUDE.md under MCP Servers.
 5. **Execute QUERY: criteria** via database tool. If data missing: create test data, document it.
 6. **Decompose multi-step criteria** into atomic sub-checks. Each sub-check gets its own ✅/❌. The criterion only passes when ALL sub-checks pass.
 7. **Mutation tests (logic-heavy and arch/security tasks):** Pick 1-3 critical lines, break each one (comment out, change value), re-run affected criteria. Criteria MUST fail with broken code. If they still pass → criteria don't test what they claim → report as ❌. Restore code after each mutation. Max 3 mutations.

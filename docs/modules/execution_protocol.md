@@ -140,7 +140,7 @@ Route 2 — Subagent (logic-heavy + architecture/security)
 ```
 
 **⏭️ is NOT valid when:**
-- UI: if ANY `.tsx`, `.jsx`, `.html`, `.css`, or template file was modified in this task, UI MUST be ✅ or ❌, never ⏭️.
+- UI: if ANY `.tsx`, `.jsx`, `.html`, `.css`, or template file was modified in this task, UI MUST be ✅ or ❌, never ⏭️. If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 retries): mark as ❌ with reason, list VERIFY: criteria as MANUAL:.
 - Tests: if task has QUERY: or VERIFY: criteria with business logic AND test framework is configured, Tests MUST be ✅ or ❌, never ⏭️.
 - DB: if task has QUERY: criteria AND database tool is available, DB MUST be ✅ or ❌, never ⏭️.
 
@@ -181,6 +181,7 @@ IF security-relevant:
 
 IF UI task:
   - Design System section of CLAUDE.md
+  - Instruct subagent that UI files were modified and browser automation is required for VERIFY: criteria
 
 NEVER instruct the subagent to read (anti-bias firewall):
   - project.md Progress Log (contains implementation reasoning)

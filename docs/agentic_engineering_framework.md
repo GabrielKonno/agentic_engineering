@@ -870,7 +870,7 @@ The implementing agent validates its own work inline. Bias risk is near-zero for
 
 **Step 4 — Self-review:** Read `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, Architecture Patterns, edge cases. **Security:** ALWAYS read security-reviewer.md section headers; if changes touch user input, auth, database, APIs, AI/LLM, secrets, or HTML rendering: do the full security review.
 
-**Step 5 — UI verification:** If UI was modified: verify changes are working (navigate → action → verify → screenshot). If dev server not running: mark as ❌. If no UI modified: ⏭️.
+**Step 5 — UI verification:** If UI was modified: use browser automation tools to verify changes visually (navigate → action → verify → screenshot) — code review alone is NOT sufficient. If dev server not running: mark as ❌ with reason, list VERIFY: criteria as MANUAL:. If browser automation tools unavailable: mark as ❌ with reason, list VERIFY: criteria as MANUAL:. If no UI modified: ⏭️.
 
 **Step 6 — Check acceptance criteria:** Execute each criterion by tag type. For criteria with tests (Step 2): the passing test IS the verification. For criteria without tests: verify by tag. **Regression:** run full test suite, or re-check last 2-3 tasks' criteria.
 
@@ -1040,6 +1040,7 @@ IF security-relevant:
 
 IF UI task:
   - Design System section of CLAUDE.md
+  - Instruct subagent that UI files were modified and browser automation is required for VERIFY: criteria
 
 NEVER instruct the subagent to read (anti-bias firewall):
   - project.md Progress Log (contains implementation reasoning from previous sessions)
@@ -1865,6 +1866,7 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Human as bottleneck** | Waiting for plan approval on every micro-task | Small tasks flow directly to implementation. Only medium/large need approval. |
 | **Flaky UI verification** (validation only) | Unstable selectors, loading states, race conditions | Health check first. Retry with 2s wait. If fails 3x AND UI files were modified: mark as ❌ with reason, list VERIFY: criteria as MANUAL:. If no UI files modified: ⏭️. Does not affect research browsing. |
 | **Dev server unavailable** (validation only) | Browser validation needs a local server running | Health check via HTTP request. If down: try starting it. If still down AND UI files were modified: mark as ❌ with reason "dev server unavailable", list VERIFY: criteria as MANUAL:. If no UI files modified: ⏭️. Research browsing works without dev server. |
+| **Browser automation tools unavailable** (validation only) | Browser tool not installed or not responding | Mark UI as ❌ with reason "browser tools unavailable", list VERIFY: criteria as MANUAL:. Never ⏭️ when UI files were modified. Check CLAUDE.md MCP Servers section for available tools. |
 | **Auth in browser** (validation only) | Protected pages require login | Navigate to login first, authenticate with test credentials, then navigate to target. |
 | **Known Bug Patterns as noise** | List grows indefinitely, AI ignores mechanically | Max 20 patterns. Consolidate similar. Promote domain rules to rules files. Remove patterns enforced by linting. |
 | **Under-specified criteria** | Generic criteria give false confidence | PRD must define criteria with concrete expected results. "Works correctly" ❌ → "returns 200 with body containing X" ✅ |
