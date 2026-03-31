@@ -922,6 +922,7 @@ Report template categories:
 - Mutation: ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
 - UI: ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
+- Migration: ✅/❌/⏭️ [migration ran + rollback verified — or "no migration files" — or "destructive without rollback: ❌"]
 - Regression: ✅/❌
 - Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
 
@@ -929,6 +930,7 @@ Report template categories:
 - UI: if ANY frontend template, component, or style file was modified in this task, UI MUST be ✅ or ❌, never ⏭️. If browser automation couldn't run after trying to start the dev server: mark as ❌ with reason, and list all VERIFY: criteria as MANUAL:.
 - Tests: if task has QUERY: or VERIFY: criteria with business logic AND test framework is configured, Tests MUST be ✅ or ❌, never ⏭️.
 - DB: if task has QUERY: criteria AND database tool is available, DB MUST be ✅ or ❌, never ⏭️.
+- Migration: if ANY migration file is in the diff, Migration MUST be ✅ or ❌, never ⏭️.
 
 ⏭️ means "not applicable to this task" — NOT "I couldn't do it" or "I skipped it."
 
@@ -1868,6 +1870,7 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Dev server unavailable** (validation only) | Browser validation needs a local server running | Health check via HTTP request. If down: try starting it. If still down AND UI files were modified: mark as ❌ with reason "dev server unavailable", list VERIFY: criteria as MANUAL:. If no UI files modified: ⏭️. Research browsing works without dev server. |
 | **Browser automation tools unavailable** (validation only) | Browser tool not installed or not responding | Mark UI as ❌ with reason "browser tools unavailable", list VERIFY: criteria as MANUAL:. Never ⏭️ when UI files were modified. Check CLAUDE.md MCP Servers section for available tools. |
 | **Auth in browser** (validation only) | Protected pages require login | Navigate to login first, authenticate with test credentials, then navigate to target. |
+| **Migration data loss** (validation only) | Destructive migration without rollback, or NOT NULL column without default on populated table | Code-reviewer flags migration safety. Validator checks if rollback migration exists and runs without errors. Destructive without rollback → ❌. ⏭️ only when no migration files in diff. |
 | **Known Bug Patterns as noise** | List grows indefinitely, AI ignores mechanically | Max 20 patterns. Consolidate similar. Promote domain rules to rules files. Remove patterns enforced by linting. |
 | **Under-specified criteria** | Generic criteria give false confidence | PRD must define criteria with concrete expected results. "Works correctly" ❌ → "returns 200 with body containing X" ✅ |
 | **Over-specified criteria** | Criteria so detailed they prescribe the implementation | Criteria describe WHAT to verify, not HOW to implement. |
