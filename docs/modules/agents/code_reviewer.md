@@ -62,12 +62,17 @@ When invoked as subagent, do NOT read:
 - Consistent response format (success, data, error)
 - Inputs validated server-side
 - Cache/state invalidation after mutations
+- Existing response fields preserved? (removing or renaming a field = breaking change for callers)
+- New required request fields backward-compatible? (use optional + defaults, or version the endpoint)
+- Mutation operations idempotent or safe to retry? (unique constraint, idempotency key, or at-least-once safe)
 
 ## Performance
 - N+1 queries?
 - Unnecessary imports or heavy dependencies?
 - Code running on client/frontend that could run on server/backend?
 - Consult .claude/skills/*/SKILL.md for framework-specific rules
+- (Frontend) Heavy dependencies imported unconditionally that could be lazy-loaded or dynamically imported?
+- (Frontend) Large datasets rendered without pagination or virtualization?
 
 ## Security
 - Inputs validated
@@ -91,6 +96,30 @@ When invoked as subagent, do NOT read:
 - [ ] Minimize client-side/public-facing code — keep logic server-side/backend when possible
 
 [Populate with project-specific rules as structural issues emerge]
+
+## Migration Safety (check when diff includes migration files)
+- Is the migration reversible? Does a rollback/down migration exist?
+- Does it handle existing data safely? (NOT NULL on populated column needs DEFAULT or backfill step)
+- Index changes on large tables could lock or timeout — is this acknowledged?
+- If destructive (drop column, drop table): is it intentional and irreversible data loss acknowledged?
+- If migration safety is insufficient: flag as FIX REQUIRED.
+
+## Accessibility (check when diff modifies UI components)
+- Interactive elements (buttons, links, form inputs) have accessible names (label, aria-label, or visible text)?
+- Images have alt text (decorative: alt=""; informative: descriptive alt)?
+- Form inputs associated with labels — not just placeholder text?
+- Custom interactive components keyboard-reachable? (Tab focusable, Enter/Space activatable)
+- Color alone not used to convey meaning (error states, status indicators also use text or icon)?
+- If accessibility issues found: flag as FIX REQUIRED.
+
+## Observability & Infrastructure (check when diff modifies backend services, API handlers, or infra config)
+- Error paths have logging with context (user ID, operation, request ID where applicable)?
+- Sensitive data (passwords, tokens, PII) excluded from logs?
+- Critical operations (auth, payments, data mutations) have audit trail or structured log entry?
+- (Infra) Secrets use environment variables or secret managers — not hardcoded?
+- (Infra) Docker images use specific version tags, not :latest?
+- (CI/CD) Pipeline changes preserve existing test/lint/build steps?
+- If observability/infra issues found in critical paths: flag as FIX REQUIRED.
 
 ## Known Bug Patterns (check EVERY review)
 

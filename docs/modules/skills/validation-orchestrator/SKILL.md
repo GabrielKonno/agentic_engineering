@@ -92,6 +92,7 @@ Check all acceptance criteria by tag type. Run regression (full test suite or re
 - project.md: Architectural Decisions table ONLY
 - IF security-relevant: security-reviewer.md + stack security skill
 - IF UI task: Design System section + instruct subagent that UI files were modified and browser automation is required for VERIFY: criteria (subagent's CLAUDE.md lists available browser tools under MCP Servers)
+- IF migration files in diff: instruct validator that migration verification is required (Step 6 — check rollback migration exists and runs without errors)
 
 **NEVER include (anti-bias firewall):**
 - project.md Progress Log
@@ -119,6 +120,7 @@ Each subagent is a fresh Agent tool instance — isolated context. Code-reviewer
 - Mutation:   ✅/⏭️
 - DB:         ✅/❌/⏭️
 - UI:         ✅/❌/⏭️
+- Migration:  ✅/❌/⏭️
 - Regression: ✅/❌
 - Validation: ✅/❌/⏭️
 ### Items for human verification:
@@ -127,7 +129,7 @@ Each subagent is a fresh Agent tool instance — isolated context. Code-reviewer
 - [next task]
 ```
 
-⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css/.html` or template files were modified, or for Tests if business logic + test framework exists. ⏭️ is NOT "I skipped it." If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 attempts): use ❌ with reason, list VERIFY: criteria as MANUAL:.
+⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css/.html` or template files were modified, or for Tests if business logic + test framework exists, or for Migration if migration files are in the diff. ⏭️ is NOT "I skipped it." If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 attempts): use ❌ with reason, list VERIFY: criteria as MANUAL:.
 
 If any finding is worth mentioning in the report, create a task in pendencias.md for it. Findings that die in prose are invisible.
 

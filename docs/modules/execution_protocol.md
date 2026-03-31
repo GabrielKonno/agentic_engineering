@@ -128,6 +128,7 @@ Route 2 — Subagent (logic-heavy + architecture/security)
 - Mutation:   ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
 - DB:         ✅/❌/⏭️ [query results or covered by tests]
 - UI:         ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
+- Migration:  ✅/❌/⏭️ [migration ran + rollback verified — or "no migration files" — or "destructive without rollback: ❌"]
 - Regression: ✅/❌ [test suite results or re-checked tasks]
 - Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
 ### Items for human verification:
@@ -143,6 +144,7 @@ Route 2 — Subagent (logic-heavy + architecture/security)
 - UI: if ANY `.tsx`, `.jsx`, `.html`, `.css`, or template file was modified in this task, UI MUST be ✅ or ❌, never ⏭️. If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 retries): mark as ❌ with reason, list VERIFY: criteria as MANUAL:.
 - Tests: if task has QUERY: or VERIFY: criteria with business logic AND test framework is configured, Tests MUST be ✅ or ❌, never ⏭️.
 - DB: if task has QUERY: criteria AND database tool is available, DB MUST be ✅ or ❌, never ⏭️.
+- Migration: if ANY migration file is in the diff, Migration MUST be ✅ or ❌, never ⏭️.
 
 ⏭️ means "not applicable to this task" — NOT "I couldn't do it" or "I skipped it."
 
