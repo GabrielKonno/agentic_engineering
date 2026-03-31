@@ -35,6 +35,12 @@ derived_from: null
 - [ ] Feature flags set — experimental features disabled in production (unless intentional)
 - [ ] Debug mode off — `DEBUG=false`, `NODE_ENV=production`, framework-specific debug settings
 
+### Config Schema Validation
+- [ ] All env vars pass type and format checks — invoke `config-schema-validator` subagent (or manually verify per `examples/agents/config-schema-validator.md` Tier 2 checks)
+- [ ] No sensitive var has a fallback default in application code (e.g., `process.env.JWT_SECRET || 'fallback'`)
+- [ ] No sensitive var has a non-empty default value in `.env.example`
+- [ ] Cross-variable consistency verified: `NODE_ENV=production` → `DEBUG=false`, DB uses TLS, no `*_DEV_*` flags active
+
 ### Database
 - [ ] Migrations applied — target database schema matches code expectations
 - [ ] Seed data present — required configuration data exists (categories, roles, settings)
@@ -55,10 +61,14 @@ derived_from: null
 - [ ] Alerts configured — team notified on deploy failure or error spike
 
 ### Rollback Plan
-- [ ] Previous version identified — know exactly what to revert to
-- [ ] Rollback tested — process documented and verified
-- [ ] Database rollback considered — if migration is destructive, rollback plan exists
-- [ ] Communication plan — who to notify if rollback is needed
+- [ ] **Previous version identified** — commit SHA (or image tag) for rollback target recorded before deploying
+- [ ] **Rollback procedure written** — step-by-step runbook exists; accessible to anyone on-call, not just the deploy author
+- [ ] **Rollback tested in staging** — procedure was executed at least once against staging; untested rollbacks are not rollbacks
+- [ ] **Database rollback verified** — if deploy includes migrations:
+  - Reversible: down migration exists and validated in staging
+  - Irreversible (drop column, data transform): explicitly acknowledged; strategy documented (backup restore, feature flag, etc.)
+- [ ] **Estimated rollback duration documented** — team knows whether recovery takes 2 min or 45 min
+- [ ] **Communication plan defined** — channel, audience, and responsible person identified before deploy starts
 
 ## Output Format
 

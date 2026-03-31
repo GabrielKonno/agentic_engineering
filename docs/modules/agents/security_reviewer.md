@@ -38,6 +38,7 @@ When invoked as subagent, produce:
 | # | Severity | Section | Finding | Evidence | Status |
 |---|----------|---------|---------|----------|--------|
 ### Summary: [N critical, N high, N medium, N low]
+### Coverage gaps declared: [None | list of gaps]
 ### Recommendation: APPROVE / FIX REQUIRED / BLOCK
 ```
 
@@ -125,6 +126,20 @@ file operations, external APIs, AI/LLM integration, secrets, HTML rendering, ses
 - [ ] Database backups encrypted
 - [ ] Sensitive fields encrypted at application level if required by regulation
 
+### Compliance Probe (informational — does NOT block APPROVE by itself)
+
+Trigger when diff touches: user registration, profile data, health features, payment flows,
+document uploads, or any field that stores CPF, CNPJ, email, phone, birth date, address,
+financial data, or health data.
+
+- [ ] Does the changed code collect or store personal data?
+  - If YES and `.claude/rules/compliance-rules.md` EXISTS: verify code follows data minimization and consent-tracking rules defined there.
+  - If YES and file is ABSENT: add finding at severity INFO — "Project collects personal data but has no compliance-rules.md. Create from `examples/rules/compliance-rules.md`."
+- [ ] Does code transmit personal data to third-party services (analytics, error tracking, email)?
+  - If YES and no masking/anonymization present: flag as MEDIUM.
+- [ ] Does code implement deletion of user data?
+  - If YES: verify deletion covers related records (cascade or explicit) — not just primary record.
+
 ## 4. Input Validation
 - [ ] All user inputs validated on server side (client validation is UX, not security)
 - [ ] Inputs have maximum length limits
@@ -171,6 +186,60 @@ For every change, ask:
 5. **If a dependency is compromised, what data could be exfiltrated?**
 
 If any answer reveals a risk: address it before proceeding.
+
+## 10. SAST Integration
+
+**Tier 1 — always run when diff touches auth, input processing, cryptography, deserialization, file I/O, or shell execution:**
+- [ ] semgrep (or equivalent) scan output reviewed — zero ERROR-severity findings unresolved before APPROVE.
+- [ ] If SAST tool output unavailable: perform manual pattern review per `examples/agents/sast-scanner.md` Tier 1 checklist (injection patterns, deserialization, path traversal, XXE, SSRF, cryptography).
+- [ ] Document tooling gap as INFO finding if SAST tool is not installed — include recommendation to install.
+
+**Escalation condition:** If diff touches auth, authorization, input processing, cryptography, deserialization, file I/O, or shell execution AND a SAST tool is available → spawn `sast-scanner` subagent for dedicated SAST scan before proceeding to `validator`.
+
+## Coverage Gap Declaration
+
+After completing Sections 1-10, declare what was and was not covered.
+Include this section in every Security Review Report.
+
+### What this review covered
+- Injection prevention (manual code review — Sections 1, 10)
+- Authentication and authorization patterns (Section 2)
+- Data protection, secrets handling (Section 3)
+- Input validation (Section 4)
+- API security patterns (Section 5)
+- Dependency security (Section 6)
+- Security headers (Section 7)
+- Red Team thinking (Section 9)
+
+### What manual review cannot fully cover
+
+**If diff touches input processing, deserialization, cryptography, file I/O, or shell execution:**
+Declare in report:
+> Static analysis gap: manual review provides partial coverage for injection patterns,
+> deserialization call chains, path traversal normalization, and dangerous function usage.
+> Automated static analysis (SAST tooling) provides deeper, more systematic coverage
+> through AST-level analysis that manual review cannot replicate.
+> Recommend: search `.claude/agents/` for a specialized static analysis agent and
+> invoke before validator if found.
+
+**If diff touches `.env*`, config files, CI/CD YAML, auth modules, or secrets management:**
+Declare in report:
+> Secrets coverage gap: manual pattern check covers current diff only.
+> Git history scanning for previously committed secrets, high-entropy string detection
+> across history, and service-specific credential pattern matching require dedicated tooling.
+> Recommend: search `.claude/agents/` for a specialized secrets scanning agent and
+> invoke before validator if found.
+
+**If diff touches OAuth provider, callback URL, token exchange, OIDC/SAML, or federated logout:**
+Declare in report:
+> Federation protocol gap: OWASP auth checks (Section 2) cover session/JWT mechanics.
+> OAuth 2.0 authorization code flow validation, PKCE correctness, state/nonce handling,
+> ID token claim verification, and SAML assertion integrity require protocol-specific testing
+> that goes beyond what general security review provides.
+> Recommend: search `.claude/agents/` for a specialized OAuth/OIDC flow testing agent and
+> invoke before validator if found.
+
+**If none of the above apply:** omit Coverage Gap Declaration from the report (set field to `None`).
 ```
 
 ## Creation eval
