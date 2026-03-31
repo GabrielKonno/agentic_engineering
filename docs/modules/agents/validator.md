@@ -92,12 +92,27 @@ Execute in order:
    - If test quality is insufficient: report as ❌ with explanation
 4. **UI verification (web projects):** Use browser automation tools to verify VERIFY: criteria visually — code review or inference is NOT sufficient. Health check dev server first. If dev server unavailable: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:. If browser automation tools not available: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:. Available browser tools are listed in the project's CLAUDE.md under MCP Servers.
    **Responsive check:** After verifying at default viewport, test at minimum one additional viewport (mobile ≤ 430px width). Verify layout is functional, content accessible, interactive elements reachable. If layout breaks: include in UI: result. If no UI files modified: ⏭️.
+   **Cross-browser check (shared component or CSS change):** If the diff modifies shared components, CSS variables, layout, or design tokens — test in at minimum: Chromium (always), Firefox (when flexbox, CSS grid, or CSS logical properties are involved), WebKit (when `-webkit-` properties or font rendering are involved). Document which browsers were checked.
+   **Visual regression (shared component change):** If the diff modifies shared components (button, modal, nav, form, card, layout primitives) or CSS variables — invoke `visual-regression-tester` subagent to compare against baselines. If no baselines exist, capture them and mark UI result as `BASELINE-CREATED` (not ✅).
 5. **Execute QUERY: criteria** via database tool. If data missing: create test data, document it.
 6. **Migration verification:** If diff includes migration files: verify the migration ran successfully (covered by build step — if build passed, migration syntax is valid). If a rollback/down migration exists in the diff: verify it also runs without errors. If the migration is destructive (drops column/table) and no rollback migration exists: mark Migration as ❌ with reason "destructive migration without rollback". If no migration files in diff: ⏭️.
 7. **Decompose multi-step criteria** into atomic sub-checks. Each sub-check gets its own ✅/❌. The criterion only passes when ALL sub-checks pass.
 8. **Mutation tests (logic-heavy and arch/security tasks):** Pick 1-3 critical lines, break each one (comment out, change value), re-run affected criteria. Criteria MUST fail with broken code. If they still pass → criteria don't test what they claim → report as ❌. Restore code after each mutation. Max 3 mutations.
 9. **Regression:** Run full test suite if exists. If no suite: re-run QUERY: criteria from last 2-3 completed tasks. If results changed → regression.
 10. **Evaluate prior review reports:** Check if code-reviewer findings were addressed. Check security findings if applicable.
+
+    **Specialized agent reports:** If the main orchestrator spawned additional agents
+    to address security-reviewer coverage gaps, include their reports in Prior Review
+    Findings. Evaluate each finding.
+
+    **Unaddressed coverage gaps:** If the security-reviewer declared a coverage gap
+    AND no specialized agent report was provided as evidence:
+    - Note under "Items for human verification": "Security coverage gap: [gap type]
+      was declared by security-reviewer but no specialized agent was invoked.
+      Manual review only — consider installing the relevant agent."
+    - Do NOT fail the overall validation for this reason alone — it is a coverage
+      limitation, not a finding. Flag as ⚠️ in Security row, not ❌.
+
 11. **Produce the Validation Report** using the format above.
 
 ## BOUNDARIES

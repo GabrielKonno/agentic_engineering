@@ -75,6 +75,16 @@ Check all acceptance criteria by tag type. Run regression (full test suite or re
 - If high-risk (auth/RLS/payment/AI): add **Red Team subagent**.
 - After validation passes (if Red Team ran): run **Blue Team subagent**.
 
+**Coverage gap handling:** After receiving the security-reviewer report, read the
+Coverage Gap Declaration section if present. For each declared gap, search
+`.claude/agents/` descriptions for an agent whose description matches the gap's
+domain (e.g., "SAST", "static analysis", "secrets scanning", "OAuth flow testing").
+If a matching agent is found: spawn it and include its report as additional evidence
+for the validator. If no matching agent is found: note the unaddressed gap in the
+validation report's "Items for human verification" section.
+This instruction is generic — it names no specific agents and adds zero cost when
+no coverage gaps are declared.
+
 **If ❌ contradicts mechanical evidence:** spawn **arbitrator subagent**.
 
 **Process report:** All ✅ → done. Any ❌ → fix, commit, re-spawn full subagent sequence from code-reviewer. Max 3 retries. After limit: STOP and escalate to human with diagnosis of what keeps failing and what was tried.

@@ -23,6 +23,24 @@ After implementing or modifying:
 - Real-time features (WebSockets, SSE, polling)
 - Search or filtering with large datasets
 
+## Baselines
+
+Default thresholds — customize at project creation. Replace `_tbd_` with measured values
+from the first staging deploy or load test. Update this file or reference CLAUDE.md.
+
+| Metric | Default | Project baseline | Note |
+|--------|---------|------------------|------|
+| API response p50 | < 200ms | _tbd_ | Server-side, excludes network |
+| API response p95 | < 800ms | _tbd_ | Flag if p95 > 3× p50 (high variance) |
+| Database query p95 | < 100ms | _tbd_ | Single query; joins counted as one |
+| Page load LCP (3G) | < 3s | _tbd_ | Lighthouse / WebPageTest |
+| Initial JS bundle (gzip) | < 150KB | _tbd_ | Excludes lazy-loaded chunks |
+| Background job duration | < 30s | _tbd_ | Per job; flag if near queue timeout |
+
+**During audit:** compare against project baseline if available. If baseline is still `_tbd_`:
+note "baseline not yet established" in the Metrics section — do not block on absent baseline.
+Exceeds threshold by > 2×: HIGH. Between 1×–2×: MEDIUM.
+
 ## Checklist
 
 ### Data Fetching

@@ -119,7 +119,40 @@ When invoked as subagent, do NOT read:
 - (Infra) Secrets use environment variables or secret managers — not hardcoded?
 - (Infra) Docker images use specific version tags, not :latest?
 - (CI/CD) Pipeline changes preserve existing test/lint/build steps?
+
+### Structured Logging Context
+- Structured log entries include `user_id` and `request_id` on every backend operation?
+- Multi-tenant services also include `tenant_id` / `organization_id` in every log entry?
+- Error captures (try/catch) include originating operation name and relevant entity IDs — not just the exception message?
+- No PII in logs: email, CPF, phone, health data, payment details absent from log output — even at DEBUG level?
+
+### API Documentation (check when diff adds or changes exported/public functions or REST endpoints)
+- New public endpoints have at minimum: purpose, expected inputs/outputs, and auth requirement documented?
+- Removed or renamed public fields flagged as breaking change in the review finding?
+
 - If observability/infra issues found in critical paths: flag as FIX REQUIRED.
+
+## Rules-Driven Checks (auto-activated when rules files present)
+
+### Internationalization (activate when `.claude/rules/i18n-rules.md` exists)
+- [ ] User-visible strings extracted to locale files — no hardcoded text in
+  component JSX, templates, or server-rendered HTML?
+- [ ] Dates/times formatted via `Intl.DateTimeFormat` — no manual format strings
+  (`DD/MM/YYYY`, `toLocaleDateString()` without locale arg)?
+- [ ] Plural forms use ICU plural rules (`Intl.PluralRules` or equivalent) —
+  not `count === 1 ? 'item' : 'items'`?
+- [ ] CSS uses logical properties (`margin-inline-start`) for elements that appear
+  in RTL locales?
+- [ ] String interpolation uses named placeholders `{firstName}` — no fragmented
+  sentence concatenation?
+
+### Distributed Systems (activate when `.claude/rules/distributed-systems-rules.md` exists)
+- [ ] Message/event handlers idempotent — processing same message twice is safe?
+- [ ] Events carry a unique `event_id` field for deduplication?
+- [ ] Operations spanning multiple services wrapped in saga or compensating
+  transaction — no unbounded partial states?
+- [ ] Saga steps each have a defined compensation action?
+- [ ] Dead-letter queue configured for message consumers?
 
 ## Known Bug Patterns (check EVERY review)
 
