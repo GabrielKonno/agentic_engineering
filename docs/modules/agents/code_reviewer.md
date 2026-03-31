@@ -9,8 +9,8 @@ invocation: subagent
 effort: medium
 description: >
   Reviews code after implementation. Spawned as independent subagent for
-  logic-heavy and architecture/security tasks (Routes B and C). Read as
-  inline checklist for routine tasks (Route A).
+  logic-heavy and architecture/security tasks (Route 2). Read as
+  inline checklist for routine tasks (Route 1).
 receives: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table
 produces: Code Review Report with findings, pattern violations, and APPROVE/FIX REQUIRED recommendation
 created: s0 (bootstrap)
@@ -75,6 +75,12 @@ When invoked as subagent, do NOT read:
 - Parameterized queries
 - No hardcoded secrets
 - For detailed checks, consult `.claude/agents/security-reviewer.md`
+
+## Test Quality (check when task has tests)
+- Do tests actually test what the acceptance criteria describe?
+- Are assertions checking real values, not just "no error thrown"?
+- Are edge cases covered (empty, null, zero, negative)?
+- If test quality is insufficient: flag as FIX REQUIRED.
 
 ## Architecture Patterns (check when creating new files/modules)
 
