@@ -19,9 +19,10 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
                          |  - 12 templates    |           | 9+ agent .md files  |
-                         |  - 2 protocols     |           | 7 process skills    |
-                         |  - 7 skills        |           | examples/ (copy)    |
-                         |  - examples/       |           | settings.json       |
+                         |  - 2 protocols     |           | 10 process skills   |
+                         |  - 10 skills       |           | 2 rules files       |
+                         |  - examples/       |           | examples/ (copy)    |
+                         |                    |           | settings.json       |
                          +--------------------+           +---------------------+
                                                                     |
                                                           cd projects/my-project
@@ -132,7 +133,9 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/security-reviewer.md` | `modules/templates/security_reviewer.md` | OWASP Top 10 checklist |
 | `.claude/agents/red-team.md` | `modules/templates/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
 | `.claude/agents/blue-team.md` | `modules/templates/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
-| `.claude/skills/*` (7 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
+| `.claude/skills/*` (10 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
+| `.claude/rules/session-rules.md` | `modules/templates/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
+| `.claude/rules/evolution-policy.md` | `modules/templates/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
 | `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/templates/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
@@ -145,7 +148,7 @@ Templates are blueprints. The paths they contain are the paths those files will 
 
 **Files created only during development** (not at bootstrap):
 - `.claude/phases/done_tasks.md` — archive of completed tasks (created when first task completes)
-- `.claude/rules/*.md` — domain-specific rules (created when 3+ patterns accumulate from the same domain)
+- `.claude/rules/*.md` — domain-specific rules (created when 3+ patterns accumulate from the same domain; `session-rules.md` and `evolution-policy.md` are created at bootstrap)
 - `.claude/logs/*.md` — session logs (one per session, first created at end of session 0)
 
 ---
@@ -331,7 +334,7 @@ Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is
 
 **Session Logs** — Permanent record of every session (what was done, decisions made, reasoning, git diff). Not read by the AI during normal sessions — exists for human reference and project history.
 
-**Graduated Validation** — Validation depth scales with task risk. Routine tasks (UI text, config changes) use inline checklists — low cost, fast. Logic-heavy tasks (business rules, calculations) spawn 2 independent subagents (code-reviewer + validator). Architecture and security tasks spawn the full chain — up to 5 subagents (code-reviewer, security-reviewer, Red Team, validator, Blue Team). The AI classifies each task and routes to the appropriate depth automatically.
+**Graduated Validation** — Validation depth scales with task risk via 2 routes. Route 1 (Inline): routine tasks (UI text, config changes) use inline checklists — low cost, fast. Route 2 (Subagent): logic-heavy and architecture/security tasks always spawn code-reviewer + validator subagents; security-relevant tasks adaptively add security-reviewer and Red Team/Blue Team based on risk level. The AI classifies each task and routes to the appropriate depth automatically.
 
 **Anti-Bias Firewall** — When validation subagents are spawned, they receive the code diff, checklists, and acceptance criteria — but NOT the implementing agent's reasoning, session logs, or implementation plans. This context isolation prevents confirmation bias: the validating agent judges the code against the criteria without knowing WHY it was written that way.
 

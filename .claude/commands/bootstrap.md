@@ -210,9 +210,10 @@ These 3 run as isolated subagents via Agent tool — they produce decisions or a
 mkdir -p projects/$ARGUMENTS/.claude/rules
 # Extract content between the markdown fences in the template
 sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
+sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/evolution_policy.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/evolution-policy.md
 ```
 
-This creates the session-rules.md rule file with task limits, documentation quality, and reasoning depth rules.
+This creates session-rules.md (task limits, documentation quality, reasoning depth, scripts convention) and evolution-policy.md (evolution classification, auto-evolution boundaries).
 
 Skills and agents are auto-discovered by Claude Code from `.claude/skills/` and `.claude/agents/`. No explicit listing is needed in CLAUDE.md.
 
@@ -416,8 +417,9 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 - .claude/agents/criteria-enforcer.md (before implementing — subagent)
 - .claude/agents/diff-pattern-extractor.md (session end — subagent)
 
-### Session rules: copied from framework (Step 5.7):
-- .claude/rules/session-rules.md (task limits, documentation quality, reasoning depth)
+### Rules: copied from framework (Step 5.7):
+- .claude/rules/session-rules.md (task limits, documentation quality, reasoning depth, scripts convention)
+- .claude/rules/evolution-policy.md (evolution classification, auto-evolution boundaries)
 
 ### Hooks configured:
 - smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]

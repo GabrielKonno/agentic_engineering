@@ -212,7 +212,7 @@ project/
 │   │   ├── pendencias.md                  # Prioritized backlog with acceptance criteria
 │   │   └── done_tasks.md                  # Archived completed tasks (not read at session start)
 │   ├── logs/                              # Session logs (one file per session, permanent record)
-│   │   └── YYYYMMDD_sN_slug_commit.md     # e.g., 20260326_s12_financial-sprint_a3f7b2c.md
+│   │   └── YYYYMMDD_sN_slug.md             # e.g., 20260326_s12_financial-sprint.md
 │   ├── rules/
 │   │   └── (created as complex domains emerge)
 │   ├── agents/
@@ -245,7 +245,7 @@ project/
 | `skills/[custom]/SKILL.md` | Custom skills created on-demand for recurring complex processes (Anthropic folder format) | When a technical process repeats 2+ times |
 | `skills/[stack]/SKILL.md` | Stack knowledge (framework-specific patterns for the project's stack) | Created at bootstrap or one-time installation |
 | `assets/examples/` | Reference templates for agents, skills, and rules (copied from framework repo during bootstrap) | Read-only reference. Consult before creating on-demand agents/skills. |
-| `.claude/logs/YYYYMMDD_sN_slug_commit.md` | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Primary detailed record. Read on-demand by AI when investigating past decisions or debugging recurring issues. Not read at session start. | Created automatically at end of every session (item 1). Never edited after creation. |
+| `.claude/logs/YYYYMMDD_sN_slug.md` | SESSION LOG — permanent record of what was done, what changed, decisions made, bugs found, and reasoning. One file per session. Primary detailed record. Read on-demand by AI when investigating past decisions or debugging recurring issues. Not read at session start. | Created automatically at end of every session (step 2 of session-end). Never edited after creation. |
 
 ---
 
@@ -404,17 +404,17 @@ SESSION START (Session Protocol):
 PER TASK (Execution Protocol):
   criteria-enforcer [subagent] --> implement --> validation-orchestrator
                                                         |
-                                        .----- Route by complexity -----.
-                                        |               |               |
-                                    Route A         Route B         Route C
-                                    (routine)       (logic-heavy)   (arch/security)
-                                        |               |               |
-                                    inline          code-reviewer   code-reviewer
-                                    checklist       validator        security-reviewer
-                                                                     red-team
-                                                                     validator
-                                                                     arbitrator (if conflict)
-                                                                     blue-team
+                                        .--- Route by complexity ---.
+                                        |                          |
+                                    Route 1                    Route 2
+                                    (routine)                  (logic-heavy +
+                                        |                      arch/security)
+                                    inline                         |
+                                    checklist              code-reviewer
+                                                           validator
+                                                           + security-reviewer (if relevant)
+                                                           + red-team/blue-team (if high-risk)
+                                                           + arbitrator (if conflict)
 
 SESSION END (Session Protocol):
   diff-pattern-extractor [subagent] --> session-log-creator --> project-md-updater
@@ -528,7 +528,7 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 #### Evolution classification
 
-Every evolution in items 4-5 below must be classified by its trigger mode:
+Every evolution in items 4-5 below must be classified by its trigger mode (implemented in `.claude/rules/evolution-policy.md`):
 
 | Mode | Trigger | Examples |
 |------|---------|----------|
@@ -571,11 +571,10 @@ In v1.6.0, each end-of-session item is implemented by a pre-built process skill 
 
    **Session log:** Primary detailed record in `.claude/logs/`: tasks completed, decisions (with reasoning), bugs, discoveries, files changed, evolutions.
 
-   **Filename format:** `YYYYMMDD_sN_[slug]_[commit].md`
+   **Filename format:** `YYYYMMDD_sN_[slug].md`
    - `YYYYMMDD` — session date
    - `sN` — session number (s1, s2, ... s24)
    - `[slug]` — 2-4 word kebab-case summary (e.g., `auth-rls-setup`, `financial-sprint`)
-   - `[commit]` — short hash (7 chars) of the last commit
 
    **Log template:**
    ```markdown
@@ -822,14 +821,10 @@ Routine task (UI text, config, styling, simple CRUD)
   → Phase B uses inline checklist (current behavior). No subagent.
   → Bias risk near-zero. Token cost: ~5-10k.
 
-Logic-heavy task (business rules, calculations, state machines, financial)
-  → Phase B spawns code-reviewer subagent + validator subagent (2 calls)
-  → Token cost: ~50-65k. Acceptable for where bias matters.
-
-Architecture/security task (new module, cross-module, Red Team trigger)
-  → Phase B spawns full chain: code-reviewer + security-reviewer +
-    Red Team + validator + Blue Team (up to 5 calls)
-  → Token cost: ~120-150k. Worth it for high-risk tasks.
+Logic-heavy / architecture / security task (Route 2)
+  → Phase B always spawns code-reviewer + validator (2 calls minimum)
+  → If security-relevant: adds security-reviewer, Red Team, Blue Team adaptively
+  → Token cost: ~50-150k depending on security depth. Acceptable for where bias matters.
 ```
 
 The implementing agent can override the classification after reading the task (same as the existing override rule).
@@ -862,68 +857,53 @@ For **routine tasks** that use inline validation: this commit can be deferred un
 
 #### Phase B — Validation (graduated by complexity)
 
-**Route A — Routine tasks (inline validation):**
+**Route 1 — Inline (routine tasks):**
 
 The implementing agent validates its own work inline. Bias risk is near-zero for routine changes.
 
-**Step 4 — Self-review:** Read the code-reviewer rules as a checklist. Check: project patterns, domain rules, Known Bug Patterns (every pattern against changes), Architecture Patterns, **security** (ALWAYS read security section headers; if changes touch user input, auth, database, APIs, AI/LLM, secrets, or HTML rendering: read the FULL security-reviewer checklist and run Tier 1 checks; when in doubt, read it), edge cases (empty, null, zero, negative).
+**Step 4 — Self-review:** Read `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, Architecture Patterns, edge cases. **Security:** ALWAYS read security-reviewer.md section headers; if changes touch user input, auth, database, APIs, AI/LLM, secrets, or HTML rendering: do the full security review.
 
-**Step 5 — UI verification (web projects only):** Skip entirely for non-web projects. Skip entirely if no UI was modified. If UI was changed, this step is MANDATORY — do not wait for user to request it. Health check the dev server first. If not running: try starting it (check Commands section), wait 10s. If still unavailable AND UI files were modified in this task: mark as ❌ with reason "dev server unavailable", list all VERIFY: criteria as MANUAL:. If no UI files were modified: mark as ⏭️ (not applicable). If running: navigate → action → verify → screenshot. Max 3 attempts.
+**Step 5 — UI verification:** If UI was modified: verify changes are working (navigate → action → verify → screenshot). If dev server not running: mark as ❌. If no UI modified: ⏭️.
 
-**Step 6 — Check acceptance criteria:** Execute each criterion by tag type. For criteria with corresponding tests (Step 2): the passing test IS the verification — do not re-check manually. For criteria without tests: verify manually by tag.
-
-**Then run regression:** if test suite exists, run full suite. If no suite yet, re-execute `QUERY:` criteria from last 2-3 completed tasks. If results changed unexpectedly → regression detected → treat as ❌.
+**Step 6 — Check acceptance criteria:** Execute each criterion by tag type. For criteria with tests (Step 2): the passing test IS the verification. For criteria without tests: verify by tag. **Regression:** run full test suite, or re-check last 2-3 tasks' criteria.
 
 **Step 7 — Report:** Structured validation report (see report format below).
 
-**Route B — Logic-heavy tasks (2 subagents):**
+**Route 2 — Subagent (logic-heavy + architecture/security):**
 
-The implementing agent spawns independent subagents with isolated context. See [Validation Orchestration Protocol](#validation-orchestration-protocol) for context routing, instruction templates, and sequencing.
+Independent subagents with isolated context. See [Validation Orchestration Protocol](#validation-orchestration-protocol) for context routing and sequencing.
 
-**Step 4 — Spawn code-reviewer subagent:**
-Input: git diff, rules files, Key Patterns, Architecture Patterns, Architectural Decisions table from project.md.
+**Always spawn:**
+
+**Step 4 — code-reviewer subagent:**
+Input: git diff, rules files, Key Patterns, Architectural Decisions table from project.md.
 Output: Code Review Report with findings.
 
-**Step 5 — Spawn validator subagent:**
-Input: git diff, acceptance criteria, Code Review Report, rules files, Architectural Decisions table from project.md.
-The validator independently: re-runs build, re-runs tests (and evaluates test quality), navigates browser for VERIFY: criteria, runs QUERY: criteria via database, decomposes multi-step criteria, executes mutation tests, runs regression, produces the Validation Report.
+**Step 5 — validator subagent:**
+Input: git diff, acceptance criteria, Code Review Report (+ Security/Vulnerability Reports if they exist), rules files, Architectural Decisions table.
+The validator independently: re-runs build, re-runs tests, navigates browser for VERIFY: criteria, runs QUERY: criteria, executes mutation tests, runs regression, produces the Validation Report.
 Output: Validation Report with ✅/❌/⏭️ per category.
 
-**Step 6 — Process Validation Report:**
-- If all ✅: proceed to report.
-- If any ❌ AND mechanical evidence contradicts (build passes, tests pass, query matches): spawn arbitrator subagent (see [Validation Orchestration Protocol](#validation-orchestration-protocol)).
-- If any ❌ AND mechanical evidence agrees: fix → commit `"fix: [task] — validation fix N"` → re-spawn from Step 4. Max 3 retry cycles.
+**If security-relevant** (auth, RLS, payment, AI/LLM, multi-tenancy, file upload, secrets):
 
-**Step 7 — Report:** Structured validation report (see report format below).
-
-**Route C — Architecture/security tasks (full chain):**
-
-Full subagent chain for maximum confidence on high-risk tasks.
-
-**Step 4 — Spawn code-reviewer subagent:** (same as Route B Step 4)
-
-**Step 5 — Spawn security-reviewer subagent:**
+**security-reviewer subagent** (before validator):
 Input: git diff, security-reviewer.md, stack security skill, rules files.
 Output: Security Review Report.
 
-**Step 6 — Red Team (if triggered):**
-Trigger: task implemented or modified authentication logic, authorization/RLS, payment/financial, multi-tenancy, user input → DB, or AI/LLM integration.
+**Red Team subagent** (if high-risk: auth/RLS/payment/AI):
 Input: git diff, red-team.md, security context.
-Output: Vulnerability Report with Tier 1-2 findings. Tier 3 flagged as MANUAL:.
+Output: Vulnerability Report. Tier 3 flagged as MANUAL:.
 
-**Step 7 — Spawn validator subagent:**
-Input: git diff, acceptance criteria, Code Review Report, Security Review Report, Vulnerability Report (if exists), rules files, Architectural Decisions table from project.md.
-The validator independently: re-runs build, re-runs tests (and evaluates test quality), navigates browser, runs queries, decomposes multi-step criteria, executes mutation tests, runs regression, produces the Validation Report.
-Output: Validation Report with ✅/❌/⏭️ per category.
+**Blue Team subagent** (after validation passes, if Red Team ran):
+Input: Vulnerability Report + final code (post-fixes).
+Output: Defense Assessment — verifies defenses exist for each finding.
 
-**Step 8 — Process Validation Report:** (same as Route B Step 6)
+**Step 6 — Process Validation Report:**
+- All ✅: proceed to report.
+- Any ❌ AND mechanical evidence contradicts: spawn **arbitrator subagent**.
+- Any ❌ AND evidence agrees: fix → commit → re-spawn from Step 4. Max 3 retry cycles.
 
-**Step 9 — Blue Team (after validation passes, if Red Team ran):**
-Input: Vulnerability Report + final code (post-fixes from retry loop).
-Output: Defense Assessment — verifies defenses exist for each finding, updates Defense Inventory.
-Blue Team runs AFTER validation passes because it evaluates the final code state.
-
-**Step 10 — Report:** Structured validation report (see report format below).
+**Step 7 — Report:** Structured validation report (see report format below).
 
 #### Validation report format (all routes)
 
@@ -1085,25 +1065,24 @@ The implementing agent does NOT package file contents into the prompt. It provid
 Subagents are spawned **sequentially** by the implementing agent. Each subagent is a fresh instance with isolated context — no carryover between invocations.
 
 ```
-Logic-heavy tasks (Route B):
-  1. code-reviewer subagent → Code Review Report
-  2. validator subagent (receives Code Review Report) → Validation Report
-
-Architecture/security tasks (Route C):
-  1. code-reviewer subagent → Code Review Report
-  2. security-reviewer subagent → Security Review Report
-  3. Red Team subagent (if triggered) → Vulnerability Report
-  4. validator subagent (receives all prior reports) → Validation Report
-  5. arbitrator subagent (only if validator ❌ contradicts mechanical evidence)
-  6. Blue Team subagent (after validation passes, if Red Team ran) → Defense Assessment
+Route 2 — Subagent (logic-heavy + architecture/security):
+  Always:
+    1. code-reviewer subagent → Code Review Report
+  If security-relevant:
+    2. security-reviewer subagent → Security Review Report
+    3. Red Team subagent (if high-risk) → Vulnerability Report
+  Always:
+    4. validator subagent (receives all prior reports) → Validation Report
+  Conditional:
+    5. arbitrator subagent (only if ❌ contradicts mechanical evidence)
+    6. Blue Team subagent (after validation passes, if Red Team ran) → Defense Assessment
 ```
 
 **Why this order:**
 - Code-reviewer FIRST: catches code pattern issues cheaply before expensive validation.
-- Security-reviewer SECOND: security findings affect the validator's ✅/❌ judgment.
-- Red Team THIRD: adversarial testing before final validation.
-- Validator FOURTH: receives ALL prior reports as input, does independent verification. The validator is the final authority on ✅/❌.
-- Arbitrator FIFTH: only if validator ❌ contradicts mechanical evidence. Not triggered when validator ❌ agrees with evidence.
+- Security agents SECOND: security findings affect the validator's ✅/❌ judgment. Added adaptively based on risk.
+- Validator THIRD/FOURTH: receives ALL prior reports. The validator is the final authority on ✅/❌.
+- Arbitrator: only if validator ❌ contradicts mechanical evidence.
 - Blue Team LAST: assesses FINAL code state (post-fixes from retry loop).
 
 ### Validator agent
@@ -1158,7 +1137,7 @@ Each call gets a fresh context. Only use when the combined scope would strain a 
 The concepts in this protocol are tool-agnostic. The mechanics are tool-specific:
 
 - **Claude Code:** Subagents are spawned via the **Task tool**. Each Task tool call creates a new conversation with isolated context.
-- **Other tools:** Adapt to the tool's subagent/subprocess mechanism. If the tool does not support subagents, fall back to inline validation (Route A behavior for all tasks) and note the limitation.
+- **Other tools:** Adapt to the tool's subagent/subprocess mechanism. If the tool does not support subagents, fall back to inline validation (Route 1 behavior for all tasks) and note the limitation.
 
 The bootstrap file (`.claude/commands/bootstrap.md`) contains the Claude Code implementation with exact templates and commands. For other tools, adapt to the tool's configuration format.
 
@@ -1258,7 +1237,7 @@ Source: PRD defines "paginated list, max 20 items per page"
 The rule applies at creation time AND at "Before implementing" when upgrading WEAK criteria. It stacks with the Criteria Adversarial Review — the sabotage test catches criteria that are vague, but specificity inheritance prevents vagueness from being written in the first place.
 
 **Enforcement:** The AI must actively check criteria quality at two moments:
-1. **When creating tasks in pendencias.md** (end of session, item 2): write criteria that meet the STRONG level. If a criterion only has action without expected result or failure signal, rewrite it before saving.
+1. **When creating tasks in pendencias.md** (end of session, pendencias-updater skill): write criteria that meet the STRONG level. If a criterion only has action without expected result or failure signal, rewrite it before saving.
 2. **When reading a task before implementation** (Execution Protocol, "Before implementing"): if the task's criteria are WEAK, rewrite them to STRONG before proceeding. Log: "Upgraded criteria for [task]: [what was changed]"
 
 **Criteria Adversarial Review (applied at both enforcement moments):**
@@ -1616,7 +1595,7 @@ The config file's Session Protocol contains explicit trigger points:
 - "At session start step 3: run prd-sync-checker (opt-in)"
 - "Before implementing: run criteria-enforcer"
 - "After implementation: run validation-orchestrator"
-- "At session end item 2: run session-log-creator + project-md-updater"
+- "At session end: run diff-pattern-extractor, session-log-creator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater"
 
 These are deterministic — the AI follows the numbered protocol and encounters the trigger.
 
@@ -1901,7 +1880,7 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Criteria don't detect breakage** | Criteria check a snapshot or pass with hardcoded/wrong data | Mutation testing (Step 5c): sabotage critical code, verify criteria fail. If they don't, strengthen and re-validate. Only for logic-heavy and architecture tasks. |
 | **Subagent context incomplete** | Context routing omits a relevant rules file | Route ALL rules files (`.claude/rules/*.md`) to every subagent. Cost is low, risk of omission is high. |
 | **Subagent context contaminated** | Boundaries violated — subagent reads implementation reasoning | BOUNDARIES section in subagent prompt template. NEVER list explicitly blocks project.md Progress Log, session logs, sprint proposals, and implementation plans. |
-| **Validation token overhead** | Each subagent consumes tokens for file reads + reasoning | Graduated validation depth: routine tasks use inline checklist (no subagent), logic-heavy use 2 subagents, arch/security use full chain. Accept overhead as cost of unbiased validation where bias matters. Monitor if sessions become shorter. |
+| **Validation token overhead** | Each subagent consumes tokens for file reads + reasoning | Graduated validation: Route 1 (inline) for routine tasks, Route 2 (subagent) for logic-heavy/arch/security with adaptive depth. Accept overhead as cost of unbiased validation where bias matters. Monitor if sessions become shorter. |
 | **Validation latency** | Subagent spawn + file reads + reasoning + return per subagent | 10-30s per subagent. Acceptable vs risk of false ✅ from biased inline review. |
 | **False ❌ from subagent** | Subagent rejects correct code due to missing context or rigid interpretation | Arbitrator agent resolves: receives validator report + mechanical evidence, rules UPHOLD ❌ / OVERRIDE TO ✅ / ESCALATE. If genuinely ambiguous, escalates to human. |
 | **Context overload in subagent** | Large task: 500+ line diff + many criteria + mutations in single subagent context | Split validation into sequential subagent calls for large tasks: (1) code review + criteria evaluation, (2) mutation testing. Each call gets a fresh context. Only when diff exceeds ~300 lines or criteria exceed 10. |

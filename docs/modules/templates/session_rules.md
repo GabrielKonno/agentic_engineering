@@ -36,4 +36,8 @@ Mechanisms stack: a standard-effort session uses high effort when security agent
 - Be specific: "Fixed reopenMonth deleting only unpaid" NOT "Fixed a bug"
 - Include WHY: "Added parseLocal() because toISOString() shifts dates in UTC-3 timezone"
 - Constraints go in rules files, not just session logs
+
+## Scripts convention
+
+Skills with `scripts/` subdirectories have optional bash helpers. Use them if available; execute equivalent steps manually otherwise. Scripts require bash (Git Bash on Windows, native on macOS/Linux).
 ```

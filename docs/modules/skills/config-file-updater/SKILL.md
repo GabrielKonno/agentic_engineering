@@ -34,14 +34,7 @@ Review git diff for changes that affect config file sections.
 | **Skills** | Skills created or installed |
 | **Environment Variables** | New env vars needed |
 
-### 3. File Map accuracy
-If new files were created, update the File Map section. Run file-map-scan.sh if available:
-```bash
-bash .claude/skills/config-file-updater/scripts/file-map-scan.sh
-```
-(Scripts require bash — Git Bash on Windows, native on macOS/Linux. If unavailable, the AI executes the equivalent steps manually.)
-
-### 4. Do NOT update
+### 3. Do NOT update
 - Session Protocol (behavior change — requires human approval)
 - Execution Protocol (behavior change — requires human approval)
 - Information already covered by rules files
