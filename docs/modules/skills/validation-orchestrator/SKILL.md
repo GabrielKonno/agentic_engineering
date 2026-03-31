@@ -77,7 +77,7 @@ Check all acceptance criteria by tag type. Run regression (full test suite or re
 
 **If ❌ contradicts mechanical evidence:** spawn **arbitrator subagent**.
 
-**Process report:** All ✅ → done. Any ❌ → fix, commit, re-spawn validation. Max 3 retries. After limit: STOP and escalate to human with diagnosis of what keeps failing and what was tried.
+**Process report:** All ✅ → done. Any ❌ → fix, commit, re-spawn full subagent sequence from code-reviewer. Max 3 retries. After limit: STOP and escalate to human with diagnosis of what keeps failing and what was tried.
 
 **UI tasks in Route 2:** The validator subagent handles UI verification via browser automation. Ensure the subagent prompt includes that UI files were modified and which VERIFY: criteria require browser verification.
 
