@@ -41,7 +41,9 @@ The bootstrap prompt reads the components below and generates a self-contained p
 
 | Directory | Contains | Role in the system |
 |-----------|----------|--------------------|
-| `docs/modules/templates/` | Document and agent blueprints (`.md` files) | Used by the bootstrap prompt to generate project files. Templates reference paths like `.claude/agents/code-reviewer.md` — these paths will exist inside the bootstrapped project, not in this repo. |
+| `docs/modules/templates/` | Document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json). |
+| `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
+| `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy). |
 | `docs/modules/skills/` | 10 pre-built process skills (prd-sync-checker, sprint-proposer, validation-orchestrator, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol or Execution Protocol. 3 skills (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) have `invocation: subagent` — invoked via Agent tool. The remaining 7 run inline. |
 | `docs/modules/session_protocol.md` | Session Protocol (START, END, recovery) | Defines WHEN things happen during development sessions. Embedded into each project's CLAUDE.md during bootstrap. |
 | `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
@@ -181,7 +183,9 @@ agentic_engineering/                         # Framework root (meta-project)
 │   ├── modules/                              # Shared templates and skills (single source of truth)
 │   │   ├── session_protocol.md               # Session Protocol (tool-agnostic)
 │   │   ├── execution_protocol.md             # Execution Protocol (tool-agnostic)
-│   │   ├── templates/                        # Document and agent templates for bootstrap
+│   │   ├── templates/                        # Document and config templates for bootstrap
+│   │   ├── agents/                           # Agent templates (copied to .claude/agents/)
+│   │   ├── rules/                            # Rules templates (copied to .claude/rules/)
 │   │   └── skills/                           # 10 pre-built process skills (copied to projects)
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
@@ -260,9 +264,10 @@ The framework has five types of components. Each answers a different question:
 | Component type | Location | Question it answers | Used during |
 |----------------|----------|---------------------|-------------|
 | **Protocols** | `modules/session_protocol.md`, `modules/execution_protocol.md` | WHEN do things happen? | Development sessions |
-| **Templates** | `modules/templates/*.md` | WHAT gets created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (7 inline skills) | HOW are inline protocol steps executed? | Development sessions |
-| **Process Agents** | `modules/templates/prd_sync_checker.md`, `criteria_enforcer.md`, `diff_pattern_extractor.md` | Decision/analysis steps that run as isolated subagents | Development sessions |
+| **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
+| **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
+| **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
+| **Process Skills** | `modules/skills/*/SKILL.md` (10 skills, 7 inline + 3 subagent) | HOW are protocol steps executed? | Development sessions |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
@@ -329,17 +334,19 @@ Step     Source (framework repo)                     Output (project folder)
 4        modules/templates/pendencias_md.md      --> .claude/phases/pendencias.md
 5        (external: npm registry, CLI tools)     --> MCP servers installed
 5.5      (external: skill-creator plugin)        --> Plugin installed (optional)
-5.7      modules/skills/*                        --> .claude/skills/* (copy 7 inline skills)
-         modules/templates/prd_sync_checker.md  --> .claude/agents/prd-sync-checker.md
-         modules/templates/criteria_enforcer.md --> .claude/agents/criteria-enforcer.md
-         modules/templates/diff_pattern_extractor.md --> .claude/agents/diff-pattern-extractor.md
+5.7      modules/skills/*                        --> .claude/skills/* (copy 10 skills)
+         modules/agents/prd_sync_checker.md     --> .claude/agents/prd-sync-checker.md
+         modules/agents/criteria_enforcer.md    --> .claude/agents/criteria-enforcer.md
+         modules/agents/diff_pattern_extractor.md --> .claude/agents/diff-pattern-extractor.md
+         modules/rules/session_rules.md         --> .claude/rules/session-rules.md
+         modules/rules/evolution_policy.md      --> .claude/rules/evolution-policy.md
 6        (external: skill registries)            --> Stack-specific skills (optional)
-7        modules/templates/code_reviewer.md      --> .claude/agents/code-reviewer.md
-8        modules/templates/security_reviewer.md  --> .claude/agents/security-reviewer.md
-9        modules/templates/red_team.md           --> .claude/agents/red-team.md (conditional)
-         modules/templates/blue_team.md          --> .claude/agents/blue-team.md (conditional)
-10       modules/templates/validator.md          --> .claude/agents/validator.md
-11       modules/templates/arbitrator.md         --> .claude/agents/arbitrator.md
+7        modules/agents/code_reviewer.md          --> .claude/agents/code-reviewer.md
+8        modules/agents/security_reviewer.md     --> .claude/agents/security-reviewer.md
+9        modules/agents/red_team.md              --> .claude/agents/red-team.md (conditional)
+         modules/agents/blue_team.md             --> .claude/agents/blue-team.md (conditional)
+10       modules/agents/validator.md             --> .claude/agents/validator.md
+11       modules/agents/arbitrator.md            --> .claude/agents/arbitrator.md
 12       (from PRD stack analysis)               --> .claude/skills/[stack]/SKILL.md (optional)
 13       (from PRD module analysis)              --> Rules planned in pendencias.md
 14       modules/templates/settings_json.md      --> .claude/settings.json
@@ -371,7 +378,7 @@ The framework's `.gitignore` contains `projects/` — framework git never tracks
 
 ### Why templates reference files that don't exist in this repo
 
-Templates in `docs/modules/templates/` contain paths such as `.claude/agents/prd-sync-checker.md` and `.claude/agents/code-reviewer.md`. These paths do **not** resolve in the framework repository — they resolve in the bootstrapped project.
+Templates in `docs/modules/` (templates/, agents/, rules/) contain paths such as `.claude/agents/prd-sync-checker.md` and `.claude/agents/code-reviewer.md`. These paths do **not** resolve in the framework repository — they resolve in the bootstrapped project.
 
 This is intentional: templates are blueprints for project files. The paths they contain are the paths those files will have *after bootstrap creates them*. When reading a template, the context is the future project directory, not the framework root.
 
@@ -379,7 +386,7 @@ This is intentional: templates are blueprints for project files. The paths they 
 
 > "4. PRD sync check — invoke `.claude/agents/prd-sync-checker.md` as subagent"
 
-This path does not exist in the framework repo. It will exist at `projects/[name]/.claude/agents/prd-sync-checker.md` after Step 5.7 copies it from `docs/modules/templates/prd_sync_checker.md`.
+This path does not exist in the framework repo. It will exist at `projects/[name]/.claude/agents/prd-sync-checker.md` after Step 5.7 copies it from `docs/modules/agents/prd_sync_checker.md`.
 
 **Files that only exist after bootstrap:**
 - `.claude/phases/project.md`, `pendencias.md` — created at Steps 3-4

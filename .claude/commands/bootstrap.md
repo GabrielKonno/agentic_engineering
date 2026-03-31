@@ -193,9 +193,9 @@ cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 **Process agents (3 — invoked as subagents, copied to `.claude/agents/`):**
 
 ```bash
-cp docs/modules/templates/prd_sync_checker.md projects/$ARGUMENTS/.claude/agents/prd-sync-checker.md
-cp docs/modules/templates/criteria_enforcer.md projects/$ARGUMENTS/.claude/agents/criteria-enforcer.md
-cp docs/modules/templates/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/agents/diff-pattern-extractor.md
+cp docs/modules/agents/prd_sync_checker.md projects/$ARGUMENTS/.claude/agents/prd-sync-checker.md
+cp docs/modules/agents/criteria_enforcer.md projects/$ARGUMENTS/.claude/agents/criteria-enforcer.md
+cp docs/modules/agents/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/agents/diff-pattern-extractor.md
 ```
 
 - **Session start:** prd-sync-checker (called by session-start skill, step 3, opt-in)
@@ -209,8 +209,8 @@ These 3 run as isolated subagents via Agent tool — they produce decisions or a
 ```bash
 mkdir -p projects/$ARGUMENTS/.claude/rules
 # Extract content between the markdown fences in the template
-sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
-sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/evolution_policy.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/evolution-policy.md
+sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
+sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/evolution_policy.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/evolution-policy.md
 ```
 
 This creates session-rules.md (task limits, documentation quality, reasoning depth, scripts convention) and evolution-policy.md (evolution classification, auto-evolution boundaries).
@@ -263,7 +263,7 @@ Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills 
 
 **If `.claude/agents/code-reviewer.md` already exists:** Do NOT overwrite. Verify it has "Known Bug Patterns" and "Architecture Patterns" sections. Add them if missing. Do not remove existing patterns.
 
-**If it does not exist:** Read the template at `docs/modules/templates/code_reviewer.md`. Adapt:
+**If it does not exist:** Read the template at `docs/modules/agents/code_reviewer.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - Create at `.claude/agents/code-reviewer.md`
@@ -276,7 +276,7 @@ This agent is created at bootstrap for ALL projects (security is universal).
 
 **If `.claude/agents/security-reviewer.md` already exists:** Do NOT overwrite. Verify it has: prompt injection section, tiered security testing model reference, and Section 8 delegation.
 
-**If it does not exist:** Read the template at `docs/modules/templates/security_reviewer.md`. Adapt:
+**If it does not exist:** Read the template at `docs/modules/agents/security_reviewer.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - Create at `.claude/agents/security-reviewer.md`
@@ -302,7 +302,7 @@ PRD indicates ANY of these → CREATE Red Team + Blue Team agents:
 PRD indicates NONE of these → security-reviewer is sufficient, skip this step
 ```
 
-**If creating:** Read templates at `docs/modules/templates/red_team.md` and `docs/modules/templates/blue_team.md`. Adapt with stack-specific attack vectors and security settings from PRD.
+**If creating:** Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Adapt with stack-specific attack vectors and security settings from PRD.
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - Replace `{SUBAGENT_TOOL}` with `Task tool`
@@ -314,7 +314,7 @@ PRD indicates NONE of these → security-reviewer is sufficient, skip this step
 
 ### Step 10 — Create validator agent
 
-The validator is mandatory for ALL projects. Read the template at `docs/modules/templates/validator.md`. Adapt:
+The validator is mandatory for ALL projects. Read the template at `docs/modules/agents/validator.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - Replace `{SUBAGENT_TOOL}` with `Task tool`
@@ -324,7 +324,7 @@ The validator is mandatory for ALL projects. Read the template at `docs/modules/
 
 ### Step 11 — Create arbitrator agent
 
-The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/templates/arbitrator.md`. Adapt:
+The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/agents/arbitrator.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - Replace `{SUBAGENT_TOOL}` with `Task tool`
