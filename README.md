@@ -20,7 +20,7 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
                          | Reads:             |           | pendencias.md       |
                          |  - 12 templates    |           | 9+ agent .md files  |
                          |  - 2 protocols     |           | 10 process skills   |
-                         |  - 10 skills       |           | 2 rules files       |
+                         |  - 10 skills       |           | 3 rules files       |
                          |  - examples/       |           | examples/ (copy)    |
                          |                    |           | settings.json       |
                          +--------------------+           +---------------------+
@@ -105,14 +105,14 @@ agentic_engineering/
 │   │   ├── execution_protocol.md           ← Execution Protocol (validation loop)
 │   │   ├── templates/                      ← Document and config templates
 │   │   ├── agents/                         ← Agent templates (9 agents)
-│   │   ├── rules/                          ← Rules templates (2 rules files)
+│   │   ├── rules/                          ← Rules templates (3 rules files)
 │   │   └── skills/                         ← 10 pre-built process skills
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── examples_instructions.md        ← Conventions for creating agents/skills
-│   ├── agents/                         ← 10 agent templates (quality, domain, ops, security)
+│   ├── agents/                         ← 20 agent templates (quality, domain, ops, security, compliance)
 │   ├── skills/                         ← 9 skill templates (stack, domain, process)
-│   └── rules/                          ← 3 rules templates (multi-tenancy, e-commerce, auth)
+│   └── rules/                          ← 10 rules templates (auth, compliance, i18n, scheduling, resilience, etc.)
 │
 └── projects/                           ← Local workspace (git-ignored)
     └── [project-name]/                 ← Each project gets its own git repo
@@ -138,6 +138,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/skills/*` (10 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
 | `.claude/rules/session-rules.md` | `modules/rules/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
 | `.claude/rules/evolution-policy.md` | `modules/rules/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
+| `.claude/rules/component-design.md` | `modules/rules/component_design.md` | Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment |
 | `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/agents/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
@@ -150,7 +151,7 @@ Templates are blueprints. The paths they contain are the paths those files will 
 
 **Files created only during development** (not at bootstrap):
 - `.claude/phases/done_tasks.md` — archive of completed tasks (created when first task completes)
-- `.claude/rules/*.md` — domain-specific rules (created when 3+ patterns accumulate from the same domain; `session-rules.md` and `evolution-policy.md` are created at bootstrap)
+- `.claude/rules/*.md` — domain-specific rules (created when 3+ patterns accumulate from the same domain; `session-rules.md`, `evolution-policy.md`, and `component-design.md` are created at bootstrap)
 - `.claude/logs/*.md` — session logs (one per session, first created at end of session 0)
 
 ---

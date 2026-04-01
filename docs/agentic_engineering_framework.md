@@ -43,11 +43,11 @@ The bootstrap prompt reads the components below and generates a self-contained p
 |-----------|----------|--------------------|
 | `docs/modules/templates/` | Document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json). |
 | `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
-| `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy). |
+| `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design). |
 | `docs/modules/skills/` | 10 pre-built process skills (prd-sync-checker, sprint-proposer, validation-orchestrator, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol or Execution Protocol. 3 skills (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) have `invocation: subagent` — invoked via Agent tool. The remaining 7 run inline. |
 | `docs/modules/session_protocol.md` | Session Protocol (START, END, recovery) | Defines WHEN things happen during development sessions. Embedded into each project's CLAUDE.md during bootstrap. |
 | `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
-| `examples/` | Quality reference templates for agents (10), skills (9), and rules (3) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
+| `examples/` | Quality reference templates for agents (20), skills (9), and rules (10) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | Slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
 | `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo after extraction. |
@@ -340,6 +340,7 @@ Step     Source (framework repo)                     Output (project folder)
          modules/agents/diff_pattern_extractor.md --> .claude/agents/diff-pattern-extractor.md
          modules/rules/session_rules.md         --> .claude/rules/session-rules.md
          modules/rules/evolution_policy.md      --> .claude/rules/evolution-policy.md
+         modules/rules/component_design.md     --> .claude/rules/component-design.md
 6        (external: skill registries)            --> Stack-specific skills (optional)
 7        modules/agents/code_reviewer.md          --> .claude/agents/code-reviewer.md
 8        modules/agents/security_reviewer.md     --> .claude/agents/security-reviewer.md
@@ -904,6 +905,9 @@ Output: Vulnerability Report. Tier 3 flagged as MANUAL:.
 **Blue Team subagent** (after validation passes, if Red Team ran):
 Input: Vulnerability Report + final code (post-fixes).
 Output: Defense Assessment — verifies defenses exist for each finding.
+
+**Coverage gap handling** (after receiving code-reviewer and security-reviewer reports):
+Read the Coverage Gap Declaration section in each report. For each declared gap, search `.claude/agents/` descriptions for a specialist agent matching the gap's domain. If found: spawn it and include its report as evidence for the validator. If not found: note the gap in "Items for human verification." This is generic — zero cost when no gaps are declared.
 
 **Step 6 — Process Validation Report:**
 - All ✅: proceed to report.
@@ -1609,14 +1613,14 @@ The config file's Session Protocol contains explicit trigger points:
 
 These are deterministic — the AI follows the numbered protocol and encounters the trigger.
 
-### Layer 2 — Pushy descriptions in SKILL.md (persuasive)
+### Layer 2 — Pushy descriptions in SKILL.md and agent .md (persuasive)
 
 Each process skill's `description:` frontmatter field includes:
 1. What the skill does
 2. WHEN it MUST run (imperative language)
 3. What goes wrong if it is skipped (consequence)
 
-Example:
+Example (process skill):
 ```yaml
 description: >
   Enforces criteria quality before implementation. Rewrites WEAK criteria to STRONG.
@@ -1634,6 +1638,24 @@ When creating new fixed process skills (framework or project):
 - If the skill has a trigger point in the Session Protocol, that trigger must reference the skill by path
 
 This convention applies to **process skills** (workflow steps). Knowledge skills (`invocation: inline`, used as reference) use contextual descriptions instead — they explain when the skill is useful, without imperative triggers.
+
+### Convention for specialist agents (Pushy Description pattern)
+
+Specialist agents (on-demand, in `examples/agents/`) use a different description pattern that communicates both PURPOSE and ACTIVATION:
+
+```yaml
+description: >
+  [Core function — what the agent does, how, what value it adds].
+  USE PROACTIVELY when [trigger conditions]
+    or when [reviewer] declares a [domain] gap.
+  NOT needed for [exclusions].
+  Without this, [consequence of skipping].
+  Produces [Report Name] → [OUTCOME_A / OUTCOME_B].
+```
+
+The core function line is mandatory — without it, the description is a trigger with no substance. The gap phrase must echo the reviewer's gap declaration verbatim for reliable semantic matching.
+
+See `.claude/rules/component-design.md` (or `modules/rules/component_design.md` template) for the full Component Design Policy covering gap-declaration architecture, vocabulary alignment, and tiered agent-vs-rule decisions.
 
 ---
 
