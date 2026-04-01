@@ -3,9 +3,10 @@ name: project-md-updater
 invocation: inline
 effort: medium
 description: >
-  Updates project.md with a concise index row and PRD version at end of every session.
-  Detailed records are in session logs. MUST run AFTER session-log-creator. Without
-  this, the next session has no context of what happened.
+  Updates project.md with a concise index row, PRD version, and domain signals
+  at end of every session. Detailed records are in session logs. MUST run AFTER
+  session-log-creator. Without this, the next session has no context of what
+  happened and cross-session domain accumulation is lost.
 created: framework-v1.6.0 (pre-validated)
 derived_from: session_protocol end-of-session item 2
 ---
@@ -54,6 +55,25 @@ If sprint was interrupted: add `**Sprint interrupted:** Yes — remaining tasks:
 ### 5. Incomplete features
 
 If a feature stopped mid-session, the index row summary should note it: "Auth module — partial, blocked by schema issue."
+
+### 6. Update Domain Signals
+
+If this session involved domain-specific business logic, business rules, or repeated a complex process:
+
+1. Check the Domain Signals table in project.md
+2. If the domain already has a row with status `active`: append the current session number (e.g., `s3` → `s3, s5`)
+3. If not: add a new row with the current session number and type (`logic` or `process`)
+4. If a rules file or skill was created for this domain during this session: update status to `→ .claude/rules/[domain]-rules.md` or `→ .claude/skills/[name]/`
+
+**Type classification:**
+- `logic` — business rules, domain constraints, recurring domain-specific patterns (e.g., timezone handling, financial calculations, auth flows)
+- `process` — a complex multi-step procedure that was executed manually and could become a skill (e.g., migration workflow, deploy checklist, data backfill procedure)
+
+**Do NOT add signals for:**
+- Generic code patterns (→ CLAUDE.md Key Patterns)
+- Bug patterns (→ Known Bug Patterns in code-reviewer.md)
+- One-time decisions (→ session log only)
+- Framework/tooling conventions (→ CLAUDE.md Architecture section)
 
 ---
 
