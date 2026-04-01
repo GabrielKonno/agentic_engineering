@@ -58,11 +58,14 @@ Commit current state before writing code to enable clean rollback.
 
 ### Route 1 — Inline (routine tasks)
 
-Self-review using `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, edge cases. Always check security-reviewer.md headers — if changes touch user input, auth, database, APIs, secrets, or HTML rendering, do the full security review.
+Execute these steps in order. Do not skip steps — each one produces evidence for the validation report.
 
-If UI was modified: use browser automation tools to verify changes visually — code review alone is NOT sufficient for UI verification. Health check dev server first. If dev server unavailable: ❌. If browser automation tools unavailable: ❌ with reason, list VERIFY: criteria as MANUAL:.
-
-Check all acceptance criteria by tag type. Run regression (full test suite or re-check last 2-3 tasks' criteria). Produce report.
+1. **Code review** — Self-review using `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, edge cases.
+2. **Security check** — Check security-reviewer.md headers. If changes touch user input, auth, database, APIs, secrets, or HTML rendering: do the full security review.
+3. **UI verification (if UI files modified)** — Use the project's browser automation MCP to verify visual changes. Navigate to the affected pages, take snapshots, and verify that VERIFY: criteria match what's rendered. Test at a mobile viewport (≤430px) in addition to desktop. Code review alone is NOT sufficient for UI verification — browser automation is mandatory. If browser automation is unavailable: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:.
+4. **Criteria check** — Check all acceptance criteria by tag type (BUILD:/VERIFY:/QUERY:/REVIEW:).
+5. **Regression** — Run full test suite or re-check last 2-3 tasks' criteria.
+6. **Report** — Produce the validation report using the standard format.
 
 ### Route 2 — Subagent (logic-heavy + architecture/security)
 
@@ -89,7 +92,7 @@ no coverage gaps are declared.
 
 **Process report:** All ✅ → done. Any ❌ → fix, commit, re-spawn full subagent sequence from code-reviewer. Max 3 retries. After limit: STOP and escalate to human with diagnosis of what keeps failing and what was tried.
 
-**UI tasks in Route 2:** The validator subagent handles UI verification via browser automation. Ensure the subagent prompt includes that UI files were modified and which VERIFY: criteria require browser verification.
+**UI tasks in Route 2:** The validator subagent handles UI verification via browser automation MCP. When spawning the validator, include in the prompt: (1) that UI files were modified, (2) which VERIFY: criteria require browser verification, and (3) the app URL or route where changes are visible. The validator will navigate, take snapshots, and verify elements match criteria.
 
 ---
 
