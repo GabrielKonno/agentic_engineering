@@ -90,8 +90,18 @@ Execute in order:
    - Are assertions checking real values, not just "no error thrown"?
    - Are edge cases covered (empty, null, zero, negative)?
    - If test quality is insufficient: report as ❌ with explanation
-4. **UI verification (web projects):** Use browser automation tools to verify VERIFY: criteria visually — code review or inference is NOT sufficient. Health check dev server first. If dev server unavailable: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:. If browser automation tools not available: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:. Available browser tools are listed in the project's CLAUDE.md under MCP Servers.
-   **Responsive check:** After verifying at default viewport, test at minimum one additional viewport (mobile ≤ 430px width). Verify layout is functional, content accessible, interactive elements reachable. If layout breaks: include in UI: result. If no UI files modified: ⏭️.
+4. **UI verification (if UI files modified):** Code review or inference is NOT sufficient — browser automation is mandatory for any change that affects what the user sees.
+
+   **Verification flow:**
+   a. Verify the dev server is running and the app is accessible
+   b. Navigate to the page(s) where changes are visible
+   c. Take a snapshot (accessibility tree) to verify element structure and content
+   d. For each VERIFY: criterion that requires visual confirmation: navigate to the relevant state, verify elements are present, visible, and match expectations
+   e. Document findings with evidence (snapshot output, element state)
+
+   If browser automation MCP is unavailable: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:. If no UI files modified: ⏭️.
+
+   **Responsive check:** After verifying at default viewport, test at mobile viewport (≤430px width). Verify layout is functional, content accessible, interactive elements reachable. If layout breaks: include in UI result.
    **Cross-browser check (shared component or CSS change):** If the diff modifies shared components, CSS variables, layout, or design tokens — test in at minimum: Chromium (always), Firefox (when flexbox, CSS grid, or CSS logical properties are involved), WebKit (when `-webkit-` properties or font rendering are involved). Document which browsers were checked.
    **Visual regression (shared component change):** If the diff modifies shared components (button, modal, nav, form, card, layout primitives) or CSS variables — invoke `visual-regression-tester` subagent to compare against baselines. If no baselines exist, capture them and mark UI result as `BASELINE-CREATED` (not ✅).
 5. **Execute QUERY: criteria** via database tool. If data missing: create test data, document it.
