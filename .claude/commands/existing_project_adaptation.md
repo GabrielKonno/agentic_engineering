@@ -166,7 +166,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v1.7.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.1.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -181,11 +181,11 @@ Required sections (compare against docs/modules/templates/claude_md.md — v1.7.
 □ Environment Variables section
 ```
 
-**Migration from v1.6.0 to v1.7.0:** If the CLAUDE.md contains inline Session Protocol (10 start steps, end steps, model switch protocol, validation failure post-mortem, sprint-approved mode, etc.), these should be REMOVED. All protocol logic now lives in process skills (sprint-proposer, session-end, context-recovery, validation-orchestrator) and session rules (.claude/rules/session-rules.md). Replace inline protocol sections with the slim Session Protocol pointers from the v1.7.0 template.
+**Migration from v1.6.0 to v2.1.0:** If the CLAUDE.md contains inline Session Protocol (10 start steps, end steps, model switch protocol, validation failure post-mortem, sprint-approved mode, etc.), these should be REMOVED. All protocol logic now lives in process skills (sprint-proposer, session-end, context-recovery, validation-orchestrator) and session rules (.claude/rules/session-rules.md). Replace inline protocol sections with the slim Session Protocol pointers from the v2.1.0 template.
 
 **Key additions likely missing from older versions:**
 
-*v1.7.0 structural change:*
+*v2.1.0 structural change:*
 - CLAUDE.md is now a slim orchestrator (~90 lines). All protocol logic lives in skills and rules.
 - Session Protocol section is 5 lines of pointers, not inline protocol steps.
 - Skills & Agents section uses auto-discovery (no explicit listing).
@@ -405,7 +405,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v1.7.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.1.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (9 inline — to `.claude/skills/`):**
 ```bash

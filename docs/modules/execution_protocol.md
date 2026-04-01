@@ -2,7 +2,7 @@
 
 This module defines the before-implementing, during-implementation (validation loop), between-tasks, and validation orchestration protocols. This is the architectural reference — WHAT happens and WHY.
 
-In v1.7.0, all protocol logic is implemented in skills:
+In v2.1.0, all protocol logic is implemented in skills:
 - `validation-orchestrator` skill: before-implementing (criteria enforcement, complexity classification, plan proposal), during-implementation (Phase A + Phase B with 2 validation routes: inline for routine, subagent for logic-heavy/architecture/security), and validation failure post-mortem
 - `sprint-proposer` skill: session start (model switch check, project.md, PRD sync, sprint proposal) + between-tasks workflow (commit, update pendencias, context health check, sprint report)
 - `criteria-enforcer` agent: criteria quality enforcement (subagent, called by validation-orchestrator)

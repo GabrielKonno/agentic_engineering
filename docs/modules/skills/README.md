@@ -9,7 +9,7 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 
 ## What these are
 
-These 9 skills implement steps of the Session Protocol and Execution Protocol. The main agent reads the SKILL.md and follows the steps in its own context. In v1.7.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
+These 9 skills implement steps of the Session Protocol and Execution Protocol. The main agent reads the SKILL.md and follows the steps in its own context. In v2.1.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
 
 1. **Copied** to each project's `.claude/skills/` at bootstrap
 2. **Triggered** by convention (sprint-proposer/session-end are user-invoked; others are called by orchestrating skills)

@@ -6,7 +6,7 @@ description: >
   MUST run at the end of every implementation session. Orchestrates pattern
   extraction, session log, project/pendencias/config/rules updates in priority
   order. Without this, the next session starts with stale context and lost patterns.
-created: framework-v1.7.0 (pre-validated)
+created: framework-v2.1.0 (pre-validated)
 derived_from: session_protocol "At the END of every session"
 ---
 
