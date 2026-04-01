@@ -18,11 +18,25 @@ At the END of every session, after config-file-updater. Only if domain discoveri
 
 ## Process
 
+### 0. Check cross-session signals
+
+Read the Domain Signals table in project.md.
+
+For each domain with status `active`:
+- If **2+ sessions** listed AND type is `logic` → evaluate whether a rules file should be created (same criteria as Step 1: is the domain a core feature? are there enough business rules to justify a dedicated file?)
+- If **2+ sessions** listed AND type is `process` → evaluate whether a skill should be created (same criteria as Step 4: is the process complex enough? will it recur?)
+
+If a rules file or skill IS created from a domain signal:
+1. Create the rules file/skill following the existing process (Steps 1 or 4)
+2. Update the Domain Signals row status in project.md: `active` → `→ .claude/rules/[domain]-rules.md` or `→ .claude/skills/[name]/`
+
+If the domain has 2+ sessions but does NOT yet justify a rules file (e.g., only 1 business rule so far): leave as `active`. The signal keeps accumulating.
+
 ### 1. Rules files — create or update
 
 **Create a new rules file when:**
 - A module has 3+ business rules affecting code
-- Same logic referenced 2+ times across sessions
+- Domain Signals table shows 2+ sessions for a domain (detected in Step 0)
 - A bug was caused by domain misunderstanding
 - 3+ Known Bug Patterns from same domain (DERIVED promotion)
 

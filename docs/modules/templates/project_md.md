@@ -73,5 +73,18 @@ Module A ──→ Module B ──→ Module C
 
 ---
 
+## Domain Signals
+
+> Tracks domain-specific logic and repeated processes across sessions.
+> When a domain reaches 2+ sessions, `rules-agents-updater` evaluates
+> whether to create a rules file (logic) or skill (process).
+
+| Domain | Sessions | Type | Status |
+|--------|----------|------|--------|
+
+<!-- Rows added by project-md-updater. Status: "active" or "→ .claude/rules/[file].md" -->
+
+---
+
 *Last updated: [date]*
 ```
