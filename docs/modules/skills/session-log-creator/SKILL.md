@@ -40,6 +40,21 @@ Save to `.claude/logs/[filename]`:
 ## Tasks completed
 - [task]: [approach, key decisions]
 
+## Validation Summary
+
+### [Task name]
+- **Complexity:** routine | logic-heavy | architecture/security
+- **Route:** inline checklist | subagent chain
+- **Subagents:** [inline checklist | code-reviewer → validator | code-reviewer → security-reviewer → validator | etc.]
+- **Specialists spawned:** [none | list with gap that triggered them]
+- **Result:**
+  - Build: ✅  Tests: ✅  Review: ✅  Security: ⏭️  UI: ⏭️  Migration: ⏭️
+- **Retries:** 0 | [N — brief reason for each ❌ → fix cycle]
+- **Human verification:** [none | list of MANUAL: criteria]
+- **Key findings:** [none | non-trivial findings from reviewers, even if overall ✅]
+
+[Repeat for each task validated in this session]
+
 ## Decisions made (and why)
 - [decision]: [reasoning, alternatives, trade-offs]
 
@@ -61,6 +76,13 @@ Save to `.claude/logs/[filename]`:
 ## PRD version: v[X.X.X]
 ## Next session should: [specific next step]
 ```
+
+**Validation Summary notes:**
+- Include one entry per task that went through validation (Phase B of validation-orchestrator)
+- For routine tasks (Route 1), "Subagents" is "inline checklist" and "Specialists" is "none"
+- For tasks skipped without validation (e.g., documentation-only, config changes), omit the entry
+- The Result line uses the same ✅/❌/⏭️ convention as the validation report (⏭️ = not applicable)
+- "Key findings" captures reviewer observations worth noting even when the task passed — these inform future Known Bug Patterns and post-mortems
 
 ## Rules
 - Logs are **append-only** — never edit old logs
