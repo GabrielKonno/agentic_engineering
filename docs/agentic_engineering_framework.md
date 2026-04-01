@@ -240,12 +240,12 @@ project/
 | `project.md` | WHERE we are + TECHNICAL DECISIONS (approved plans, implementation choices) | End of every session |
 | `pendencias.md` | WHAT is left (backlog with verifiable criteria) | End of every session. Completed tasks are moved immediately to `done_tasks.md` with full metadata. If "Next Steps" exceeds 15 items: re-evaluate priorities with the user — some items may belong in "Future Improvements" instead. |
 | `done_tasks.md` | Archive of completed tasks with full metadata. Not read at session start. Read on-demand by sprint-proposer (dependency checks) or when investigating history. | When tasks are completed (moved by pendencias-updater at end of session or between tasks) |
-| `rules/*.md` | DOMAIN RULES (complex business logic translated into technical rules) | When complex domain logic is established |
+| `rules/*.md` | DOMAIN RULES (complex business logic translated into technical rules) | Pre-created at bootstrap from example templates when PRD indicates the domain; refined by `rules-agents-updater` as project-specific patterns emerge |
 | `agents/code-reviewer.md` | QUALITY checks + Known Bug Patterns + Architecture Patterns (cumulative) | When bugs are fixed, patterns defined, or structural issues found |
 | `agents/security-reviewer.md` | SECURITY checks — OWASP Top 10, injection, auth, data protection (universal, stack-agnostic) | Bootstrap. Covers WHAT to check; stack-specific HOW is in stack skills and Red Team |
 | `agents/red-team.md` (conditional) | ADVERSARIAL security testing — stack-specific attack vectors, tiered security model | Bootstrap, if PRD has high-risk features (auth, payments, AI/LLM, PII, multi-tenancy) |
 | `agents/blue-team.md` (conditional) | DEFENSIVE security verification — validates defenses, confirms fixes | Bootstrap, if PRD has high-risk features (same trigger as Red Team) |
-| `agents/[custom].md` | Custom agents created on-demand when recurring review/analysis patterns emerge | When a review pattern repeats |
+| `agents/[custom].md` | Custom agents — specialist agents pre-installed at bootstrap from example templates (matching kept gap declarations), plus additional agents created on-demand when recurring review/analysis patterns emerge | Bootstrap (pre-installed from examples) or when a review pattern repeats (on-demand) |
 | `skills/[custom]/SKILL.md` | Custom skills created on-demand for recurring complex processes (Anthropic folder format) | When a technical process repeats 2+ times |
 | `skills/[stack]/SKILL.md` | Stack knowledge (framework-specific patterns for the project's stack) | Created at bootstrap or one-time installation |
 | `assets/examples/` | Reference templates for agents, skills, and rules (copied from framework repo during bootstrap) | Read-only reference. Consult before creating on-demand agents/skills. |
@@ -349,7 +349,8 @@ Step     Source (framework repo)                     Output (project folder)
 10       modules/agents/validator.md             --> .claude/agents/validator.md
 11       modules/agents/arbitrator.md            --> .claude/agents/arbitrator.md
 12       (from PRD stack analysis)               --> .claude/skills/[stack]/SKILL.md (optional)
-13       (from PRD module analysis)              --> Rules planned in pendencias.md
+12.5     examples/agents/*                       --> .claude/agents/[specialist].md (pre-install matching gap declarations)
+13       examples/rules/*                        --> .claude/rules/[domain]-rules.md (pre-create from PRD signals)
 14       modules/templates/settings_json.md      --> .claude/settings.json
 15       (all of above)                          --> Bootstrap report
 ```
@@ -1641,7 +1642,7 @@ This convention applies to **process skills** (workflow steps). Knowledge skills
 
 ### Convention for specialist agents (Pushy Description pattern)
 
-Specialist agents (on-demand, in `examples/agents/`) use a different description pattern that communicates both PURPOSE and ACTIVATION:
+Specialist agents (pre-installed at bootstrap from `examples/agents/` when matching gap declarations, or created on-demand later) use a different description pattern that communicates both PURPOSE and ACTIVATION:
 
 ```yaml
 description: >

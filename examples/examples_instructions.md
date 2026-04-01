@@ -50,6 +50,13 @@ examples/
 ### During bootstrap (automatic)
 The session0 prompt copies this entire directory to `assets/examples/` in the project. No manual action needed.
 
+### During bootstrap — pre-installation (Step 12.5 + Step 13)
+After copying examples, the bootstrap also pre-installs relevant components directly into the project:
+- **Specialist agents** (Step 12.5): agents matching kept Coverage Gap Declarations are copied from `assets/examples/agents/` to `.claude/agents/` so the activation chain works from session 1.
+- **Domain rules** (Step 13): rules matching PRD domain signals are copied from `assets/examples/rules/` to `.claude/rules/` so code-reviewer conditional checks activate from session 1.
+
+Both are seeded from example templates and refined by `rules-agents-updater` as project-specific patterns emerge.
+
 ### When creating on-demand agents/skills (AI reference)
 The framework instructs the AI to check `assets/examples/` before creating any new agent or skill:
 

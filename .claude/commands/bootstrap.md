@@ -266,6 +266,9 @@ Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills 
 **If it does not exist:** Read the template at `docs/modules/agents/code_reviewer.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
+- **Pre-fill "Architecture Patterns" from PRD:** Read the PRD's stack, framework, and architectural constraints. Add 3-7 stack-specific structural rules that are predictable from the technology choice (e.g., Next.js App Router → server/client component separation; Prisma → transaction usage for multi-table ops; Django → fat models/thin views). Keep the existing generic rules and append project-specific ones below them. Do NOT invent speculative patterns — only add rules that are well-established conventions for the chosen stack.
+- **Pre-select Coverage Gap Declarations from PRD:** Review the four optional gap sections (accessibility, performance, concurrency, data integrity). Remove sections that are clearly irrelevant to this project's domain (e.g., remove accessibility gap if project has no UI; remove concurrency gap if project has no shared state or booking logic). Keep sections that match PRD features. When in doubt, keep the section — it is conditional and only activates when matching diffs appear.
+- **Keep "Known Bug Patterns" empty** — this section is populated by `rules-agents-updater` as real bugs emerge during development, not from predictions.
 - Create at `.claude/agents/code-reviewer.md`
 
 **Creation eval (DEFERRABLE if context is low):** See template for eval scenarios. Update lineage after eval.
@@ -279,6 +282,9 @@ This agent is created at bootstrap for ALL projects (security is universal).
 **If it does not exist:** Read the template at `docs/modules/agents/security_reviewer.md`. Adapt:
 - Replace `{CONFIG_DIR}` with `.claude/`
 - Replace `{CONFIG_FILE}` with `CLAUDE.md`
+- **Pre-select Coverage Gap Declarations from PRD:** Review the five optional gap sections (static analysis, secrets coverage, federation protocol, compliance, infrastructure security). Remove sections clearly irrelevant to this project (e.g., remove federation protocol gap if no OAuth/OIDC/SAML; remove infrastructure security gap if no IaC/Docker/K8s). Keep sections that match PRD's tech stack and architecture. When in doubt, keep — gaps are conditional and only fire when matching diffs appear.
+- **Compliance Probe context:** If the PRD indicates the project handles personal data (PII, CPF, health records, payment data), note this in the agent so the Compliance Probe section activates from session 1 rather than waiting for a diff to reveal it.
+- **Keep Section 8 (Stack-Specific Security) as-is** — this delegates to the stack skill and Red Team agent by design.
 - Create at `.claude/agents/security-reviewer.md`
 
 After creating, verify code-reviewer references it in the Security section.
@@ -357,32 +363,74 @@ mkdir -p .claude/skills/[stack-name]
 
 **Do NOT create if:** pre-made skill already installed, stack too generic, AI unfamiliar with framework.
 
-### Step 12.5 — Validate activation chains
+### Step 12.5 — Pre-install specialist agents and validate activation chains
 
-For every specialist agent created in Steps 7-12 that uses gap-declaration activation, verify the chain is complete. Note: code-reviewer and security-reviewer are SOURCES of gaps (not targets) — skip them. Validator, arbitrator, red-team, and blue-team are spawned by protocol, not by gap declaration — skip them too.
+#### Step 12.5a — Pre-install specialist agents matching kept gap declarations
 
-For each remaining specialist agent (if any were created — at bootstrap this is rare, since most specialists are created on-demand in later sessions):
+Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/security-reviewer.md` (created in Steps 7-8). Identify which Coverage Gap Declaration sections were KEPT (not removed during pre-selection). For each kept gap, check if a matching specialist example exists in `assets/examples/agents/`:
+
+| Gap declaration (in reviewer) | Specialist example to install |
+|-------------------------------|-------------------------------|
+| accessibility gap (code-reviewer) | accessibility-checker.md |
+| performance gap (code-reviewer) | performance-auditor.md |
+| concurrency gap (code-reviewer) | concurrency-tester.md |
+| data integrity gap (code-reviewer) | data-integrity-checker.md |
+| static analysis gap (security-reviewer) | sast-scanner.md |
+| secrets coverage gap (security-reviewer) | secrets-scanner.md |
+| federation protocol gap (security-reviewer) | oauth-flow-tester.md |
+| compliance gap (security-reviewer) | compliance-auditor.md |
+| infrastructure security gap (security-reviewer) | iac-scanner.md |
+
+For each match found: copy from `assets/examples/agents/` to `.claude/agents/`, adapting only:
+- `created:` lineage: change from `example` to `s0 (bootstrap — pre-installed from example template)`
+- Verify the `description:` gap phrase matches the reviewer's gap declaration vocabulary
+
+If a gap was KEPT but no matching example exists in `assets/examples/agents/`: register in `pendencias.md` — "Create specialist agent for [gap] when domain implementation begins."
+
+#### Step 12.5b — Validate activation chains
+
+For every specialist agent created or pre-installed in Steps 7-12.5a that uses gap-declaration activation, verify the chain is complete. Note: code-reviewer and security-reviewer are SOURCES of gaps (not targets) — skip them. Validator, arbitrator, red-team, and blue-team are spawned by protocol, not by gap declaration — skip them too.
+
+For each remaining specialist agent:
 
 1. Verify it has a matching Coverage Gap Declaration in code-reviewer.md or security-reviewer.md whose domain vocabulary echoes the agent's Pushy Description
 2. If no match: add the gap declaration to the appropriate reviewer following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
 3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md` — the domain must appear in at least one reviewer
 
-If no specialist agents exist yet (typical for a fresh bootstrap): skip this step entirely. It becomes relevant when `rules-agents-updater` creates specialists during future sessions.
-
 This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the reviewer-to-orchestrator-to-specialist activation chain is broken.
 
 ---
 
-### Step 13 — Identify future rules
+### Step 13 — Pre-create domain rules from PRD
 
-Analyze the PRD and list modules with complex business logic (3+ business rules).
+Analyze the PRD for domain signals. For each domain that is a **core feature or architectural pattern** in the PRD (not a passing mention), check if a matching example template exists in `assets/examples/rules/`:
 
-For each, register in pendencias.md:
+| PRD signal (keywords/features) | Rules file to create | Example template |
+|---|----|---|
+| Multilingual, i18n, localization, multi-language | i18n-rules.md | examples/rules/i18n-rules.md |
+| Microservices, event-driven, message queue, saga | distributed-systems-rules.md | examples/rules/distributed-systems-rules.md |
+| Scheduling, cron, appointments, calendar, booking | scheduling-rules.md | examples/rules/scheduling-rules.md |
+| High-availability, retry, circuit-breaker, fallback | resilience-rules.md | examples/rules/resilience-rules.md |
+| Rate limiting, throttling, API quotas | rate-limiting-rules.md | examples/rules/rate-limiting-rules.md |
+| E-commerce, cart, checkout, payment, orders | e-commerce-rules.md | examples/rules/e-commerce-rules.md |
+| Full-stack, frontend + backend, SSR, API + UI | frontend-backend-integration-rules.md | examples/rules/frontend-backend-integration-rules.md |
+| Auth, login, permissions, roles, OAuth | auth-rules.md | examples/rules/auth-rules.md |
+| PII, LGPD, GDPR, personal data, consent | compliance-rules.md | examples/rules/compliance-rules.md |
+| Multi-tenancy, organization isolation, RLS | multi-tenancy-rules.md | examples/rules/multi-tenancy-rules.md |
+| Observability, logging, tracing, metrics, alerts | observability-rules.md | examples/rules/observability-rules.md |
+
+**Guard:** Only pre-create when BOTH conditions are met: (1) the domain is a core feature or architectural pattern in the PRD, and (2) a matching example template exists in `assets/examples/rules/`.
+
+For each match: copy from `assets/examples/rules/` to `.claude/rules/`, adapting:
+- `applies_to:` frontmatter: reference the project's actual module names from the PRD
+- Remove clearly irrelevant sections that contradict the PRD (e.g., RTL layout section in i18n-rules.md if the project targets only Portuguese/English)
+- Add an HTML comment at the top of the file body: `<!-- Seeded from example template at bootstrap. Refined by rules-agents-updater as project-specific patterns emerge. -->`
+- Do NOT rewrite code examples to match the project's stack — leave for `rules-agents-updater` to refine with real code patterns
+
+For modules with complex business logic but WITHOUT a matching example template: register in `pendencias.md` as a future task:
 ```
 - Create `.claude/rules/[module]-rules.md` when starting implementation of [module]
 ```
-
-Do NOT create the rule now — wait until implementation when the details are known.
 
 ---
 
@@ -436,6 +484,14 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 - .claude/rules/evolution-policy.md (evolution classification, auto-evolution boundaries)
 - .claude/rules/component-design.md (agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment, tiered architecture)
 
+### Domain rules pre-created (from example templates — Step 13):
+- .claude/rules/[domain]-rules.md ← seeded, refined by rules-agents-updater
+- [list each pre-created rules file, or "none — no PRD domain signals matched example templates"]
+
+### Specialist agents pre-installed (from example templates — Step 12.5):
+- .claude/agents/[specialist].md ← activation chain verified
+- [list each pre-installed specialist, or "none — no gap declarations kept"]
+
 ### Hooks configured:
 - smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]
 
@@ -447,8 +503,9 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 - [stack-skill if created] (proactive — Step 12)
 - [domain-test-patterns if created] (proactive — Step 12)
 
-### Rules planned for future creation:
+### Rules planned for future creation (no example template):
 - [module] → .claude/rules/[module]-rules.md
+- [or "none — all detected domains had example templates"]
 
 ### Build Order:
 1. [first step — NEXT SESSION]
