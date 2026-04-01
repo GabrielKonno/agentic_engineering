@@ -113,6 +113,12 @@ Execute in order:
     - Do NOT fail the overall validation for this reason alone — it is a coverage
       limitation, not a finding. Flag as ⚠️ in Security row, not ❌.
 
+    **Code-reviewer coverage gaps:** If the code-reviewer declared coverage gaps
+    (accessibility, performance, concurrency, data integrity) AND no specialized
+    agent report was provided as evidence: note under "Items for human verification"
+    with ⚠️, not ❌. Same treatment as security-reviewer gaps — coverage limitation,
+    not a finding.
+
 11. **Produce the Validation Report** using the format above.
 
 ## BOUNDARIES

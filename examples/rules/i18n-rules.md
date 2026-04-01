@@ -141,3 +141,23 @@ QUERY: Grep for string concatenation in UI components.
   → Expected: 0 matches in user-visible strings.
   FAILURE: fragmented strings (breaks grammar in RTL and inflected languages).
 ```
+
+## Character Encoding Rules
+
+### UTF-8 Everywhere
+- **Source files**: UTF-8 without BOM
+- **HTTP responses**: `Content-Type` header includes `charset=utf-8`
+- **Database**: use `utf8mb4` (MySQL) or ensure UTF-8 collation (PostgreSQL uses UTF-8 by default). Never `utf8` on MySQL — it only supports 3-byte chars (no emoji, some CJK missing).
+- **File I/O**: always specify encoding explicitly — `fs.readFile(path, 'utf-8')`, `open(path, encoding='utf-8')`
+
+### Unicode Normalization
+- **String comparison**: normalize to NFC before comparing user input (accented characters have multiple valid byte representations: `é` can be U+00E9 or U+0065 + U+0301)
+- **Search**: normalize both query and target to the same form before matching
+- **Database indexes on text columns with accents**: use ICU collation or normalize at write time
+- **URL slugs**: normalize and transliterate (remove diacritics) — `"São Paulo"` → `"sao-paulo"`
+
+### Combining Characters and Emoji
+- **String length for user-visible limits**: use grapheme cluster count, not code point count — `"é"` can be 1 or 2 code points but is always 1 visible character
+- **Truncation**: never truncate mid-grapheme-cluster — use `Intl.Segmenter` or equivalent library
+- **Emoji in user input**: support in text fields — requires `utf8mb4` on MySQL, standard UTF-8 elsewhere
+- **Zero-width characters**: strip ZWJ, ZWNJ, and other invisible characters from security-sensitive inputs (usernames, slugs, search queries) to prevent visual spoofing

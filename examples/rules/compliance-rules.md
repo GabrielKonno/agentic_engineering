@@ -98,3 +98,21 @@ QUERY: Audit log de acesso admin a dados de usuário.
   → Expected: linha presente para cada evento de acesso admin.
   FAILURE: sem entrada de auditoria (acesso admin não logado).
 ```
+
+## Blocking Validation Requirements
+
+The following compliance findings are **blocking** — they produce ❌ in the validation report, not just informational notes:
+
+| Finding | Severity | Justification |
+|---------|----------|---------------|
+| PII collected without documented purpose | BLOCK | LGPD Art. 6 / GDPR Art. 5 — data minimization |
+| PII stored without consent mechanism OR alternative legal basis | BLOCK | LGPD Art. 7 / GDPR Art. 6 |
+| Account deletion does not remove/anonymize PII from all stores | FIX REQUIRED | LGPD Art. 18 / GDPR Art. 17 — right to erasure |
+| Admin access to PII without audit log entry | FIX REQUIRED | LGPD Art. 37 / GDPR Art. 30 — records of processing |
+| PII transmitted to third party without DPA documentation | FIX REQUIRED | LGPD Art. 39 / GDPR Art. 28 — processor agreements |
+| PII in application log output (email, CPF, phone, card) | FIX REQUIRED | Security + compliance intersection |
+| Missing data export capability | MEDIUM | Not blocking for MVP; required before public launch |
+| Missing consent version tracking | MEDIUM | Required before adding consent-dependent features |
+
+When the `compliance-auditor` agent is invoked (or compliance is checked inline), these findings
+produce ❌ (BLOCK/FIX REQUIRED) or ⚠️ (MEDIUM) in the validation report.

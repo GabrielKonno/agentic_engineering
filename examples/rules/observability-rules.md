@@ -151,3 +151,30 @@ QUERY: Verify alert configuration exists before production deploy.
   → Each alert has a runbook link.
   FAILURE: no alerts configured (blind production service).
 ```
+
+## Observability Completeness Requirements
+
+### Minimum Coverage per Service
+Every service deployed to production MUST have:
+1. **Request logging**: every API endpoint emits a structured log entry with method, path template (not raw path with IDs), status code, and duration
+2. **Error capture**: every unhandled exception captured with operation context (not just stack trace)
+3. **Health endpoint**: `/health` or `/healthz` returns 200 when ready, includes dependency status
+4. **At least 2 alerts**: error rate threshold + latency (p95) threshold — configured before first production deploy
+5. **Trace propagation**: W3C `traceparent` header propagated to all downstream HTTP calls (if distributed)
+
+### Completeness Checklist
+- [ ] Every API endpoint has a corresponding request log — no silent endpoints
+- [ ] Every error handler (`catch` block) has a log entry at ERROR level — no silent swallows
+- [ ] Every external service call has: explicit timeout, error logging, and latency metric
+- [ ] Every background job/consumer has: start log, completion log, and failure log with context
+- [ ] PII audit: grep all log statements for email, phone, CPF, card number patterns — expect: 0 matches
+
+### Observability Debt Indicators
+
+| Indicator | Severity | Action |
+|-----------|----------|--------|
+| API endpoint without request logging | MEDIUM | Add structured log entry |
+| Error handler without logging | HIGH | Add error log with context |
+| External service call without timeout | HIGH | Add explicit timeout |
+| Production service without alerts | CRITICAL | Configure error rate + latency alerts before next deploy |
+| Alerts without linked runbooks | MEDIUM | Create runbook with diagnosis steps |

@@ -3,9 +3,11 @@ name: data-integrity-checker
 invocation: subagent
 effort: high
 description: >
-  Verifies data integrity across related tables and operations.
-  Use when implementing features that create, update, or delete data
-  across multiple tables (cascades, transactions, denormalized data).
+  USE PROACTIVELY when diff modifies multi-table operations, cascading deletes,
+  or denormalized data, or when code-reviewer declares a data integrity gap.
+  NOT needed for single-table reads or simple CRUD. Without this, orphaned
+  records and denormalized drift are discovered by users, not tests.
+  Produces Data Integrity Report → APPROVE / FIX REQUIRED.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []
@@ -13,6 +15,22 @@ derived_from: null
 ---
 
 # Data Integrity Checker
+
+## When spawned
+
+This agent is typically invoked by main Claude after receiving a code-reviewer
+report that declares a data integrity gap. It may also be invoked directly
+when the diff's domain is recognized via this agent's description.
+
+**Context to include in prompt:**
+- Git diff (`git diff HEAD~1`)
+- Code Review Report (if data integrity gap triggered this invocation)
+- All `.claude/rules/*.md` files
+- CLAUDE.md: Key Patterns and Architecture sections
+
+**What main Claude should do with this report:**
+- `APPROVE` → data integrity coverage ✅ — include as evidence in validator prompt
+- `FIX REQUIRED` → data integrity ❌ — list findings in validation report, address before proceeding
 
 ## When to invoke
 

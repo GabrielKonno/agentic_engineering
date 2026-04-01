@@ -126,6 +126,16 @@ trufflehog git file://. --json 2>/dev/null | jq 'select(.Verified == true)'
 
 - [ ] ⚠️ Attempt a read request using a found credential against its target service — ONLY if finding is confirmed and rotation needs verification. Purpose: confirm the credential is live and requires immediate rotation.
 
+## Credential Lifecycle Checks (Tier 1 — REVIEW:)
+
+Beyond detection of leaked secrets, verify credential management practices:
+
+- [ ] **Rotation mechanism exists**: service credentials have documented rotation procedure or automated rotation (secrets manager auto-rotation, CI/CD rotation pipeline)
+- [ ] **No shared credentials**: production and staging use different credentials for the same service — grep for identical env var values across `.env.example` entries
+- [ ] **Minimum privilege**: service accounts and API keys scoped to required operations only — grep credential configuration for keywords: `admin`, `root`, `full-access`, `*` permissions
+- [ ] **Service account inventory**: `.env.example` or documentation lists all external service credentials with their scope/purpose
+- [ ] **PII logging check**: grep error handling and logging code for patterns that might log sensitive data alongside credential usage (e.g., logging full request bodies that include auth headers)
+
 ## Remediation Guidance
 
 When BLOCK is issued, include these steps in the report:
