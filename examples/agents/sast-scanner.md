@@ -3,6 +3,9 @@ name: sast-scanner
 invocation: subagent
 effort: high
 description: >
+  Performs static application security testing by running SAST tools (semgrep,
+  Bandit, ESLint security) and manual AST-level pattern review to detect
+  injection vulnerabilities, unsafe deserialization, and dangerous function usage.
   USE PROACTIVELY when diff touches input processing, deserialization,
   cryptography, file I/O, shell execution, or when security-reviewer declares
   a static analysis coverage gap. NOT needed for pure UI, config-only, or

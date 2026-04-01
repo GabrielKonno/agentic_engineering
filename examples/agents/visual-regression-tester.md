@@ -3,6 +3,9 @@ name: visual-regression-tester
 invocation: subagent
 effort: medium
 description: >
+  Captures and compares UI screenshots across viewports and browsers to detect
+  visual regressions caused by CSS cascade changes, design token updates, or
+  shared component modifications — using pixel-diff analysis against baselines.
   USE PROACTIVELY when diff modifies shared UI components (button, modal, nav,
   form, card, layout primitives), CSS variables, design tokens, or global
   stylesheets that cascade visually across the app. NOT needed for isolated

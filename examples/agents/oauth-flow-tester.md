@@ -3,6 +3,9 @@ name: oauth-flow-tester
 invocation: subagent
 effort: high
 description: >
+  Tests OAuth 2.0, OIDC, and SAML federation flows for protocol correctness —
+  verifying PKCE implementation, state/nonce handling, token validation, callback
+  URL restrictions, and federated logout completeness through flow simulation.
   USE PROACTIVELY when diff implements or modifies OAuth 2.0 / OIDC / SAML
   provider integration, callback URL, token exchange, or logout flows, or when
   security-reviewer declares a federation protocol coverage gap. NOT needed

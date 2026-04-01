@@ -3,6 +3,9 @@ name: concurrency-tester
 invocation: subagent
 effort: high
 description: >
+  Detects race conditions, lost updates, and double-booking by analyzing
+  transaction isolation, locking patterns, and idempotency guards — with
+  optional controlled parallel request probes for confirmation.
   USE PROACTIVELY when diff modifies shared mutable state, database transactions
   with concurrent access, queue consumers, or booking/reservation logic, or when
   code-reviewer declares a concurrency gap. NOT needed for pure reads, static

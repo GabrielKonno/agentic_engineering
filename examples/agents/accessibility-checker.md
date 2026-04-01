@@ -3,6 +3,9 @@ name: accessibility-checker
 invocation: subagent
 effort: medium
 description: >
+  Audits UI for WCAG 2.1 AA compliance — checking semantic HTML, ARIA attributes,
+  keyboard navigation, color contrast, screen reader flow, and focus management
+  through code inspection and browser-based automated scanning.
   USE PROACTIVELY when diff modifies UI components, forms, navigation, or
   interactive elements, or when code-reviewer declares an accessibility gap.
   NOT needed for backend-only or API-only changes. Without this, WCAG 2.1 AA

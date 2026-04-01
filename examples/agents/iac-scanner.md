@@ -3,6 +3,9 @@ name: iac-scanner
 invocation: subagent
 effort: high
 description: >
+  Reviews infrastructure-as-code for security misconfigurations by checking IAM
+  least-privilege, Docker hardening, network exposure, encryption at rest, and
+  CI/CD pipeline integrity — with query-based verification of policy documents.
   USE PROACTIVELY when diff touches Terraform, CloudFormation, Pulumi, Docker,
   Kubernetes manifests, CI/CD pipelines, or IAM policies, or when security-reviewer
   declares an infrastructure security gap. NOT needed for application code without

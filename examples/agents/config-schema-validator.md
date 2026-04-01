@@ -3,6 +3,9 @@ name: config-schema-validator
 invocation: subagent
 effort: medium
 description: >
+  Validates environment configuration against schema (types, required values,
+  cross-variable consistency) by comparing .env.example definitions with
+  runtime config — catching mismatches and contradictions before deploy.
   USE PROACTIVELY when deploying to staging or production, or when diff
   adds/modifies environment variable usage. NOT needed for mid-development
   tasks with no env var changes. Without this, type mismatches and

@@ -3,6 +3,9 @@ name: compliance-auditor
 invocation: subagent
 effort: high
 description: >
+  Audits personal data handling for LGPD/GDPR compliance by verifying consent
+  mechanisms, deletion cascades, audit trails, and data minimization — with
+  database-level checks for referential completeness.
   USE PROACTIVELY when diff touches user data collection, PII storage, consent
   mechanisms, or account deletion, AND `.claude/rules/compliance-rules.md` exists,
   or when security-reviewer declares a compliance gap. NOT needed for non-personal-data
