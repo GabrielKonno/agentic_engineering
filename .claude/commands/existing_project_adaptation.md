@@ -303,6 +303,8 @@ cd projects/$ARGUMENTS && git log --oneline --all | grep -iE "fix|bug|hotfix|pat
 ```
 For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the mistake) with efficacy tracking metadata: `[added: adaptation | triggered: never | false-positive: 0]`.
 
+**Pre-select Coverage Gap Declarations:** Review the four optional gap sections (accessibility, performance, concurrency, data integrity). Remove sections clearly irrelevant to this project's domain based on the codebase analysis from Step 1. Keep sections that match actual code patterns found (e.g., keep concurrency gap if project has database transactions with concurrent access). When in doubt, keep — gaps are conditional and only activate when matching diffs appear.
+
 **Step 2.5 — Upgrade security-reviewer:**
 
 Check frontmatter:
@@ -330,6 +332,8 @@ Compare against the full checklist (9 sections):
 ```
 
 Add missing sections. **Do NOT remove existing customizations** — they may contain project-specific security rules.
+
+**Pre-select Coverage Gap Declarations:** Review the five optional gap sections (static analysis, secrets coverage, federation protocol, compliance, infrastructure security). Remove sections clearly irrelevant based on the codebase analysis from Step 1 (e.g., remove federation protocol gap if no OAuth/OIDC/SAML found in codebase). Keep sections that match actual tech stack. If the project handles personal data (PII, CPF, health, payment), ensure the Compliance Probe section is active and `.claude/rules/compliance-rules.md` is flagged for creation if absent.
 
 **Step 2.6 — Verify Red Team / Blue Team:**
 
@@ -364,6 +368,29 @@ If it doesn't exist: create it. The arbitrator is mandatory for ALL projects. Re
 **Step 2.7 — Verify rules files:**
 
 Read each rules file. No structural changes needed — rules files are project-specific. Just verify they are referenced from the code-reviewer's Security section or relevant agent.
+
+**Step 2.7.1 — Pre-create missing domain rules from codebase analysis:**
+
+Based on the codebase analysis from Step 1 and the existing/retroactive PRD, identify domain signals that match example templates. For each domain that is a core feature or architectural pattern in the project, check if the corresponding rules file ALREADY EXISTS in `.claude/rules/`. If it does NOT exist and a matching example template is available in `assets/examples/rules/`, pre-create it:
+
+| Domain signal | Rules file | Example template |
+|---|---|---|
+| Multilingual / i18n | i18n-rules.md | examples/rules/i18n-rules.md |
+| Microservices / event-driven | distributed-systems-rules.md | examples/rules/distributed-systems-rules.md |
+| Scheduling / cron / calendar | scheduling-rules.md | examples/rules/scheduling-rules.md |
+| High-availability / retry | resilience-rules.md | examples/rules/resilience-rules.md |
+| Rate limiting / throttling | rate-limiting-rules.md | examples/rules/rate-limiting-rules.md |
+| E-commerce / cart / payment | e-commerce-rules.md | examples/rules/e-commerce-rules.md |
+| Full-stack / FE+BE | frontend-backend-integration-rules.md | examples/rules/frontend-backend-integration-rules.md |
+| Auth / login / permissions | auth-rules.md | examples/rules/auth-rules.md |
+| PII / LGPD / GDPR | compliance-rules.md | examples/rules/compliance-rules.md |
+| Multi-tenancy / org isolation | multi-tenancy-rules.md | examples/rules/multi-tenancy-rules.md |
+| Observability / logging | observability-rules.md | examples/rules/observability-rules.md |
+
+For each match: copy from `assets/examples/rules/` to `.claude/rules/`, adapting:
+- `applies_to:` frontmatter: reference actual module names found in the codebase
+- Remove clearly irrelevant sections
+- Add HTML comment: `<!-- Seeded from example template during adaptation. Refined by rules-agents-updater as patterns emerge. -->`
 
 **Step 2.8 — Verify and upgrade skills:**
 
@@ -596,13 +623,40 @@ mkdir -p projects/$ARGUMENTS/.claude/skills/[stack-name]
 
 Register in CLAUDE.md "Skills" section.
 
-**Step 4.6 — Identify future rules:**
+**Step 4.6 — Pre-create domain rules from retroactive PRD:**
 
-Analyze the retroactive PRD (created in Phase 3) for modules with complex business logic (3+ business rules). For each, register in pendencias.md:
-```
-- Create `.claude/rules/[module]-rules.md` when starting implementation of [module]
-```
-Do NOT create rules now — wait until implementation when the details are known.
+Analyze the retroactive PRD (created in Phase 3) for domain signals matching example templates (same mapping table as Step 2.7.1). For each domain that is a core feature or architectural pattern:
+
+- If the rules file was already pre-created in Step 2.7.1: skip (already exists)
+- If the rules file does NOT exist and a matching example template is available: pre-create using the same process as Step 2.7.1
+- If the domain has complex business logic but NO matching example template: register in `pendencias.md`:
+  ```
+  - Create `.claude/rules/[module]-rules.md` when starting implementation of [module]
+  ```
+
+**Step 4.6.5 — Pre-install specialist agents and validate activation chains:**
+
+Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/security-reviewer.md`. Identify which Coverage Gap Declaration sections are present. For each gap declaration, check if a matching specialist agent ALREADY EXISTS in `.claude/agents/`. If it does NOT exist and a matching example is available in `assets/examples/agents/`, pre-install it:
+
+| Gap declaration (in reviewer) | Specialist example to install |
+|-------------------------------|-------------------------------|
+| accessibility gap (code-reviewer) | accessibility-checker.md |
+| performance gap (code-reviewer) | performance-auditor.md |
+| concurrency gap (code-reviewer) | concurrency-tester.md |
+| data integrity gap (code-reviewer) | data-integrity-checker.md |
+| static analysis gap (security-reviewer) | sast-scanner.md |
+| secrets coverage gap (security-reviewer) | secrets-scanner.md |
+| federation protocol gap (security-reviewer) | oauth-flow-tester.md |
+| compliance gap (security-reviewer) | compliance-auditor.md |
+| infrastructure security gap (security-reviewer) | iac-scanner.md |
+
+For each match: copy from `assets/examples/agents/` to `.claude/agents/`, adapting only:
+- `created:` lineage: change from `example` to `adaptation (pre-installed from example template)`
+- Verify the `description:` gap phrase matches the reviewer's gap declaration vocabulary
+
+After installation, validate activation chains for every pre-installed specialist:
+1. Verify it has a matching Coverage Gap Declaration in the reviewer whose domain vocabulary echoes the agent's Pushy Description
+2. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md`
 
 ---
 
@@ -720,6 +774,14 @@ done
 ### Rules:
 - .claude/rules/session-rules.md [CREATED / SKIPPED]
 - .claude/rules/evolution-policy.md [CREATED / SKIPPED]
+
+### Domain rules pre-created (from example templates — Step 2.7.1/4.6):
+- .claude/rules/[domain]-rules.md ← seeded, refined by rules-agents-updater
+- [list each, or "none — no domain signals matched example templates"]
+
+### Specialist agents pre-installed (from example templates — Step 4.6.5):
+- .claude/agents/[specialist].md ← activation chain verified
+- [list each, or "none — no gap declarations without existing specialists"]
 
 ### Preserved (not modified):
 - [N] rows in Progress Log index
