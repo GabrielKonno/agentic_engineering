@@ -2,7 +2,7 @@
 
 This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. This is the architectural reference — WHAT happens and WHY.
 
-In v1.7.0, all protocol logic is implemented as skills. CLAUDE.md contains pointers only:
+In v2.1.0, all protocol logic is implemented as skills. CLAUDE.md contains pointers only:
 - `sprint-proposer` skill: START-of-session (4 steps: model switch check, project.md, PRD sync, sprint proposal) + sprint-approved mode + between-tasks workflow
 - `session-end` skill: END-of-session (5 skills/agents orchestrated in sequence)
 - `context-recovery` skill: mid-session emergency save (calls 3 sub-skills directly, not session-end)

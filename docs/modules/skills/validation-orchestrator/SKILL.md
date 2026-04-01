@@ -9,7 +9,7 @@ description: >
   validation (routine) or subagent chain (logic-heavy/architecture/security).
   MUST run for every task. Skipping this means the human finds the bugs instead
   of the framework.
-created: framework-v1.7.0 (pre-validated)
+created: framework-v2.1.0 (pre-validated)
 derived_from: execution_protocol "Before implementing", "During implementation", "Validation Failure Post-Mortem"
 ---
 

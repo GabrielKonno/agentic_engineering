@@ -10,7 +10,7 @@ description: >
   workflow, sprint reports). Not needed for planning discussions, task management,
   or quick fixes. Without this, implementation sessions start without project
   context and wrong priorities.
-created: framework-v1.7.0 (pre-validated)
+created: framework-v2.1.0 (pre-validated)
 derived_from: session_protocol "At the START of implementation sessions"
 ---
 

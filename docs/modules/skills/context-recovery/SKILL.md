@@ -6,7 +6,7 @@ description: >
   Emergency mid-session recovery when context is degrading. Saves state via
   3 end-of-session sub-skills, commits WIP, and requests a new session.
   Trigger: contradicting earlier decisions, repeating mistakes, losing track.
-created: framework-v1.7.0 (pre-validated)
+created: framework-v2.1.0 (pre-validated)
 derived_from: session_protocol "Mid-session context recovery"
 ---
 
