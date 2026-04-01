@@ -263,7 +263,7 @@ or booking/reservation logic:**
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff containing a SQL string concatenation vulnerability and an N+1 query — code-reviewer should flag both
    - **Scenario B (negative):** A clean git diff with parameterized queries and proper patterns — code-reviewer should APPROVE with no false flags
-2. Spawn code-reviewer via Task tool against each scenario
+2. Spawn code-reviewer via Agent tool against each scenario
 3. Verify: A → issues detected, B → no false flags
 4. If any result is wrong: improve the agent and re-test
 5. Update lineage: `last_eval: s0 (2/2 passed)`

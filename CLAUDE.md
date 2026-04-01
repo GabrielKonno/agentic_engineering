@@ -32,14 +32,15 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── session_rules.md            # Task limits, reasoning depth, scripts convention
 │   │   │   ├── evolution_policy.md         # Evolution classification + auto-evolution boundaries
 │   │   │   └── component_design.md         # Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment
-│   │   └── skills/                         # Pre-built inline process skills (10, copied to projects)
+│   │   └── skills/                         # Pre-built inline process skills (9, copied to projects)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components
-│   │       └── ... (5 more)               # (see skills/README.md for full list)
+│   │       └── ... (7 more)               # (see skills/README.md for full list)
 ├── examples/                               # Quality reference for agents, skills, rules
-│   ├── agents/                             # Agent templates by category
-│   ├── skills/                             # Skill templates by type
-│   └── rules/                              # Rules file templates
+│   ├── examples_instructions.md            # Conventions for creating agents/skills/rules
+│   ├── agents/                             # Agent templates by category (20)
+│   ├── skills/                             # Skill templates by type (9)
+│   └── rules/                              # Rules file templates (11)
 └── projects/                               ← IGNORED by framework git (local-only workspace)
     └── [project-name]/                     ← Each project gets its own git repo
 ```

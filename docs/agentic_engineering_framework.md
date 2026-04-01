@@ -47,7 +47,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/skills/` | 9 pre-built process skills (sprint-proposer, validation-orchestrator, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol or Execution Protocol. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `docs/modules/session_protocol.md` | Session Protocol (START, END, recovery) | Defines WHEN things happen during development sessions. Embedded into each project's CLAUDE.md during bootstrap. |
 | `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
-| `examples/` | Quality reference templates for agents (20), skills (9), and rules (10) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
+| `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | Slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
 | `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo after extraction. |
@@ -554,7 +554,7 @@ Log each evolution with its classification: `"[FIX/DERIVED/CAPTURED]: [component
 
 **Priority order** (if context is limited, at minimum do items 1 and 2):
 
-In v1.6.0, each end-of-session item is implemented by a pre-built process skill (see `modules/skills/`). The sequence below defines the order and triggers; the skills contain the detailed how-to.
+Since v1.6.0, each end-of-session item is implemented by a pre-built process skill (see `modules/skills/`). The sequence below defines the order and triggers; the skills contain the detailed how-to.
 
 1. **Extract patterns from diff** → run `diff-pattern-extractor` skill
 
@@ -1024,7 +1024,7 @@ When the human identifies a bug in a task that the AI reported as ✅ (the valid
 
 ## Validation Orchestration Protocol
 
-This section defines how the implementing agent spawns and coordinates independent validation subagents. It applies to **logic-heavy** and **architecture/security** tasks (Routes B and C in the validation loop). Routine tasks use inline validation and skip this protocol entirely.
+This section defines how the implementing agent spawns and coordinates independent validation subagents. It applies to **logic-heavy** and **architecture/security** tasks (Route 2 in the validation loop). Routine tasks use inline validation and skip this protocol entirely.
 
 ### Core principle: separation of implementation and judgment
 
@@ -1062,7 +1062,7 @@ The NEVER list is as important as the ALWAYS list — it is the anti-bias firewa
 
 ### Subagent instruction template
 
-The implementing agent constructs a prompt for the tool's subagent mechanism (e.g., Claude Code's Task tool). The prompt follows this structure:
+The implementing agent constructs a prompt for the tool's subagent mechanism (e.g., Claude Code's Agent tool). The prompt follows this structure:
 
 ```
 1. Role definition — "You are the [agent name]. Your role is [purpose]."
@@ -1151,7 +1151,7 @@ Each call gets a fresh context. Only use when the combined scope would strain a 
 
 The concepts in this protocol are tool-agnostic. The mechanics are tool-specific:
 
-- **Claude Code:** Subagents are spawned via the **Task tool**. Each Task tool call creates a new conversation with isolated context.
+- **Claude Code:** Subagents are spawned via the **Agent tool**. Each Agent tool call creates a new conversation with isolated context.
 - **Other tools:** Adapt to the tool's subagent/subprocess mechanism. If the tool does not support subagents, fall back to inline validation (Route 1 behavior for all tasks) and note the limitation.
 
 The bootstrap file (`.claude/commands/bootstrap.md`) contains the Claude Code implementation with exact templates and commands. For other tools, adapt to the tool's configuration format.
@@ -1494,7 +1494,7 @@ Some skills emerge from real project experience — they require observed repeti
 
 Every agent and skill declares how it is activated via `invocation` frontmatter:
 
-- `invocation: subagent` — spawned as an independent process via the tool's subagent mechanism (e.g., Claude Code's Task tool). The subagent receives instructions, reads files from the filesystem, and returns a structured report. It operates with **isolated context** — no access to the implementing agent's reasoning or conversation history.
+- `invocation: subagent` — spawned as an independent process via the tool's subagent mechanism (e.g., Claude Code's Agent tool). The subagent receives instructions, reads files from the filesystem, and returns a structured report. It operates with **isolated context** — no access to the implementing agent's reasoning or conversation history.
 - `invocation: inline` — read as a reference document by another agent (implementing agent, validator, or any subagent that needs the knowledge). Skills are typically `inline`. Knowledge documents, design systems, and stack references are `inline`.
 
 **All validation/review/security agents are `subagent`:** code-reviewer, security-reviewer, red-team, blue-team, validator, arbitrator, and on-demand agents created for specialized review roles.
@@ -1555,7 +1555,7 @@ After creating any agent with `invocation: subagent`, validate it via test scena
 1. Generate 2 test scenarios relevant to the agent's purpose:
    - **Scenario A:** contains a clear issue the agent should detect (positive case)
    - **Scenario B:** clean code/input with no issues (negative case — should not trigger false flags)
-2. Spawn the agent via the tool's subagent mechanism (e.g., Task tool) against each scenario
+2. Spawn the agent via the tool's subagent mechanism (e.g., Agent tool) against each scenario
 3. Verify: A → issue detected, B → no false flags
 4. If any result is wrong: improve the agent and re-test
 5. Update lineage: `last_eval: sN (2/2 passed)`
@@ -1567,7 +1567,7 @@ After creating any agent with `invocation: subagent`, validate it via test scena
 - **After FIX evolution** — re-run eval with original scenarios + 1 new scenario for the specific failure that triggered the FIX. All scenarios must pass.
 - **NOT for DERIVED/CAPTURED evolutions** — source patterns were already validated individually (DERIVED) or the diff is the evidence (CAPTURED).
 
-**If the Skill Creator plugin is installed (Claude Code):** Use it for skill eval — it automates test case generation, baseline comparison, grading, and iteration. For agents with `invocation: subagent`, use the Task tool directly since the Skill Creator is designed for skills, not for subagent I/O contracts.
+**If the Skill Creator plugin is installed (Claude Code):** Use it for skill eval — it automates test case generation, baseline comparison, grading, and iteration. For agents with `invocation: subagent`, use the Agent tool directly since the Skill Creator is designed for skills, not for subagent I/O contracts.
 
 ### Do NOT create when:
 - The pattern is a one-time thing (will not recur) — applies to reactive only

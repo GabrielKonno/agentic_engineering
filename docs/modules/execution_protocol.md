@@ -156,7 +156,7 @@ If any ❌ after max retry cycles: STOP and escalate to human with diagnosis.
 
 ## Validation Orchestration (subagent mechanics)
 
-When spawning validation subagents (Routes B and C), construct the Task tool prompt following this template:
+When spawning validation subagents (Route 2), construct the Agent tool prompt following this template:
 
 ```
 1. Role definition — "You are the [agent name]. Your role is [purpose]."
@@ -209,7 +209,7 @@ If ❌ contradicts mechanical evidence:
   - arbitrator subagent
 ```
 
-Each subagent is a fresh Task tool instance — isolated context, no carryover between invocations.
+Each subagent is a fresh Agent tool instance — isolated context, no carryover between invocations.
 
 **Retry flow:** When validator returns ❌: fix → commit `"fix: [task] — validation fix N"` → re-spawn from step 1 of subagent sequence. Max 3 retry cycles. After limit: STOP and escalate to human with diagnosis.
 

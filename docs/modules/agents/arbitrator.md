@@ -87,7 +87,7 @@ Same anti-bias firewall as the validator. You judge the CODE against CRITERIA, n
 1. Generate 2 test scenarios:
    - **Scenario A (UPHOLD ❌):** Validator says ❌, build passes but test assertions are superficial — arbitrator should UPHOLD
    - **Scenario B (OVERRIDE TO ✅):** Validator says ❌ but build passes, tests pass with strong assertions, and query returns exact expected value — arbitrator should OVERRIDE TO ✅
-2. Spawn arbitrator via Task tool against each scenario
+2. Spawn arbitrator via Agent tool against each scenario
 3. Verify: A → UPHOLD ❌, B → OVERRIDE TO ✅
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`

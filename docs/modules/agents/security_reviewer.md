@@ -9,8 +9,8 @@ invocation: subagent
 effort: high
 description: >
   Security review agent based on OWASP Top 10 and common attack vectors.
-  Spawned as independent subagent for architecture/security tasks (Route C).
-  Read as inline checklist for routine tasks (Route A). Covers user input,
+  Spawned as independent subagent for architecture/security tasks (Route 2).
+  Read as inline checklist for routine tasks (Route 1). Covers user input,
   authentication, data storage, external APIs, and AI/LLM features.
 receives: git diff, security-reviewer.md (self), stack security skill, rules files
 produces: Security Review Report with findings by category, severity, and APPROVE/FIX REQUIRED/BLOCK recommendation
@@ -280,7 +280,7 @@ Declare in report:
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff introducing an endpoint with string-concatenated SQL, no auth check, and hardcoded API key — should flag all three
    - **Scenario B (negative):** A git diff with parameterized queries, auth middleware, and env-var secrets — should APPROVE
-2. Spawn security-reviewer via Task tool against each scenario
+2. Spawn security-reviewer via Agent tool against each scenario
 3. Verify: A → issues detected, B → no false flags
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`

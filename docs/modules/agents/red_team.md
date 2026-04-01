@@ -10,7 +10,7 @@ invocation: subagent
 effort: high
 description: >
   Adversarial security tester for [STACK]. Spawned as independent subagent
-  for architecture/security tasks (Route C) when security triggers are met.
+  for architecture/security tasks (Route 2) when security triggers are met.
   Produces vulnerability reports using the tiered security model.
 receives: git diff, red-team.md (self), security-reviewer.md, stack security skill, rules files
 produces: Vulnerability Report with findings by severity, category, tier, and evidence
@@ -145,7 +145,7 @@ NEVER proceed with Tier 3 without explicit approval in the current session.
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff introducing an RLS-protected endpoint where the policy has a gap — Red Team should identify the bypass vector
    - **Scenario B (negative):** A git diff with correct RLS policies and no bypass paths — Red Team should report no findings
-2. Spawn Red Team via Task tool against each scenario
+2. Spawn Red Team via Agent tool against each scenario
 3. Verify: A → vulnerability detected, B → no false flags
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`
