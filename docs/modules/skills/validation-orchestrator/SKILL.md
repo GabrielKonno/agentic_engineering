@@ -32,7 +32,7 @@ Invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task n
 
 ### 2. Classify and route
 
-**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. Architecture/Security triggers model switch protocol (see `session-start` skill).
+**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. Architecture/Security triggers model switch protocol (see execution protocol).
 
 **Threshold:** Small (single file) → implement directly. Medium (2-5 files) → propose plan, wait for approval. Large (new module, cross-module) → propose plan with risks, wait for approval.
 

@@ -13,7 +13,7 @@ applies_to: "**/*"
 
 ## Session lifecycle
 
-- Before implementation work, run `/session-start` (loads project state, syncs PRD, proposes sprint)
+- Before implementation work, run `/sprint-proposer` (loads project state, syncs PRD, proposes sprint)
 - Every session with implementation work MUST end with `/session-end`
 - If context degrades mid-session, run `/context-recovery`
 
@@ -27,7 +27,7 @@ Signals of exceeding: contradicting earlier findings, skipping validation steps,
 
 1. **Agent-level (automatic):** `effort:` in agent/skill frontmatter. Security agents always `effort: high`.
 2. **Task-level (2 seconds):** AI recommends `/effort high` in plan. Human types one command.
-3. **Session-level model switch (5 seconds):** AI saves state with MODEL SWITCH marker → requests restart. See `session-start` skill for full protocol.
+3. **Session-level model switch (5 seconds):** AI saves state with MODEL SWITCH marker → requests restart. See execution protocol for full model switch initiation; `sprint-proposer` skill detects the marker on restart.
 
 Mechanisms stack: a standard-effort session uses high effort when security agents run (mechanism 1), can switch to high effort for a financial task (mechanism 2), and can switch to a more capable model for an architecture task (mechanism 3).
 

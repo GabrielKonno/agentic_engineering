@@ -21,12 +21,11 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Session Protocol
 
-- Before implementation work, run `/session-start` to load context and propose a sprint
+- Before implementation work, run `/sprint-proposer` to load context and propose a sprint
 - Every session with implementation work MUST end with `/session-end`
 - If context degrades mid-session: run `/context-recovery`
 - Task limits, documentation quality, reasoning depth: see `.claude/rules/session-rules.md`
 - Implementation workflow (before/during/after): handled by `validation-orchestrator` skill
-- Sprint management: handled by `sprint-proposer` skill
 
 ## Commands
 

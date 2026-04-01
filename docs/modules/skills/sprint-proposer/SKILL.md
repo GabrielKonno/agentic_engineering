@@ -1,39 +1,79 @@
 ---
 name: sprint-proposer
-invocation: inline
+invocation: user
 effort: medium
 description: >
-  Proposes a sprint batch at session start. Reads pendencias.md, selects 3-5 tasks,
-  orders by dependency, presents for approval. Also manages sprint-approved mode
-  (exception stops, between-tasks workflow, sprint reports). MUST run at session
-  start (step 5). Without this, you work task-by-task instead of efficient batches.
+  Run before implementation work to load project state, sync PRD, and propose a
+  sprint. Checks for model switch continuation, reads project.md, optionally syncs
+  PRD, analyzes pendencias.md, selects 3-5 tasks by dependency, and presents for
+  approval. Also manages sprint-approved mode (exception stops, between-tasks
+  workflow, sprint reports). Not needed for planning discussions, task management,
+  or quick fixes. Without this, implementation sessions start without project
+  context and wrong priorities.
 created: framework-v1.7.0 (pre-validated)
-derived_from: session_protocol step 5, execution_protocol "Sprint-approved mode" and "Between tasks"
+derived_from: session_protocol "At the START of implementation sessions"
 ---
 
 # Sprint Proposer
 
 ## When to run
-At the START of implementation sessions, after reading pendencias.md (step 5 in session-start).
-Skip if MODEL SWITCH continuation is active (step 1 already selected the task).
-**After a model switch restart:** do NOT resume the previous sprint — propose a new one. The previous sprint was interrupted and context has changed.
+
+Before **implementation work** — when you intend to build, fix, or validate code.
+
+Not needed for:
+- Planning discussions or architecture reviews
+- Adding/reorganizing tasks in pendencias.md
+- Quick fixes where the user specifies the exact task
+- Framework maintenance sessions
+
+Claude Code automatically handles: CLAUDE.md reading, rules loading (via `applies_to` globs), skill/agent discovery (via `description:` frontmatter), and codebase exploration.
 
 ## Process
 
-### 1. Analyze pendencias.md
+### 1. Check for MODEL SWITCH continuation
+
+Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:
+- This session is a continuation — skip normal task selection
+- The task and reason for the switch are in the marker
+- Log: "Continuing: [task name] (model switched from [source] to [target])"
+- Proceed directly to the validation-orchestrator skill's "Before Implementing" section with the specified task
+
+If no MODEL SWITCH block exists, continue normally.
+
+### 2. Read project.md
+
+Read `.claude/phases/project.md`:
+- **First session:** read fully (overview, architectural decisions, module relationships, phases)
+- **Returning sessions:** architectural decisions + Project Phases status + Progress Log index
+
+### 3. PRD sync check (opt-in)
+
+Ask the user: **"Do you want me to run the PRD sync check?"**
+
+If yes: invoke `.claude/agents/prd-sync-checker.md` as subagent. This compares PRD version/content with project.md and propagates changes. Runs in isolated context, no session bias.
+
+If no: skip. The user knows whether the PRD changed or was already synced.
+
+### 4. Analyze pendencias.md and propose sprint
+
+Read `.claude/phases/pendencias.md`. If MODEL SWITCH continuation was active (step 1), skip this step entirely.
+
+After a model switch restart: do NOT resume the previous sprint — propose a new one. The previous sprint was interrupted and context has changed.
+
+#### 4a. Analyze
 - Read all items in "Next Steps" and "In Progress"
 - Check dependency graph (`depends:` fields)
 - Identify which tasks have satisfied dependencies (a task in "Next Steps" or "In Progress" whose dependencies are all completed)
 - If a `depends:` references a task number not found in pendencias.md, check `.claude/phases/done_tasks.md` — the dependency may have been archived there. If found in done_tasks.md, the dependency is satisfied.
 - Note complexity classification of each task
 
-### 2. Select tasks
+#### 4b. Select tasks
 - Pick 3-5 dependency-satisfied tasks
 - Order by: dependency resolution first, then priority
 - Respect task limit (3-5 standard, up to 7 if all small+related, 1 if large)
 - Mix: prefer starting with a small warm-up task if available
 
-### 3. Present sprint proposal
+#### 4c. Present sprint proposal
 
 ```
 ## Sprint Proposal: Session N
@@ -48,7 +88,7 @@ Skip if MODEL SWITCH continuation is active (step 1 already selected the task).
 - OR adjust: remove/add/reorder tasks
 ```
 
-### 4. Handle response
+#### 4d. Handle response
 - **Human approves** → enter sprint-approved mode (medium tasks proceed without approval)
 - **Human adjusts** → apply adjustments and confirm
 - **Human wants task-by-task** → proceed as Level 3 (present each task individually)

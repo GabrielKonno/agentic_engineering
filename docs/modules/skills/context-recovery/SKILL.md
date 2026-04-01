@@ -37,4 +37,4 @@ Commit all WIP state with a descriptive message noting the context recovery.
 
 "Context is degrading. I've saved state. Please start a new session to continue with fresh context."
 
-The next session's `/session-start` will pick up via the progress log and pendencias state.
+The next session's `/sprint-proposer` will pick up via the progress log and pendencias state.

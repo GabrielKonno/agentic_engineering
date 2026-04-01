@@ -179,14 +179,13 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ### Step 5.7 — Copy pre-built process skills, process agents, and session rules
 
-**Process skills (10 — inline, copied to `.claude/skills/`):**
+**Process skills (9 — inline, copied to `.claude/skills/`):**
 
 ```bash
 cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 ```
 
-- **Session lifecycle (user-triggered):** session-start, session-end, context-recovery
-- **Session start:** sprint-proposer
+- **Session lifecycle (user-triggered):** sprint-proposer, session-end, context-recovery
 - **During implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
@@ -198,11 +197,11 @@ cp docs/modules/agents/criteria_enforcer.md projects/$ARGUMENTS/.claude/agents/c
 cp docs/modules/agents/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/agents/diff-pattern-extractor.md
 ```
 
-- **Session start:** prd-sync-checker (called by session-start skill, step 3, opt-in)
+- **Session start:** prd-sync-checker (called by sprint-proposer skill, step 3, opt-in)
 - **Before implementing:** criteria-enforcer (called by validation-orchestrator skill)
 - **Session end:** diff-pattern-extractor (called by session-end skill, item 1)
 
-These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 10 run inline (main agent reads SKILL.md and follows steps in its own context).
+These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 9 run inline (main agent reads SKILL.md and follows steps in its own context).
 
 **Session rules (copied to `.claude/rules/`):**
 
@@ -423,8 +422,8 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 - assets/examples/ (copied from framework — Step 1.5)
 
 ### Process skills: copied from framework (Step 5.7):
-- **Session lifecycle:** session-start, session-end, context-recovery
-- **Implementation:** sprint-proposer, validation-orchestrator
+- **Session lifecycle:** sprint-proposer, session-end, context-recovery
+- **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
 ### Process agents: copied from framework templates (Step 5.7):

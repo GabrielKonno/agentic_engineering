@@ -4,7 +4,7 @@ This module defines the before-implementing, during-implementation (validation l
 
 In v1.7.0, all protocol logic is implemented in skills:
 - `validation-orchestrator` skill: before-implementing (criteria enforcement, complexity classification, plan proposal), during-implementation (Phase A + Phase B with 2 validation routes: inline for routine, subagent for logic-heavy/architecture/security), and validation failure post-mortem
-- `sprint-proposer` skill: between-tasks workflow (commit, update pendencias, context health check, sprint report)
+- `sprint-proposer` skill: session start (model switch check, project.md, PRD sync, sprint proposal) + between-tasks workflow (commit, update pendencias, context health check, sprint report)
 - `criteria-enforcer` agent: criteria quality enforcement (subagent, called by validation-orchestrator)
 
 CLAUDE.md contains pointers only. The content below is the architectural reference describing the design and rationale.
