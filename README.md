@@ -112,7 +112,7 @@ agentic_engineering/
 │   ├── examples_instructions.md        ← Conventions for creating agents/skills
 │   ├── agents/                         ← 20 agent templates (quality, domain, ops, security, compliance)
 │   ├── skills/                         ← 9 skill templates (stack, domain, process)
-│   └── rules/                          ← 10 rules templates (auth, compliance, i18n, scheduling, resilience, etc.)
+│   └── rules/                          ← 11 rules templates (auth, compliance, i18n, scheduling, resilience, integration, etc.)
 │
 └── projects/                           ← Local workspace (git-ignored)
     └── [project-name]/                 ← Each project gets its own git repo

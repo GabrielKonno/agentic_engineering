@@ -169,10 +169,31 @@ When invoked as subagent, do NOT read:
 - [ ] Critical paths have fallback behavior — user sees degraded response, not error page?
 - [ ] Health check endpoint exists and verifies critical dependencies?
 
+### Rate Limiting (activate when `.claude/rules/rate-limiting-rules.md` exists)
+- [ ] Rate limiting middleware applied to all public routes — not just auth endpoints?
+- [ ] Rate limit keys include both user identifier AND IP where applicable?
+- [ ] Rate limit storage is shared across instances — not in-memory default that resets on deploy?
+- [ ] 429 responses include `Retry-After` header with seconds until reset?
+- [ ] Authentication endpoints have stricter limits than general API endpoints?
+
+### E-Commerce (activate when `.claude/rules/e-commerce-rules.md` exists)
+- [ ] Monetary values stored as integer cents — no float or decimal for currency?
+- [ ] Cart total recalculated on every modification — not cached or carried from previous state?
+- [ ] Order totals are snapshots — product price changes do not affect existing orders?
+- [ ] Stock decremented at order confirmation, not at cart add?
+- [ ] Payment operations use idempotency keys — retry-safe, no duplicate charges?
+
 ### API Contracts (activate when diff touches shared types, API interfaces, or OpenAPI/GraphQL schemas)
 - [ ] Response interface matches actual handler return type?
 - [ ] Removed or renamed response fields flagged as breaking change?
 - [ ] New required request fields flagged as breaking change (use optional with defaults)?
+
+### Frontend-Backend Integration (activate when `.claude/rules/frontend-backend-integration-rules.md` exists)
+- [ ] API response types shared between frontend and backend — not duplicated or hand-synced?
+- [ ] Auth flow handles token refresh and expiry — not just initial login?
+- [ ] Error responses from backend follow consistent structure consumable by frontend error boundaries?
+- [ ] Server-rendered content hydration-safe — no mismatch between SSR output and client initial render?
+- [ ] CORS configuration matches deployment environments — not hardcoded to localhost or wildcard `*`?
 
 ## Coverage Gap Declaration
 

@@ -250,3 +250,21 @@ Then fix the bug normally. The validation loop improves before the bug is fixed.
    ### Rules files created/updated: [list]
    ### Next sprint suggestion: [top 3-5 tasks]
    ```
+
+---
+
+## Post-deploy validation
+
+After deploying to staging or production (when applicable), verify the deployment succeeded:
+
+1. **If `.claude/agents/deploy-validator.md` exists:** invoke it as subagent with the deployment target and environment as context. It runs pre-deployment and post-deployment checklists (build, environment, database, security, monitoring, rollback plan) and produces a Deploy Validation Report with DEPLOY / FIX FIRST / ABORT recommendation.
+2. **If no deploy-validator agent exists:** at minimum:
+   - Verify the health check endpoint returns 200 and reports all dependencies healthy
+   - Run a smoke test against 2-3 critical user flows (login, main feature, data mutation)
+   - Confirm no error rate spike in the first 5 minutes post-deploy
+
+**Rollback readiness:** Before deploying, confirm a rollback path exists and has been tested. If deploying database migrations, confirm the DOWN migration runs cleanly or document why rollback requires manual intervention.
+
+**Scope:** This step applies only to projects with a deployment target. Pure library projects or projects without deployment infrastructure skip this section entirely.
+
+**Reference template:** `examples/agents/deploy-validator.md` — copy and adapt during bootstrap or when deployment is first configured.

@@ -358,6 +358,20 @@ mkdir -p .claude/skills/[stack-name]
 
 **Do NOT create if:** pre-made skill already installed, stack too generic, AI unfamiliar with framework.
 
+### Step 12.5 — Validate activation chains
+
+For every specialist agent created in Steps 7-12 that uses gap-declaration activation, verify the chain is complete. Note: code-reviewer and security-reviewer are SOURCES of gaps (not targets) — skip them. Validator, arbitrator, red-team, and blue-team are spawned by protocol, not by gap declaration — skip them too.
+
+For each remaining specialist agent (if any were created — at bootstrap this is rare, since most specialists are created on-demand in later sessions):
+
+1. Verify it has a matching Coverage Gap Declaration in code-reviewer.md or security-reviewer.md whose domain vocabulary echoes the agent's Pushy Description
+2. If no match: add the gap declaration to the appropriate reviewer following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
+3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md` — the domain must appear in at least one reviewer
+
+If no specialist agents exist yet (typical for a fresh bootstrap): skip this step entirely. It becomes relevant when `rules-agents-updater` creates specialists during future sessions.
+
+This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the reviewer-to-orchestrator-to-specialist activation chain is broken.
+
 ---
 
 ### Step 13 — Identify future rules

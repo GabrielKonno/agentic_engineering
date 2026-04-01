@@ -49,3 +49,25 @@ Check `assets/examples/` for conventions and structural templates before creatin
 `"[FIX/DERIVED/CAPTURED]: [component] — [what changed and why]"`
 
 Check evolution approval boundaries (see `.claude/rules/evolution-policy.md`) before applying. For human-approval items, propose in session log and wait.
+
+### 6. Validate activation chains
+
+After creating or modifying any specialist agent (Step 4), verify the activation chain is complete. Skip this step if the agent is a process agent (criteria-enforcer, diff-pattern-extractor, prd-sync-checker) or a core reviewer (code-reviewer, security-reviewer, validator, arbitrator, red-team, blue-team).
+
+For each specialist agent created or modified:
+
+1. **Gap declaration exists?** — The appropriate reviewer (code-reviewer or security-reviewer) must have a Coverage Gap Declaration paragraph whose domain vocabulary matches the agent's Pushy Description. If missing: add it now, following the existing conditional format (`**If diff touches [trigger]:**` + blockquote with gap phrase + `Recommend: search .claude/agents/`).
+2. **Pushy Description echoes vocabulary?** — The agent's `description:` frontmatter must include `"when [reviewer] declares a [domain] gap"` using the same domain noun that the reviewer uses. If mismatched: fix the description now.
+3. **Vocabulary alignment grep** — Run: `grep -l "[domain keyword]" .claude/agents/*.md` and verify the specialist appears in results AND the reviewer's gap declaration appears in results. If either is missing: the chain is broken — fix before continuing.
+
+See `.claude/rules/component-design.md` sections 1-3 for the full activation architecture reference.
+
+### 7. Track activation efficacy (periodic)
+
+Every ~10 sessions or during maintenance sessions, review activation chain health:
+
+1. **Gap declarations activated?** — For each Coverage Gap Declaration in code-reviewer.md and security-reviewer.md, check session logs for evidence the gap was triggered and a specialist was spawned. Track using: `[gap: domain | activated: sN, sN | never-activated: true]`
+2. **Never-activated gaps** (10+ sessions with no trigger) — Either the specialist domain is rare for this project (acceptable) or the gap vocabulary is mismatched and never matches (fix the chain).
+3. **Post-mortem correlation** — If a Validation Failure Post-Mortem identified "review missed pattern" or "subagent context incomplete" as root cause, check whether a gap declaration or specialist agent could have caught it. If yes: add the gap declaration and/or create the specialist agent now.
+
+This step reuses the same `[added: sN | triggered: sN]` tracking convention as Known Bug Patterns in code-reviewer.md.
