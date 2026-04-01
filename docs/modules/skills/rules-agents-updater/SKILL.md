@@ -59,7 +59,7 @@ Check `assets/examples/` for conventions and structural templates before creatin
 **Do NOT create if:** one-time pattern, rules file more appropriate, Known Bug Pattern suffices, or duplicates existing content.
 
 **After creating — run creation eval:**
-- **Subagent agents** (`invocation: subagent`): Generate 2 test scenarios (one with issue agent should detect, one clean). Spawn via Task tool against each. Verify: issue detected + no false flags. Update lineage: `last_eval: sN (2/2 passed)`. If eval fails: improve and re-test.
+- **Subagent agents** (`invocation: subagent`): Generate 2 test scenarios (one with issue agent should detect, one clean). Spawn via Agent tool against each. Verify: issue detected + no false flags. Update lineage: `last_eval: sN (2/2 passed)`. If eval fails: improve and re-test.
 - **Skills** (`invocation: inline`): If Skill Creator plugin is installed, use it for eval (automates test case generation, grading, iteration). If not installed: skip eval for inline skills (knowledge references, not judgment agents).
 - **Deferrable:** If context window is low, log "Eval deferred to session N" and set `last_eval: none (deferred)`.
 

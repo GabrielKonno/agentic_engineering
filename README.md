@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v1.6.0
+# Agentic Engineering Framework v1.7.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -18,7 +18,7 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 12 templates    |           | 9+ agent .md files  |
+                         |  - 16 templates    |           | 9+ agent .md files  |
                          |  - 2 protocols     |           | 9 process skills    |
                          |  - 9 skills        |           | 3 rules files       |
                          |  - examples/       |           | examples/ (copy)    |
@@ -100,7 +100,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v1.6.0)
+│   ├── modules/                            ← Single source of truth (v1.7.0)
 │   │   ├── session_protocol.md             ← Session Protocol (START, END, recovery)
 │   │   ├── execution_protocol.md           ← Execution Protocol (validation loop)
 │   │   ├── templates/                      ← Document and config templates

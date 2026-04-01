@@ -9,18 +9,28 @@ Quality reference templates for creating agents, skills, and rules. The AI consu
 ```
 examples/
 ├── examples_instructions.md       # This file
-├── agents/                        # Agent templates (all categories)
-│   ├── performance-auditor.md     # Data fetching, rendering, DB, bundle optimization
+├── agents/                        # Agent templates (20 — all categories)
 │   ├── accessibility-checker.md   # WCAG 2.1 AA compliance
-│   ├── test-quality-reviewer.md   # Test quality, false positives, coverage gaps
-│   ├── state-machine-verifier.md  # Status workflows, transition matrix, guards
+│   ├── api-security-scanner.md    # Tiered model (Tier 1/2/3), auth, injection, data exposure
+│   ├── compliance-auditor.md      # LGPD/GDPR audit, consent, data lifecycle
+│   ├── concurrency-tester.md      # Race conditions, transactions, locking, idempotency
+│   ├── config-schema-validator.md # Env var validation, type checking, cross-variable consistency
 │   ├── data-integrity-checker.md  # Referential integrity, transactions, consistency
-│   ├── multi-tenancy-auditor.md   # Tenant isolation, RLS, cross-tenant leak detection
 │   ├── dependency-auditor.md      # Security vulnerabilities, outdated packages, licenses
-│   ├── migration-runner.md        # Safe migration execution, rollback, verification
 │   ├── deploy-validator.md        # Pre-deploy checklist, environment, rollback plan
-│   └── api-security-scanner.md    # Tiered model (Tier 1/2/3), auth, injection, data exposure
-├── skills/                        # Skill templates (Anthropic folder format)
+│   ├── iac-scanner.md             # Infrastructure security: IAM, Docker, network, CI/CD
+│   ├── integration-contract-tester.md  # External API contracts, error handling, retry
+│   ├── load-tester.md             # Performance under load, p50/p95/p99 latency, throughput
+│   ├── migration-runner.md        # Safe migration execution, rollback, verification
+│   ├── multi-tenancy-auditor.md   # Tenant isolation, RLS, cross-tenant leak detection
+│   ├── oauth-flow-tester.md       # OAuth/OIDC/SAML: state, PKCE, token validation
+│   ├── performance-auditor.md     # Data fetching, rendering, DB, bundle optimization
+│   ├── sast-scanner.md            # Static analysis: injection, deserialization, path traversal
+│   ├── secrets-scanner.md         # Credential detection, high-entropy, lifecycle checks
+│   ├── state-machine-verifier.md  # Status workflows, transition matrix, guards
+│   ├── test-quality-reviewer.md   # Test quality, false positives, coverage gaps
+│   └── visual-regression-tester.md # UI visual regressions, CSS impact, pixel diff
+├── skills/                        # Skill templates (9 — Anthropic folder format)
 │   ├── nextjs-supabase/
 │   │   └── SKILL.md               # Next.js App Router + Supabase (Auth, RLS, Storage)
 │   ├── django-postgres/
@@ -39,10 +49,18 @@ examples/
 │   │   └── SKILL.md               # Safe operations, data migration, rollback
 │   └── ci-cd-pipeline/
 │       └── SKILL.md               # GitHub Actions, environments, deploy strategies
-└── rules/                        # Domain rules templates
-    ├── multi-tenancy-rules.md     # Inviolable rules, query patterns, new table checklist
+└── rules/                        # Domain rules templates (11)
+    ├── auth-rules.md              # Auth levels, password reset, token management
+    ├── compliance-rules.md        # LGPD/GDPR: consent, erasure, audit trail, retention
+    ├── distributed-systems-rules.md # Sagas, idempotency, eventual consistency, event sourcing
     ├── e-commerce-rules.md        # Monetary values, cart, stock, orders, discounts
-    └── auth-rules.md              # Auth levels, password reset, token management
+    ├── frontend-backend-integration-rules.md # Shared types, auth flow E2E, CORS, hydration
+    ├── i18n-rules.md              # String extraction, date formatting, RTL, Unicode
+    ├── multi-tenancy-rules.md     # Inviolable rules, query patterns, new table checklist
+    ├── observability-rules.md     # Structured logging, PII sanitization, tracing, alerts
+    ├── rate-limiting-rules.md     # Public endpoint limits, Retry-After, abuse patterns
+    ├── resilience-rules.md        # Timeouts, backoff, retry, circuit breaker, error boundaries
+    └── scheduling-rules.md        # UTC storage, IANA timezone, DST handling, date boundaries
 ```
 
 ## How to use
@@ -74,7 +92,7 @@ The framework instructs the AI to check `assets/examples/` before creating any n
   - **Process skills** (workflow steps): pushy format — `[What]. MUST [trigger]. [Consequence of skipping].`
   - **Knowledge skills** (reference patterns): contextual format — explains when the skill is useful, no imperative trigger
 - `invocation:` — how the agent/skill is activated:
-  - `subagent` — spawned as an independent process via Task tool. Isolated context, no access to implementing agent's reasoning. Required for all validation/review/security agents.
+  - `subagent` — spawned as an independent process via Agent tool. Isolated context, no access to implementing agent's reasoning. Required for all validation/review/security agents.
   - `inline` — read as a reference document by another agent. Default for skills and knowledge documents.
 - `receives:` — (subagent only) what the orchestrating agent passes: git diff, reports, criteria, file paths
 - `produces:` — (subagent only) what the subagent returns: structured report format

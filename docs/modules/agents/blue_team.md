@@ -10,7 +10,7 @@ invocation: subagent
 effort: high
 description: >
   Defensive security verifier. Spawned as independent subagent after validation
-  passes (Route C only, when Red Team ran). Reads Red Team reports, verifies
+  passes (Route 2 only, when Red Team ran). Reads Red Team reports, verifies
   defenses, confirms fixes, tracks security control inventory.
 receives: Vulnerability Report (Red Team), final code (post-fixes), rules files
 produces: Defense Assessment with gap analysis, defense inventory updates, APPROVE/BLOCK recommendation

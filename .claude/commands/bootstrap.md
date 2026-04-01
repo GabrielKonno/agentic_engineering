@@ -264,8 +264,6 @@ Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills 
 **If `.claude/agents/code-reviewer.md` already exists:** Do NOT overwrite. Verify it has "Known Bug Patterns" and "Architecture Patterns" sections. Add them if missing. Do not remove existing patterns.
 
 **If it does not exist:** Read the template at `docs/modules/agents/code_reviewer.md`. Adapt:
-- Replace `{CONFIG_DIR}` with `.claude/`
-- Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - **Pre-fill "Architecture Patterns" from PRD:** Read the PRD's stack, framework, and architectural constraints. Add 3-7 stack-specific structural rules that are predictable from the technology choice (e.g., Next.js App Router → server/client component separation; Prisma → transaction usage for multi-table ops; Django → fat models/thin views). Keep the existing generic rules and append project-specific ones below them. Do NOT invent speculative patterns — only add rules that are well-established conventions for the chosen stack.
 - **Pre-select Coverage Gap Declarations from PRD:** Review the four optional gap sections (accessibility, performance, concurrency, data integrity). Remove sections that are clearly irrelevant to this project's domain (e.g., remove accessibility gap if project has no UI; remove concurrency gap if project has no shared state or booking logic). Keep sections that match PRD features. When in doubt, keep the section — it is conditional and only activates when matching diffs appear.
 - **Keep "Known Bug Patterns" empty** — this section is populated by `rules-agents-updater` as real bugs emerge during development, not from predictions.
@@ -280,8 +278,6 @@ This agent is created at bootstrap for ALL projects (security is universal).
 **If `.claude/agents/security-reviewer.md` already exists:** Do NOT overwrite. Verify it has: prompt injection section, tiered security testing model reference, and Section 8 delegation.
 
 **If it does not exist:** Read the template at `docs/modules/agents/security_reviewer.md`. Adapt:
-- Replace `{CONFIG_DIR}` with `.claude/`
-- Replace `{CONFIG_FILE}` with `CLAUDE.md`
 - **Pre-select Coverage Gap Declarations from PRD:** Review the five optional gap sections (static analysis, secrets coverage, federation protocol, compliance, infrastructure security). Remove sections clearly irrelevant to this project (e.g., remove federation protocol gap if no OAuth/OIDC/SAML; remove infrastructure security gap if no IaC/Docker/K8s). Keep sections that match PRD's tech stack and architecture. When in doubt, keep — gaps are conditional and only fire when matching diffs appear.
 - **Compliance Probe context:** If the PRD indicates the project handles personal data (PII, CPF, health records, payment data), note this in the agent so the Compliance Probe section activates from session 1 rather than waiting for a diff to reveal it.
 - **Keep Section 8 (Stack-Specific Security) as-is** — this delegates to the stack skill and Red Team agent by design.
@@ -309,9 +305,6 @@ PRD indicates NONE of these → security-reviewer is sufficient, skip this step
 ```
 
 **If creating:** Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Adapt with stack-specific attack vectors and security settings from PRD.
-- Replace `{CONFIG_DIR}` with `.claude/`
-- Replace `{CONFIG_FILE}` with `CLAUDE.md`
-- Replace `{SUBAGENT_TOOL}` with `Task tool`
 - Fill Stack Attack Surface table from PRD
 - Fill Stack Security Settings from framework
 - Create at `.claude/agents/red-team.md` and `.claude/agents/blue-team.md`
@@ -320,21 +313,13 @@ PRD indicates NONE of these → security-reviewer is sufficient, skip this step
 
 ### Step 10 — Create validator agent
 
-The validator is mandatory for ALL projects. Read the template at `docs/modules/agents/validator.md`. Adapt:
-- Replace `{CONFIG_DIR}` with `.claude/`
-- Replace `{CONFIG_FILE}` with `CLAUDE.md`
-- Replace `{SUBAGENT_TOOL}` with `Task tool`
-- Create at `.claude/agents/validator.md`
+The validator is mandatory for ALL projects. Read the template at `docs/modules/agents/validator.md`. Adapt with project-specific context. Create at `.claude/agents/validator.md`.
 
 **Creation eval (DEFERRABLE if context is low):** See template for eval scenarios.
 
 ### Step 11 — Create arbitrator agent
 
-The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/agents/arbitrator.md`. Adapt:
-- Replace `{CONFIG_DIR}` with `.claude/`
-- Replace `{CONFIG_FILE}` with `CLAUDE.md`
-- Replace `{SUBAGENT_TOOL}` with `Task tool`
-- Create at `.claude/agents/arbitrator.md`
+The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/agents/arbitrator.md`. Adapt with project-specific context. Create at `.claude/agents/arbitrator.md`.
 
 **Creation eval (DEFERRABLE if context is low):** See template for eval scenarios.
 

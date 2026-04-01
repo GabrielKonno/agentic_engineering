@@ -9,7 +9,7 @@ name: validator
 invocation: subagent
 effort: high
 description: >
-  Independent validation agent. Spawned via Task tool after implementation.
+  Independent validation agent. Spawned via Agent tool after implementation.
   Re-runs build, tests, criteria checks, and mutation tests with isolated context.
   Receives prior review reports (code-reviewer, security-reviewer, Red Team) as
   additional evidence. Produces the Validation Report with ✅/❌/⏭️ per category.
@@ -29,7 +29,7 @@ derived_from: null
 
 ## Input
 
-This agent receives (via Task tool prompt):
+This agent receives (via Agent tool prompt):
 - **Git diff** — read via `git diff HEAD~1`
 - **Acceptance criteria** — copied into the prompt (short, central contract)
 - **Code Review Report** — findings from code-reviewer subagent
@@ -147,7 +147,7 @@ You do not know WHY the code was written this way. You only see code + checklist
 1. Generate 2 test scenarios:
    - **Scenario A (positive):** A git diff with a passing build but a QUERY: criterion that returns wrong data — validator should report ❌ with evidence
    - **Scenario B (negative):** A git diff where build passes, tests pass, and all criteria match — validator should report ✅ PASS
-2. Spawn validator via Task tool against each scenario
+2. Spawn validator via Agent tool against each scenario
 3. Verify: A → ❌ detected with evidence, B → ✅ with no false flags
 4. Update lineage: `last_eval: s0 (2/2 passed)`
 If skipped: set `last_eval: none (deferred)`

@@ -339,17 +339,13 @@ Add missing sections. **Do NOT remove existing customizations** — they may con
 
 If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, `produces:`, and lineage fields (`created:`, `last_eval:`, `fixes:`, `derived_from:`) in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
 
-If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them. Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Replace `{CONFIG_DIR}` with `.claude/`, `{CONFIG_FILE}` with `CLAUDE.md`, `{SUBAGENT_TOOL}` with `Task tool`.
+If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them. Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Adapt with stack-specific attack vectors.
 
 **Step 2.6.1 — Verify validator agent/skill:**
 
 If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, Input, Output, Verification Process, and BOUNDARIES sections. Add if missing.
 
-If it doesn't exist: create it. The validator is mandatory for ALL projects. Read the template at `docs/modules/agents/validator.md`. Adapt:
-- Replace `{CONFIG_DIR}` with `.claude/`
-- Replace `{CONFIG_FILE}` with `CLAUDE.md`
-- Replace `{SUBAGENT_TOOL}` with `Task tool`
-- Create at `.claude/agents/validator.md`
+If it doesn't exist: create it. The validator is mandatory for ALL projects. Read the template at `docs/modules/agents/validator.md`. Adapt with project-specific context. Create at `.claude/agents/validator.md`.
 
 **Creation eval (DEFERRABLE if context is low):** See agent template for 2 test scenarios. Update lineage after eval.
 
@@ -357,11 +353,7 @@ If it doesn't exist: create it. The validator is mandatory for ALL projects. Rea
 
 If it exists: verify it has `invocation: subagent`, `effort: high`, `receives:`, `produces:`, three terminal rulings (UPHOLD/OVERRIDE/ESCALATE), and BOUNDARIES sections.
 
-If it doesn't exist: create it. The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/agents/arbitrator.md`. Adapt:
-- Replace `{CONFIG_DIR}` with `.claude/`
-- Replace `{CONFIG_FILE}` with `CLAUDE.md`
-- Replace `{SUBAGENT_TOOL}` with `Task tool`
-- Create at `.claude/agents/arbitrator.md`
+If it doesn't exist: create it. The arbitrator is mandatory for ALL projects. Read the template at `docs/modules/agents/arbitrator.md`. Adapt with project-specific context. Create at `.claude/agents/arbitrator.md`.
 
 **Creation eval (DEFERRABLE if context is low):** See agent template for 2 test scenarios. Update lineage after eval.
 
@@ -444,7 +436,7 @@ done
 **Copy rules files (to `.claude/rules/`):**
 ```bash
 mkdir -p projects/$ARGUMENTS/.claude/rules
-for tmpl in session_rules evolution_policy; do
+for tmpl in session_rules evolution_policy component_design; do
   target=$(echo "$tmpl" | tr '_' '-')
   if [ ! -f "projects/$ARGUMENTS/.claude/rules/${target}.md" ]; then
     sed -n '/^```markdown$/,/^```$/p' "docs/modules/rules/${tmpl}.md" | sed '1d;$d' > "projects/$ARGUMENTS/.claude/rules/${target}.md"
@@ -458,7 +450,7 @@ done
 **Expected after this step:**
 - **Process skills (9):** sprint-proposer, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
-- **Rules (2):** session-rules.md, evolution-policy.md
+- **Rules (3):** session-rules.md, evolution-policy.md, component-design.md
 
 Skills and agents are auto-discovered by Claude Code. No explicit listing is needed in CLAUDE.md.
 

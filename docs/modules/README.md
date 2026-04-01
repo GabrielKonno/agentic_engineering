@@ -8,7 +8,7 @@ Single source of truth for all templates and protocols used by bootstrap prompts
 - `execution_protocol.md` — Execution Protocol (before implementing, validation loop, validation orchestration)
 - `templates/` — Document and config templates used at bootstrap (CLAUDE.md, project.md, pendencias.md, settings.json)
 - `agents/` — Agent templates (code-reviewer, validator, security-reviewer, etc.) copied to `.claude/agents/`
-- `rules/` — Rules templates (session-rules, evolution-policy) copied to `.claude/rules/`
+- `rules/` — Rules templates (session-rules, evolution-policy, component-design) copied to `.claude/rules/`
 - `skills/` — Pre-built process skills copied to projects at bootstrap Step 5.7
 
 ## How bootstraps use modules
@@ -27,7 +27,7 @@ Protocols and templates use these Claude Code paths:
 |-------|------|
 | Config file | `CLAUDE.md` |
 | Config directory | `.claude/` |
-| Subagent tool | Task tool |
+| Subagent tool | Agent tool |
 
 Agent templates are stored at `.claude/agents/[name].md`.
 
