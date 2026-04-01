@@ -109,3 +109,36 @@ VERIFY: Kill the saga orchestrator mid-saga. Restart it.
   → Saga resumes from last committed step — no duplicate side effects.
   FAILURE: saga stuck in 'running' or duplicate steps executed.
 ```
+
+## Webhook Patterns
+
+### Webhook Receiver Rules
+- **Verify webhook signature**: every incoming webhook validates the sender's signature (HMAC-SHA256 or equivalent) before processing. Unsigned or invalid-signature webhooks are rejected with 401.
+- **Signature key rotation**: support verifying against the current AND previous signing secret during rotation window.
+- **Idempotent processing**: webhook handlers are idempotent — redelivered webhooks with the same event ID produce no additional side effects.
+- **Async processing**: webhook endpoint returns 200/202 immediately, enqueues the event for async processing. Do NOT process synchronously in the HTTP handler — webhook senders have short timeout windows.
+- **Retry tolerance**: webhook endpoint must be available (return 2xx) > 99.5% of the time. Provider retries with exponential backoff on failure.
+- **Event ordering**: do NOT assume webhooks arrive in chronological order. Use event timestamps or sequence numbers to handle out-of-order delivery.
+
+### Webhook Sender Rules (if project sends webhooks)
+- Implement retry with exponential backoff: 1s, 2s, 4s, 8s, ... up to max 5 retries
+- Sign every outgoing webhook with HMAC-SHA256 using per-subscriber secret
+- Include event metadata in every payload: `event_id` (UUID), `event_type`, `timestamp`, `webhook_id`
+- Log delivery status: record attempt count, response code, and final status per webhook delivery
+
+## Exactly-Once Semantics Guidance
+
+True exactly-once delivery is impossible in distributed systems. The framework targets **effectively-once** via idempotency at each layer:
+
+1. **Producer side**: assign unique `event_id` before publishing. If publish result is ambiguous (timeout, connection lost), retry with the SAME `event_id`.
+2. **Broker side**: use broker-level deduplication if available (Kafka idempotent producer, SQS content-based deduplication).
+3. **Consumer side**: check `event_id` against a processed-events store BEFORE processing. Store the `event_id` in the same database transaction as the side effect (transactional outbox pattern).
+
+### Idempotent Database Operations — Trade-offs
+
+| Strategy | Pros | Cons | When to use |
+|----------|------|------|-------------|
+| Idempotency key table | Explicit, auditable, TTL-based | Extra table + lookup per operation | Payment operations, critical mutations |
+| UPSERT / ON CONFLICT | No extra table, database-native | Requires natural unique constraint | Entity creation where natural key exists |
+| Optimistic locking (version column) | Prevents lost updates, no locks | Requires retry on conflict | Concurrent entity updates |
+| Transactional outbox | Atomicity guaranteed for event+mutation | More complex setup, needs poller | Event publishing from database mutations |

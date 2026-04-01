@@ -3,9 +3,11 @@ name: performance-auditor
 invocation: subagent
 effort: medium
 description: >
-  Reviews code for performance issues. Invoked after implementing features
-  that involve data fetching, rendering, or heavy computation.
-  Adapts checks to the project's stack.
+  USE PROACTIVELY when diff modifies data fetching, rendering logic, or API
+  endpoints with SLA targets, or when code-reviewer declares a performance gap.
+  NOT needed for config-only, documentation, or minor text changes. Without this,
+  N+1 queries, bundle regressions, and SLA breaches pass code review as "looks fine."
+  Produces Performance Audit Report → APPROVE / FIX REQUIRED.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []
@@ -13,6 +15,22 @@ derived_from: null
 ---
 
 # Performance Auditor
+
+## When spawned
+
+This agent is typically invoked by main Claude after receiving a code-reviewer
+report that declares a performance gap. It may also be invoked directly when
+the diff's domain is recognized via this agent's description.
+
+**Context to include in prompt:**
+- Git diff (`git diff HEAD~1`)
+- Code Review Report (if performance gap triggered this invocation)
+- All `.claude/rules/*.md` files
+- CLAUDE.md: Key Patterns and Architecture sections
+
+**What main Claude should do with this report:**
+- `APPROVE` → performance coverage ✅ — include as evidence in validator prompt
+- `FIX REQUIRED` → performance ❌ — list findings in validation report, address before proceeding
 
 ## When to invoke
 
@@ -74,6 +92,23 @@ Exceeds threshold by > 2×: HIGH. Between 1×–2×: MEDIUM.
 - [ ] Tree-shakeable — unused code is eliminated (ESM imports, no side-effect imports)
 - [ ] API responses minimal — only necessary fields returned, not entire database rows
 - [ ] Compression enabled — gzip/brotli on responses >1KB
+
+## Baseline Enforcement
+
+When baselines are established (not `_tbd_`), compare measurements:
+
+| Condition | Result |
+|-----------|--------|
+| Metric within baseline | ✅ PASS |
+| Metric 1x-2x above baseline | ⚠️ MEDIUM — note in report, investigate |
+| Metric >2x above baseline | ❌ FIX REQUIRED — regression |
+| Baseline is `_tbd_` | ⚠️ INFO — "baseline not established, cannot verify regression" |
+
+### Core Web Vitals (when diff modifies frontend rendering)
+- LCP (Largest Contentful Paint): < 2.5s on 3G simulation
+- INP (Interaction to Next Paint): < 200ms
+- CLS (Cumulative Layout Shift): < 0.1
+- Bundle size: report delta (+/- KB) vs previous build
 
 ## Output Format
 

@@ -3,8 +3,11 @@ name: accessibility-checker
 invocation: subagent
 effort: medium
 description: >
-  Reviews UI components and pages for WCAG 2.1 AA compliance.
-  Invoked when implementing or modifying user-facing interfaces.
+  USE PROACTIVELY when diff modifies UI components, forms, navigation, or
+  interactive elements, or when code-reviewer declares an accessibility gap.
+  NOT needed for backend-only or API-only changes. Without this, WCAG 2.1 AA
+  violations pass code review where only basic ARIA checks are performed.
+  Produces Accessibility Audit Report → APPROVE / FIX REQUIRED.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []
@@ -12,6 +15,22 @@ derived_from: null
 ---
 
 # Accessibility Checker
+
+## When spawned
+
+This agent is typically invoked by main Claude after receiving a code-reviewer
+report that declares an accessibility gap. It may also be invoked directly
+when the diff's domain is recognized via this agent's description.
+
+**Context to include in prompt:**
+- Git diff (`git diff HEAD~1`)
+- Code Review Report (if accessibility gap triggered this invocation)
+- All `.claude/rules/*.md` files
+- CLAUDE.md: Key Patterns and Architecture sections
+
+**What main Claude should do with this report:**
+- `APPROVE` → accessibility coverage ✅ — include as evidence in validator prompt
+- `FIX REQUIRED` → accessibility ❌ — list findings in validation report, address before proceeding
 
 ## When to invoke
 

@@ -90,3 +90,24 @@ VERIFY: Submit password reset for non-existent email.
   → No email sent, no error revealed.
   SUCCESS: same response as valid email. FAILURE: different response (user enumeration).
 ```
+
+## Credential Lifecycle Management
+
+### Rotation Policies
+- Service account credentials: rotated every 90 days (automated via CI/CD or secrets manager)
+- API keys: have expiry date; support 2 active keys simultaneously during rotation window
+- Database passwords: rotated on schedule; never shared between environments (dev/staging/prod use different credentials)
+
+### Minimum Privilege
+- Service accounts scoped to required resources only — not admin/root
+- API keys scoped to required endpoints/operations
+- Database application user has DML permissions only (SELECT/INSERT/UPDATE/DELETE) — no DDL (CREATE/ALTER/DROP) in production
+
+### Secrets Manager Integration (production)
+- Production secrets stored in platform secrets manager (AWS Secrets Manager, GCP Secret Manager, Vault, etc.)
+- Application reads secrets from manager at startup or via SDK — not from environment files deployed alongside code
+- Secrets manager access audited (who accessed which secret, when)
+
+### PII in Authentication Logs
+- Authentication event logs MUST NOT include: password value, token value, session ID value, API key value
+- Authentication event logs MUST include: user_id, event type (login/logout/failed/mfa), timestamp, IP address (hashed if compliance requires)

@@ -38,6 +38,7 @@ When invoked as subagent, produce:
 ### Pattern violations: [list any CLAUDE.md/rules violations]
 ### Known Bug Patterns triggered: [list patterns that matched this diff, by name — used to update efficacy tracking]
 ### Architecture: [file size, cross-module imports, structure issues]
+### Coverage gaps declared: [None | list of gaps]
 ### Recommendation: APPROVE / FIX REQUIRED
 ```
 
@@ -153,6 +154,63 @@ When invoked as subagent, do NOT read:
   transaction — no unbounded partial states?
 - [ ] Saga steps each have a defined compensation action?
 - [ ] Dead-letter queue configured for message consumers?
+
+### Scheduling / Temporal (activate when `.claude/rules/scheduling-rules.md` exists)
+- [ ] Timestamps stored as UTC (`TIMESTAMPTZ`, not `TIMESTAMP` without timezone)?
+- [ ] Timezone identifier stored separately using IANA format (e.g., `America/Sao_Paulo`)?
+- [ ] Duration calculations use timezone-aware library — not simple arithmetic (`+86400`)?
+- [ ] "Today" queries use user's timezone for day boundaries, not server midnight?
+- [ ] Recurring events handle DST gap and fold (2:30 AM may not exist or exist twice)?
+
+### Resilience (activate when `.claude/rules/resilience-rules.md` exists)
+- [ ] External service calls have explicit timeout — not relying on library default?
+- [ ] Error paths do not swallow exceptions silently — at minimum: log + return meaningful error?
+- [ ] Retry logic uses exponential backoff — not fixed-interval or unbounded retries?
+- [ ] Critical paths have fallback behavior — user sees degraded response, not error page?
+- [ ] Health check endpoint exists and verifies critical dependencies?
+
+### API Contracts (activate when diff touches shared types, API interfaces, or OpenAPI/GraphQL schemas)
+- [ ] Response interface matches actual handler return type?
+- [ ] Removed or renamed response fields flagged as breaking change?
+- [ ] New required request fields flagged as breaking change (use optional with defaults)?
+
+## Coverage Gap Declaration
+
+After completing all sections above, declare domains where inline code review
+provides only partial coverage and a specialized agent would add deeper analysis.
+Include this section in every Code Review Report.
+
+**If diff touches UI components, forms, navigation, or interactive elements:**
+> Accessibility gap: inline checklist covers ARIA attributes, keyboard navigation,
+> and semantic HTML patterns. Comprehensive WCAG 2.1 AA compliance audit (axe-core,
+> contrast ratios, screen reader flow) requires automated scanning and browser
+> verification beyond code review.
+> Recommend: search `.claude/agents/` for an accessibility audit agent and invoke
+> before validator if found.
+
+**If diff significantly modifies data-fetching, rendering logic, or API response paths:**
+> Performance gap: inline review detects N+1 queries, missing pagination, and
+> obvious anti-patterns. Quantitative measurement (p95 baselines, Core Web Vitals,
+> bundle impact) requires profiling beyond code inspection.
+> Recommend: search `.claude/agents/` for a performance audit agent and invoke
+> before validator if found.
+
+**If diff modifies shared mutable state, database transactions with concurrent access,
+or booking/reservation logic:**
+> Concurrency gap: inline review checks for locking patterns and transaction isolation.
+> Race condition detection under concurrent load requires controlled execution testing
+> beyond what code review provides.
+> Recommend: search `.claude/agents/` for a concurrency testing agent and invoke
+> before validator if found.
+
+**If diff modifies multi-table operations, cascading deletes, or denormalized data:**
+> Data integrity gap: inline review checks referential integrity patterns.
+> Multi-table transactional consistency and denormalized data drift verification
+> require database-level queries beyond code inspection.
+> Recommend: search `.claude/agents/` for a data integrity agent and invoke
+> before validator if found.
+
+**If none of the above apply:** omit Coverage Gap Declaration from the report.
 
 ## Known Bug Patterns (check EVERY review)
 

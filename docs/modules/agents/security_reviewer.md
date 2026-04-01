@@ -196,6 +196,20 @@ If any answer reveals a risk: address it before proceeding.
 
 **Escalation condition:** If diff touches auth, authorization, input processing, cryptography, deserialization, file I/O, or shell execution AND a SAST tool is available → spawn `sast-scanner` subagent for dedicated SAST scan before proceeding to `validator`.
 
+## 11. Rate Limiting & Abuse Prevention (check when diff touches auth, public APIs, or payment endpoints)
+- [ ] Rate limit strategy matches endpoint risk: per-user + per-IP for auth, per-API-key for general
+- [ ] Rate limit response includes `Retry-After` header
+- [ ] Distributed rate limiting: if multiple instances, rate state shared (Redis or equivalent) — not per-instance in-memory
+- [ ] Auth endpoints: account lockout or progressive delay after N failed attempts
+- [ ] If `.claude/rules/rate-limiting-rules.md` exists: verify code follows patterns defined there
+
+## 12. Data Validation (check when diff touches API endpoints or form handlers)
+- [ ] Application-level schema validation present (Zod, Joi, Pydantic, or equivalent) — not just DB constraints
+- [ ] Schema validation runs server-side — client-side validation is UX only
+- [ ] Required fields enforced at schema level — not relying solely on DB NOT NULL
+- [ ] String fields have max length at schema level — prevents payload bombs
+- [ ] Numeric fields have range validation where business logic applies
+
 ## Coverage Gap Declaration
 
 After completing Sections 1-10, declare what was and was not covered.
@@ -210,6 +224,8 @@ Include this section in every Security Review Report.
 - Dependency security (Section 6)
 - Security headers (Section 7)
 - Red Team thinking (Section 9)
+- Rate limiting & abuse prevention (Section 11)
+- Data validation depth (Section 12)
 
 ### What manual review cannot fully cover
 
@@ -238,6 +254,23 @@ Declare in report:
 > that goes beyond what general security review provides.
 > Recommend: search `.claude/agents/` for a specialized OAuth/OIDC flow testing agent and
 > invoke before validator if found.
+
+**If diff touches user data collection, PII storage, consent, or account deletion,
+AND `.claude/rules/compliance-rules.md` exists:**
+Declare in report:
+> Compliance gap: informational probe (Section 3) detected personal data handling.
+> Full LGPD/GDPR compliance audit (consent tracking, deletion completeness, audit trail)
+> requires specialized analysis beyond security review.
+> Recommend: search `.claude/agents/` for a compliance audit agent and invoke
+> before validator if found.
+
+**If diff touches Terraform, CloudFormation, Docker, Kubernetes manifests, or IAM policies:**
+Declare in report:
+> Infrastructure security gap: this review covers application-level security.
+> Infrastructure configuration (IAM least-privilege, Docker hardening, network rules,
+> encryption at rest) requires dedicated IaC analysis.
+> Recommend: search `.claude/agents/` for an IaC security agent and invoke
+> before validator if found.
 
 **If none of the above apply:** omit Coverage Gap Declaration from the report (set field to `None`).
 ```
