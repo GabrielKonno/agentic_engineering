@@ -1,11 +1,17 @@
 ---
 name: e-commerce-patterns
+invocation: inline
 effort: high
 description: >
-  Test patterns and business rules for e-commerce features: cart, checkout,
-  inventory, pricing, discounts, orders, payments, shipping, refunds.
+  Business rules and verification patterns for e-commerce domains — cart
+  recalculation invariants, discount stacking order, stock management, order
+  lifecycle state machine, payment idempotency, and refund constraints. Consult
+  when implementing or reviewing any feature that touches monetary values,
+  inventory, or order state transitions. Includes 4 STRONG criteria examples
+  and 9 edge cases that commonly cause financial discrepancies.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # E-Commerce Domain Patterns
@@ -73,6 +79,17 @@ QUERY: Cancel order in "processing" status.
   → order status = "cancelled", cancelled_at = now(), cancelled_by = user_id
   SUCCESS: all 3 reversals present. FAILURE: any missing reversal
 ```
+
+## Common Pitfalls
+
+| Pitfall | Symptom | Fix |
+|---------|---------|-----|
+| Storing prices as float | Rounding errors on totals (R$9.99 ≠ R$10.00 - R$0.01) | Store as integer cents, format only for display |
+| Cart total cached instead of recalculated | Total shows stale value after item update | Recalculate on every cart read, not just on modification |
+| Discount applied after tax | Customer pays tax on undiscounted amount | Apply discounts to subtotal, then calculate tax |
+| Stock checked only at add-to-cart | Ghost orders when stock sold between cart and checkout | Re-validate stock at checkout confirmation |
+| Order total updates with product price | Historical orders show wrong amounts | Snapshot price at order creation, never reference current price |
+| Missing idempotency key on payment | Duplicate charges on retry/timeout | Require client-generated idempotency key, reject duplicates |
 
 ## Edge Cases Checklist
 

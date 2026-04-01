@@ -1,11 +1,16 @@
 ---
 name: django-postgres
+invocation: inline
 effort: medium
 description: >
-  Stack patterns for Django + PostgreSQL projects.
-  Includes ORM patterns, security settings, middleware, and testing conventions.
+  Reference patterns for Django + PostgreSQL projects — model design with tenant
+  isolation, manager-level query scoping, class-based view permission checks,
+  and middleware security. Consult when implementing models, views, or middleware
+  that touch data isolation or access control. Covers 6 pitfalls including N+1
+  queries and unscoped querysets.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # Django + PostgreSQL Patterns
@@ -91,3 +96,23 @@ X_FRAME_OPTIONS = "DENY"
 - Factory: factory_boy for test data
 - Test command: `pytest` or `python manage.py test`
 - Coverage: `pytest --cov=apps/ --cov-report=term-missing`
+
+## STRONG Criteria Examples
+
+```
+REVIEW: New view accesses model data.
+  → Verify: queryset filtered through manager with tenant scoping (not `Model.objects.all()`)
+  → Verify: view has `permission_classes` or `LoginRequiredMixin` — not unprotected
+  SUCCESS: scoped + authenticated. FAILURE: unscoped queryset or missing permission check
+
+REVIEW: New model created.
+  → Verify: has `organization` ForeignKey field
+  → Verify: custom manager with `get_queryset().filter(organization=current_org)`
+  → Verify: `unique_together` constraints include organization scope
+  SUCCESS: tenant-aware model. FAILURE: missing org field or global uniqueness
+
+VERIFY: ORM query in view returns data.
+  → Check Django Debug Toolbar or `connection.queries`: N+1 detection
+  → Verify: related objects loaded via `select_related()` or `prefetch_related()`
+  SUCCESS: ≤2 queries for list view. FAILURE: query count grows with result count
+```

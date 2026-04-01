@@ -1,11 +1,16 @@
 ---
 name: database-migration-guide
+invocation: inline
 effort: high
 description: >
-  Safe database migration patterns. Covers schema changes, data migrations,
-  zero-downtime strategies, and rollback procedures. Stack-agnostic.
+  Safe database migration patterns — operation risk classification, zero-downtime
+  schema changes, batched data migration, rollback procedures, and post-migration
+  verification queries. Consult before writing any migration that adds constraints,
+  renames columns, changes types, or touches large tables. Stack-agnostic with
+  framework-specific rollback examples (Django, Prisma, Supabase).
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # Database Migration Guide
@@ -110,4 +115,23 @@ WHERE table_name = 'target_table';
 -- Verify index exists
 SELECT indexname, indexdef FROM pg_indexes
 WHERE tablename = 'target_table' AND indexname = 'expected_index';
+```
+
+## STRONG Criteria Examples
+
+```
+REVIEW: Migration adds NOT NULL column to existing table.
+  → Verify: migration is multi-step (add nullable → backfill → set NOT NULL)
+  → Verify: backfill uses batched UPDATE (LIMIT/batch size), not single UPDATE on all rows
+  SUCCESS: safe multi-step approach. FAILURE: single ALTER TABLE ADD COLUMN ... NOT NULL
+
+REVIEW: Migration renames or drops column.
+  → Verify: code references to old column name already removed in a prior deploy
+  → Verify: DOWN migration can restore the column (or explicit "irreversible" acknowledgement)
+  SUCCESS: deploy-order safe. FAILURE: column dropped while code still references it
+
+REVIEW: Migration adds index to large table.
+  → Verify: uses CONCURRENTLY option (PostgreSQL) or equivalent non-locking strategy
+  → Verify: estimated table size considered (comment or documentation)
+  SUCCESS: non-blocking index creation. FAILURE: standard CREATE INDEX on >100k row table
 ```
