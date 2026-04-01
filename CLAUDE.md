@@ -30,7 +30,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   └── prd_sync_checker.md, criteria_enforcer.md, diff_pattern_extractor.md  # Process agent templates
 │   │   ├── rules/                          # Rules templates (copied to .claude/rules/)
 │   │   │   ├── session_rules.md            # Task limits, reasoning depth, scripts convention
-│   │   │   └── evolution_policy.md         # Evolution classification + auto-evolution boundaries
+│   │   │   ├── evolution_policy.md         # Evolution classification + auto-evolution boundaries
+│   │   │   └── component_design.md         # Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment
 │   │   └── skills/                         # Pre-built inline process skills (10, copied to projects)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components

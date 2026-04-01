@@ -211,9 +211,10 @@ mkdir -p projects/$ARGUMENTS/.claude/rules
 # Extract content between the markdown fences in the template
 sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
 sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/evolution_policy.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/evolution-policy.md
+sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/component_design.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/component-design.md
 ```
 
-This creates session-rules.md (task limits, documentation quality, reasoning depth, scripts convention) and evolution-policy.md (evolution classification, auto-evolution boundaries).
+This creates session-rules.md (task limits, documentation quality, reasoning depth, scripts convention), evolution-policy.md (evolution classification, auto-evolution boundaries), and component-design.md (agent/skill/rule design principles: gap-declaration activation, Pushy Descriptions, vocabulary alignment, tiered architecture, Preservar+Adicionar).
 
 Skills and agents are auto-discovered by Claude Code from `.claude/skills/` and `.claude/agents/`. No explicit listing is needed in CLAUDE.md.
 
@@ -420,6 +421,7 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 ### Rules: copied from framework (Step 5.7):
 - .claude/rules/session-rules.md (task limits, documentation quality, reasoning depth, scripts convention)
 - .claude/rules/evolution-policy.md (evolution classification, auto-evolution boundaries)
+- .claude/rules/component-design.md (agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment, tiered architecture)
 
 ### Hooks configured:
 - smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]

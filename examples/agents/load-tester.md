@@ -3,6 +3,9 @@ name: load-tester
 invocation: subagent
 effort: high
 description: >
+  Executes load and stress tests against API endpoints, measuring p50/p95/p99
+  latency, throughput, error rates, and resource utilization under simulated
+  concurrent traffic — comparing results against PRD SLA targets.
   USE PROACTIVELY before production launch of features with explicit SLA targets
   in the PRD or high-concurrency requirements (checkout, payments, real-time,
   file upload/download). NOT needed for admin features or standard CRUD without

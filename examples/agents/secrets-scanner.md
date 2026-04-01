@@ -3,6 +3,9 @@ name: secrets-scanner
 invocation: subagent
 effort: medium
 description: >
+  Scans code and git history for leaked credentials using high-entropy detection,
+  service-specific patterns (AWS, GitHub, Stripe, Google, Slack), and credential
+  lifecycle verification — with optional live credential validation probes.
   USE PROACTIVELY when diff touches .env files, config files, CI/CD YAML,
   auth modules, secrets management, or when security-reviewer declares a
   secrets coverage gap. Also run as periodic full-history scan before

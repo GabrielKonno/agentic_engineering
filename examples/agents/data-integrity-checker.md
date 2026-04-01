@@ -3,6 +3,9 @@ name: data-integrity-checker
 invocation: subagent
 effort: high
 description: >
+  Verifies referential integrity, cascade completeness, and denormalized data
+  consistency across related tables — using database queries to detect orphaned
+  records, missing foreign keys, and sync drift that code review alone cannot catch.
   USE PROACTIVELY when diff modifies multi-table operations, cascading deletes,
   or denormalized data, or when code-reviewer declares a data integrity gap.
   NOT needed for single-table reads or simple CRUD. Without this, orphaned

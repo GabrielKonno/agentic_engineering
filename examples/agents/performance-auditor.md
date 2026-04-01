@@ -3,6 +3,9 @@ name: performance-auditor
 invocation: subagent
 effort: medium
 description: >
+  Measures and audits code performance against baselines — detecting N+1 queries,
+  missing pagination, bundle size regressions, and SLA violations through static
+  analysis, query inspection, and Core Web Vitals measurement.
   USE PROACTIVELY when diff modifies data fetching, rendering logic, or API
   endpoints with SLA targets, or when code-reviewer declares a performance gap.
   NOT needed for config-only, documentation, or minor text changes. Without this,
