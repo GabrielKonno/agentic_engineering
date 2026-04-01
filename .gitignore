@@ -1,3 +1,4 @@
 # Project folders — each project has its own git repo
 projects/
 .claude/settings.local.json
+.claude/docs/
