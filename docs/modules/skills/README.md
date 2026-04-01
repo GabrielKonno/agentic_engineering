@@ -5,30 +5,29 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > **Note:** 3 process components that produce decisions or analyses are proper agents:
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
-> This directory contains the 10 **inline** skills (7 implementation + 3 session lifecycle).
+> This directory contains the 9 **inline** skills (6 implementation + 3 session lifecycle).
 
 ## What these are
 
-These 10 skills implement steps of the Session Protocol and Execution Protocol. The main agent reads the SKILL.md and follows the steps in its own context. In v1.7.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
+These 9 skills implement steps of the Session Protocol and Execution Protocol. The main agent reads the SKILL.md and follows the steps in its own context. In v1.7.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
 
 1. **Copied** to each project's `.claude/skills/` at bootstrap
-2. **Triggered** by convention (session-start/session-end are user-invoked; others are called by orchestrating skills)
+2. **Triggered** by convention (sprint-proposer/session-end are user-invoked; others are called by orchestrating skills)
 3. **Evolvable** via the standard evolution mechanisms (FIX/DERIVED/CAPTURED — see `.claude/rules/evolution-policy.md`)
 
 ## Skills list
 
 | # | Skill | Type | When triggered |
 |---|-------|------|---------------|
-| 1 | session-start | Process + judgment | Start of session (user-triggered) |
+| 1 | sprint-proposer | Process + judgment | Start of session (user-triggered) — loads context, proposes sprint, manages sprint-approved mode |
 | 2 | session-end | Process + judgment | End of session (user-triggered) |
 | 3 | context-recovery | Process pure | Mid-session emergency (user-triggered) |
-| 4 | sprint-proposer | Process + judgment | Start of session (called by session-start, step 5) |
-| 5 | validation-orchestrator | Process + judgment | Before + during implementation |
-| 6 | project-md-updater | Process + judgment | End of session (called by session-end, item 2) |
-| 7 | pendencias-updater | Process + judgment | End of session (called by session-end, item 3) |
-| 8 | config-file-updater | Process + judgment | End of session (called by session-end, item 4) |
-| 9 | rules-agents-updater | Process + judgment | End of session (called by session-end, item 5) |
-| 10 | session-log-creator | Process pure | End of session (called by session-end, with item 2) |
+| 4 | validation-orchestrator | Process + judgment | Before + during implementation |
+| 5 | project-md-updater | Process + judgment | End of session (called by session-end, item 2) |
+| 6 | pendencias-updater | Process + judgment | End of session (called by session-end, item 3) |
+| 7 | config-file-updater | Process + judgment | End of session (called by session-end, item 4) |
+| 8 | rules-agents-updater | Process + judgment | End of session (called by session-end, item 5) |
+| 9 | session-log-creator | Process pure | End of session (called by session-end, with item 2) |
 
 ## Skill Creator usage
 

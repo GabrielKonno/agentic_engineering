@@ -1,7 +1,7 @@
 ---
 name: prd-sync-checker
 description: >
-  Runs at session start (step 3, opt-in) before task selection — invoked as subagent,
+  Runs at sprint-proposer step 3 (opt-in) before task selection — invoked as subagent,
   no session context. Checks PRD version + content against project.md.
   Skipping risks implementing against stale requirements.
 tools: Read, Write

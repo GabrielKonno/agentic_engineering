@@ -19,8 +19,8 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
                          |  - 12 templates    |           | 9+ agent .md files  |
-                         |  - 2 protocols     |           | 10 process skills   |
-                         |  - 10 skills       |           | 3 rules files       |
+                         |  - 2 protocols     |           | 9 process skills    |
+                         |  - 9 skills        |           | 3 rules files       |
                          |  - examples/       |           | examples/ (copy)    |
                          |                    |           | settings.json       |
                          +--------------------+           +---------------------+
@@ -106,7 +106,7 @@ agentic_engineering/
 │   │   ├── templates/                      ← Document and config templates
 │   │   ├── agents/                         ← Agent templates (9 agents)
 │   │   ├── rules/                          ← Rules templates (3 rules files)
-│   │   └── skills/                         ← 10 pre-built process skills
+│   │   └── skills/                         ← 9 pre-built process skills
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── examples_instructions.md        ← Conventions for creating agents/skills
@@ -135,7 +135,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/security-reviewer.md` | `modules/agents/security_reviewer.md` | OWASP Top 10 checklist |
 | `.claude/agents/red-team.md` | `modules/agents/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
 | `.claude/agents/blue-team.md` | `modules/agents/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
-| `.claude/skills/*` (10 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
+| `.claude/skills/*` (9 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
 | `.claude/rules/session-rules.md` | `modules/rules/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
 | `.claude/rules/evolution-policy.md` | `modules/rules/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
 | `.claude/rules/component-design.md` | `modules/rules/component_design.md` | Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment |
@@ -173,7 +173,7 @@ TOOLKIT PROMPTS          TEMPLATES               PROTOCOLS
                               |              |        v
                               v              |   PROCESS SKILLS
                         PROJECT FILES        |   (how to execute)
-                        (instances in the    |   10 pre-built skills
+                        (instances in the    |   9 pre-built skills
                          bootstrapped        |   that implement each
                          project)            |   protocol step
                                              |        |

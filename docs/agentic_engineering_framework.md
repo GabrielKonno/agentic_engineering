@@ -44,7 +44,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/templates/` | Document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json). |
 | `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
 | `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design). |
-| `docs/modules/skills/` | 10 pre-built process skills (prd-sync-checker, sprint-proposer, validation-orchestrator, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol or Execution Protocol. 3 skills (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) have `invocation: subagent` — invoked via Agent tool. The remaining 7 run inline. |
+| `docs/modules/skills/` | 9 pre-built process skills (sprint-proposer, validation-orchestrator, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol or Execution Protocol. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `docs/modules/session_protocol.md` | Session Protocol (START, END, recovery) | Defines WHEN things happen during development sessions. Embedded into each project's CLAUDE.md during bootstrap. |
 | `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (10) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
@@ -186,7 +186,7 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   ├── templates/                        # Document and config templates for bootstrap
 │   │   ├── agents/                           # Agent templates (copied to .claude/agents/)
 │   │   ├── rules/                            # Rules templates (copied to .claude/rules/)
-│   │   └── skills/                           # 10 pre-built process skills (copied to projects)
+│   │   └── skills/                           # 9 pre-built process skills (copied to projects)
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── examples_instructions.md             # How to use examples, conventions, key patterns
 │   ├── agents/                              # Agent templates (flat .md)
@@ -267,7 +267,7 @@ The framework has five types of components. Each answers a different question:
 | **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
 | **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
 | **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (10 skills, 7 inline + 3 subagent) | HOW are protocol steps executed? | Development sessions |
+| **Process Skills** | `modules/skills/*/SKILL.md` (9 inline skills) | HOW are protocol steps executed? | Development sessions |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
@@ -334,7 +334,7 @@ Step     Source (framework repo)                     Output (project folder)
 4        modules/templates/pendencias_md.md      --> .claude/phases/pendencias.md
 5        (external: npm registry, CLI tools)     --> MCP servers installed
 5.5      (external: skill-creator plugin)        --> Plugin installed (optional)
-5.7      modules/skills/*                        --> .claude/skills/* (copy 10 skills)
+5.7      modules/skills/*                        --> .claude/skills/* (copy 9 skills)
          modules/agents/prd_sync_checker.md     --> .claude/agents/prd-sync-checker.md
          modules/agents/criteria_enforcer.md    --> .claude/agents/criteria-enforcer.md
          modules/agents/diff_pattern_extractor.md --> .claude/agents/diff-pattern-extractor.md
@@ -407,7 +407,7 @@ During development sessions, the protocols and skills interact in this sequence:
 
 ```
 SESSION START (Session Protocol):
-  Read CLAUDE.md --> prd-sync-checker [subagent] --> sprint-proposer --> approve sprint
+  Read CLAUDE.md --> sprint-proposer --> prd-sync-checker [subagent, opt-in] --> propose sprint --> approve
 
 PER TASK (Execution Protocol):
   criteria-enforcer [subagent] --> implement --> validation-orchestrator

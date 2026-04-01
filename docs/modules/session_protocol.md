@@ -3,11 +3,10 @@
 This module defines the START-of-session, END-of-session, between-tasks, and mid-session recovery protocols. This is the architectural reference — WHAT happens and WHY.
 
 In v1.7.0, all protocol logic is implemented as skills. CLAUDE.md contains pointers only:
-- `session-start` skill: START-of-session (5 steps + model switch continuation)
+- `sprint-proposer` skill: START-of-session (4 steps: model switch check, project.md, PRD sync, sprint proposal) + sprint-approved mode + between-tasks workflow
 - `session-end` skill: END-of-session (5 skills/agents orchestrated in sequence)
 - `context-recovery` skill: mid-session emergency save (calls 3 sub-skills directly, not session-end)
 - `.claude/rules/evolution-policy.md`: evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries
-- `sprint-proposer` skill: sprint proposal + sprint-approved mode + between-tasks workflow
 - `validation-orchestrator` skill: before-implementing + validation loop + post-mortem
 - `.claude/rules/session-rules.md`: task limits, documentation quality, reasoning depth
 
@@ -17,15 +16,14 @@ In v1.7.0, all protocol logic is implemented as skills. CLAUDE.md contains point
 
 > **Note:** Claude Code automatically handles CLAUDE.md reading, rules loading (via `applies_to` globs), skill/agent discovery (via `description:` frontmatter), and codebase exploration. The steps below cover what Claude Code does NOT do automatically.
 
-1. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:
-   - This session is a continuation — skip normal task selection
-   - The task and reason for the switch are in the marker
-   - Log: "Continuing: [task name] (model switched from [source] to [target])"
-   - Proceed directly to "Before implementing" with the specified task
-2. Read `.claude/phases/project.md` — full on first session; architectural decisions + Project Phases status + Progress Log index on returning sessions
-3. **PRD sync check (opt-in)** — ask user if they want to run the sync check. If yes, invoke `.claude/agents/prd-sync-checker.md` as subagent. If no, skip.
-4. Read `.claude/phases/pendencias.md` — what is next
-5. **Propose sprint** → run `.claude/skills/sprint-proposer/SKILL.md`
+Run `/sprint-proposer` to load project context and propose a sprint. The skill handles:
+
+1. **Check for MODEL SWITCH continuation** (early return if active — proceeds directly to validation-orchestrator)
+2. **Read project.md** (full on first session, partial on returning)
+3. **PRD sync check** (opt-in — asks user, spawns prd-sync-checker subagent)
+4. **Analyze pendencias.md and propose sprint** (3-5 tasks, ordered by dependency)
+
+See `.claude/skills/sprint-proposer/SKILL.md` for the full process.
 
 ### Task limit per session:
 
@@ -35,9 +33,8 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 ### Process component types
 
-**Skills (10, in `.claude/skills/`):** inline — main agent reads SKILL.md and follows steps in its own context.
-- **Session lifecycle (3, user-triggered):** session-start, session-end, context-recovery
-- **Session start (1):** sprint-proposer
+**Skills (9, in `.claude/skills/`):** inline — main agent reads SKILL.md and follows steps in its own context.
+- **Session lifecycle (3, user-triggered):** sprint-proposer, session-end, context-recovery
 - **During implementation (1):** validation-orchestrator
 - **Session end (5, called by session-end):** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 
