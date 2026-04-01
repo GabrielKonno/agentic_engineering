@@ -1,11 +1,17 @@
 ---
 name: ci-cd-pipeline
+invocation: inline
 effort: medium
 description: >
-  CI/CD pipeline patterns for automated testing, building, and deployment.
-  Covers GitHub Actions, environment management, and deployment strategies.
+  CI/CD pipeline patterns — GitHub Actions workflow structure, environment
+  management (dev/staging/prod), deployment strategies (blue-green, canary,
+  rolling), automated pre-deploy checklists, and secrets management. Consult
+  when setting up pipelines, configuring deployment environments, or reviewing
+  CI configuration changes. Covers 6 pitfalls including missing caching,
+  exposed secrets, and deploy-without-migration failures.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # CI/CD Pipeline Patterns

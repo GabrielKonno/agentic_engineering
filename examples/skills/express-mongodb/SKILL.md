@@ -1,11 +1,16 @@
 ---
 name: express-mongodb
+invocation: inline
 effort: medium
 description: >
-  Stack patterns for Express.js + MongoDB (Mongoose) projects.
-  Includes middleware patterns, schema design, security, and API conventions.
+  Reference patterns for Express.js + MongoDB (Mongoose) projects — async error
+  handling, auth middleware chains, tenant-scoped Mongoose queries, and security
+  hardening. Consult when implementing API routes, middleware, or database
+  queries that touch authentication or multi-tenancy. Covers 6 pitfalls
+  including unhandled rejections and missing tenant filters.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # Express + MongoDB Patterns
@@ -91,3 +96,23 @@ app.use(express.json({ limit: "10mb" })); // Payload size limit
 - Database: mongodb-memory-server for isolated tests
 - Test command: `npm test`
 - Pattern: `describe("POST /api/items")` → test auth, validation, success, error cases
+
+## STRONG Criteria Examples
+
+```
+REVIEW: New route handler defined.
+  → Verify: wrapped in asyncHandler (or equivalent error wrapper)
+  → Verify: auth middleware in route chain before handler
+  → Verify: request body validated before business logic
+  SUCCESS: error-safe + authenticated + validated. FAILURE: unwrapped async or missing auth
+
+REVIEW: Mongoose query in route handler.
+  → Verify: query includes tenant filter (`.find({ orgId: req.user.orgId, ... })`)
+  → Verify: orgId sourced from `req.user` (middleware-injected), not `req.body` or `req.params`
+  SUCCESS: tenant-scoped from session. FAILURE: missing orgId filter or client-sourced
+
+VERIFY: Error thrown in async route handler.
+  → Express error middleware catches it and returns structured error response
+  → Response has `{ error: { code, message } }` format, not stack trace
+  SUCCESS: structured error, no leak. FAILURE: unhandled rejection or stack trace exposed
+```

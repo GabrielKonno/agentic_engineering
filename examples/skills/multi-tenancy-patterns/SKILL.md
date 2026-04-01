@@ -1,11 +1,17 @@
 ---
 name: multi-tenancy-patterns
+invocation: inline
 effort: high
 description: >
-  Patterns for implementing multi-tenant SaaS applications.
-  Covers isolation strategies, data model, auth scoping, and common pitfalls.
+  Architecture and security patterns for multi-tenant SaaS — isolation strategy
+  selection (row-level vs schema vs database), tenant-scoped data model with
+  RLS, application-layer tenant resolution, and cross-tenant leak prevention.
+  Consult when designing tenant isolation, adding new tables to a multi-tenant
+  schema, or reviewing queries that touch tenant-scoped data. Includes 8
+  pitfalls and 3 STRONG criteria for cross-tenant leak detection.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # Multi-Tenancy Patterns

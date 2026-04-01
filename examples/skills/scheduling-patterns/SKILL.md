@@ -1,11 +1,17 @@
 ---
 name: scheduling-patterns
+invocation: inline
 effort: high
 description: >
-  Test patterns and business rules for scheduling features: appointments,
-  calendars, availability, recurring events, timezone handling, conflicts.
+  Business rules and verification patterns for scheduling domains — availability
+  calculation, appointment lifecycle, recurring event expansion with exceptions,
+  timezone-aware storage and display, and double-booking prevention. Consult
+  when implementing or reviewing features that involve time slots, bookings,
+  or calendar logic. Includes 4 STRONG criteria examples and 8 edge cases
+  focused on DST transitions and timezone boundaries.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # Scheduling Domain Patterns
@@ -69,6 +75,17 @@ VERIFY: Provider in UTC-3. Client in UTC+1. Appointment at "15:00 provider time.
   → Database stores start_time in UTC: "18:00Z"
   SUCCESS: all 3 representations consistent. FAILURE: any timezone mismatch
 ```
+
+## Common Pitfalls
+
+| Pitfall | Symptom | Fix |
+|---------|---------|-----|
+| Storing times in local timezone | Appointments shift when server timezone changes | Store all times as UTC (`TIMESTAMPTZ`), convert at display |
+| Buffer time not enforced server-side | Back-to-back bookings with no prep time | Subtract buffer from available slot calculation |
+| Availability check at UI only | Double bookings via concurrent API calls | Server-side uniqueness check or optimistic lock at insert |
+| Recurring series edited globally | Editing one occurrence changes the entire series | Exception mechanism: modify individual, keep series rule |
+| Day boundary not timezone-aware | "Today's appointments" query returns wrong set for user's timezone | Use user's timezone offset for day boundary, not server midnight |
+| Cancel+recreate loses history | Rescheduled appointment has no link to original | Preserve `rescheduled_from` reference on new appointment |
 
 ## Edge Cases Checklist
 

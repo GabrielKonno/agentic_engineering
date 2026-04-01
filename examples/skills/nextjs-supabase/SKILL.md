@@ -1,11 +1,16 @@
 ---
 name: nextjs-supabase
+invocation: inline
 effort: medium
 description: >
-  Stack patterns for Next.js (App Router) + Supabase (PostgreSQL, Auth, RLS, Storage).
-  Includes security settings, component patterns, and common pitfalls.
+  Reference patterns for Next.js App Router + Supabase projects — server/client
+  component boundaries, Supabase client instantiation, RLS policies, and auth
+  flow. Consult when implementing features that touch rendering strategy, database
+  queries, auth, or file storage. Covers security hardening checklist and 6
+  pitfalls that cause silent data leaks or hydration errors.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # Next.js + Supabase Patterns
@@ -103,3 +108,22 @@ export async function createClient() {
 - Server action tests: mock Supabase client, test business logic
 - E2E tests: Playwright for critical user flows
 - Test command: `npm test` (add `"test": "vitest"` to package.json)
+
+## STRONG Criteria Examples
+
+```
+REVIEW: Server Action calls `supabase.from('items').insert(...)`.
+  → Verify: precedes insert with `supabase.auth.getUser()` — not `getSession()`
+  → Verify: `organization_id` comes from membership lookup, not from request/formData
+  SUCCESS: auth + org derived server-side. FAILURE: getSession used (spoofable) or org from client
+
+REVIEW: Component fetches data from Supabase.
+  → Verify: uses server component (no "use client" directive) for data fetching
+  → Verify: `createClient()` imported from `@/lib/supabase/server`, not `@/lib/supabase/client`
+  SUCCESS: server-side fetch with server client. FAILURE: client-side fetch or wrong import
+
+VERIFY: RLS policy on new table.
+  → User in org_A queries table → only org_A rows returned
+  → Direct SQL without RLS context → blocked by policy
+  SUCCESS: tenant isolation enforced at DB level. FAILURE: rows from other orgs visible
+```

@@ -1,11 +1,17 @@
 ---
 name: api-design-patterns
+invocation: inline
 effort: medium
 description: >
-  REST API design conventions and patterns. Use when creating new endpoints,
-  reviewing API design, or standardizing an existing API.
+  REST API design conventions — URL structure, response format standardization,
+  status code selection, cursor and offset pagination, versioning strategy,
+  rate limiting headers, and endpoint security checklist. Consult when creating
+  new endpoints, reviewing API contracts, or standardizing response formats
+  across modules. Prevents inconsistent API surfaces that break frontend
+  integration and complicate versioning.
 created: example (framework reference template)
 derived_from: null
+fixes: []
 ---
 
 # API Design Patterns
@@ -117,3 +123,36 @@ Tiers:
 - [ ] Rate limiting on all public endpoints
 - [ ] Idempotency keys on POST (prevent duplicate creates)
 - [ ] Request size limits (reject payloads > configured max)
+
+## Common Pitfalls
+
+| Pitfall | Symptom | Fix |
+|---------|---------|-----|
+| Inconsistent response wrapper | Frontend needs per-endpoint parsing logic | Always return `{ data }` or `{ error }` — never raw arrays or unwrapped objects |
+| 200 for all responses | Client can't distinguish success from failure without parsing body | Use semantic status codes: 201 for created, 422 for validation, 404 for missing |
+| Offset pagination on large tables | Slow queries at high page numbers (`OFFSET 10000`) | Switch to cursor-based pagination for datasets > 10k rows |
+| Version in header only | Hard to test with browser, hard to link/share | Use URL prefix (`/api/v1/`) — most explicit and cacheable |
+| No rate limit on auth endpoints | Brute force attacks on login/reset | Stricter limits on auth (10/min) vs general API (300/min) |
+| Error details in production | Stack traces leak internals to attackers | Return generic message in prod, full details only in dev/staging |
+
+## STRONG Criteria Examples
+
+```
+REVIEW: New endpoint added to API.
+  → Verify: follows URL convention (plural nouns, nested for parent-child)
+  → Verify: response uses standard wrapper `{ data }` or `{ data, pagination }`
+  → Verify: error responses use `{ error: { code, message } }` format
+  SUCCESS: consistent with existing endpoints. FAILURE: custom format or raw response
+
+REVIEW: List endpoint returns paginated data.
+  → Verify: pagination metadata present (`page`, `per_page`, `total`, `total_pages`)
+  → Verify: `per_page` has max cap (≤100), rejects larger values
+  → Verify: default sort specified (typically `-created_at`)
+  SUCCESS: pagination complete and bounded. FAILURE: missing metadata or unbounded page size
+
+REVIEW: Endpoint handles invalid input.
+  → Send request with missing required field → expect 422 with field-level error details
+  → Send request with wrong type → expect 400
+  → Send request to non-existent resource → expect 404 (not 500)
+  SUCCESS: appropriate status codes per error type. FAILURE: generic 500 or 200 with error in body
+```
