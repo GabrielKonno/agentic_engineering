@@ -669,6 +669,26 @@ done
 
 echo "=== Known Bug Patterns have efficacy tracking? ==="
 grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
+
+echo "=== Activation chain integrity? ==="
+# For each specialist agent (not process/core agents), verify a reviewer declares a matching gap
+for f in projects/$ARGUMENTS/.claude/agents/*.md; do
+  agent_name=$(basename "$f" .md)
+  # Skip process agents and core agents (they are gap sources or protocol-spawned, not gap targets)
+  case "$agent_name" in
+    code-reviewer|security-reviewer|validator|arbitrator|criteria-enforcer|prd-sync-checker|diff-pattern-extractor|red-team|blue-team) continue ;;
+  esac
+  # Extract domain from Pushy Description ("when [reviewer] declares a [domain] gap")
+  domain=$(grep -oP 'declares a \K\S+(?= gap)' "$f" 2>/dev/null | head -1)
+  if [ -n "$domain" ]; then
+    found=0
+    grep -qi "$domain gap" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/null && found=1
+    grep -qi "$domain gap" projects/$ARGUMENTS/.claude/agents/security-reviewer.md 2>/dev/null && found=1
+    [ "$found" -eq 0 ] && echo "BROKEN CHAIN: $agent_name declares '$domain gap' but no reviewer has a matching gap declaration"
+  else
+    echo "WARNING: $agent_name has no Pushy Description gap phrase — may be unreachable via gap-declaration activation"
+  fi
+done
 ```
 
 **Step 5.2 — Produce the adaptation report:**
