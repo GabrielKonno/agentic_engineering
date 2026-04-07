@@ -109,7 +109,7 @@ agentic_engineering/
 │   │   └── skills/                         ← 9 pre-built process skills
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
-│   ├── examples_instructions.md        ← Conventions for creating agents/skills
+│   ├── README.md                       ← Conventions for creating agents/skills
 │   ├── agents/                         ← 20 agent templates (quality, domain, ops, security, compliance)
 │   ├── skills/                         ← 9 skill templates (stack, domain, process)
 │   └── rules/                          ← 11 rules templates (auth, compliance, i18n, scheduling, resilience, integration, etc.)

@@ -8,7 +8,7 @@ Quality reference templates for creating agents, skills, and rules. The AI consu
 
 ```
 examples/
-├── examples_instructions.md       # This file
+├── README.md                      # This file
 ├── agents/                        # Agent templates (20 — all categories)
 │   ├── accessibility-checker.md   # WCAG 2.1 AA compliance
 │   ├── api-security-scanner.md    # Tiered model (Tier 1/2/3), auth, injection, data exposure

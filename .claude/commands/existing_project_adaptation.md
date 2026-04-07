@@ -141,6 +141,7 @@ Before proceeding, present a summary of everything you read:
 - Process agents: [N of 3 installed] — [list missing: prd-sync-checker, criteria-enforcer, diff-pattern-extractor]
 - Session rules: [exists/missing] — .claude/rules/session-rules.md
 - Evolution policy: [exists/missing] — .claude/rules/evolution-policy.md
+- Component design: [exists/missing] — .claude/rules/component-design.md
 - PRD: [exists/missing]
 
 ### What needs to be created:
@@ -204,7 +205,7 @@ Required sections (compare against docs/modules/templates/claude_md.md — v2.1.
 - **"Evolutions applied"** section in session log template
 
 *Process components (copied in Step 2.9):*
-- 9 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 2 rules files (`.claude/rules/`)
+- 9 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 3 rules files (`.claude/rules/`)
 - Without these, the skill pointers in CLAUDE.md are broken references
 
 **For each addition, log:**
@@ -273,7 +274,7 @@ Check and upgrade:
 
 **For existing tasks without these fields:** Add them based on the task description and your understanding of the codebase. Mark additions with `← added during adaptation` so the user can review.
 
-**Before Steps 2.4-2.8:** If `assets/examples/examples_instructions.md` exists, read it for conventions (frontmatter fields, structure, output format, invocation types). Use these conventions when creating or upgrading any agent or skill.
+**Before Steps 2.4-2.8:** If `assets/examples/README.md` exists, read it for conventions (frontmatter fields, structure, output format, invocation types). Use these conventions when creating or upgrading any agent or skill.
 
 **Step 2.4 — Upgrade code-reviewer agent/skill:**
 
@@ -766,6 +767,7 @@ done
 ### Rules:
 - .claude/rules/session-rules.md [CREATED / SKIPPED]
 - .claude/rules/evolution-policy.md [CREATED / SKIPPED]
+- .claude/rules/component-design.md [CREATED / SKIPPED]
 
 ### Domain rules pre-created (from example templates — Step 2.7.1/4.6):
 - .claude/rules/[domain]-rules.md ← seeded, refined by rules-agents-updater

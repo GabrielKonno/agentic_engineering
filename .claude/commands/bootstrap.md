@@ -257,7 +257,7 @@ Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills 
 
 ### Steps 7-12 — Create agents and skills
 
-**Before creating any agent or skill in the steps below:** read `assets/examples/examples_instructions.md` for conventions (frontmatter, structure, output format, invocation type). Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as a structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project.
+**Before creating any agent or skill in the steps below:** read `assets/examples/README.md` for conventions (frontmatter, structure, output format, invocation type). Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as a structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project.
 
 ### Step 7 — Create code-reviewer agent
 

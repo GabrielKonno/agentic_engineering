@@ -188,7 +188,7 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   ├── rules/                            # Rules templates (copied to .claude/rules/)
 │   │   └── skills/                           # 9 pre-built process skills (copied to projects)
 ├── examples/                                # Reference examples for agent/skill creation
-│   ├── examples_instructions.md             # How to use examples, conventions, key patterns
+│   ├── README.md                            # How to use examples, conventions, key patterns
 │   ├── agents/                              # Agent templates (flat .md)
 │   ├── skills/                              # Skill templates (Anthropic folder format)
 │   └── rules/                               # Rules file templates
@@ -206,7 +206,7 @@ project/
 │   ├── docs/
 │   │   └── prd.md                         # Product Requirements Document (stable reference, versioned)
 │   └── examples/                          # Reference examples (copied from framework during bootstrap)
-│       ├── examples_instructions.md       # Conventions and structural patterns for creating new agents/skills
+│       ├── README.md                      # Conventions and structural patterns for creating new agents/skills
 │       ├── agents/                        # Agent templates by category
 │       ├── skills/                        # Skill templates by type
 │       └── rules/                         # Rules file templates
@@ -1544,7 +1544,7 @@ The tool-specific implementation (frontmatter, config, etc.) is defined in the s
 
 ### Before creating (quality reference):
 
-Before creating any agent or skill (proactive or reactive), read `assets/examples/examples_instructions.md` for conventions (frontmatter, structure, output format). Then check if a relevant example exists in `assets/examples/`. If found, read it and use as a structural template — adapt to the project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project. If no example exists, create from scratch following the conventions in the instructions file.
+Before creating any agent or skill (proactive or reactive), read `assets/examples/README.md` for conventions (frontmatter, structure, output format). Then check if a relevant example exists in `assets/examples/`. If found, read it and use as a structural template — adapt to the project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project. If no example exists, create from scratch following the conventions in the instructions file.
 
 Examples provide quality calibration: they show the expected depth of checklists, the tier structure for security agents, the STRONG criteria format for test patterns, and the effort frontmatter convention. An agent created with an example as reference will be significantly more thorough than one created from scratch.
 
