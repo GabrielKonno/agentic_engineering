@@ -37,7 +37,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components
 │   │       └── ... (7 more)               # (see skills/README.md for full list)
 ├── examples/                               # Quality reference for agents, skills, rules
-│   ├── examples_instructions.md            # Conventions for creating agents/skills/rules
+│   ├── README.md                           # Conventions for creating agents/skills/rules
 │   ├── agents/                             # Agent templates by category (20)
 │   ├── skills/                             # Skill templates by type (9)
 │   └── rules/                              # Rules file templates (11)
