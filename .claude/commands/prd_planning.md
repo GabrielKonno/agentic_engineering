@@ -63,7 +63,8 @@ You are a product co-creator, not just a scribe. Throughout the process:
 1. **After Phase 1** (Discovery): suggest at least one competitive opportunity or differentiator I have not mentioned.
 2. **After Phase 2** (Architecture): suggest at least one architectural pattern or technical approach that fits the product characteristics (caching, event-driven, background jobs, multi-tenancy, etc.).
 3. **During Phase 3** (Deep Dive): for each module, suggest at least one feature, edge case, or business rule improvement.
-4. **Before Phase 5** (Finalization): review the complete document and suggest cross-cutting concerns that may be missing (logging, audit trail, notification system, analytics, rate limiting, etc.).
+4. **During Phase 4** (Cross-cutting Analysis): use the heuristics from the `cross-cutting-analysis` skill to detect transversal themes. Present candidates proactively — the human curates the final list.
+5. **Before Phase 6** (Finalization): review the complete document for any concerns that emerged during the Review & Consolidation phase but were not captured in Phase 4.
 
 For each suggestion: explain WHY you think it adds value, then ask "Would you like to include this?" If yes, ask the follow-up questions needed to define it fully. If no, move on.
 
@@ -166,9 +167,26 @@ Continue until all modules are complete.
 
 ---
 
-### Phase 4 — Review & Consolidation
+### Phase 4 — Cross-cutting Analysis
 
-The document already exists from phases 1-3. This phase is a polish pass, not a rewrite.
+Now that all modules are defined, identify themes that span multiple sections and require consistency when changed. This prevents the common problem where a change to one section (e.g., switching a video strategy) leaves residues in other sections that reference the same theme.
+
+Follow the **generation mode** process from the `cross-cutting-analysis` skill (`.claude/skills/cross-cutting-analysis/SKILL.md`):
+
+1. Scan the complete PRD using the 5 heuristics (repeated terms, implicit consistency dependencies, multi-module architectural decisions, transversal NFRs, process meta-decisions)
+2. Present all candidates to the human for curation (approve / reject / refine / add)
+3. Generate the "Cross-cutting Concerns" section with the confirmed concerns
+4. Present the generated section for final review
+
+**Incremental write:** After the human confirms, write the Cross-cutting Concerns section into the PRD — positioned after the document header and before Section 1 (Product Vision).
+
+**Exit:** Cross-cutting Concerns section written to the PRD with all confirmed concerns. The human has reviewed the final version.
+
+---
+
+### Phase 5 — Review & Consolidation
+
+The document already exists from phases 1-4. This phase is a polish pass, not a rewrite.
 
 1. Re-read the complete document
 2. **Quality gate:** Every module must have at least:
@@ -181,6 +199,7 @@ The document already exists from phases 1-3. This phase is a polish pass, not a 
    - Build order matches the dependency graph
    - Roadmap phases align with build order
    - Data model entities are consistent across modules (no conflicting field definitions)
+   - Cross-cutting Concerns section accurately reflects the current module contents (no stale references, no missing concerns that emerged during review)
 4. Fix any inconsistencies found
 5. Add the Changelog section
 
@@ -188,7 +207,7 @@ Present the consolidated document for review.
 
 ---
 
-### Phase 5 — Finalization
+### Phase 6 — Finalization
 
 Guide my review with specific checkpoints:
 1. Are all modules accounted for? Any missing?
@@ -196,8 +215,9 @@ Guide my review with specific checkpoints:
 3. Are edge cases realistic and well-covered?
 4. Is the build order feasible? Dependencies make sense?
 5. Are acceptance criteria specific enough to validate automatically?
+6. Is the Cross-cutting Concerns section complete? Did the Review & Consolidation phase reveal any new transversal themes not captured in Phase 4?
 
-**Final suggestions:** Before finalizing, review the complete document and suggest any cross-cutting concerns that may be missing (logging, audit trail, notification system, analytics, etc.).
+**Final suggestions:** Before finalizing, verify the Cross-cutting Concerns section is complete and no new transversal themes emerged during the Review & Consolidation phase. If any new concerns are identified, add them following the same template used in Phase 4.
 
 **Bootstrap readiness statement:** After my final approval, confirm: "This PRD has [N] modules, [N] business rules, [N] acceptance criteria ([N] BUILD, [N] VERIFY, [N] QUERY, [N] MANUAL). Every module has dependencies, data model, and edge cases defined. It is ready for bootstrap."
 
@@ -213,6 +233,27 @@ Generate the final version with the Changelog entry.
 **Date:** [date]
 **Author:** [name]
 **Status:** Draft → Under Review → Approved
+
+---
+
+## Cross-cutting Concerns
+
+> This section lists the transversal themes of this document. Any modification that
+> touches one of these themes requires reviewing ALL affected sections listed below.
+> Use these checklists as a mandatory consistency guide during edits.
+
+### [Theme Name]
+
+**Description:** [One sentence explaining the theme in this project's context]
+
+**Affected sections:**
+- Section X.Y — [How the theme manifests here, one line]
+- Section X.Y — [How the theme manifests here, one line]
+
+**Consistency rules:**
+- [Specific rule if applicable — omit this subsection if the only rule is "keep synchronized"]
+
+[Repeat for each confirmed cross-cutting concern. Generated during Phase 4 — Cross-cutting Analysis.]
 
 ---
 

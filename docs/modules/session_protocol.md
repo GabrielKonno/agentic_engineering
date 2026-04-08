@@ -33,10 +33,11 @@ Signals that you've exceeded the limit: contradicting earlier self-review findin
 
 ### Process component types
 
-**Skills (9, in `.claude/skills/`):** inline — main agent reads SKILL.md and follows steps in its own context.
+**Skills (10, in `.claude/skills/`):** inline — main agent reads SKILL.md and follows steps in its own context.
 - **Session lifecycle (3, user-triggered):** sprint-proposer, session-end, context-recovery
 - **During implementation (1):** validation-orchestrator
 - **Session end (5, called by session-end):** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+- **PRD workflows (1, called by prd_planning/prd_change):** cross-cutting-analysis
 
 **Process agents (3, in `.claude/agents/`):** subagent — main agent invokes via Agent tool; isolated context, no session bias. Main agent does NOT proceed until the subagent returns.
 - `prd-sync-checker` — session start (step 3, opt-in)
