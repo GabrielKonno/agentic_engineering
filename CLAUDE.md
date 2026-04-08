@@ -32,7 +32,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── session_rules.md            # Task limits, reasoning depth, scripts convention
 │   │   │   ├── evolution_policy.md         # Evolution classification + auto-evolution boundaries
 │   │   │   └── component_design.md         # Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment
-│   │   └── skills/                         # Pre-built inline process skills (9, copied to projects)
+│   │   └── skills/                         # Pre-built inline process skills (10, copied to projects)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components
 │   │       └── ... (7 more)               # (see skills/README.md for full list)

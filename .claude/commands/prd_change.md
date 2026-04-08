@@ -138,6 +138,10 @@ Ask in blocks of 3-5. Wait for my answers before proceeding. DO NOT draft anythi
 
 ### Phase 3 — Impact Analysis
 
+**Cross-cutting check (before analysis):** Read the PRD's "Cross-cutting Concerns" section if it exists. Follow the **consultation mode** process from the `cross-cutting-analysis` skill (`.claude/skills/cross-cutting-analysis/SKILL.md`):
+- If the section exists: check if the proposed change touches any listed concern. If it does, expand the impact analysis to include ALL sections listed under that concern — even if the change was only requested for one section.
+- If the section does not exist: warn the human — "This PRD has no Cross-cutting Concerns section. Transversal themes are not tracked. Consider running the cross-cutting-analysis skill before continuing." Allow continuing without it if the human chooses.
+
 Based on the answers, present an impact analysis BEFORE drafting:
 
 ```
@@ -169,6 +173,11 @@ Based on the answers, present an impact analysis BEFORE drafting:
 - Breaking changes: [yes/no — detail if yes]
 - Migration needed: [yes/no — detail if yes]
 
+### Cross-cutting concerns touched:
+- [Concern name] — affects sections X.Y, X.Y, X.Y
+- [Concern name] — affects sections X.Y, X.Y
+[Remove this subsection if PRD has no Cross-cutting Concerns section or no concerns are touched]
+
 ### Risks:
 - [risk and mitigation]
 
@@ -185,7 +194,9 @@ After confirmation, draft changes for each affected document:
 
 **In the PRD (`projects/$ARGUMENTS/assets/docs/prd.md`):**
 1. Modify ONLY the sections listed in the impact analysis
-2. Keep the rest of the document intact
+2. If the change touches a cross-cutting concern: propagate modifications to ALL sections listed under that concern, not just the section where the change was requested. Apply the concern's consistency rules if defined.
+3. If the change alters a cross-cutting theme's scope (adds/removes affected sections, changes consistency rules): update the Cross-cutting Concerns section itself
+4. Keep the rest of the document intact
 3. Update the Changelog:
    ```
    | [new version] | [date] | [concise description] | [author] |
@@ -230,6 +241,9 @@ After approval, run this checklist:
 - [ ] Edge cases updated for affected modules
 - [ ] Integration points updated if external services changed
 - [ ] Module relationships still accurate
+- [ ] Cross-cutting concerns: all sections listed for touched themes were reviewed and updated
+- [ ] Cross-cutting Concerns section itself updated if the change altered a theme's scope
+- [ ] If change introduces a new transversal theme (appears in 3+ sections), suggest re-running cross-cutting-analysis
 ```
 
 Summarize: "PRD updated from vX.X.X to vY.Y.Y. In the next AI agent session, the PRD sync check will detect and propagate automatically."
