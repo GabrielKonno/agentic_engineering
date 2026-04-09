@@ -391,14 +391,13 @@ This is intentional: templates are blueprints for project files. The paths they 
 This path does not exist in the framework repo. It will exist at `projects/[name]/.claude/agents/prd-sync-checker.md` after Step 5.7 copies it from `docs/modules/agents/prd_sync_checker.md`.
 
 **Files that only exist after bootstrap:**
-- `.claude/phases/project.md`, `pendencias.md` — created at Steps 3-4
+- `.claude/phases/project.md`, `pendencias.md`, `done_tasks.md` — created at Steps 3-4
 - `.claude/agents/*.md` — created at Steps 7-11
 - `.claude/skills/*/SKILL.md` — copied at Step 5.7, additional skills at Steps 6 and 12
 - `.claude/settings.json` — created at Step 14
 - `assets/examples/` — copied at Step 1.5
 
 **Files that only exist during development (not at bootstrap):**
-- `.claude/phases/done_tasks.md` — created when the first task is completed
 - `.claude/rules/*.md` — created when domain patterns accumulate (3+ patterns from same domain)
 - `.claude/logs/*.md` — session logs, one per session (first created at end of session 0)
 
