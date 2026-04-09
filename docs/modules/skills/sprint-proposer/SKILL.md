@@ -81,19 +81,20 @@ After a model switch restart: do NOT resume the previous sprint — propose a ne
 1. Task [N] — [name] (complexity, estimated scope)
 2. Task [N] — [name] (complexity, estimated scope)
 ### Execution order: [N → N → N]
-### Model & effort:
-- Task [N]: [complexity] → [recommendation]
-- Task [N]: [complexity] → [recommendation]
+### Model & effort (MUST include — never omit):
+- Task [N]: [complexity] → [model] + [effort] — [justification]
+- Task [N]: [complexity] → [model] + [effort] — [justification]
 ### Risks: [anything that might cause a stop]
 ### What I need from you:
 - Approve this sprint (I will execute all tasks, stopping only on exceptions)
 - OR adjust: remove/add/reorder tasks
 ```
 
-**Model & effort mapping** (derive from each task's `Complexity:` field in pendencias.md):
-- `routine` → `current settings`
-- `logic-heavy` → `recommend extended thinking`
-- `architecture/security` → `⚠️ model switch required (interrupts sprint)`
+**Model & effort mapping — ALWAYS derive and present for every task. Never omit this section.**
+Derive from each task's `Complexity:` field in pendencias.md. If no complexity field exists, classify before presenting:
+- `routine` → `current model` + `current settings` — no change needed
+- `logic-heavy` → `current model` + `extended thinking` — [reason: e.g., financial logic, state machine]
+- `architecture/security` → `⚠️ model switch required (interrupts sprint)` + `high effort` — [reason]
 
 #### 4d. Handle response
 - **Human approves** → enter sprint-approved mode (medium tasks proceed without approval)

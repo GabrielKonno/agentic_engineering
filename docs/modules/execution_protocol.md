@@ -21,7 +21,7 @@ CLAUDE.md contains pointers only. The content below is the architectural referen
 <!-- Rewrites WEAK criteria to STRONG, runs adversarial review — runs in isolated context, returns upgrade summary -->
 
 **Classify task complexity for model/effort:**
-Based on task content, classify and recommend:
+MUST classify and ALWAYS include the recommendation in the plan or sprint proposal:
 - **Routine** (UI changes, simple CRUD, text updates) → current model + effort is fine. No recommendation needed.
 - **Logic-heavy** (business rules, calculations, state machines, financial operations) → recommend increased reasoning depth. Log: "Recommend: increase reasoning depth — [reason]"
 - **Architecture/Security** (new module design, cross-module changes, security audit, debugging cross-module bugs) → triggers model switch (see model switch protocol below). Log: "Recommend: model switch to most capable model — [reason]"
