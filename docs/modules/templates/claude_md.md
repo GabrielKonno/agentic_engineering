@@ -1,7 +1,7 @@
 # Template: CLAUDE.md (slim orchestrator)
 
 > Create at project root as `CLAUDE.md`.
-> This is the v2.1.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
+> This is the v2.2.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
 > For design rationale and architectural decisions, see `docs/modules/README.md`.
 
 ```markdown
