@@ -79,10 +79,10 @@ Either way, `projects/` stays gitignored — your project repos are always separ
 2. Run Claude Code from the repo root: claude
 3. Create a PRD: /prd_planning my-project
 4. Bootstrap the project: /bootstrap my-project
-5. Extract the project to its own repo
+5. Attach your remote and push (see Workflow below)
 ```
 
-After extraction, the framework repo is no longer needed for this project — development happens entirely from within the project folder.
+After bootstrap, the project already has its own git repo with an initial `chore: bootstrap from agentic framework` commit. The framework repo is no longer needed for this project — development happens entirely from within the project folder.
 
 ### Existing project (has code, needs framework)
 
