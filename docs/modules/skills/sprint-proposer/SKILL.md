@@ -33,10 +33,19 @@ Claude Code automatically handles: CLAUDE.md reading, rules loading (via `applie
 ### 1. Check for MODEL SWITCH continuation
 
 Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:
-- This session is a continuation — skip normal task selection
+- This session is a continuation — skip normal dependency analysis and task selection (steps 4a/4b)
 - The task and reason for the switch are in the marker
 - Log: "Continuing: [task name] (model switched from [source] to [target])"
-- Proceed directly to the validation-orchestrator skill's "Before Implementing" section with the specified task
+- **Still produce a sprint proposal using the §4c format, with a single task (the one from the marker).**
+  Include a "Continuation context" block at the top: why the switch happened, what the previous session
+  delivered, what this session must not re-decide. Include Risks, Critical files previewed, and Verification
+  overview.
+- Wait for user approval of the proposal.
+- After approval, proceed to the validation-orchestrator skill's "Before Implementing" section with the
+  specified task.
+- **Do NOT load a pre-existing plan.** Planning happens fresh in the continuation session by design, so the
+  more capable model plans without bias from a weaker-model draft. Any exploration/notes the prior session
+  persisted are context, not a plan.
 
 If no MODEL SWITCH block exists, continue normally.
 
@@ -56,9 +65,18 @@ If no: skip. The user knows whether the PRD changed or was already synced.
 
 ### 4. Analyze pendencias.md and propose sprint
 
-Read `.claude/phases/pendencias.md`. If MODEL SWITCH continuation was active (step 1), skip this step entirely.
+Read `.claude/phases/pendencias.md`. If MODEL SWITCH continuation was active (step 1), **skip 4a (dependency
+analysis) and 4b (task selection)** — the task is already fixed by the marker — but **still produce the
+sprint proposal in 4c format** with that single task and the continuation context block.
 
-After a model switch restart: do NOT resume the previous sprint — propose a new one. The previous sprint was interrupted and context has changed.
+After a model switch restart: do NOT resume the previous sprint unchanged — propose a fresh single-task
+sprint for the task named in the marker. Context has changed and the continuation session plans fresh.
+
+> **Design rationale:** Planning post-switch is intentional. The weaker model must not draft the plan the
+> stronger model will execute (avoids bias). sprint-proposer only reads project.md + pendencias.md without
+> code exploration, so no prior-session work is lost when the switch happens at classification time. The
+> sprint proposal in continuation exists to give panoramic visibility (context/risks/critical files) before
+> the user enters detailed plan approval inside validation-orchestrator.
 
 #### 4a. Analyze
 - Read all items in "Next Steps" and "In Progress"
