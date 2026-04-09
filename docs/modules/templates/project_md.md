@@ -45,7 +45,17 @@ Module A ──→ Module B ──→ Module C
 
 ## Project Phases
 
-[For each phase from Build Order:]
+For each phase from Build Order, ALWAYS include:
+1. **Phase header** with objective, modules list, and completion criteria
+2. **Module Breakdown** — for every module in the phase, include:
+   - Module name and status indicator (⏳ / ✅)
+   - 1-line objective
+   - Key features (bullet list with concrete details: component names, data values, dimensions, IDs)
+   - Key business rules that affect implementation (not all — only the ones an implementor needs to recall without reading the full PRD)
+   - Integration points with other modules (cross-references)
+
+The Module Breakdown is what makes project.md useful as a session entry point.
+Without it, every session must re-read the full PRD to understand module scope.
 
 ### Phase 1 — [Name] ⏳
 
@@ -55,7 +65,16 @@ Module A ──→ Module B ──→ Module C
 1. [verifiable criterion]
 2. [verifiable criterion]
 
-[Repeat with detail from PRD: features, business rules, flows]
+#### Module Breakdown
+
+**[Module 3.X — Name]** ⏳
+- [1-line objective]
+- Key features: [F1] ..., [F2] ..., [F3] ...
+- Key business rules: [BR1] ..., [BR2] ...
+- Integration points: depends on [Module Y], consumed by [Module Z]
+
+**[Module 3.Y — Name]** ⏳
+- [repeat same structure]
 
 ---
 

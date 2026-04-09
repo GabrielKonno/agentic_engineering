@@ -91,13 +91,14 @@ Create the file at the project root as `CLAUDE.md`.
 - Fill Architectural Decisions table with stack decisions from PRD
 - Fill Module Relationships with dependencies from PRD
 - Fill Project Phases from Build Order
+- **For each phase, ALWAYS include a Module Breakdown** — for every module in the phase, include: 1-line objective, key features with concrete details (component names, data values, IDs), key business rules that affect implementation, and integration points with other modules. This is what makes project.md useful as a session entry point without re-reading the full PRD every time.
 - Add Session 0 row to Progress Log index table: `| 0 (Bootstrap) | [date] | PRD analyzed, docs + agents created, stack confirmed | — |`
 
 Create at `.claude/phases/project.md`.
 
 ---
 
-### Step 4 — Create pendencias.md
+### Step 4 — Create pendencias.md and done_tasks.md
 
 **If `.claude/phases/pendencias.md` already exists:** Do NOT overwrite. Verify existing items have acceptance criteria tags. Add tags to items missing them. Add any new items from the PRD that are not yet tracked.
 
@@ -107,6 +108,22 @@ Create at `.claude/phases/project.md`.
 - Criteria quality standard: every criterion must have 3 parts (action, expected result, failure signal)
 
 Create at `.claude/phases/pendencias.md`.
+
+**ALWAYS create `.claude/phases/done_tasks.md`** if it does not exist. This file is the destination for completed tasks — the `pendencias-updater` skill moves tasks here at end of each session. Without it, the task lifecycle breaks silently.
+
+```markdown
+# [Project] — Completed Tasks
+
+> Tasks moved here from `pendencias.md` by the `pendencias-updater` skill at end of each session.
+> Full metadata preserved for dependency tracking and audit trail.
+
+---
+
+## Done
+
+- [x] PRD created and approved
+- [x] Session 0: bootstrap and configuration ([date])
+```
 
 ---
 
@@ -444,6 +461,7 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 - CLAUDE.md ([lines] lines)
 - .claude/phases/project.md ([lines] lines)
 - .claude/phases/pendencias.md ([lines] lines)
+- .claude/phases/done_tasks.md — completed tasks destination (Step 4)
 - .claude/agents/code-reviewer.md ([lines] lines)
 - .claude/agents/security-reviewer.md ([lines] lines)
 - .claude/agents/red-team.md ([lines] lines) ← if created (Step 9)
