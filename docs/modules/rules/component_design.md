@@ -142,6 +142,21 @@ When [trigger situation], ALWAYS [action verb] with:
 "The system uses X to achieve Y" reads as documentation. If X must happen every time,
 give it its own line: "ALWAYS do X."
 
+**Anti-pattern in orchestrator skills:** Listing sub-skills with "Run X" or "Invoke X"
+in prose, without an explicit load instruction. "Run" permits memory-execution — main
+Claude operates from what it remembers about the sub-skill instead of the current file.
+Use "READ X into context, THEN execute its process" to force contract loading.
+
+| Writing style | Example | Behavior |
+|---------------|---------|----------|
+| Descriptive (dangerous) | `"Run .claude/skills/pendencias-updater/SKILL.md — moves completed tasks"` | Main Claude executes from memory; requirements inside the sub-skill are lost |
+| Imperative (safe) | `"READ .claude/skills/pendencias-updater/SKILL.md into context, THEN execute its process"` | Sub-skill loaded before execution; contracts are respected |
+
+**Reference incident:** Session 1 of project `alexandre_chaves_ladingpage` — sub-skill
+executed from memory lost the "full metadata intact" clause; three tasks were moved as
+one-line summaries instead of full blocks, destroying the audit trail sprint-proposer
+depends on. Caught only during user review.
+
 **Applies to:** process steps in skills, checklist items in agents, constraint rules
 in rules files — any instruction where inconsistent execution causes a bug.
 
