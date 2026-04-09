@@ -255,15 +255,14 @@ The previous section describes the file structure. This section describes how th
 
 ### Component types
 
-The framework has five types of components. Each answers a different question:
+The framework has six types of components. Each answers a different question:
 
 | Component type | Location | Question it answers | Used during |
 |----------------|----------|---------------------|-------------|
-| **Protocols** (concepts) | Implemented by `modules/skills/` (sprint-proposer, session-end, context-recovery, validation-orchestrator) | WHEN do things happen? HOW are tasks validated? | Development sessions |
 | **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
 | **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
 | **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (10 inline skills) | HOW are protocol steps executed? | Development sessions + PRD workflows |
+| **Process Skills** | `modules/skills/*/SKILL.md` (10 inline skills) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 

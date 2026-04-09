@@ -29,11 +29,18 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
                                                           claude
 ```
 
-### Two operating modes
+### Session modes
 
-**Bootstrap mode** (this repo) — The AI reads your PRD, reads the framework's templates, agents, rules, and skills, and creates all project files inside `projects/[name]/`. Run once per project. Triggered by the session0 bootstrap prompt.
+The framework has 5 session modes in the framework repo, plus project-repo execution after bootstrap:
 
-**Development mode** (inside the project) — The AI reads the project's own CLAUDE.md, follows the Session Protocol, proposes sprints, implements tasks, validates via subagents, and reports with evidence. The framework repo is no longer involved.
+**Framework repo** (this repo) — 5 session modes, each activated by a slash command:
+- `/prd_planning` — Create a PRD interactively
+- `/prd_change` — Modify an existing PRD with impact analysis
+- `/bootstrap` — Create project structure from PRD (Session 0)
+- `/existing_project_adaptation` — Upgrade existing project to framework
+- `/maintenance` — Edit framework docs, examples, CLAUDE.md
+
+**Project repo** (inside the project) — The AI reads the project's own CLAUDE.md, follows the Session Protocol, proposes sprints, implements tasks, validates via subagents, and reports with evidence. The framework repo is no longer involved.
 
 ### How development works (inside a bootstrapped project)
 
@@ -50,10 +57,25 @@ At Level 4 (Auto Pilot), the AI proposes sprints, executes 3-5 tasks autonomousl
 
 ## Quick Start
 
+### Setup: clone or fork?
+
+The framework is designed to be customized over time — `examples/` grows with your patterns, new agent/skill templates get added for your domain, rules files capture team conventions. The `/maintenance` mode exists specifically for editing framework docs and examples.
+
+- **Fork (recommended)** — if you intend to accumulate your own examples/templates/rules, contribute back, or use the framework across multiple projects over time. Fork on GitHub, then:
+  ```bash
+  git clone [your-fork-url] ~/agentic_engineering
+  cd ~/agentic_engineering
+  git remote add upstream [original-repo-url]
+  # later: git fetch upstream && git merge upstream/main   # pull core updates
+  ```
+- **Clone** — if you just want to try the framework once or consume it without customizing. `git clone [url]` and you're done. You can always convert to a fork later.
+
+Either way, `projects/` stays gitignored — your project repos are always separate from the framework repo.
+
 ### New project (greenfield)
 
 ```
-1. Clone this repo
+1. Clone or fork this repo (see above)
 2. Run Claude Code from the repo root: claude
 3. Create a PRD: /prd_planning my-project
 4. Bootstrap the project: /bootstrap my-project
@@ -65,7 +87,7 @@ After extraction, the framework repo is no longer needed for this project — de
 ### Existing project (has code, needs framework)
 
 ```
-1. Clone this repo
+1. Clone or fork this repo (see above)
 2. Place your project in projects/[name]/
 3. Run Claude Code from the repo root: claude
 4. Run: /existing_project_adaptation [name]
@@ -148,7 +170,6 @@ Templates and protocols reference paths like `.claude/agents/code-reviewer.md` a
 Templates are blueprints. The paths they contain are the paths those files will have *after bootstrap creates them*. When reading a template, the context is the future project directory, not the framework root.
 
 **Files created only during development** (not at bootstrap):
-- `.claude/phases/done_tasks.md` — archive of completed tasks (created when first task completes)
 - `.claude/rules/*.md` — domain-specific rules (created when 3+ patterns accumulate from the same domain; `session-rules.md`, `evolution-policy.md`, and `component-design.md` are created at bootstrap)
 - `.claude/logs/*.md` — session logs (one per session, first created at end of session 0)
 
@@ -156,7 +177,7 @@ Templates are blueprints. The paths they contain are the paths those files will 
 
 ## How Modules Interact
 
-The framework has five component types, each serving a distinct role:
+The framework has six component types, each serving a distinct role:
 
 ```
 TOOLKIT PROMPTS          TEMPLATES               PROCESS SKILLS
