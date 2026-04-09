@@ -12,17 +12,17 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
 
 ```
   YOUR PRD               FRAMEWORK MODULES               BOOTSTRAPPED PROJECT
-  (what to build)        (templates + protocols           (ready for development)
-                          + skills + examples)
+  (what to build)        (templates + agents +            (ready for development)
+                          rules + skills + examples)
   +-------------+        +--------------------+           +---------------------+
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 16 templates    |           | 9+ agent .md files  |
-                         |  - 2 protocols     |           | 10 process skills   |
-                         |  - 10 skills       |           | 3 rules files       |
-                         |  - examples/       |           | examples/ (copy)    |
-                         |                    |           | settings.json       |
+                         |  - 4 doc templates |           | 9 agent .md files   |
+                         |  - 9 agent files   |           | 10 process skills   |
+                         |  - 3 rules files   |           | 3 rules files       |
+                         |  - 10 skills       |           | examples/ (copy)    |
+                         |  - examples/       |           | settings.json       |
                          +--------------------+           +---------------------+
                                                                     |
                                                           cd projects/my-project
@@ -31,7 +31,7 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
 
 ### Two operating modes
 
-**Bootstrap mode** (this repo) — The AI reads your PRD, reads the framework's templates and protocols, and creates all project files inside `projects/[name]/`. Run once per project. Triggered by the session0 bootstrap prompt.
+**Bootstrap mode** (this repo) — The AI reads your PRD, reads the framework's templates, agents, rules, and skills, and creates all project files inside `projects/[name]/`. Run once per project. Triggered by the session0 bootstrap prompt.
 
 **Development mode** (inside the project) — The AI reads the project's own CLAUDE.md, follows the Session Protocol, proposes sprints, implements tasks, validates via subagents, and reports with evidence. The framework repo is no longer involved.
 
@@ -101,9 +101,7 @@ agentic_engineering/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
 │   ├── modules/                            ← Single source of truth (v2.1.0)
-│   │   ├── session_protocol.md             ← Session Protocol (START, END, recovery)
-│   │   ├── execution_protocol.md           ← Execution Protocol (validation loop)
-│   │   ├── templates/                      ← Document and config templates
+│   │   ├── templates/                      ← Document and config templates (4)
 │   │   ├── agents/                         ← Agent templates (9 agents)
 │   │   ├── rules/                          ← Rules templates (3 rules files)
 │   │   └── skills/                         ← 10 pre-built process skills
@@ -126,7 +124,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 
 | Created file | Source in this repo | Purpose |
 |---|---|---|
-| `CLAUDE.md` | `modules/templates/claude_md.md` | AI instructions — embeds Session Protocol + Execution Protocol |
+| `CLAUDE.md` | `modules/templates/claude_md.md` | AI instructions — orchestrates skills that implement Session Protocol + Execution Protocol |
 | `.claude/phases/project.md` | `modules/templates/project_md.md` | Engineering handoff (architectural decisions, phase status, progress log) |
 | `.claude/phases/pendencias.md` | `modules/templates/pendencias_md.md` | Prioritized backlog with verifiable acceptance criteria |
 | `.claude/agents/code-reviewer.md` | `modules/agents/code_reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
@@ -161,37 +159,33 @@ Templates are blueprints. The paths they contain are the paths those files will 
 The framework has five component types, each serving a distinct role:
 
 ```
-TOOLKIT PROMPTS          TEMPLATES               PROTOCOLS
-(human entry points)     (what to create)        (when things happen)
+TOOLKIT PROMPTS          TEMPLATES               PROCESS SKILLS
+(human entry points)     (what to create)        (how to execute)
 
-  /bootstrap ----------> claude_md.md -------.   session_protocol.md
-  /prd_planning          project_md.md       |   execution_protocol.md
-  /prd_change            pendencias_md.md    |        |
-  /existing_adaptation   agent templates (6) |   embedded in project's
-                              |              |   CLAUDE.md at bootstrap
+  /bootstrap ----------> claude_md.md -------.   10 pre-built skills
+  /prd_planning          project_md.md       |   implement Session Protocol
+  /prd_change            pendencias_md.md    |   + Execution Protocol
+  /existing_adaptation   agent templates (9) |        |
+                         rules templates (3) |   copied to project
+                              |              |   at bootstrap
                      created at bootstrap    |        |
                               |              |        v
-                              v              |   PROCESS SKILLS
-                        PROJECT FILES        |   (how to execute)
-                        (instances in the    |   10 pre-built skills
-                         bootstrapped        |   that implement each
-                         project)            |   protocol step
+                              v              |   AGENTS (subagent .md)
+                        PROJECT FILES        |   code-reviewer, validator,
+                        (instances in the    |   security-reviewer, etc.
+                         bootstrapped        |        |
+                         project)            |   consult at runtime
                                              |        |
-                        EXAMPLES             |   trigger at runtime
-                        (copied to project's |        |
-                         assets/examples/)   |        v
-                              |              |   AGENTS (subagent .md)
-                        read-only reference  |   code-reviewer, validator,
-                        for on-demand        |   security-reviewer, etc.
-                        creation             |        |
-                                             |   consult at runtime
-                                             |        v
-                                             |   RULES (domain logic)
-                                             |   created during development
-                                             '--------'
+                        EXAMPLES             |        v
+                        (copied to project's |   RULES (domain logic)
+                         assets/examples/)   |   created during development
+                              |              '--------'
+                        read-only reference
+                        for on-demand
+                        creation
 ```
 
-**Dependency flow:** PRD --> bootstrap prompt reads PRD --> creates project files from templates. Templates embed protocols --> protocols trigger skills. Skills orchestrate agents --> agents consult rules. Examples are copied to the project as reference for creating new agents/skills on demand.
+**Dependency flow:** PRD --> bootstrap prompt reads PRD --> creates project files from templates. Skills implement protocol concepts (Session Protocol, Execution Protocol). Skills orchestrate agents --> agents consult rules. Examples are copied to the project as reference for creating new agents/skills on demand.
 
 For the full architecture diagram and bootstrap pipeline details, see [Framework Architecture](docs/agentic_engineering_framework.md#framework-architecture) in the deep reference.
 

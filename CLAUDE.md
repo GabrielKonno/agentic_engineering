@@ -17,8 +17,6 @@ agentic_engineering/                        ← Cloned once, kept permanently
 ├── docs/
 │   ├── agentic_engineering_framework.md    # Framework concepts (tool-agnostic)
 │   ├── modules/                            # Shared templates and skills (single source of truth)
-│   │   ├── session_protocol.md             # Session Protocol (START, END, recovery)
-│   │   ├── execution_protocol.md           # Execution Protocol (validation loop, orchestration)
 │   │   ├── templates/                      # Document and config templates for bootstrap
 │   │   │   ├── claude_md.md                # Config file template (orchestrator format)
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
