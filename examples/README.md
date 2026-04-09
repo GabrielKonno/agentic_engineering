@@ -106,6 +106,12 @@ The framework instructs the AI to check `assets/examples/` before creating any n
   - `DERIVED` — something works but can be consolidated (3+ patterns → rules file)
   - `CAPTURED` — pattern observed in real usage (diff-based extraction)
 
+**Instruction style (all components):**
+- Behavioral instructions (steps that must always happen) → imperative: "When [trigger], ALWAYS [action] with [format]"
+- Mechanism explanations (how the system works) → descriptive: "The system uses X to achieve Y"
+- Never bury a behavioral requirement inside a rationale paragraph — give it its own line
+- See `component-design.md` § 6 for the full pattern and anti-patterns
+
 **Agents (WHAT to verify):**
 - `invocation: subagent` for review/validation/security agents
 - `## Input` section — what the agent receives (file paths, reports, criteria)

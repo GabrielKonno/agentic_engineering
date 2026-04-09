@@ -111,7 +111,41 @@ sections that contain useful information.
 When planning changes, classify each as: ADD (new section — default),
 SUBSTITUTE (replace — must justify), DELETE (remove — must justify).
 
-## 6. Native Mechanisms — Don't Reinvent
+## 6. Instruction Writing — Imperative over Descriptive
+
+Instructions inside agents, skills, and rules that need to produce **consistent behavior**
+MUST follow the trigger–action–format pattern. Descriptive text explains mechanisms;
+imperative text drives action. Both are valid — but only imperatives fire reliably.
+
+**Pattern:**
+```
+When [trigger situation], ALWAYS [action verb] with:
+- **Field 1:** [what to include]
+- **Field 2:** [what to include]
+```
+
+**Three properties of a reliable behavioral instruction:**
+1. **Imperative verb in CAPS** — "ALWAYS include", "MUST produce", "NEVER omit"
+2. **Dedicated section** — not buried inside a mechanism description or rationale paragraph
+3. **Explicit output format** — fields/columns that make omission structurally visible
+
+| Writing style | Example | Behavior |
+|---------------|---------|----------|
+| Descriptive (informational) | "AI recommends `/effort high` in plan" | Understood but inconsistently applied |
+| Imperative (behavioral) | "ALWAYS include Model, Effort, and Justification for each task" | Reliably triggers action |
+
+**When to use each:**
+- **Descriptive:** explaining WHY a mechanism exists, how components interact, architectural rationale
+- **Imperative:** any step the AI must execute every time — output fields, checks, format requirements
+
+**Anti-pattern:** Burying a behavioral requirement inside a mechanism explanation.
+"The system uses X to achieve Y" reads as documentation. If X must happen every time,
+give it its own line: "ALWAYS do X."
+
+**Applies to:** process steps in skills, checklist items in agents, constraint rules
+in rules files — any instruction where inconsistent execution causes a bug.
+
+## 7. Native Mechanisms — Don't Reinvent
 
 Claude Code provides these natively — do not build custom replacements:
 
