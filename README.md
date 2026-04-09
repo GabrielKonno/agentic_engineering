@@ -230,13 +230,13 @@ Run Claude Code from the repo root:
 
 The AI reads the PRD and creates the entire project structure — see [What Bootstrap Creates](#what-bootstrap-creates) above for the full list of files and their sources.
 
-### 3. Extract to its own repo
+### 3. Attach your remote and push
+
+Bootstrap already initializes the project as a git repo and creates the initial `chore: bootstrap from agentic framework` commit. You only need to attach your remote and push:
 
 ```bash
 cd projects/[project-name]
-git init
 git remote add origin [your-repo-url]
-git add -A && git commit -m "chore: bootstrap from agentic framework"
 git push -u origin main
 ```
 

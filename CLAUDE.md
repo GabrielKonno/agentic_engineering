@@ -53,7 +53,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 
 ### Project repos (inside projects/)
 - **Created during bootstrap** inside `projects/[project-name]/`
-- **Get their own git:** `git init` + `git remote add origin [project-repo-url]`
+- **Get their own git:** bootstrap runs `git init` + initial commit automatically. User only attaches the remote afterwards: `git remote add origin [project-repo-url]`
 - **Self-contained after bootstrap** — examples/ copied into `assets/examples/`, own CLAUDE.md, own Session Protocol
 - **Development happens here** — `cd projects/[project-name] && claude`
 - **Two git repos coexist:** framework git ignores the folder, project git only sees itself
@@ -87,12 +87,11 @@ The user will say something like: "Bootstrap project X" or use the `/bootstrap` 
 
 **If no PRD exists:** Tell the user to create one first with `/prd_planning [project-name]`. Alternatively, the bootstrap works without PRD — sections will be marked "to be defined".
 
-**After bootstrap, the user will:**
+**After bootstrap** the project folder is already a git repo with a single `chore: bootstrap from agentic framework` commit (created by Steps Setup→14.5). The user only needs to attach the remote and push:
+
 ```bash
 cd projects/[project-name]
-git init
 git remote add origin [project-repo-url]
-git add -A && git commit -m "chore: bootstrap from agentic framework"
 git push -u origin main
 ```
 
