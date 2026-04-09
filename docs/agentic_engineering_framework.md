@@ -366,7 +366,7 @@ agentic_engineering/                    <-- framework git (permanent, updated vi
       ...
 ```
 
-The framework's `.gitignore` contains `projects/` — framework git never tracks project files. Each project has its own `git init`, its own remote, its own history. After bootstrap, `cd projects/my-project && claude` enters development mode.
+The framework's `.gitignore` contains `projects/` — framework git never tracks project files. Bootstrap runs `git init` inside the project folder as its very first action, so from the moment any file is written the project already owns its own `.git/`, its own history, and (once the user attaches a remote) its own origin. The early `git init` also prevents IDEs opened during bootstrap from walking up and mistakenly attaching to the framework's git history. After bootstrap, `cd projects/my-project && claude` enters development mode.
 
 ### Why templates reference files that don't exist in this repo
 

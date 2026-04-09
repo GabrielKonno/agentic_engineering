@@ -10,6 +10,7 @@ This is a **bootstrap session** (Session 0) for project **$ARGUMENTS**.
 - Create all project files inside `projects/$ARGUMENTS/`
 - Install MCPs and plugins for the project
 - Copy examples and skills from the framework into the project
+- Run `git init`, `git add`, and `git commit` **inside** `projects/$ARGUMENTS/` (the project's own repo — never the framework repo)
 - No files outside `projects/$ARGUMENTS/` should be created or modified
 
 ## Rules
@@ -24,7 +25,8 @@ This is a **bootstrap session** (Session 0) for project **$ARGUMENTS**.
 Before starting the process:
 
 1. If `projects/$ARGUMENTS/` does not exist, create it and `projects/$ARGUMENTS/assets/docs/`
-2. If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, the session still works — PRD-derived sections will be marked "to be defined"
+2. If `projects/$ARGUMENTS/.git/` does not exist, ALWAYS run `git init` inside `projects/$ARGUMENTS/` **before creating any other file**. This gives the project its own git identity from the first file onward. Without this early `git init`, any IDE opened on the project folder during bootstrap walks up the directory tree, attaches to the framework's `.git/`, and displays the framework's commit history as if it belonged to the project — a confusing (though harmless) artifact of git's walk-up behavior.
+3. If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, the session still works — PRD-derived sections will be marked "to be defined"
 
 Execute in order. Report results after each part.
 
@@ -449,6 +451,26 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 **Prerequisite:** Prettier must be installed (`npm install -D prettier`). If the project does not use Prettier, skip the hooks section.
 
 **Note:** If `.claude/settings.json` or `.claude/settings.local.json` already exists, merge the keys rather than overwriting.
+
+---
+
+### Step 14.5 — Create initial commit
+
+Every project file has now been written. Create the initial commit **inside the project repo** (created by Setup step 2 — never the framework repo):
+
+```bash
+cd projects/$ARGUMENTS
+git add -A
+git commit -m "chore: bootstrap from agentic framework"
+```
+
+**Before committing, ALWAYS verify you are inside the project repo:**
+- Run `git rev-parse --show-toplevel`. It MUST print the absolute path to `projects/$ARGUMENTS`, not the framework path.
+- If it prints the framework path, Setup step 2 failed (no `.git/` was created). STOP and investigate instead of committing — committing from the framework path would pollute the framework repo (or be silently blocked by `.gitignore: projects/`, depending on which files you stage).
+
+**Do NOT run `git remote add origin` or `git push`.** The remote URL is project-specific and must be provided by the user after bootstrap. Step 15 will instruct the user on the exact commands to run.
+
+**If the commit fails because `user.name` / `user.email` is not configured:** report the error in Step 15's output and instruct the user to set those locally inside the project (`git -C projects/$ARGUMENTS config user.name "..."` / `user.email "..."`) and then re-run the two commands above. Do NOT modify global git config.
 
 ---
 
