@@ -14,6 +14,23 @@ This is a **meta-project** — a framework for creating and managing other proje
 agentic_engineering/                        ← Cloned once, kept permanently
 ├── CLAUDE.md                               ← You are reading this
 ├── .gitignore                              ← Contains "projects/" — isolates project repos
+├── .claude/                                ← Active config for this repo (framework runtime)
+│   ├── commands/                           # 5 slash commands — user entry points
+│   │   ├── bootstrap.md                    # Create project structure from PRD (Session 0)
+│   │   ├── existing_project_adaptation.md  # Upgrade existing project to current framework
+│   │   ├── prd_planning.md                 # Create a PRD interactively
+│   │   ├── prd_change.md                   # Modify an existing PRD with impact analysis
+│   │   └── maintenance.md                  # Edit framework docs, examples, CLAUDE.md
+│   ├── rules/
+│   │   └── component-design.md             # Agent/skill/rule design policy (consulted during /maintenance)
+│   ├── skills/
+│   │   └── cross-cutting-analysis/         # Runtime skill used during PRD sessions
+│   └── settings.json                       # Claude Code settings
+│
+│   NOTE: `.claude/` here is minimal by design — only what the framework
+│   needs to run its own 5 session modes. The agent templates, rules
+│   templates, and 10 process skills live under `docs/modules/` as
+│   templates, copied to each project's `.claude/` at bootstrap.
 ├── docs/
 │   ├── agentic_engineering_framework.md    # Framework concepts (tool-agnostic)
 │   ├── modules/                            # Shared templates and skills (single source of truth)

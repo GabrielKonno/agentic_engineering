@@ -119,6 +119,12 @@ agentic_engineering/
 ├── .gitignore                          ← Ignores projects/ folder
 ├── README.md                           ← You are here
 │
+├── .claude/                            ← Active config for this repo (makes the slash commands work)
+│   ├── commands/                       ← 5 slash commands: /bootstrap, /prd_planning, /prd_change, /existing_project_adaptation, /maintenance
+│   ├── rules/                          ← component-design.md (consulted during /maintenance when editing agents/skills/rules)
+│   ├── skills/                         ← cross-cutting-analysis (runtime skill used during PRD sessions)
+│   └── settings.json                   ← Claude Code settings
+│
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
@@ -137,6 +143,8 @@ agentic_engineering/
 └── projects/                           ← Local workspace (git-ignored)
     └── [project-name]/                 ← Each project gets its own git repo
 ```
+
+**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 10 process skills, 9 agent templates, and 3 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
 
 ---
 
