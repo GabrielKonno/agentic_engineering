@@ -44,9 +44,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/templates/` | Document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json). |
 | `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
 | `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design). |
-| `docs/modules/skills/` | 10 pre-built process skills (sprint-proposer, validation-orchestrator, cross-cutting-analysis, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol, Execution Protocol, or PRD workflows. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
-| `docs/modules/session_protocol.md` | Session Protocol (START, END, recovery) | Defines WHEN things happen during development sessions. Embedded into each project's CLAUDE.md during bootstrap. |
-| `docs/modules/execution_protocol.md` | Execution Protocol (validation loop, orchestration) | Defines HOW tasks are validated. Embedded (slim reference) into each project's CLAUDE.md during bootstrap. |
+| `docs/modules/skills/` | 10 pre-built process skills (sprint-proposer, validation-orchestrator, cross-cutting-analysis, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol, Execution Protocol, or PRD workflows. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | Slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
@@ -181,8 +179,6 @@ agentic_engineering/                         # Framework root (meta-project)
 ├── docs/
 │   ├── agentic_engineering_framework.md      # This document (tool-agnostic concepts)
 │   ├── modules/                              # Shared templates and skills (single source of truth)
-│   │   ├── session_protocol.md               # Session Protocol (tool-agnostic)
-│   │   ├── execution_protocol.md             # Execution Protocol (tool-agnostic)
 │   │   ├── templates/                        # Document and config templates for bootstrap
 │   │   ├── agents/                           # Agent templates (copied to .claude/agents/)
 │   │   ├── rules/                            # Rules templates (copied to .claude/rules/)
@@ -263,7 +259,7 @@ The framework has five types of components. Each answers a different question:
 
 | Component type | Location | Question it answers | Used during |
 |----------------|----------|---------------------|-------------|
-| **Protocols** | `modules/session_protocol.md`, `modules/execution_protocol.md` | WHEN do things happen? | Development sessions |
+| **Protocols** (concepts) | Implemented by `modules/skills/` (sprint-proposer, session-end, context-recovery, validation-orchestrator) | WHEN do things happen? HOW are tasks validated? | Development sessions |
 | **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
 | **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
 | **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
@@ -274,40 +270,35 @@ The framework has five types of components. Each answers a different question:
 ### How components reference each other
 
 ```
-TOOLKIT PROMPTS                 TEMPLATES                    PROTOCOLS
-(human entry points)            (document blueprints)        (behavioral rules)
+TOOLKIT PROMPTS                 TEMPLATES                    PROCESS SKILLS
+(human entry points)            (document blueprints)        (implement protocol concepts)
 
-  /bootstrap -----------------> claude_md.md -----------.    session_protocol.md
-  /prd_planning                 project_md.md           |    execution_protocol.md
-  /prd_change                   pendencias_md.md        |         |
-  /existing_adaptation          code_reviewer.md        |         |
-                                security_reviewer.md    |    embedded in project's
-                                validator.md            |    CLAUDE.md at bootstrap
-                                arbitrator.md           |         |
-                                red_team.md             |         |
-                                blue_team.md            |         v
-                                     |                  |    PROCESS SKILLS
-                            created at bootstrap        |    (step-by-step how-to)
+  /bootstrap -----------------> claude_md.md -----------.    Session Protocol:
+  /prd_planning                 project_md.md           |      sprint-proposer
+  /prd_change                   pendencias_md.md        |      session-end
+  /existing_adaptation          code_reviewer.md        |      context-recovery
+                                security_reviewer.md    |    Execution Protocol:
+                                validator.md            |      validation-orchestrator
+                                arbitrator.md           |      criteria-enforcer (agent)
+                                red_team.md             |    PRD workflows:
+                                blue_team.md            |      cross-cutting-analysis
+                                     |                  |    End-of-session:
+                            created at bootstrap        |      project-md-updater
+                                     |                  |      pendencias-updater
+                                     v                  |      config-file-updater
+                               PROJECT FILES            |      rules-agents-updater
+                               (instances in the        |      session-log-creator
+                                bootstrapped project)   |      diff-pattern-extractor (agent)
+                                     |                  |      prd-sync-checker (agent)
                                      |                  |         |
-                                     v                  |    prd-sync-checker
-                               PROJECT FILES            |    sprint-proposer
-                               (instances in the        |    criteria-enforcer
-                                bootstrapped project)   |    validation-orchestrator
-                                     |                  |    diff-pattern-extractor
-                                     |                  |    session-log-creator
-                                     |                  |    project-md-updater
-                              EXAMPLES                  |    pendencias-updater
-                              (copied to project's      |    config-file-updater
-                               assets/examples/)        |    rules-agents-updater
-                                     |                  |         |
-                              read-only reference       |    trigger at runtime
-                              for on-demand creation    |         |
-                              of new agents, skills,    |         v
-                              and rules                 |    AGENTS (subagent .md)
-                                                        |    code-reviewer
-                                                        |    security-reviewer
-                                                        |    validator
-                                                        |    arbitrator
+                              EXAMPLES                  |    trigger at runtime
+                              (copied to project's      |         |
+                               assets/examples/)        |         v
+                                     |                  |    AGENTS (subagent .md)
+                              read-only reference       |    code-reviewer
+                              for on-demand creation    |    security-reviewer
+                              of new agents, skills,    |    validator
+                              and rules                 |    arbitrator
                                                         |    red-team (conditional)
                                                         |    blue-team (conditional)
                                                         |         |

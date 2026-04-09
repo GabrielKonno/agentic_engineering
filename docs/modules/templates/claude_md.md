@@ -2,7 +2,7 @@
 
 > Create at project root as `CLAUDE.md`.
 > This is the v2.1.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
-> For the full protocol reference, see `docs/modules/session_protocol.md` and `docs/modules/execution_protocol.md`.
+> For design rationale and architectural decisions, see `docs/modules/README.md`.
 
 ```markdown
 # CLAUDE.md
