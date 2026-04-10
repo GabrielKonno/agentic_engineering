@@ -7,7 +7,7 @@ description: >
   bundling unrelated files. Shows staged state, detects intent mismatches, groups logical commits,
   and writes conventional messages. USE when committing any change — especially after multi-file
   sessions where unrelated files may have accumulated in staging.
-created: framework-v2.2.2
+created: framework-v2.2.1
 derived_from: commit_hygiene "Before every commit"
 ---
 

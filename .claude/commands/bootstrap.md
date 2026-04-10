@@ -198,7 +198,7 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ### Step 5.7 — Copy pre-built process skills, process agents, and session rules
 
-**Process skills (10 — inline, copied to `.claude/skills/`):**
+**Process skills (11 — inline, copied to `.claude/skills/`):**
 
 ```bash
 cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
@@ -208,6 +208,7 @@ cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 - **During implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **PRD workflows:** cross-cutting-analysis
+- **Commit workflow (user-triggered):** commit
 
 **Process agents (3 — invoked as subagents, copied to `.claude/agents/`):**
 
@@ -499,6 +500,8 @@ git commit -m "chore: bootstrap from agentic framework"
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
 - **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+- **PRD workflows:** cross-cutting-analysis
+- **Commit workflow:** commit
 
 ### Process agents: copied from framework templates (Step 5.7):
 - .claude/agents/prd-sync-checker.md (session start — subagent)

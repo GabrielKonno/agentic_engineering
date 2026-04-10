@@ -44,7 +44,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/templates/` | Document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json). |
 | `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
 | `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design). |
-| `docs/modules/skills/` | 10 pre-built process skills (sprint-proposer, validation-orchestrator, cross-cutting-analysis, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol, Execution Protocol, or PRD workflows. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
+| `docs/modules/skills/` | 11 pre-built process skills (sprint-proposer, validation-orchestrator, cross-cutting-analysis, commit, etc.) | Copied entirely into each project at bootstrap Step 5.7. Each skill implements one step of the Session Protocol, Execution Protocol, or PRD workflows. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | Slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
@@ -182,7 +182,7 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   ├── templates/                        # Document and config templates for bootstrap
 │   │   ├── agents/                           # Agent templates (copied to .claude/agents/)
 │   │   ├── rules/                            # Rules templates (copied to .claude/rules/)
-│   │   └── skills/                           # 10 pre-built process skills (copied to projects)
+│   │   └── skills/                           # 11 pre-built process skills (copied to projects)
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── README.md                            # How to use examples, conventions, key patterns
 │   ├── agents/                              # Agent templates (flat .md)
@@ -262,7 +262,7 @@ The framework has six types of components. Each answers a different question:
 | **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
 | **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
 | **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (10 inline skills) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
+| **Process Skills** | `modules/skills/*/SKILL.md` (11 inline skills) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
@@ -324,7 +324,7 @@ Step     Source (framework repo)                     Output (project folder)
 4        modules/templates/pendencias_md.md      --> .claude/phases/pendencias.md
 5        (external: npm registry, CLI tools)     --> MCP servers installed
 5.5      (external: skill-creator plugin)        --> Plugin installed (optional)
-5.7      modules/skills/*                        --> .claude/skills/* (copy 10 skills)
+5.7      modules/skills/*                        --> .claude/skills/* (copy 11 skills)
          modules/agents/prd_sync_checker.md     --> .claude/agents/prd-sync-checker.md
          modules/agents/criteria_enforcer.md    --> .claude/agents/criteria-enforcer.md
          modules/agents/diff_pattern_extractor.md --> .claude/agents/diff-pattern-extractor.md
@@ -342,6 +342,7 @@ Step     Source (framework repo)                     Output (project folder)
 12.5     examples/agents/*                       --> .claude/agents/[specialist].md (pre-install matching gap declarations)
 13       examples/rules/*                        --> .claude/rules/[domain]-rules.md (pre-create from PRD signals)
 14       modules/templates/settings_json.md      --> .claude/settings.json
+14.5     (all files from prior steps)            --> git commit "chore: bootstrap from agentic framework"
 15       (all of above)                          --> Bootstrap report
 ```
 

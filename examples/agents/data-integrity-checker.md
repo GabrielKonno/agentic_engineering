@@ -11,6 +11,8 @@ description: >
   NOT needed for single-table reads or simple CRUD. Without this, orphaned
   records and denormalized drift are discovered by users, not tests.
   Produces Data Integrity Report → APPROVE / FIX REQUIRED.
+receives: git diff, database schema files, rules files, data-integrity-rules.md (if exists)
+produces: Report — Data Integrity with findings table and APPROVE/FIX REQUIRED recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

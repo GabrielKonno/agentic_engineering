@@ -19,9 +19,9 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
                          |  - 4 doc templates |           | 9 agent .md files   |
-                         |  - 9 agent files   |           | 10 process skills   |
+                         |  - 9 agent files   |           | 11 process skills   |
                          |  - 3 rules files   |           | 3 rules files       |
-                         |  - 10 skills       |           | examples/ (copy)    |
+                         |  - 11 skills       |           | examples/ (copy)    |
                          |  - examples/       |           | settings.json       |
                          +--------------------+           +---------------------+
                                                                     |
@@ -120,7 +120,7 @@ agentic_engineering/
 ├── README.md                           ← You are here
 │
 ├── .claude/                            ← Active config for this repo (makes the slash commands work)
-│   ├── commands/                       ← 5 slash commands: /bootstrap, /prd_planning, /prd_change, /existing_project_adaptation, /maintenance
+│   ├── commands/                       ← 6 slash commands: /bootstrap, /prd_planning, /prd_change, /existing_project_adaptation, /maintenance, /audit
 │   ├── rules/                          ← component-design.md (consulted during /maintenance when editing agents/skills/rules)
 │   ├── skills/                         ← cross-cutting-analysis (runtime skill used during PRD sessions)
 │   └── settings.json                   ← Claude Code settings
@@ -132,7 +132,7 @@ agentic_engineering/
 │   │   ├── templates/                      ← Document and config templates (4)
 │   │   ├── agents/                         ← Agent templates (9 agents)
 │   │   ├── rules/                          ← Rules templates (3 rules files)
-│   │   └── skills/                         ← 10 pre-built process skills
+│   │   └── skills/                         ← 11 pre-built process skills
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── README.md                       ← Conventions for creating agents/skills
@@ -144,7 +144,7 @@ agentic_engineering/
     └── [project-name]/                 ← Each project gets its own git repo
 ```
 
-**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 10 process skills, 9 agent templates, and 3 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
+**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 11 process skills, 9 agent templates, and 3 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
 
 ---
 
@@ -163,7 +163,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/security-reviewer.md` | `modules/agents/security_reviewer.md` | OWASP Top 10 checklist |
 | `.claude/agents/red-team.md` | `modules/agents/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
 | `.claude/agents/blue-team.md` | `modules/agents/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
-| `.claude/skills/*` (10 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
+| `.claude/skills/*` (11 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
 | `.claude/rules/session-rules.md` | `modules/rules/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
 | `.claude/rules/evolution-policy.md` | `modules/rules/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
 | `.claude/rules/component-design.md` | `modules/rules/component_design.md` | Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment |
@@ -191,7 +191,7 @@ The framework has six component types, each serving a distinct role:
 TOOLKIT PROMPTS          TEMPLATES               PROCESS SKILLS
 (human entry points)     (what to create)        (how to execute)
 
-  /bootstrap ----------> claude_md.md -------.   10 pre-built skills
+  /bootstrap ----------> claude_md.md -------.   11 pre-built skills
   /prd_planning          project_md.md       |   implement Session Protocol
   /prd_change            pendencias_md.md    |   + Execution Protocol
   /existing_adaptation   agent templates (9) |        |

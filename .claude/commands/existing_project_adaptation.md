@@ -408,7 +408,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 The v2.2.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
-**Copy process skills (10 inline — to `.claude/skills/`):**
+**Copy process skills (11 inline — to `.claude/skills/`):**
 ```bash
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
@@ -700,8 +700,8 @@ find projects/$ARGUMENTS/.claude/skills -name "SKILL.md" 2>/dev/null | while rea
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
 
-echo "=== All 10 process skills present? ==="
-for skill in sprint-proposer session-end context-recovery validation-orchestrator project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator cross-cutting-analysis; do
+echo "=== All 11 process skills present? ==="
+for skill in sprint-proposer session-end context-recovery validation-orchestrator project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator cross-cutting-analysis commit; do
   ls "projects/$ARGUMENTS/.claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
 done
 

@@ -11,6 +11,8 @@ description: >
   NOT needed for backend-only or API-only changes. Without this, WCAG 2.1 AA
   violations pass code review where only basic ARIA checks are performed.
   Produces Accessibility Audit Report → APPROVE / FIX REQUIRED.
+receives: git diff, component file paths, WCAG requirements context
+produces: Report — Accessibility Audit with findings table and APPROVE/FIX REQUIRED recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

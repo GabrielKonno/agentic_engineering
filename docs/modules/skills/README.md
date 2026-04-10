@@ -5,11 +5,11 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > **Note:** 3 process components that produce decisions or analyses are proper agents:
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
-> This directory contains the 10 **inline** skills (6 implementation + 3 session lifecycle + 1 PRD process).
+> This directory contains the 11 **inline** skills (6 implementation + 3 session lifecycle + 1 PRD process + 1 commit workflow).
 
 ## What these are
 
-These 10 skills implement steps of the Session Protocol, Execution Protocol, and PRD workflows. The main agent reads the SKILL.md and follows the steps in its own context. In v2.1.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
+These 11 skills implement steps of the Session Protocol, Execution Protocol, PRD workflows, and commit hygiene. The main agent reads the SKILL.md and follows the steps in its own context. In v2.1.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
 
 1. **Copied** to each project's `.claude/skills/` at bootstrap
 2. **Triggered** by convention (sprint-proposer/session-end are user-invoked; others are called by orchestrating skills)
@@ -29,6 +29,7 @@ These 10 skills implement steps of the Session Protocol, Execution Protocol, and
 | 8 | rules-agents-updater | Process + judgment | End of session (called by session-end, item 5) |
 | 9 | session-log-creator | Process pure | End of session (called by session-end, with item 2) |
 | 10 | cross-cutting-analysis | Process + judgment | During PRD planning (Phase 4) and PRD change (Phase 3) — identifies and maintains transversal themes |
+| 11 | commit | Process pure | Before any non-trivial commit (user-triggered) — staging verification, intent matching, conventional messages |
 
 ## Skill Creator usage
 

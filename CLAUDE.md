@@ -13,6 +13,7 @@ This is a **meta-project** — a framework for creating and managing other proje
 ```
 agentic_engineering/                        ← Cloned once, kept permanently
 ├── CLAUDE.md                               ← You are reading this
+├── README.md                               ← Project overview and quick start
 ├── .gitignore                              ← Contains "projects/" — isolates project repos
 ├── .claude/                                ← Active config for this repo (framework runtime)
 │   ├── commands/                           # 6 slash commands (5 sessions + 1 utility)
@@ -53,10 +54,10 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── session_rules.md            # Task limits, reasoning depth, scripts convention
 │   │   │   ├── evolution_policy.md         # Evolution classification + auto-evolution boundaries
 │   │   │   └── component_design.md         # Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment
-│   │   └── skills/                         # Pre-built inline process skills (10, copied to projects)
+│   │   └── skills/                         # Pre-built inline process skills (11, copied to projects)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components
-│   │       └── ... (7 more)               # (see skills/README.md for full list)
+│   │       └── ... (8 more)               # (see skills/README.md for full list)
 ├── examples/                               # Quality reference for agents, skills, rules
 │   ├── README.md                           # Conventions for creating agents/skills/rules
 │   ├── agents/                             # Agent templates by category (20)
