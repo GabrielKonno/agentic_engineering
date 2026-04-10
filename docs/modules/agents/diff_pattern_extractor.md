@@ -20,18 +20,15 @@ derived_from: session_protocol end-of-session item 1
 ### 1. Review git diff
 Run `git diff --stat` and `git log --oneline` for this session's commits. For each non-trivial fix or implementation change:
 
-### 2. Ask three questions per change
+### 2. Cap management gate — BEFORE adding any pattern
 
-| Question | Classification | Action |
-|----------|---------------|--------|
-| **Bug fixed — could this recur?** | FIX | Add CORRECT pattern to code-reviewer Known Bug Patterns with efficacy tracking: `[added: sN \| triggered: never \| false-positive: 0]` |
-| **Mistake corrected mid-task?** | FIX | Add a check that catches the WRONG approach |
-| **Structural decision worth preserving?** | CAPTURED | Add to code-reviewer Architecture Patterns |
+BEFORE adding any new Known Bug Pattern, count existing patterns in code-reviewer.md:
 
-### 3. Cap management — EXECUTE, don't suggest
+```bash
+grep -c "^\*\*" .claude/agents/code-reviewer.md
+```
 
-**Max 20 patterns** in code-reviewer. When count reaches **18+, you MUST act** — do not
-leave "cap management notes" for the next session. Execute the changes yourself:
+**IF count ≥ 18: STOP. Do NOT add any pattern yet. Execute Steps A → D now.**
 
 **Step A — Identify candidates** (in priority order):
 1. **Remove by inactivity:** `triggered: never` after 15+ sessions since `added:`
@@ -44,13 +41,24 @@ leave "cap management notes" for the next session. Execute the changes yourself:
 3. Add a new section with the promoted content (consolidated, not copy-pasted verbatim)
 4. In code-reviewer.md, replace each promoted/removed pattern with a comment:
    `<!-- Promoted sN: [pattern] → [rules file] -->` or `<!-- Removed sN: [pattern] — [reason] -->`
-5. Use Grep to count remaining patterns — verify final count is **≤ 16** (leave buffer for next session)
 
-If no matching rules file exists for the domain, note it in the output — the rules-agents-updater (session-end item 5) will create the file.
+**Step C — Verify:** Use Grep to count remaining patterns. Target MUST be **≤ 16** before proceeding. If still ≥ 17, repeat Steps A–B.
 
-**Step C — Report in output** (see Output section below).
+**Step D — Report** (mandatory when cap management ran — produce the `### Cap management executed:` block in output).
+
+If no matching rules file exists for a domain, note it — the rules-agents-updater (session-end item 5) will create the file.
 
 Rules files have no cap. Promotion preserves knowledge while freeing code-reviewer context.
+
+**IF count < 18:** skip to Step 3.
+
+### 3. Ask three questions per change
+
+| Question | Classification | Action |
+|----------|---------------|--------|
+| **Bug fixed — could this recur?** | FIX | Add CORRECT pattern to code-reviewer Known Bug Patterns with efficacy tracking: `[added: sN \| triggered: never \| false-positive: 0]` |
+| **Mistake corrected mid-task?** | FIX | Add a check that catches the WRONG approach |
+| **Structural decision worth preserving?** | CAPTURED | Add to code-reviewer Architecture Patterns |
 
 ### 4. Update efficacy tracking
 Review the Code Review Report from this session. For each Known Bug Pattern listed under "Known Bug Patterns triggered":
@@ -73,7 +81,7 @@ Return to the main agent:
 - Cap management: [actions taken] or "not needed (N/20)"
 ```
 
-If cap management was executed, include details:
+Step 2D output (REQUIRED when cap management ran — omitting this block means Step D was skipped):
 ```
 ### Cap management executed:
 - Promoted: [pattern] → [rules file] "[section]"
