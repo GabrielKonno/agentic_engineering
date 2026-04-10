@@ -29,8 +29,13 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │
 │   NOTE: `.claude/` here is minimal by design — only what the framework
 │   needs to run its own 5 session modes. The agent templates, rules
-│   templates, and 10 process skills live under `docs/modules/` as
+│   templates, and 11 process skills live under `docs/modules/` as
 │   templates, copied to each project's `.claude/` at bootstrap.
+│   When adding a new skill to the framework: place it in BOTH
+│   `docs/modules/skills/` (SSoT for bootstrap — all projects receive it)
+│   AND `.claude/skills/` ONLY if the framework itself needs it at runtime
+│   (e.g., cross-cutting-analysis). Project-specific skills go only in the
+│   project's `.claude/skills/`.
 ├── docs/
 │   ├── agentic_engineering_framework.md    # Framework concepts (tool-agnostic)
 │   ├── modules/                            # Shared templates and skills (single source of truth)
