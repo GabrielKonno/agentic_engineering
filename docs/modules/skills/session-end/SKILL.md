@@ -57,6 +57,8 @@ If any check fails, fix it in the same session — do NOT defer.
 
 ## Priority and context limits
 
-Items 1-3 are the critical minimum. Items 4-5 can be deferred if context window is low. Item 6 (self-verification) is fast and MUST always run — it catches bugs that would otherwise compound across sessions.
+Items 1-3 are the critical minimum. Items 4-5 can be deferred if context window is low.
+
+**Item 6 (self-verification) MUST always run — never defer it.** It is fast and catches consistency bugs that would compound across sessions.
 
 If severely limited: do at minimum items 2, 3, and 6 (session log + pendencias + verification), commit, and tell the user to start fresh.
