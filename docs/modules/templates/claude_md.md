@@ -26,6 +26,14 @@ This file provides guidance to Claude Code when working with this repository.
 - If context degrades mid-session: run `/context-recovery`
 - Task limits, documentation quality, reasoning depth: see `.claude/rules/session-rules.md`
 - Implementation workflow (before/during/after): handled by `validation-orchestrator` skill
+- Before executing any skill workflow (session-end, sprint-proposer, etc.), ALWAYS Read the SKILL.md file first — never work from memory
+
+## Commit Hygiene
+
+- Before every commit, run `git status` and show which files will be staged
+- If any staged file doesn't match the commit's intent, unstage it and inform the user
+- Never bundle unrelated changes in a single commit
+- Use `/commit` skill for any non-trivial commit
 
 ## Commands
 
