@@ -15,12 +15,13 @@ agentic_engineering/                        ← Cloned once, kept permanently
 ├── CLAUDE.md                               ← You are reading this
 ├── .gitignore                              ← Contains "projects/" — isolates project repos
 ├── .claude/                                ← Active config for this repo (framework runtime)
-│   ├── commands/                           # 5 slash commands — user entry points
+│   ├── commands/                           # 6 slash commands (5 sessions + 1 utility)
 │   │   ├── bootstrap.md                    # Create project structure from PRD (Session 0)
 │   │   ├── existing_project_adaptation.md  # Upgrade existing project to current framework
 │   │   ├── prd_planning.md                 # Create a PRD interactively
 │   │   ├── prd_change.md                   # Modify an existing PRD with impact analysis
-│   │   └── maintenance.md                  # Edit framework docs, examples, CLAUDE.md
+│   │   ├── maintenance.md                  # Edit framework docs, examples, CLAUDE.md
+│   │   └── audit.md                        # Read-only framework integrity audit (utility)
 │   ├── rules/
 │   │   └── component-design.md             # Agent/skill/rule design policy (consulted during /maintenance)
 │   ├── skills/
@@ -28,7 +29,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   └── settings.json                       # Claude Code settings
 │
 │   NOTE: `.claude/` here is minimal by design — only what the framework
-│   needs to run its own 5 session modes. The agent templates, rules
+│   needs to run its own 5 session modes + 1 utility. The agent templates, rules
 │   templates, and 11 process skills live under `docs/modules/` as
 │   templates, copied to each project's `.claude/` at bootstrap.
 │   When adding a new skill to the framework: place it in BOTH
@@ -93,6 +94,8 @@ This repository supports 5 session modes, each activated by its slash command:
 | **Framework Maintenance** | `/maintenance` | Edit framework docs/examples (no project work) |
 
 Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
+
+**Utilities:** `/audit` — read-only integrity check across 15 dimensions (structural, references, process logic, quality, document accuracy). Launches 5 parallel audit agents and produces a consolidated report. No files are modified.
 
 **Alternative (non-Claude Code):** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 
