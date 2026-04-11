@@ -4,7 +4,11 @@ invocation: subagent
 effort: medium
 description: >
   Pre-deployment checklist ensuring the application is ready for production.
-  Run before every deployment to staging or production.
+  USE PROACTIVELY before deploying to staging or production, or after significant
+  changes (new modules, dependency updates, infrastructure changes). NOT needed
+  for local development or draft PRs. Without this, broken builds, missing
+  environment variables, or misconfigurations reach production.
+  Produces Deploy Validation Report → APPROVE / FIX REQUIRED / BLOCK.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

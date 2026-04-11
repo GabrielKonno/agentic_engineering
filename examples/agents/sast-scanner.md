@@ -8,7 +8,7 @@ description: >
   injection vulnerabilities, unsafe deserialization, and dangerous function usage.
   USE PROACTIVELY when diff touches input processing, deserialization,
   cryptography, file I/O, shell execution, or when security-reviewer declares
-  a static analysis coverage gap. NOT needed for pure UI, config-only, or
+  a static analysis gap. NOT needed for pure UI, config-only, or
   documentation changes. Without this on security-sensitive diffs, injection
   patterns and unsafe deserialization pass code review undetected.
   Produces SAST Scan Report → APPROVE / FIX REQUIRED / BLOCK.
@@ -25,7 +25,7 @@ derived_from: null
 ## When spawned
 
 This agent is typically invoked by main Claude after receiving a security-reviewer
-report that declares a static analysis coverage gap. It may also be invoked directly
+report that declares a static analysis gap. It may also be invoked directly
 when the diff's domain is recognized via this agent's description.
 
 **Context to include in prompt:**

@@ -360,7 +360,7 @@ CHECKS:
        docs/modules/skills/commit/SKILL.md, and any other files where versions appear
   E.3. List every occurrence with file, line, and the version string
   E.4. Report any version string that does NOT match the canonical version
-  E.5. Specifically flag: commit/SKILL.md "created: framework-v2.2.2" vs README canonical version
+  E.5. Specifically flag: commit/SKILL.md "created: framework-v2.2.1" vs README canonical version
 
 [D12] Examples follow conventions in examples/README.md
   D12.1. Read examples/README.md — extract required frontmatter fields and structural conventions

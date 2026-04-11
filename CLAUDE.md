@@ -27,6 +27,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   └── component-design.md             # Agent/skill/rule design policy (consulted during /maintenance)
 │   ├── skills/
 │   │   └── cross-cutting-analysis/         # Runtime skill used during PRD sessions
+│   ├── docs/                               # Framework notes and ideas (not copied to projects)
 │   └── settings.json                       # Claude Code settings
 │
 │   NOTE: `.claude/` here is minimal by design — only what the framework

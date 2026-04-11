@@ -6,7 +6,12 @@ description: >
   Validates integrations with external APIs and third-party services.
   Covers contract correctness, error handling, retry safety, resilience
   patterns, and mock strategy for automated tests.
-  Use when implementing or modifying any feature that calls an external API.
+  USE PROACTIVELY when diff implements or modifies calls to external APIs,
+  webhook handlers, or background jobs dependent on third-party responses.
+  NOT needed for internal-only service calls or UI-only changes.
+  Without this, contract violations, missing error handling, and unsafe retry
+  patterns in external integrations pass review undetected.
+  Produces Integration Contract Test Report → APPROVE / FIX REQUIRED.
 receives: git diff, rules files, CLAUDE.md Key Patterns, list of external services used
 produces: Integration Contract Test Report with findings table and APPROVE/FIX REQUIRED recommendation
 created: example (framework reference template)

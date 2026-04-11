@@ -6,6 +6,12 @@ description: >
   Guides safe database migration execution. Verifies migration files,
   checks for destructive operations, validates rollback paths, and
   confirms data integrity post-migration.
+  USE PROACTIVELY when creating or modifying database migration files, especially
+  those that alter existing tables or migrate data between schemas. NOT needed for
+  code-only changes that don't touch database schema or migration files.
+  Without this, destructive migrations without rollback paths or data loss
+  safeguards reach production.
+  Produces Migration Safety Report → APPROVE / FIX REQUIRED / BLOCK.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

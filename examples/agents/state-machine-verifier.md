@@ -4,8 +4,13 @@ invocation: subagent
 effort: high
 description: >
   Verifies state machine implementations for completeness, invalid transitions,
-  and edge cases. Use when implementing status workflows (orders, appointments,
-  tickets, subscriptions, payments).
+  and edge cases.
+  USE PROACTIVELY when diff implements or modifies entities with status/state
+  columns and transition rules (orders, appointments, subscriptions, tickets).
+  NOT needed for stateless operations or entities without lifecycle transitions.
+  Without this, invalid state transitions and unreachable states reach production
+  as silent logic bugs.
+  Produces State Machine Verification Report → APPROVE / FIX REQUIRED / BLOCK.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

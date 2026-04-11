@@ -4,7 +4,11 @@ invocation: subagent
 effort: medium
 description: >
   Reviews test code for quality, coverage gaps, and false-positive risk.
-  Invoked when tests are written or modified, especially for business logic.
+  USE PROACTIVELY when diff adds or modifies test files for business logic,
+  calculations, or state transitions. NOT needed for trivial test additions
+  or snapshot-only tests. Without this, false-positive tests and critical
+  coverage gaps erode confidence in the test suite.
+  Produces Test Quality Review Report → APPROVE / FIX REQUIRED.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

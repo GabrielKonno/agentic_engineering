@@ -8,7 +8,7 @@ description: >
   URL restrictions, and federated logout completeness through flow simulation.
   USE PROACTIVELY when diff implements or modifies OAuth 2.0 / OIDC / SAML
   provider integration, callback URL, token exchange, or logout flows, or when
-  security-reviewer declares a federation protocol coverage gap. NOT needed
+  security-reviewer declares a federation protocol gap. NOT needed
   for local auth (session/JWT only). Without this, state/nonce bypass and
   token validation gaps pass security review undetected.
   Produces OAuth/OIDC Flow Test Report → APPROVE / FIX REQUIRED / BLOCK.
@@ -25,7 +25,7 @@ derived_from: null
 ## When spawned
 
 This agent is typically invoked by main Claude after receiving a security-reviewer
-report that declares a federation protocol coverage gap. It may also be invoked
+report that declares a federation protocol gap. It may also be invoked
 directly when the diff's domain is recognized via this agent's description.
 
 **Context to include in prompt:**

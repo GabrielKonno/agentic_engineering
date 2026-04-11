@@ -6,6 +6,11 @@ description: >
   Scans API endpoints for security vulnerabilities using the tiered security model.
   Covers authentication bypass, authorization flaws, injection, and data exposure.
   Stack-specific — adapt to project's API framework.
+  USE PROACTIVELY when diff adds or modifies API endpoints, authentication middleware,
+  authorization logic, or data serialization. NOT needed for frontend-only changes,
+  static content, or non-API modules. Without this, auth bypass and injection
+  vulnerabilities in API layers pass review undetected.
+  Produces API Security Scan Report → APPROVE / FIX REQUIRED / BLOCK.
 receives: git diff, security-reviewer.md, stack security skill, rules files, acceptance criteria
 produces: API Security Scan Report with findings table, severity counts, APPROVE/FIX REQUIRED/BLOCK recommendation
 created: example (framework reference template)

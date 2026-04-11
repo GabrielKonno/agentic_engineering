@@ -5,6 +5,12 @@ effort: high
 description: >
   Audits multi-tenant implementations for data isolation, cross-tenant leaks,
   and permission boundaries. Critical for SaaS applications.
+  USE PROACTIVELY when diff touches data access layers, database queries, API
+  endpoints, or admin features in multi-tenant applications. NOT needed for
+  single-tenant applications or changes that don't touch data access.
+  Without this, cross-tenant data leaks and permission boundary violations
+  pass review undetected.
+  Produces Multi-Tenancy Audit Report → APPROVE / FIX REQUIRED / BLOCK.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

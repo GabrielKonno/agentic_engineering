@@ -4,7 +4,12 @@ invocation: subagent
 effort: medium
 description: >
   Audits project dependencies for security vulnerabilities, outdated packages,
-  unused imports, and license compliance. Run periodically or before releases.
+  unused imports, and license compliance.
+  USE PROACTIVELY when adding new dependencies, before major releases, or when
+  build size increases unexpectedly. NOT needed for code-only changes that don't
+  modify dependency files. Without this, vulnerable or unmaintained dependencies
+  reach production undetected.
+  Produces Dependency Audit Report → APPROVE / FIX REQUIRED / BLOCK.
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []
