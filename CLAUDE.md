@@ -41,6 +41,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 ├── docs/
 │   ├── agentic_engineering_framework.md    # Framework concepts (tool-agnostic)
 │   ├── modules/                            # Shared templates and skills (single source of truth)
+│   │   ├── README.md                       # Module index and structure guide
 │   │   ├── templates/                      # Document and config templates for bootstrap
 │   │   │   ├── claude_md.md                # Config file template (orchestrator format)
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
@@ -57,7 +58,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   └── skills/                         # Pre-built inline process skills (11, copied to projects)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components
-│   │       └── ... (8 more)               # (see skills/README.md for full list)
+│   │       └── ... (9 more)               # (see skills/README.md for full list)
 ├── examples/                               # Quality reference for agents, skills, rules
 │   ├── README.md                           # Conventions for creating agents/skills/rules
 │   ├── agents/                             # Agent templates by category (20)
