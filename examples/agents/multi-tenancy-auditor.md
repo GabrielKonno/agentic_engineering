@@ -11,6 +11,8 @@ description: >
   Without this, cross-tenant data leaks and permission boundary violations
   pass review undetected.
   Produces Multi-Tenancy Audit Report → APPROVE / FIX REQUIRED / BLOCK.
+receives: git diff, data access layer files, tenant model context
+produces: Report — Multi-Tenancy Audit with findings table and APPROVE/FIX REQUIRED/BLOCK recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

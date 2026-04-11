@@ -12,6 +12,8 @@ description: >
   Without this, destructive migrations without rollback paths or data loss
   safeguards reach production.
   Produces Migration Safety Report → APPROVE / FIX REQUIRED / BLOCK.
+receives: migration files, git diff, database schema context
+produces: Report — Migration Safety with findings and APPROVE/FIX REQUIRED/BLOCK recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

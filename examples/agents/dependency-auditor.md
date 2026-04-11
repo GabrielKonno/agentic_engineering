@@ -10,6 +10,8 @@ description: >
   modify dependency files. Without this, vulnerable or unmaintained dependencies
   reach production undetected.
   Produces Dependency Audit Report → APPROVE / FIX REQUIRED / BLOCK.
+receives: package.json / lock files, git diff
+produces: Report — Dependency Audit with findings table and APPROVE/FIX REQUIRED/BLOCK recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

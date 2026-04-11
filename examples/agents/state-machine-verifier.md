@@ -11,6 +11,8 @@ description: >
   Without this, invalid state transitions and unreachable states reach production
   as silent logic bugs.
   Produces State Machine Verification Report → APPROVE / FIX REQUIRED / BLOCK.
+receives: git diff, state definition files, transition rules
+produces: Report — State Machine Verification with findings table and APPROVE/FIX REQUIRED/BLOCK recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

@@ -9,6 +9,8 @@ description: >
   or snapshot-only tests. Without this, false-positive tests and critical
   coverage gaps erode confidence in the test suite.
   Produces Test Quality Review Report → APPROVE / FIX REQUIRED.
+receives: git diff, test files, acceptance criteria context
+produces: Report — Test Quality Review with findings table and APPROVE/FIX REQUIRED recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

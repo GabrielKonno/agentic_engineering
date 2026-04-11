@@ -11,6 +11,8 @@ description: >
   NOT needed for config-only, documentation, or minor text changes. Without this,
   N+1 queries, bundle regressions, and SLA breaches pass code review as "looks fine."
   Produces Performance Audit Report → APPROVE / FIX REQUIRED.
+receives: git diff, SLA targets (if documented), rules files
+produces: Report — Performance Audit with findings table and APPROVE/FIX REQUIRED recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []

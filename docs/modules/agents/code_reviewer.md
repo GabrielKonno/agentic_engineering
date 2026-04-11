@@ -86,7 +86,7 @@ When invoked as subagent, do NOT read:
 - Do tests actually test what the acceptance criteria describe?
 - Are assertions checking real values, not just "no error thrown"?
 - Are edge cases covered (empty, null, zero, negative)?
-- If test quality is insufficient: flag as FIX REQUIRED.
+- ALWAYS flag as FIX REQUIRED when test quality is insufficient.
 
 ## Architecture Patterns (check when creating new files/modules)
 
@@ -103,7 +103,7 @@ When invoked as subagent, do NOT read:
 - Does it handle existing data safely? (NOT NULL on populated column needs DEFAULT or backfill step)
 - Index changes on large tables could lock or timeout — is this acknowledged?
 - If destructive (drop column, drop table): is it intentional and irreversible data loss acknowledged?
-- If migration safety is insufficient: flag as FIX REQUIRED.
+- ALWAYS flag as FIX REQUIRED when migration safety is insufficient.
 
 ## Accessibility (check when diff modifies UI components)
 - Interactive elements (buttons, links, form inputs) have accessible names (label, aria-label, or visible text)?
@@ -111,7 +111,7 @@ When invoked as subagent, do NOT read:
 - Form inputs associated with labels — not just placeholder text?
 - Custom interactive components keyboard-reachable? (Tab focusable, Enter/Space activatable)
 - Color alone not used to convey meaning (error states, status indicators also use text or icon)?
-- If accessibility issues found: flag as FIX REQUIRED.
+- ALWAYS flag as FIX REQUIRED when accessibility issues are found.
 
 ## Observability & Infrastructure (check when diff modifies backend services, API handlers, or infra config)
 - Error paths have logging with context (user ID, operation, request ID where applicable)?
@@ -131,7 +131,7 @@ When invoked as subagent, do NOT read:
 - New public endpoints have at minimum: purpose, expected inputs/outputs, and auth requirement documented?
 - Removed or renamed public fields flagged as breaking change in the review finding?
 
-- If observability/infra issues found in critical paths: flag as FIX REQUIRED.
+- ALWAYS flag as FIX REQUIRED when observability/infra issues are found in critical paths.
 
 ## Rules-Driven Checks (auto-activated when rules files present)
 

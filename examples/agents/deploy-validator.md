@@ -9,6 +9,8 @@ description: >
   for local development or draft PRs. Without this, broken builds, missing
   environment variables, or misconfigurations reach production.
   Produces Deploy Validation Report → APPROVE / FIX REQUIRED / BLOCK.
+receives: git diff, environment config, deployment context
+produces: Report — Deploy Validation with checklist results and APPROVE/FIX REQUIRED/BLOCK recommendation
 created: example (framework reference template)
 last_eval: none (reference template — eval at project creation)
 fixes: []
