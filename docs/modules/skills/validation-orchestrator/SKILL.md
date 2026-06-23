@@ -156,15 +156,22 @@ BEFORE fixing, diagnose and improve the validation loop:
 
 1. Identify which step should have caught it
 2. Diagnose why it declared ✅
-3. Classify root cause → route improvement:
-   - Weak criterion → improve criteria rules
-   - Partially verified criterion → strengthen Phase B check
-   - Tool silenced error → add Known Bug Pattern
-   - Review missed pattern → update code-reviewer checklist
-   - Test not written → refine Phase A test guidance
-   - Subagent context incomplete → update context routing rules
-   - AI judgment error → inherent limitation, no doc fix
-4. Apply systemic improvement (prevent the class of failure)
-5. Log in session log and project.md
+3. Classify root cause → route improvement (use the STABLE class name in brackets — the ledger depends on it):
+   - `weak-criterion` → improve criteria rules
+   - `partial-verification` → strengthen Phase B check
+   - `tool-silenced-error` → add Known Bug Pattern
+   - `review-missed-pattern` → update code-reviewer checklist
+   - `test-not-written` → refine Phase A test guidance
+   - `subagent-context-incomplete` → update context routing rules
+   - `spec-authoring-bug` → strengthen criteria-enforcer AUTHORING checks (the spec itself mandated the bug)
+   - `ai-judgment-limit` → inherent limitation, no doc fix
+4. Apply systemic improvement (prevent the CLASS of failure, not the instance)
+5. **Record in the Post-Mortem Ledger (internal-tool+ profiles).** ALWAYS append one row to the
+   `## Validation Post-Mortem Ledger` table in `project.md` with: session, escape symptom, the step
+   that should have caught it, the root-cause class from step 3, where the systemic fix was routed,
+   and `Recurring?` — set to `YES (Nx)` if this root-cause class already appears in the ledger,
+   else `no`. A `YES` means a one-off fix is NOT enough: flag it for the next codebase-audit /
+   framework-audit as a class with a missing owner.
+6. Log in session log and project.md.
 
-Then fix the bug normally.
+For `prototype` profile: do steps 1-4 and 6 (skip the ledger row). Then fix the bug normally.

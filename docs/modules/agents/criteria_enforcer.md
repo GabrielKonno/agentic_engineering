@@ -56,6 +56,39 @@ Every criterion must be at least as precise as its source (PRD, design system, r
 | **Empty/boundary test** | What if 0 items, 1 item, negative, null? | Add edge case criteria |
 | **Data origin test** | Could this pass with hardcoded data? | Add complementary QUERY: to verify dynamic data |
 
+### 4b. Non-happy-path class checklist (conditional — all profiles, zero cost when not triggered)
+
+A set of individually-STRONG criteria can still be WEAK if it omits an entire CLASS of behavior.
+"The wrong implementation that passes is the one that shipped only the happy path."
+
+If the task touches a trigger surface below, AT LEAST ONE criterion of that class MUST exist.
+Its absence makes the whole set WEAK even when every present criterion is strong — add the
+missing criterion before proceeding:
+
+| Trigger surface in the task | Required criterion class |
+|-----------------------------|--------------------------|
+| Shared mutable state, conditional claim, booking/reservation, balance change | **concurrency/race** — idempotency or correctness under parallel execution |
+| Cross-org / multi-tenant / row-level security / anonymous access | **tenancy** — isolation: org A cannot read/write org B; anon is denied |
+| Calendar dates, scheduling, "today", recurring, timezone | **date-boundary** — day boundary in user TZ, DST, month/year edges |
+| Async refresh, cache, derived/denormalized data, eventual consistency | **async-staleness** — stale read / out-of-order update is handled |
+
+Surfaces NOT present in the task add zero criteria — this checklist is silent unless triggered.
+
+### 4c. AUTHORING mode (run ONLY when a brand-new full-template task is being written)
+
+When the invocation is authoring a NEW task (not pre-code review of an existing one), apply two
+extra spec-level tests that catch bugs MANDATED by the spec itself (root-cause class
+`spec-authoring-bug`):
+
+- **Reuse-fit:** if the task says "reuse / copy / adapt X", verify X actually fits the new
+  context. Does the reused template drag in an assumption, placeholder, or field that is FALSE
+  here (e.g., "since your last service" applied to a customer who never had a service)? If so,
+  add a criterion that proves the adaptation is correct, not just copied.
+- **Variant-threading:** when an existing path gains a NEW branch/variant, ask which fields
+  become NULL/unset/default on the new branch. Add a criterion asserting each is handled.
+
+A spec bug caught here dies before any code exists — far cheaper than catching it in validation.
+
 ### 5. Log result
 Log which criteria were upgraded and why. If all criteria were already STRONG: log "Criteria verified — all STRONG".
 
@@ -66,6 +99,8 @@ Return to the main agent:
 ## Criteria Enforcement Result: [task name]
 - Criteria evaluated: [N]
 - Upgraded (WEAK→STRONG): [N] — [list criterion tags and what changed]
+- Class-checklist: [classes triggered + criteria added] or "no trigger surfaces touched"
+- Authoring checks: [reuse-fit / variant-threading findings] or "N/A (not authoring mode)"
 - Already STRONG: [N]
 - File modified: .claude/phases/pendencias.md [yes/no]
 ```

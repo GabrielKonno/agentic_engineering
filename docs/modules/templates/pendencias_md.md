@@ -102,8 +102,28 @@ parallel: true (if independent of task 3)
 
 ## Future Improvements
 
+> Debt-aging (internal-tool+): each item carries a session stamp `[added sN]`. The periodic
+> codebase-audit triages items older than `DEBT_AGE` (~30 sessions): KEEP / CLOSE / PROMOTE.
+
 [Features from PRD marked as out of scope / Phase 2+:]
-- [Feature A — PRD section 2.2]
+- [Feature A — PRD section 2.2] [added s0]
+
+---
+
+## Deploy Guards (production+ profiles)
+
+> A multi-session feature that ships all-or-nothing is gated here. Do NOT open the deploy PR
+> until every criterion is checked. When fulfilled, rewrite the block header to
+> `✅ FULFILLED (sN)` + PR hash, preserving the criteria below as history.
+> Omit this section entirely for `prototype` / `internal-tool` profiles.
+
+<!-- Example (delete if unused):
+### DEPLOY GUARD — [Feature name] (dev → main)
+**Rationale:** [why this must ship as a unit — e.g., 30+ commits ahead; cannot cherry-pick]
+**Exit criteria (owner-defined):**
+- [ ] [smoke test / sandbox run / config verification — specific and checkable]
+- [ ] [...]
+-->
 
 ---
 

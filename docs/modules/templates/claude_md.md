@@ -1,7 +1,7 @@
 # Template: CLAUDE.md (slim orchestrator)
 
 > Create at project root as `CLAUDE.md`.
-> This is the v2.2.1 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
+> This is the v2.3.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
 > For design rationale and architectural decisions, see `docs/modules/README.md`.
 
 ```markdown
@@ -15,6 +15,7 @@ This file provides guidance to Claude Code when working with this repository.
 
 **Current state:** [list modules from PRD with ⏳]
 **Owner:** [from PRD]
+**Risk profile:** [prototype | internal-tool | production | production-financial] — governs active ceremonies (see `.claude/rules/session-rules.md`)
 **PRD:** See `assets/docs/prd.md`
 **Pending tasks:** See `.claude/phases/pendencias.md`
 **Session logs:** See `.claude/logs/` (permanent record, one file per session)

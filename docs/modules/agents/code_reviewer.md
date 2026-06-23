@@ -195,6 +195,14 @@ When invoked as subagent, do NOT read:
 - [ ] Server-rendered content hydration-safe — no mismatch between SSR output and client initial render?
 - [ ] CORS configuration matches deployment environments — not hardcoded to localhost or wildcard `*`?
 
+### Quality Budget Delta Gate (activate when `.claude/rules/quality-budgets.md` exists)
+- [ ] Does this diff worsen any budget in `quality-budgets.md` (file size, type escapes,
+  fragile-test share, fan-in, bundle, TODO density)?
+- [ ] If yes, add ONE finding: `Budget delta: [metric] [old]→[new] (cap [cap]) — justified?`
+  Severity LOW if still within cap, MEDIUM if it crosses the cap.
+- **This gate FLAGS, never blocks.** A justified regression (with a one-line reason or a
+  follow-up split task) is acceptable — the goal is visibility on slow erosion, not a hard stop.
+
 ## Coverage Gap Declaration
 
 After completing all sections above, declare domains where inline code review

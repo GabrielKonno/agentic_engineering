@@ -167,7 +167,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.2.1 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.3.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -205,7 +205,7 @@ Required sections (compare against docs/modules/templates/claude_md.md — v2.2.
 - **"Evolutions applied"** section in session log template
 
 *Process components (copied in Step 2.9):*
-- 10 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 3 rules files (`.claude/rules/`)
+- 11 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 3 core rules files (`.claude/rules/`), plus tier-gated audit skills + ops/budgets rules by risk profile (Step 2.9b)
 - Without these, the skill pointers in CLAUDE.md are broken references
 
 **For each addition, log:**
@@ -406,12 +406,13 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.2.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.3.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (11 inline — to `.claude/skills/`):**
 ```bash
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
+  case "$skill_name" in codebase-audit|framework-audit) continue ;; esac  # tier-gated — copied in Step 2.9b
   if [ ! -d "projects/$ARGUMENTS/.claude/skills/$skill_name" ]; then
     cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"
     echo "Copied skill: $skill_name"
@@ -449,11 +450,49 @@ done
 ```
 
 **Expected after this step:**
-- **Process skills (9):** sprint-proposer, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+- **Process skills (11 lifecycle):** sprint-proposer, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit
 - **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
-- **Rules (3):** session-rules.md, evolution-policy.md, component-design.md
+- **Rules (3 core):** session-rules.md, evolution-policy.md, component-design.md
 
 Skills and agents are auto-discovered by Claude Code. No explicit listing is needed in CLAUDE.md.
+
+---
+
+**Step 2.9b — Determine risk profile + copy tier-gated MACRO skeletons:**
+
+The current framework scales ceremony by risk profile. Existing projects must be tiered too.
+
+1. **Determine the profile.** Read `project.md` Overview → **Risk profile:**. If absent, derive it
+   from the codebase + retroactive PRD (money/PII/multi-tenant → `production-financial`; public app
+   with auth/data → `production`; internal/admin → `internal-tool`; throwaway → `prototype`) and
+   **confirm with the owner** (ASK). Record it in `project.md` Overview and CLAUDE.md.
+
+2. **Copy what the profile warrants** (uncopied = inactive ceremony; the cheap core clauses arrive
+   automatically via the updated session-rules/evolution-policy/criteria-enforcer copied above):
+
+```bash
+PROFILE="[chosen]"   # prototype | internal-tool | production | production-financial
+PROJ="projects/$ARGUMENTS"
+case "$PROFILE" in
+  internal-tool|production|production-financial)
+    [ ! -d "$PROJ/.claude/skills/codebase-audit" ] && cp -r docs/modules/skills/codebase-audit "$PROJ/.claude/skills/"
+    [ ! -f "$PROJ/.claude/phases/metrics.md" ] && sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > "$PROJ/.claude/phases/metrics.md"
+    ;;
+esac
+case "$PROFILE" in
+  production|production-financial)
+    [ ! -d "$PROJ/.claude/skills/framework-audit" ] && cp -r docs/modules/skills/framework-audit "$PROJ/.claude/skills/"
+    [ ! -f "$PROJ/.claude/rules/ops-rules.md" ] && sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > "$PROJ/.claude/rules/ops-rules.md"
+    [ ! -f "$PROJ/.claude/rules/quality-budgets.md" ] && sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > "$PROJ/.claude/rules/quality-budgets.md"
+    ;;
+esac
+```
+
+3. **CI floor (internal-tool+):** if the project has no CI workflow, create one (install → lint →
+   build → test) or register a task to add it. **prototype:** skip all of the above.
+
+4. **Add the Post-Mortem Ledger** section to `project.md` (internal-tool+) and the **Risk profile &
+   ceremony tiers** awareness via the refreshed `session-rules.md` (already copied in Step 2.9).
 
 ---
 

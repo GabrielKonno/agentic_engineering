@@ -32,8 +32,10 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │
 │   NOTE: `.claude/` here is minimal by design — only what the framework
 │   needs to run its own 5 session modes + 1 utility. The agent templates, rules
-│   templates, and 11 process skills live under `docs/modules/` as
-│   templates, copied to each project's `.claude/` at bootstrap.
+│   templates, and 13 process skills live under `docs/modules/` as
+│   templates, copied to each project's `.claude/` at bootstrap (2 of the skills —
+│   codebase-audit, framework-audit — are tier-gated and copied only when the
+│   project's risk profile warrants them).
 │   When adding a new skill to the framework: place it in BOTH
 │   `docs/modules/skills/` (SSoT for bootstrap — all projects receive it)
 │   AND `.claude/skills/` ONLY if the framework itself needs it at runtime
@@ -46,6 +48,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   ├── templates/                      # Document and config templates for bootstrap
 │   │   │   ├── claude_md.md                # Config file template (orchestrator format)
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
+│   │   │   ├── metrics_md.md               # Code health time series (internal-tool+)
 │   │   │   └── settings_json.md            # Settings + hooks template
 │   │   ├── agents/                         # Agent templates (copied to .claude/agents/)
 │   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
@@ -53,12 +56,16 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── red_team.md, blue_team.md   # Security agent templates
 │   │   │   └── prd_sync_checker.md, criteria_enforcer.md, diff_pattern_extractor.md  # Process agent templates
 │   │   ├── rules/                          # Rules templates (copied to .claude/rules/)
-│   │   │   ├── session_rules.md            # Task limits, reasoning depth, scripts convention
-│   │   │   ├── evolution_policy.md         # Evolution classification + auto-evolution boundaries
-│   │   │   └── component_design.md         # Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment
-│   │   └── skills/                         # Pre-built inline process skills (11, copied to projects)
+│   │   │   ├── session_rules.md            # Task limits, risk tiers, archetypes, debt-aging, deploy gates
+│   │   │   ├── evolution_policy.md         # Evolution classification + boundaries + back-sweep
+│   │   │   ├── component_design.md         # Agent/skill/rule design: gap-declaration, Pushy Descriptions
+│   │   │   ├── ops_rules.md                # Operate/lifecycle dimension template (production+)
+│   │   │   └── quality_budgets.md          # Quality caps + delta gate (production+)
+│   │   └── skills/                         # Pre-built process skills (13: 11 lifecycle/process + 2 tier-gated audits)
 │   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
 │   │       ├── validation-orchestrator/    # as reusable, evolvable components
+│   │       ├── codebase-audit/             # MACRO axis — system health (internal-tool+)
+│   │       ├── framework-audit/            # Meta-loop — process blind spots (production+)
 │   │       └── ... (9 more)               # (see skills/README.md for full list)
 ├── examples/                               # Quality reference for agents, skills, rules
 │   ├── README.md                           # Conventions for creating agents/skills/rules

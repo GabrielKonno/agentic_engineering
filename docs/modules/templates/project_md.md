@@ -16,6 +16,7 @@
 **Deploy:** [strategy]
 **Database:** [provider]
 **PRD version:** v1.0.0
+**Risk profile:** [prototype | internal-tool | production | production-financial] — set at bootstrap; governs which ceremonies apply (see `.claude/rules/session-rules.md` → Risk profile & ceremony tiers)
 
 ---
 
@@ -102,6 +103,24 @@ Without it, every session must re-read the full PRD to understand module scope.
 |--------|----------|------|--------|
 
 <!-- Rows added by project-md-updater. Status: "active" or "→ .claude/rules/[file].md" -->
+
+---
+
+## Validation Post-Mortem Ledger
+
+> Profile: `internal-tool`+ (omit for `prototype`).
+> One row per escape — a bug the owner found in a task that had validated ✅.
+> Appended by the `validation-orchestrator` post-mortem (NOT just the prose fix).
+> Purpose: make a RECURRING class of escape visible. When the same root-cause class
+> appears 2+ times, the codebase-audit / framework-audit must treat it as a class with
+> no owner and propose a systemic fix — not another one-off patch.
+
+| Session | Escape (symptom) | Step that should have caught it | Root-cause class | Routed to (systemic fix) | Recurring? |
+|---------|------------------|---------------------------------|------------------|--------------------------|------------|
+
+<!-- Root-cause class values (stable vocabulary, so recurrence is detectable):
+     weak-criterion | partial-verification | tool-silenced-error | review-missed-pattern |
+     test-not-written | subagent-context-incomplete | spec-authoring-bug | ai-judgment-limit -->
 
 ---
 

@@ -18,6 +18,24 @@ At the **end of every implementation session**, before the conversation closes.
 
 Evolution classification and approval boundaries: see `.claude/rules/evolution-policy.md`.
 
+## Session archetype branch (run FIRST)
+
+Before executing the steps below, identify this session's archetype (see
+`.claude/rules/session-rules.md` → Session archetypes). It determines which steps are
+legitimately "N/A" versus required:
+
+- **`implementation`** (default) — run ALL steps below as written.
+- **`investigation`** — SKIP step 1 (no app diff to mine). Run steps 2-6; route findings to
+  pendencias.md as tasks.
+- **`framework-maintenance`** — SKIP step 1's app-code mining. Instead, for each agent/skill/rule
+  edited, log the change classified as FIX/DERIVED/CAPTURED, and re-verify counts/activation
+  chains. Run steps 2, 3, 6.
+- **`ops`** — SKIP step 1. Update ops-rules + metrics.md (if present), log any incident +
+  reconciliation outcome, then run steps 2, 3, 6.
+
+A step skipped because the archetype makes it inapplicable is correct — not a shortcut. Do NOT
+mark a step ⏭️ that the archetype actually requires.
+
 ## Process (in priority order)
 
 **CRITICAL — load contracts before executing.** For every step below that references a `SKILL.md`, READ that file into context BEFORE executing the step. Do NOT execute sub-skills from memory — each skill's file contains requirements that are easy to forget or misremember (e.g., "move full metadata verbatim", "write BEFORE the other updater runs", specific field schemas). The file is the contract; your recollection is not.

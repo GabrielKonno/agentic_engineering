@@ -51,6 +51,46 @@ If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. Use 
 
 ---
 
+### Step 1.2 — Determine risk profile (the ceremony keystone)
+
+The risk profile scales how much process ceremony this project receives. It is the single
+knob that keeps the framework from imposing financial-grade rigor on a throwaway prototype.
+**Every later step that creates an optional skeleton (CI floor, codebase-audit, ops-rules,
+quality-budgets, metrics, framework-audit, deploy gates) checks this profile.**
+
+**1.2a — Derive a default from PRD signals:**
+
+| PRD signals | Default profile |
+|-------------|-----------------|
+| Throwaway/demo/POC, no real users, no persistence | `prototype` |
+| Internal/admin tool, trusted users, no public exposure | `internal-tool` |
+| Public-facing app with real users, auth, or persisted data | `production` |
+| Money movement, PII/health/financial data, multi-tenant isolation, compliance (LGPD/GDPR/PCI) | `production-financial` |
+
+**1.2b — Confirm with the user.** Present the derived default and ask the user to confirm or
+override (ASK — this decision governs the whole bootstrap). If no PRD exists, ask directly.
+
+**1.2c — Record it.** Write `**Risk profile:** [chosen]` into `project.md` Overview (Step 3) and
+CLAUDE.md (Step 2). The ceremony matrix lives in `session-rules.md` (copied Step 5.7).
+
+**Ceremony by tier (the matrix later steps obey):**
+
+| Skeleton / ceremony | prototype | internal-tool | production | production-financial |
+|---------------------|:---------:|:-------------:|:----------:|:--------------------:|
+| Core: per-diff review, criteria-enforcer, KBP loop, session archetypes, per-incident post-mortem, class-checklist | ✅ | ✅ | ✅ | ✅ |
+| CI floor at t=0 (Step 14) | — | ✅ | ✅ | ✅ |
+| metrics.md (Step 5.8) + back-sweep + debt-aging + Post-Mortem ledger | — | ✅ | ✅ | ✅ |
+| codebase-audit skill (Step 5.8) | — | ✅ sparse | ✅ | ✅ |
+| ops-rules + quality-budgets + delta gate + deploy gates (Step 5.8) | — | — | ✅ | ✅ |
+| framework-audit skill (Step 5.8) | — | — | ✅ sparse | ✅ frequent |
+| Data reconciliation + red-team mandatory on money-paths | — | — | — | ✅ |
+
+> A skeleton that the tier does NOT warrant is simply not copied — its absence is what
+> deactivates the ceremony (no runtime tier check needed). This mirrors how Rules-Driven
+> Checks activate only when their rules file exists.
+
+---
+
 ### Step 1.5 — Copy examples to project
 
 Copy the framework's examples directory into the project for future reference:
@@ -237,6 +277,39 @@ sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/component_design.md | sed '
 This creates session-rules.md (task limits, documentation quality, reasoning depth, scripts convention), evolution-policy.md (evolution classification, auto-evolution boundaries), and component-design.md (agent/skill/rule design principles: gap-declaration activation, Pushy Descriptions, vocabulary alignment, tiered architecture, Preservar+Adicionar).
 
 Skills and agents are auto-discovered by Claude Code from `.claude/skills/` and `.claude/agents/`. No explicit listing is needed in CLAUDE.md.
+
+---
+
+### Step 5.8 — Copy tier-gated MACRO skeletons (by risk profile)
+
+These ceremonies are scaled by the risk profile chosen in Step 1.2. **Copy ONLY what the profile
+warrants** — an uncopied skeleton is an inactive ceremony (no runtime tier check needed; the
+cadence checks in sprint-proposer Step 0 and the Rules-Driven Checks self-gate on file presence).
+
+The cheap core (back-sweep, debt-aging, Post-Mortem ledger, session archetypes, class-checklist,
+deploy guards) is already baked into the components/templates copied in Steps 3-5.7 and self-gates
+by profile via its own clauses — nothing extra to copy for those.
+
+**`internal-tool` and above — codebase-audit + metrics:**
+```bash
+cp -r docs/modules/skills/codebase-audit projects/$ARGUMENTS/.claude/skills/
+sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/phases/metrics.md
+```
+
+**`production` and above — framework-audit + ops-rules + quality-budgets:**
+```bash
+cp -r docs/modules/skills/framework-audit projects/$ARGUMENTS/.claude/skills/
+sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/ops-rules.md
+sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/quality-budgets.md
+```
+
+**`production-financial` only — additionally** fill the ops-rules §6 reconciliation queries with
+schema-specific SELECTs (from the PRD data model), and note in `code-reviewer.md` that red-team is
+mandatory on money-paths.
+
+**`prototype` — copy none of the above.** The per-diff review loop is sufficient.
+
+Log which skeletons were copied and the profile that gated them.
 
 ---
 
@@ -455,6 +528,28 @@ Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/
 
 ---
 
+### Step 14.2 — Create the CI floor (t=0 gate — internal-tool+ profiles)
+
+Rigor cannot depend on the discipline of the worst session. For `internal-tool` and above,
+create a CI scaffold NOW so build/lint/test run as automatic gates from the first commit — the
+pipeline never starts out empty and added "later."
+
+- Detect the stack's CI convention (GitHub → `.github/workflows/ci.yml`; GitLab → `.gitlab-ci.yml`;
+  etc.) and the project's actual build/lint/test commands (from CLAUDE.md Commands / package
+  manifest).
+- Emit a minimal pipeline that runs, in order: install → lint → build → test. Each step uses the
+  REAL command if it exists; if a command is not yet defined (e.g., no tests yet), emit it
+  commented with a `# TODO: enable when [command] exists` marker — never silently omit the stage.
+- This is the per-diff CI gate (the lowest gate tier). It is distinct from the per-task validation
+  gate and the production+ DEPLOY GUARD.
+
+**`prototype` — skip.** Log "CI floor skipped (prototype profile)."
+
+If the stack/runner cannot be determined, register a task in `pendencias.md`: "Create CI floor
+once stack is confirmed" and log the deferral.
+
+---
+
 ### Step 14.5 — Create initial commit
 
 Every project file has now been written. Create the initial commit **inside the project repo** (created by Setup step 2 — never the framework repo):
@@ -520,6 +615,18 @@ git commit -m "chore: bootstrap from agentic framework"
 ### Specialist agents pre-installed (from example templates — Step 12.5):
 - .claude/agents/[specialist].md ← activation chain verified
 - [list each pre-installed specialist, or "none — no gap declarations kept"]
+
+### Risk profile: [prototype | internal-tool | production | production-financial]
+- Derived from: [PRD signals], confirmed by owner: [yes/override]
+
+### MACRO skeletons (tier-gated — Steps 5.8 / 14.2):
+- codebase-audit skill ← [copied (internal-tool+) / skipped (prototype)]
+- metrics.md ← [copied (internal-tool+) / skipped]
+- framework-audit skill ← [copied (production+) / skipped]
+- ops-rules.md ← [copied (production+) / skipped]
+- quality-budgets.md ← [copied (production+) / skipped]
+- CI floor ← [created (internal-tool+) / skipped / deferred — task added]
+- [production-financial] reconciliation queries filled, red-team mandatory on money-paths: [yes/N/A]
 
 ### Hooks configured:
 - smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]

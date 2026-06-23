@@ -30,6 +30,23 @@ Claude Code automatically handles: CLAUDE.md reading, rules loading (via `applie
 
 ## Process
 
+### 0. Audit cadence check (gated by skill presence)
+
+Before anything else, check whether a periodic audit is due. Each check is silently skipped if
+the corresponding skill folder was not copied at bootstrap (its absence = the tier doesn't want
+it — no tier lookup needed).
+
+- **codebase-audit:** IF `.claude/skills/codebase-audit/` exists — compute sessions since the last
+  codebase-audit (scan the Progress Log). If ≥ `AUDIT_CADENCE` (default 12; 20 for internal-tool)
+  OR this is a phase boundary → propose running `/codebase-audit` as this session's work (or
+  alongside a light sprint). Owner accepts or defers.
+- **framework-audit:** IF `.claude/skills/framework-audit/` exists — same check against
+  `FRAMEWORK_AUDIT_CADENCE` (default 35; 25 for production-financial). Propose `/framework-audit`.
+  Sparser than codebase-audit by design.
+
+Proposing is not running — the owner decides. If both are due, propose codebase-audit first
+(code health) and note framework-audit is also due. Then continue to Step 1.
+
 ### 1. Check for MODEL SWITCH continuation
 
 Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:

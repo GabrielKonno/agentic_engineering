@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.2.1
+# Agentic Engineering Framework v2.3.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -18,16 +18,20 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 4 doc templates |           | 9 agent .md files   |
-                         |  - 9 agent files   |           | 11 process skills   |
-                         |  - 3 rules files   |           | 3 rules files       |
-                         |  - 11 skills       |           | examples/ (copy)    |
+                         |  - 5 doc templates |           | 9 agent .md files   |
+                         |  - 9 agent files   |           | 13 process skills   |
+                         |  - 5 rules files   |           | 5 rules files       |
+                         |  - 13 skills       |           | examples/ (copy)    |
                          |  - examples/       |           | settings.json       |
                          +--------------------+           +---------------------+
                                                                     |
                                                           cd projects/my-project
                                                           claude
 ```
+
+> Counts shown are the full set. **Tier-gating by risk profile** (`prototype` → `production-financial`)
+> means a project receives a subset: a `prototype` gets the lean core (no audits/ops/budgets/CI),
+> while `production`+ gets everything. See `docs/modules/rules/session_rules.md` → *Risk profile & ceremony tiers*.
 
 ### Session modes
 
@@ -128,11 +132,11 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.2.1)
-│   │   ├── templates/                      ← Document and config templates (4)
+│   ├── modules/                            ← Single source of truth (v2.3.0)
+│   │   ├── templates/                      ← Document and config templates (5)
 │   │   ├── agents/                         ← Agent templates (9 agents)
-│   │   ├── rules/                          ← Rules templates (3 rules files)
-│   │   └── skills/                         ← 11 pre-built process skills
+│   │   ├── rules/                          ← Rules templates (5 rules files)
+│   │   └── skills/                         ← 13 pre-built skills (11 lifecycle + 2 tier-gated audits)
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── README.md                       ← Conventions for creating agents/skills
@@ -144,7 +148,7 @@ agentic_engineering/
     └── [project-name]/                 ← Each project gets its own git repo
 ```
 
-**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 11 process skills, 9 agent templates, and 3 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
+**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 13 process skills, 9 agent templates, and 5 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
 
 ---
 
@@ -163,13 +167,18 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/security-reviewer.md` | `modules/agents/security_reviewer.md` | OWASP Top 10 checklist |
 | `.claude/agents/red-team.md` | `modules/agents/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
 | `.claude/agents/blue-team.md` | `modules/agents/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
-| `.claude/skills/*` (11 skills) | `modules/skills/*` | Inline process skills — copied entirely, one per protocol step |
+| `.claude/skills/*` (11–13 skills, tier-gated) | `modules/skills/*` | Inline process skills (11) + codebase-audit/framework-audit (tier-gated) |
 | `.claude/rules/session-rules.md` | `modules/rules/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
 | `.claude/rules/evolution-policy.md` | `modules/rules/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
 | `.claude/rules/component-design.md` | `modules/rules/component_design.md` | Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment |
 | `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/agents/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
+| `.claude/skills/codebase-audit/` *(internal-tool+)* | `modules/skills/codebase-audit/` | MACRO axis — periodic system health audit |
+| `.claude/phases/metrics.md` *(internal-tool+)* | `modules/templates/metrics_md.md` | Code health time series (one row per audit) |
+| `.claude/skills/framework-audit/` *(production+)* | `modules/skills/framework-audit/` | Meta-loop — periodic process blind-spot audit |
+| `.claude/rules/ops-rules.md` *(production+)* | `modules/rules/ops_rules.md` | Operate/lifecycle dimension checklist |
+| `.claude/rules/quality-budgets.md` *(production+)* | `modules/rules/quality_budgets.md` | Quality caps + code-reviewer delta gate |
 
 ### Why files in this repo reference things that don't exist here
 

@@ -68,6 +68,24 @@ Review the Code Review Report from this session. For each Known Bug Pattern list
 ### 5. Log evolutions
 For each pattern added/modified, log: `"[FIX/DERIVED/CAPTURED]: [component] — [what changed and why]"`
 
+### 6. Back-sweep (internal-tool+ profiles — skip for prototype)
+
+First read the project's risk profile (`.claude/phases/project.md` Overview → **Risk profile:**).
+If `prototype`: skip this step. Otherwise:
+
+For EVERY rule newly CAPTURED this session (a new Known Bug Pattern) OR DERIVED (a pattern
+promoted to a rules file in Step 2), ALWAYS sweep it backward:
+
+1. **Derive** a greppable signature for the WRONG pattern the rule forbids.
+2. **Grep** the whole codebase (`Grep`/`Bash rg`) for pre-existing matches, excluding the
+   files in this session's diff (those are already covered).
+3. **Triage** each hit: a genuine pre-existing violation → add a task to `pendencias.md`
+   tagged `[back-sweep sN]` with the file:line and the rule it violates. A false match → ignore.
+4. **Never auto-fix.** Back-sweep only archives tasks; the fix is prioritized normally.
+
+If a rule's wrong-pattern is not mechanically greppable (purely semantic), note
+`back-sweep: not greppable` for that rule instead of forcing a noisy search.
+
 ## Output
 
 Return to the main agent:
@@ -79,6 +97,7 @@ Return to the main agent:
 - Efficacy updates: [list sessions appended to triggered/false-positive fields, or "none"]
 - Cap status: [N]/20 Known Bug Patterns
 - Cap management: [actions taken] or "not needed (N/20)"
+- Back-sweep: [N rules swept → M tasks added to pendencias] or "skipped (prototype)" or "no new rules to sweep"
 ```
 
 Step 2D output (REQUIRED when cap management ran — omitting this block means Step D was skipped):

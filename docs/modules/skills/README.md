@@ -5,11 +5,11 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > **Note:** 3 process components that produce decisions or analyses are proper agents:
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
-> This directory contains the 11 **inline** skills (6 implementation + 3 session lifecycle + 1 PRD process + 1 commit workflow).
+> This directory contains 13 skills: 11 **inline** (6 implementation + 3 session lifecycle + 1 PRD process + 1 commit workflow) + 2 **tier-gated audit** skills (codebase-audit, framework-audit) copied only when the project's risk profile warrants them.
 
 ## What these are
 
-These 11 skills implement steps of the Session Protocol, Execution Protocol, PRD workflows, and commit hygiene. The main agent reads the SKILL.md and follows the steps in its own context. In v2.1.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
+These skills implement steps of the Session Protocol, Execution Protocol, PRD workflows, commit hygiene, and the periodic MACRO/meta audits. The main agent reads the SKILL.md and follows the steps in its own context. In v2.1.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
 
 1. **Copied** to each project's `.claude/skills/` at bootstrap
 2. **Triggered** by convention (sprint-proposer/session-end are user-invoked; others are called by orchestrating skills)
@@ -30,6 +30,8 @@ These 11 skills implement steps of the Session Protocol, Execution Protocol, PRD
 | 9 | session-log-creator | Process pure | End of session (called by session-end, with item 2) |
 | 10 | cross-cutting-analysis | Process + judgment | During PRD planning (Phase 4) and PRD change (Phase 3) — identifies and maintains transversal themes |
 | 11 | commit | Process pure | Before any non-trivial commit (user-triggered) — staging verification, intent matching, conventional messages |
+| 12 | codebase-audit | Process + judgment (tier-gated: internal-tool+) | Periodic MACRO health audit (user-triggered; proposed by sprint-proposer at AUDIT_CADENCE / phase boundary) |
+| 13 | framework-audit | Process + judgment (tier-gated: production+) | Periodic meta-audit of the project's own process (user-triggered; proposed at FRAMEWORK_AUDIT_CADENCE / phase boundary) |
 
 ## Skill Creator usage
 
