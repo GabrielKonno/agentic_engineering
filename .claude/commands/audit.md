@@ -372,8 +372,8 @@ CHECKS:
 
 [D15] Framework concept doc + READMEs factual accuracy
   D15.1. From docs/agentic_engineering_framework.md — extract ALL numeric claims:
-         - Skill counts (look for "10 pre-built", "10 inline", "10 skills")
-         - Agent counts (look for "9 agent", "3 process agents")
+         - Skill counts (look for "14 pre-built", "11 inline", "14 skills", "3 tier-gated")
+         - Agent counts (look for "10 agent", "3 process agents")
          - Step counts (look for "15-step")
          - Example counts (look for "20", "9", "11" for agents/skills/rules)
   D15.2. From README.md — extract all numeric claims about components

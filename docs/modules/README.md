@@ -7,7 +7,7 @@ Single source of truth for all templates, agents, rules, and skills used by boot
 - `templates/` — Document and config templates used at bootstrap (CLAUDE.md, project.md, pendencias.md, settings.json, metrics.md)
 - `agents/` — Agent templates (code-reviewer, validator, security-reviewer, etc.) copied to `.claude/agents/`
 - `rules/` — Rules templates (session-rules, evolution-policy, component-design, ops-rules, quality-budgets) copied to `.claude/rules/`
-- `skills/` — Pre-built process skills copied to projects at bootstrap Step 5.7 (lifecycle/process) and Step 5.8 (tier-gated audits: codebase-audit, framework-audit)
+- `skills/` — Pre-built process skills copied to projects at bootstrap Step 5.7 (lifecycle/process) and Step 5.8 (tier-gated: codebase-audit, framework-audit, skill-gate)
 
 ## How bootstraps use modules
 

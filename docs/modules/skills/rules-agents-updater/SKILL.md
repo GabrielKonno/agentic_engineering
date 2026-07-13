@@ -58,6 +58,12 @@ Check `assets/examples/` for conventions and structural templates before creatin
 
 **Do NOT create if:** one-time pattern, rules file more appropriate, Known Bug Pattern suffices, or duplicates existing content.
 
+**Creation route — check for the gate first:**
+- If `.claude/skills/skill-gate/` exists (internal-tool+): NEVER write the new component directly into `.claude/skills/` or `.claude/rules/`. READ `.claude/skills/skill-gate/SKILL.md` and follow it — draft in `.claude/drafts/`, mark `status: ready-for-review`, spawn the blind skill-reviewer, promote via script. The creation eval below runs AFTER promotion.
+- If skill-gate is absent (prototype): create directly and run the creation eval below.
+
+This route applies to CREATION only. Steps 1-2 above (updating existing rules/agents/skills) stay in-place, per evolution-policy — including its rule that an update ADDING an empirical claim marks it `verified: false`.
+
 **After creating — run creation eval:**
 - **Subagent agents** (`invocation: subagent`): Generate 2 test scenarios (one with issue agent should detect, one clean). Spawn via Agent tool against each. Verify: issue detected + no false flags. Update lineage: `last_eval: sN (2/2 passed)`. If eval fails: improve and re-test.
 - **Skills** (`invocation: inline`): If Skill Creator plugin is installed, use it for eval (automates test case generation, grading, iteration). If not installed: skip eval for inline skills (knowledge references, not judgment agents).

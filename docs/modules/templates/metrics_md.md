@@ -6,7 +6,7 @@
 > (The PROCESS health series lives separately in `framework-metrics.md`, written by
 > `framework-audit` — production+ only. Do not conflate the two.)
 
-```markdown
+````markdown
 # [Project] — Code Health Metrics
 
 > One row per codebase-audit. Append-only. Compared against quality-budgets.md.
@@ -14,4 +14,4 @@
 | Session | Date | Largest file (lines) | Type escapes | Fragile tests % | Test coverage (logic) | Open LOW debt | Budgets breached |
 |---------|------|----------------------|--------------|-----------------|-----------------------|---------------|------------------|
 | 0 | [date] | — | 0 | — | — | 0 | none (baseline) |
-```
+````

@@ -70,6 +70,7 @@ After steps 2–3, verify output integrity — defense in depth against summariz
 - **project.md:** Progress Log table has a new row referencing the log filename from step 2.
 - **done_tasks.md:** For each task completed this session, the entry contains ALL of: `**Context:**`, `**State:**`, `**Constraints:**`, `**Complexity:**`, `**Changes:**`, and at least one `[x]` criterion. A summary-line-only entry is a bug — redo step 3.
 - **pendencias.md:** The tasks moved to done_tasks.md are no longer present in pendencias.md (no orphans in both files).
+- **Drafts sweep (only if `.claude/skills/skill-gate/` exists):** `.claude/drafts/` contains no orphans — every remaining draft is either mid-review (marker set, cycle ≤ 3) or already tracked as a pendency. A draft with neither is a silent leak: register it in pendencias.md now ("draft [name] — resume or discard").
 
 If any check fails, fix it in the same session — do NOT defer.
 

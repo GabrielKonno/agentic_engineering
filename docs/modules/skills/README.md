@@ -5,7 +5,7 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > **Note:** 3 process components that produce decisions or analyses are proper agents:
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
-> This directory contains 13 skills: 11 **inline** (6 implementation + 3 session lifecycle + 1 PRD process + 1 commit workflow) + 2 **tier-gated audit** skills (codebase-audit, framework-audit) copied only when the project's risk profile warrants them.
+> This directory contains 14 skills: 11 **inline** (6 implementation + 3 session lifecycle + 1 PRD process + 1 commit workflow) + 3 **tier-gated** skills (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the project's risk profile warrants them.
 
 ## What these are
 
@@ -32,6 +32,7 @@ These skills implement steps of the Session Protocol, Execution Protocol, PRD wo
 | 11 | commit | Process pure | Before any non-trivial commit (user-triggered) — staging verification, intent matching, conventional messages |
 | 12 | codebase-audit | Process + judgment (tier-gated: internal-tool+) | Periodic MACRO health audit (user-triggered; proposed by sprint-proposer at AUDIT_CADENCE / phase boundary) |
 | 13 | framework-audit | Process + judgment (tier-gated: production+) | Periodic meta-audit of the project's own process (user-triggered; proposed at FRAMEWORK_AUDIT_CADENCE / phase boundary) |
+| 14 | skill-gate | Process + judgment (tier-gated: internal-tool+) | When a NEW skill or rules file is created — draft in `.claude/drafts/`, blind review by skill-reviewer, conditional promotion (enforced by PostToolUse hook) |
 
 ## Skill Creator usage
 
@@ -47,4 +48,6 @@ Skills with `scripts/` subdirectories contain bash helper scripts for determinis
 
 ```bash
 cp -r docs/modules/skills/* projects/[project-name]/.claude/skills/
+# Tier-gated skills are re-added by Step 5.8 per risk profile (file presence = active ceremony)
+rm -rf projects/[project-name]/.claude/skills/{codebase-audit,framework-audit,skill-gate} projects/[project-name]/.claude/skills/README.md
 ```

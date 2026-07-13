@@ -44,7 +44,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/templates/` | Document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json). |
 | `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
 | `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design always; ops-rules, quality-budgets for production+ profiles). |
-| `docs/modules/skills/` | 13 pre-built skills (11 lifecycle: sprint-proposer, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 2 tier-gated audits: codebase-audit, framework-audit) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated audits copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
+| `docs/modules/skills/` | 14 pre-built skills (11 lifecycle: sprint-proposer, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 3 tier-gated: codebase-audit, framework-audit, skill-gate) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated skills copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | 6 slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`, `/audit`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. `/audit` is a read-only utility for framework integrity checks. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
@@ -182,7 +182,7 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   ├── templates/                        # Document and config templates for bootstrap
 │   │   ├── agents/                           # Agent templates (copied to .claude/agents/)
 │   │   ├── rules/                            # Rules templates (copied to .claude/rules/)
-│   │   └── skills/                           # 13 skills (11 lifecycle + 2 tier-gated audits, copied by profile)
+│   │   └── skills/                           # 14 skills (11 lifecycle + 3 tier-gated, copied by profile)
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── README.md                            # How to use examples, conventions, key patterns
 │   ├── agents/                              # Agent templates (flat .md)
@@ -262,7 +262,7 @@ The framework has six types of components. Each answers a different question:
 | **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
 | **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
 | **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (11 inline + 2 tier-gated audits) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
+| **Process Skills** | `modules/skills/*/SKILL.md` (11 inline + 3 tier-gated) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
@@ -332,7 +332,7 @@ Step     Source (framework repo)                     Output (project folder)
          modules/rules/session_rules.md         --> .claude/rules/session-rules.md
          modules/rules/evolution_policy.md      --> .claude/rules/evolution-policy.md
          modules/rules/component_design.md     --> .claude/rules/component-design.md
-5.8      modules/skills/codebase-audit, ...      --> tier-gated MACRO skeletons (by profile)
+5.8      modules/skills/{codebase-audit,skill-gate,framework-audit}, agents/skill_reviewer.md --> tier-gated skeletons (by profile)
 6        (external: skill registries)            --> Stack-specific skills (optional)
 7        modules/agents/code_reviewer.md          --> .claude/agents/code-reviewer.md
 8        modules/agents/security_reviewer.md     --> .claude/agents/security-reviewer.md
@@ -1478,6 +1478,46 @@ Some skills emerge from real project experience — they require observed repeti
 **Create an agent when:**
 - A specialized review or analysis role would improve quality (e.g., performance-auditor, accessibility-checker)
 - A repeated multi-step workflow could be packaged (e.g., migration-runner with project conventions)
+
+### Creation gate — blind review before promotion (internal-tool+ profiles)
+
+Both creation triggers above produce a component written by a session that is, by
+definition, contaminated with its own premises: the same misunderstanding that
+produced a bad skill will also approve it. Code already avoids this through
+isolated reviewer subagents that never see the implementing session. The creation
+gate applies the identical principle to components themselves:
+
+1. **Draft, don't publish.** New skills and rules are written into a `drafts/`
+   area — never directly into the official directories. In-place updates to
+   EXISTING components are not gated (they follow the evolution policy).
+2. **Blind review.** When the author marks the draft ready, an independent
+   reviewer instance evaluates it receiving ONLY the draft, a rubric, and an
+   index of existing components — no session history, no authorial intent. A
+   draft that cannot be judged without context is precisely the draft that fails
+   when reused months later, so context-dependence itself is a failing defect.
+3. **Procedural vs. empirical bifurcation.** The rubric classifies every claim:
+   procedural claims (instructions, conventions, internal decisions) are
+   verifiable by consistency and can auto-promote; empirical claims (durations,
+   prices, vendor/API behavior, metrics — anything whose truth requires contact
+   with reality) are promoted carrying a `verified: false` flag with the claims
+   listed. A blind reviewer judges form, not reality — the flag marks the class
+   no reviewer can cover. Consumers treat flagged claims as hypotheses; removing
+   the flag is exclusively a human or real-data decision.
+4. **Sensitive routing.** Drafts touching credentials, deploy, client data,
+   external automation, money, or permissions are reviewed by the adversarial
+   security agent instead — a wrong skill is worse than a bad commit, because it
+   is a procedure future sessions reuse with confidence.
+5. **Bounded correction loop.** A reproved draft is fixed and re-reviewed, at
+   most 3 cycles; then it becomes a human pendency. Duplicate-overlap verdicts
+   never auto-consolidate — consolidation proposals go to the human.
+6. **Promotion is mechanical and refuses bypass.** A promotion step moves the
+   draft to the official directory only when a fresh approving verdict exists;
+   this step — not the reminder that triggers the review — is the real gate.
+
+The gate is tier-gated by file presence (internal-tool and above); prototype
+projects create components directly. Tool-specific enforcement (the write-event
+hook and scripts of the reference implementation) lives in the `skill-gate`
+process skill, not in this conceptual model.
 
 ### Skill vs Agent:
 - **Skill** = knowledge/process documentation (HOW to do something). Read as inline reference by whichever agent needs it.

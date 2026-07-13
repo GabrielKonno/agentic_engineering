@@ -3,7 +3,7 @@
 > Create at `.claude/rules/evolution-policy.md` during bootstrap.
 > This rule governs how framework components evolve — loaded in every session.
 
-```markdown
+````markdown
 ---
 domain: evolution-policy
 applies_to: "**/*"
@@ -33,7 +33,7 @@ If it changes **BEHAVIOR** (how the agent acts) → requires human approval.
 **Autonomous (no approval needed):**
 - Known Bug Patterns, Architecture Patterns (factual — from diffs)
 - File Map, Commands in CLAUDE.md (factual — reflects filesystem)
-- Skills content (knowledge/process — errors caught by eval loops)
+- Skills content (knowledge/process — errors caught by eval loops; NEW components enter via the creation gate below when skill-gate is installed)
 - Agent checklist items — ADDING new checks (from real bugs via FIX)
 - Lineage metadata, efficacy tracking (append-only)
 
@@ -47,6 +47,28 @@ If it changes **BEHAVIOR** (how the agent acts) → requires human approval.
 - Changing an agent's invocation type, report format, or trigger conditions
 
 Check this list before making end-of-session updates. For human-approval items, propose the change in the session log and wait for confirmation.
+
+## Component creation gate (when `.claude/skills/skill-gate/` exists)
+
+Creating a NEW skill or rules file is still an autonomous evolution — but it routes
+through an independent gate instead of self-approval:
+
+- NEVER write a new component directly into `.claude/skills/` or `.claude/rules/`.
+  New components are drafted in `.claude/drafts/` and promoted only after a blind
+  review approves them (process: `.claude/skills/skill-gate/SKILL.md`).
+- In-place UPDATES to existing components stay direct (this policy's boundaries
+  above apply unchanged). If an update ADDS an empirical claim — a fact about the
+  external world (durations, prices, vendor/API behavior, metrics) — ALWAYS mark
+  it `verified: false` inline. framework-audit Q5 audits compliance.
+- If skill-gate is NOT installed (prototype tier), creation follows
+  rules-agents-updater Step 4 directly.
+
+**`verified: false` rules (apply regardless of tier):**
+- Consuming: treat each listed claim as hypothesis, not fact; flag to the user
+  whenever a decision depends on it.
+- Removing the flag is EXCLUSIVELY a human decision or driven by real recorded
+  data (e.g., a measured duration replacing an estimated one). NEVER remove it on
+  your own reasoning — that is the exact failure the flag exists to prevent.
 
 ## Back-sweep — rules apply backward (internal-tool+ profiles)
 
@@ -68,4 +90,4 @@ so it owns the sweep). Back-sweep ARCHIVES findings as tasks; it never auto-edit
 
 **Profile gate:** skip for `prototype` (forward-only is acceptable for throwaway code).
 Active for `internal-tool`, `production`, `production-financial`.
-```
+````

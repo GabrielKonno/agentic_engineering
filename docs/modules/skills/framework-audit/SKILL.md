@@ -48,6 +48,11 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    honestly — an unenforced field is documentation debt.
 5. **Meta-metrics review** — read `framework-metrics.md`: is the escape rate rising? Any reviewer
    with high false-positive (cry-wolf)? Any Known Bug Pattern that never triggers (dead weight)?
+   If skill-gate is installed, also: any promoted skill never loaded since promotion (cross-check
+   `.claude/skill-gate/promotion.log` against session logs — dead weight)? Any `verified: false`
+   claim older than ~20 sessions with no verification attempt (stale hypothesis being consumed
+   as if pending forever)? Any in-place update that added an empirical claim WITHOUT the flag
+   (evolution-policy compliance)?
 6. **Back-sweep of process rules** — did a recently promoted PROCESS rule condemn OLDER framework
    artifacts? Apply it backward to the project's own components.
 

@@ -81,6 +81,7 @@ CLAUDE.md (Step 2). The ceremony matrix lives in `session-rules.md` (copied Step
 | CI floor at t=0 (Step 14) | — | ✅ | ✅ | ✅ |
 | metrics.md (Step 5.8) + back-sweep + debt-aging + Post-Mortem ledger | — | ✅ | ✅ | ✅ |
 | codebase-audit skill (Step 5.8) | — | ✅ sparse | ✅ | ✅ |
+| skill-gate + skill-reviewer (Step 5.8) | — | ✅ | ✅ | ✅ |
 | ops-rules + quality-budgets + delta gate + deploy gates (Step 5.8) | — | — | ✅ | ✅ |
 | framework-audit skill (Step 5.8) | — | — | ✅ sparse | ✅ frequent |
 | Data reconciliation + red-team mandatory on money-paths | — | — | — | ✅ |
@@ -242,6 +243,9 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ```bash
 cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
+# Tier-gated skills are copied ONLY by Step 5.8 per risk profile; README.md is framework docs.
+# Without this removal, file-presence tier-gating silently activates every ceremony on every tier.
+rm -rf projects/$ARGUMENTS/.claude/skills/codebase-audit projects/$ARGUMENTS/.claude/skills/framework-audit projects/$ARGUMENTS/.claude/skills/skill-gate projects/$ARGUMENTS/.claude/skills/README.md
 ```
 
 - **Session lifecycle (user-triggered):** sprint-proposer, session-end, context-recovery
@@ -268,10 +272,10 @@ These 3 run as isolated subagents via Agent tool — they produce decisions or a
 
 ```bash
 mkdir -p projects/$ARGUMENTS/.claude/rules
-# Extract content between the markdown fences in the template
-sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
-sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/evolution_policy.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/evolution-policy.md
-sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/component_design.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/component-design.md
+# Extract content between the 4-backtick outer fences (4 backticks so template bodies may contain normal ``` blocks)
+sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/session_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/session-rules.md
+sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/evolution_policy.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/evolution-policy.md
+sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/component_design.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/component-design.md
 ```
 
 This creates session-rules.md (task limits, documentation quality, reasoning depth, scripts convention), evolution-policy.md (evolution classification, auto-evolution boundaries), and component-design.md (agent/skill/rule design principles: gap-declaration activation, Pushy Descriptions, vocabulary alignment, tiered architecture, Preservar+Adicionar).
@@ -290,17 +294,20 @@ The cheap core (back-sweep, debt-aging, Post-Mortem ledger, session archetypes, 
 deploy guards) is already baked into the components/templates copied in Steps 3-5.7 and self-gates
 by profile via its own clauses — nothing extra to copy for those.
 
-**`internal-tool` and above — codebase-audit + metrics:**
+**`internal-tool` and above — codebase-audit + metrics + skill-gate:**
 ```bash
 cp -r docs/modules/skills/codebase-audit projects/$ARGUMENTS/.claude/skills/
-sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/phases/metrics.md
+sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/phases/metrics.md
+cp -r docs/modules/skills/skill-gate projects/$ARGUMENTS/.claude/skills/
+cp docs/modules/agents/skill_reviewer.md projects/$ARGUMENTS/.claude/agents/skill-reviewer.md
+mkdir -p projects/$ARGUMENTS/.claude/drafts/skills projects/$ARGUMENTS/.claude/drafts/rules projects/$ARGUMENTS/.claude/skill-gate/review_reports
 ```
 
 **`production` and above — framework-audit + ops-rules + quality-budgets:**
 ```bash
 cp -r docs/modules/skills/framework-audit projects/$ARGUMENTS/.claude/skills/
-sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/ops-rules.md
-sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/quality-budgets.md
+sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/ops-rules.md
+sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/quality-budgets.md
 ```
 
 **`production-financial` only — additionally** fill the ops-rules §6 reconciliation queries with
@@ -622,6 +629,7 @@ git commit -m "chore: bootstrap from agentic framework"
 ### MACRO skeletons (tier-gated — Steps 5.8 / 14.2):
 - codebase-audit skill ← [copied (internal-tool+) / skipped (prototype)]
 - metrics.md ← [copied (internal-tool+) / skipped]
+- skill-gate skill + skill-reviewer agent + .claude/drafts/ ← [copied (internal-tool+) / skipped (prototype)]
 - framework-audit skill ← [copied (production+) / skipped]
 - ops-rules.md ← [copied (production+) / skipped]
 - quality-budgets.md ← [copied (production+) / skipped]

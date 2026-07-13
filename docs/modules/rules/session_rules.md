@@ -3,7 +3,7 @@
 > Create at `.claude/rules/session-rules.md` during bootstrap (Step 5.7).
 > This rule is loaded in every session — keep it concise.
 
-```markdown
+````markdown
 ---
 domain: session-management
 applies_to: "**/*"
@@ -25,6 +25,7 @@ never imposed. Read the profile, then apply ONLY the ceremonies its column marks
 | CI floor at t=0 | — | ✅ | ✅ | ✅ |
 | metrics.md (light series) | — | ✅ | ✅ | ✅ |
 | Back-sweep (rules apply backward) | — | ✅ | ✅ | ✅ |
+| skill-gate (creation gate for new skills/rules) | — | ✅ | ✅ | ✅ |
 | Debt-aging triage | — | ✅ | ✅ | ✅ |
 | Post-Mortem ledger (recurring-class detection) | — | ✅ | ✅ | ✅ |
 | codebase-audit (`AUDIT_CADENCE`) | — | sparse (~20) | ✅ (~12) | ✅ (~12) |
@@ -109,4 +110,4 @@ history. This is a distinct gate tier ABOVE the per-diff CI gate and the per-tas
 ## Scripts convention
 
 Skills with `scripts/` subdirectories have optional bash helpers. Use them if available; execute equivalent steps manually otherwise. Scripts require bash (Git Bash on Windows, native on macOS/Linux).
-```
+````

@@ -6,7 +6,7 @@
 > with no stack content yet stays as an explicit `TODO` — never silently dropped.
 > Consumed by `codebase-audit` (NOT the per-diff review — ops is not a diff concern).
 
-```markdown
+````markdown
 ---
 domain: ops
 applies_to: "**/*"
@@ -52,4 +52,4 @@ everything AFTER: the runtime health of the deployed system. Walked category-by-
 - [ ] Periodic SELECT-only checks that derived/aggregate data matches source of truth?
 - [ ] Anomaly count expected = 0; any nonzero is a high-priority finding?
 - Stack content: [fill — the actual reconciliation queries, schema-specific]
-```
+````

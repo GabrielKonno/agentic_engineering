@@ -441,7 +441,7 @@ mkdir -p projects/$ARGUMENTS/.claude/rules
 for tmpl in session_rules evolution_policy component_design; do
   target=$(echo "$tmpl" | tr '_' '-')
   if [ ! -f "projects/$ARGUMENTS/.claude/rules/${target}.md" ]; then
-    sed -n '/^```markdown$/,/^```$/p' "docs/modules/rules/${tmpl}.md" | sed '1d;$d' > "projects/$ARGUMENTS/.claude/rules/${target}.md"
+    sed -n '/^````markdown$/,/^````$/p' "docs/modules/rules/${tmpl}.md" | sed '1d;$d' > "projects/$ARGUMENTS/.claude/rules/${target}.md"
     echo "Copied ${target}.md"
   else
     echo "SKIPPED (already exists): ${target}.md — verify manually"
@@ -476,14 +476,17 @@ PROJ="projects/$ARGUMENTS"
 case "$PROFILE" in
   internal-tool|production|production-financial)
     [ ! -d "$PROJ/.claude/skills/codebase-audit" ] && cp -r docs/modules/skills/codebase-audit "$PROJ/.claude/skills/"
-    [ ! -f "$PROJ/.claude/phases/metrics.md" ] && sed -n '/^```markdown$/,/^```$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > "$PROJ/.claude/phases/metrics.md"
+    [ ! -f "$PROJ/.claude/phases/metrics.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > "$PROJ/.claude/phases/metrics.md"
+    [ ! -d "$PROJ/.claude/skills/skill-gate" ] && cp -r docs/modules/skills/skill-gate "$PROJ/.claude/skills/"
+    [ ! -f "$PROJ/.claude/agents/skill-reviewer.md" ] && cp docs/modules/agents/skill_reviewer.md "$PROJ/.claude/agents/skill-reviewer.md"
+    mkdir -p "$PROJ/.claude/drafts/skills" "$PROJ/.claude/drafts/rules" "$PROJ/.claude/skill-gate/review_reports"
     ;;
 esac
 case "$PROFILE" in
   production|production-financial)
     [ ! -d "$PROJ/.claude/skills/framework-audit" ] && cp -r docs/modules/skills/framework-audit "$PROJ/.claude/skills/"
-    [ ! -f "$PROJ/.claude/rules/ops-rules.md" ] && sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > "$PROJ/.claude/rules/ops-rules.md"
-    [ ! -f "$PROJ/.claude/rules/quality-budgets.md" ] && sed -n '/^```markdown$/,/^```$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > "$PROJ/.claude/rules/quality-budgets.md"
+    [ ! -f "$PROJ/.claude/rules/ops-rules.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > "$PROJ/.claude/rules/ops-rules.md"
+    [ ! -f "$PROJ/.claude/rules/quality-budgets.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > "$PROJ/.claude/rules/quality-budgets.md"
     ;;
 esac
 ```
@@ -580,6 +583,11 @@ if [ ! -f "projects/$ARGUMENTS/.claude/settings.json" ] && [ -d "projects/$ARGUM
             "type": "command",
             "command": "if [[ \"$CLAUDE_TOOL_FILE_PATH\" == *.js || \"$CLAUDE_TOOL_FILE_PATH\" == *.ts || \"$CLAUDE_TOOL_FILE_PATH\" == *.jsx || \"$CLAUDE_TOOL_FILE_PATH\" == *.tsx || \"$CLAUDE_TOOL_FILE_PATH\" == *.json || \"$CLAUDE_TOOL_FILE_PATH\" == *.css || \"$CLAUDE_TOOL_FILE_PATH\" == *.md ]]; then npx prettier --write \"$CLAUDE_TOOL_FILE_PATH\" 2>/dev/null || true; fi",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "if [ -f .claude/skills/skill-gate/scripts/skill_gate_hook.sh ]; then bash .claude/skills/skill-gate/scripts/skill_gate_hook.sh; fi",
+            "timeout": 10
           }
         ]
       }
@@ -591,7 +599,7 @@ SETTINGS
 fi
 ```
 
-**Note:** The smart-formatting hook requires Prettier. If the project doesn't use Prettier, create settings.json with only the `permissions` block and skip the `hooks` section.
+**Note:** The smart-formatting hook requires Prettier. If the project doesn't use Prettier, create settings.json with only the `permissions` block and skip the hook — but KEEP the skill-gate hook entry (it has no dependencies). If settings.json already existed, merge the skill-gate hook entry into its `PostToolUse` array — without it, the gate installed in Step 2.9b is never enforced (it remains a harmless no-op on tiers where skill-gate was not copied).
 
 **Step 4.3 — Discover and install MCPs:**
 

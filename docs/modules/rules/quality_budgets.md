@@ -6,7 +6,7 @@
 > Caps are DEFAULTS — tune per project. The point is a tripwire on slow erosion ("boiled frog"),
 > not a hard blocker: the code-reviewer delta gate FLAGS a budget regression, it does not block.
 
-```markdown
+````markdown
 ---
 domain: quality-budgets
 applies_to: "**/*"
@@ -30,4 +30,4 @@ periodic `codebase-audit` records the absolute values in `metrics.md`.
 **Delta gate rule (code-reviewer):** when a diff worsens any budget above, add ONE finding:
 `Budget delta: [metric] [old]→[new] (cap [cap]) — justified? ` — severity LOW unless it crosses
 the cap, then MEDIUM. It is a flag for the author to justify or split, never an automatic block.
-```
+````

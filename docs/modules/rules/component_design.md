@@ -4,7 +4,7 @@
 > This rule governs how agents, skills, and rules are created and modified.
 > Loaded when touching `.claude/agents/`, `.claude/skills/`, or `.claude/rules/`.
 
-```markdown
+````markdown
 ---
 domain: component-design
 applies_to: ".claude/agents/**,.claude/skills/**,.claude/rules/**"
@@ -174,4 +174,4 @@ Claude Code provides these natively — do not build custom replacements:
 **Subagent depth limit:** Only main Claude can use the Agent tool. Design
 activation flows that route through main Claude's report reading, not through
 direct agent-to-agent calls.
-```
+````
