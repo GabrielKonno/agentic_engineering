@@ -63,7 +63,7 @@ sequences, conventions, formats, decisions internal to the system.
 
 **Empirical** (truth requires external data or observation — MUST be listed in
 `empirical_claims[]`): any claim about the external world.
-- "the premium tier takes ~40 minutes" — duration measured, not derived
+- "The premium service takes ~40 minutes" — duration measured, not derived
 - "This copy converts better" — metric claim
 - "Vendor Y delivers in Z days" — third-party behavior
 - "The API rate-limits at 100 req/min" — external system behavior (docs drift;

@@ -25,7 +25,7 @@ Each agent receives its full contract as the prompt. Use `subagent_type: "genera
 
 ---
 
-### Agent 1: Structural Sync (Dimensions A, D4, D9)
+### Agent 1: Structural Sync (Dimensions A, D4, D9, D16)
 
 ```
 You are a structural sync auditor for the Agentic Engineering Framework.
@@ -63,6 +63,21 @@ CHECKS:
   D9.5. Check count comments in the diagram (e.g., "5 slash commands", "11 process skills")
         against actual counts on disk
 
+[D16] Project-information isolation (privacy)
+  D16.1. Build the blocklist DYNAMICALLY: list the folder names under projects/ (each name
+         plus obvious variants — hyphen/underscore forms, with and without suffixes).
+  D16.2. From each project's own CLAUDE.md / project.md (read-only), harvest additional
+         identifiers: client/person names, deployment domains (*.vercel.app, custom
+         domains), repo URLs, infra refs (e.g. Supabase project ids).
+  D16.3. Grep every TRACKED framework file (exclude projects/, .git/, .claude/docs/ —
+         gitignored) for every blocklist entry, case-insensitive.
+  D16.4. Templates get DOUBLE scrutiny (docs/modules/**, examples/**): they are copied into
+         every bootstrapped project — a project identifier inside a template broadcasts one
+         client's information to all future clients.
+  D16.5. Report every hit with file, line, and identifier class. Zero hits = PASS.
+         Lineage/history docs are NOT exempt — they must use anonymized placeholders
+         (e.g. "projeto-fonte", "a prior project").
+
 REPORT FORMAT:
 
 ## Agent 1: Structural Sync
@@ -84,6 +99,11 @@ REPORT FORMAT:
 - In diagram but not on disk: [list]
 - On disk but not in diagram: [list]
 - Count mismatches: [list]
+
+### [D16] Project-Information Isolation
+- Status: PASS / FAIL
+- Blocklist derived: [N project names + M harvested identifiers]
+- Hits: [file:line — identifier (class), or "none"]
 ```
 
 ---
@@ -436,7 +456,7 @@ After ALL 5 agents return, consolidate their reports into a single audit report.
 
 **Date:** [today's date]
 **Framework version:** [from README.md]
-**Dimensions checked:** 15
+**Dimensions checked:** 16
 **Agents dispatched:** 5
 
 ## Summary
@@ -458,6 +478,7 @@ After ALL 5 agents return, consolidate their reports into a single audit report.
 | D13 | PRD ↔ bootstrap compat | Process | 2 | PASS/FAIL | [1-line summary] |
 | D14 | Bootstrap output | Process | 2 | PASS/FAIL | [1-line summary] |
 | D15 | Doc factual accuracy | Currency | 5 | PASS/FAIL | [1-line summary] |
+| D16 | Project-info isolation | Privacy | 1 | PASS/FAIL | [1-line summary] |
 ```
 
 ### Detailed Findings
