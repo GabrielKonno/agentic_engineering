@@ -58,23 +58,27 @@ Classify EVERY factual assertion in the draft:
 
 **Procedural** (verifiable by consistency — no flag needed): instructions,
 sequences, conventions, formats, decisions internal to the system.
-- "Validate character limits before submitting a Smart campaign" ✓ procedural
-- "Rules files are loaded via paths: globs" ✓ procedural (internal mechanism)
+- "Validate input length limits before submitting to the external service" ✓
+- "Rules files are loaded via paths: globs" ✓ (internal mechanism)
+- "Run the rollback migration before marking a schema task complete" ✓ (sequence)
 
 **Empirical** (truth requires external data or observation — MUST be listed in
-`empirical_claims[]`): any claim about the external world.
-- "The premium service takes ~40 minutes" — duration measured, not derived
-- "This copy converts better" — metric claim
-- "Vendor Y delivers in Z days" — third-party behavior
-- "The API rate-limits at 100 req/min" — external system behavior (docs drift;
-  observed limits change) — empirical even when it cites documentation
-- "Customers prefer WhatsApp contact" — behavioral claim
+`empirical_claims[]`): any claim about the external world. Examples across
+project archetypes:
+- "The premium service takes ~40 minutes" — measured duration (service business)
+- "The provider's free tier rate-limits at 100 req/min" — external system
+  behavior; empirical even when it cites documentation (docs drift, limits change)
+- "The data source returns split-adjusted prices by default" — third-party data
+  behavior (pipeline/integration)
+- "This copy converts better" — conversion/usage metric (web/marketing)
+- "Vendor Y delivers in Z days" — third-party behavior (operations)
+- "Most users run the tool on Windows" — user-population claim (CLI/library)
 
-**Borderline rule:** durations, prices, conversion metrics, vendor/API behavior,
-and user preferences are ALWAYS empirical — even when stated confidently, even
-when sourced from official docs. When in doubt, classify as empirical: a false
-"procedural" label lets an unverified claim enter the library as fact; a false
-"empirical" label merely adds a flag.
+**Borderline rule:** durations, prices, conversion/usage metrics, vendor/API/
+data-source behavior, and user preferences are ALWAYS empirical — even when
+stated confidently, even when sourced from official docs. When in doubt,
+classify as empirical: a false "procedural" label lets an unverified claim
+enter the library as fact; a false "empirical" label merely adds a flag.
 
 For each empirical claim, fill `how_to_verify` with a concrete verification path
 (measure it, ask the owner, check real data).
@@ -82,10 +86,10 @@ For each empirical claim, fill `how_to_verify` with a concrete verification path
 ## 4. Sensitive category
 
 Set `detected_category: sensitive` if the draft touches ANY of: credentials or
-secrets; deploy or infrastructure; client/personal data; external messaging or
-automation (email, WhatsApp, webhooks); financial operations; permissions or
-access control. A wrong or insecure skill is worse than a bad commit — it is a
-procedure future sessions will reuse WITH confidence.
+secrets; deploy or infrastructure; client/personal data; external side-effects
+(messaging, e-mail, webhooks, third-party writes); financial operations;
+permissions or access control. A wrong or insecure skill is worse than a bad
+commit — it is a procedure future sessions will reuse WITH confidence.
 
 ## 5. Verdict discipline
 

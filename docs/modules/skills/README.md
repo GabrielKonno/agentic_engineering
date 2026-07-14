@@ -7,6 +7,24 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
 > This directory contains 14 skills: 11 **inline** (6 implementation + 3 session lifecycle + 1 PRD process + 1 commit workflow) + 3 **tier-gated** skills (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the project's risk profile warrants them.
 
+## Generality contract (inviolable)
+
+Every skill in this directory is copied VERBATIM to projects of ANY type — SaaS, data
+pipeline, CLI, static site. Therefore:
+
+- **Process skills MUST be project-type-agnostic.** They speak in workflow concepts
+  (tasks, criteria, diffs, commits, phases, context budget) and framework files
+  (`pendencias`, `project.md`) — never in the vocabulary of one project archetype.
+- **Surface-specific behavior is CONDITIONALLY GATED**, never assumed: "if UI files
+  modified", "if migration files in diff", "if `.claude/rules/X.md` exists". A project
+  without that surface pays zero cost.
+- **Examples must span archetypes or be archetype-neutral.** Examples are how the AI
+  calibrates a check — a rubric whose examples all come from one business type biases
+  the judgment on every other type.
+- **Project specificity enters at BOOTSTRAP**, through the components built per-project:
+  stack/domain skills (Step 12), domain rules (Step 13), adapted agents (Steps 7-11) —
+  never by editing these process skills' logic.
+
 ## What these are
 
 These skills implement steps of the Session Protocol, Execution Protocol, PRD workflows, commit hygiene, and the periodic MACRO/meta audits. The main agent reads the SKILL.md and follows the steps in its own context. In v2.1.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
