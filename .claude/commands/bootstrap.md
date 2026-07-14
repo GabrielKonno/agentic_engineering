@@ -106,7 +106,7 @@ These examples serve as quality reference for creating agents, skills, and rules
 
 ### Step 2 — Create CLAUDE.md
 
-**All files from Step 2 onwards are created inside `projects/$ARGUMENTS/`.** Paths in this prompt (e.g., `CLAUDE.md`, `.claude/phases/`) are relative to the project root.
+**All files from Step 2 onwards are created inside `projects/$ARGUMENTS/`.** Paths in this prompt (e.g., `CLAUDE.md`, `.claude/phases/`) are relative to the project root. Exception: shell command blocks (cp/mkdir/sed) run from the FRAMEWORK root — their targets keep the explicit `projects/$ARGUMENTS/` prefix because their sources (`docs/modules/...`, `examples/`) are framework-relative.
 
 **If CLAUDE.md already exists:** Do NOT overwrite. Instead, compare the existing content with the template. Add missing sections and update outdated sections. Report what was added/changed.
 
@@ -633,7 +633,7 @@ git commit -m "chore: bootstrap from agentic framework"
 ### MACRO skeletons (tier-gated — Steps 5.8 / 14.2):
 - codebase-audit skill ← [copied (internal-tool+) / skipped (prototype)]
 - metrics.md ← [copied (internal-tool+) / skipped]
-- skill-gate skill + skill-reviewer agent + .claude/drafts/ ← [copied (internal-tool+) / skipped (prototype)]
+- skill-gate skill + skill-reviewer agent + .claude/drafts/ + .claude/skill-gate/review_reports/ ← [copied (internal-tool+) / skipped (prototype)]
 - framework-audit skill ← [copied (production+) / skipped]
 - ops-rules.md ← [copied (production+) / skipped]
 - quality-budgets.md ← [copied (production+) / skipped]

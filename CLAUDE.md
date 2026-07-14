@@ -28,7 +28,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   ├── skills/
 │   │   └── cross-cutting-analysis/         # Runtime skill used during PRD sessions
 │   ├── docs/                               # Framework notes and ideas (not copied to projects)
-│   └── settings.json                       # Claude Code settings
+│   ├── settings.json                       # Claude Code settings
+│   └── settings.local.json                 # Machine-local overrides (gitignored)
 │
 │   NOTE: `.claude/` here is minimal by design — only what the framework
 │   needs to run its own 5 session modes + 1 utility. The agent templates, rules

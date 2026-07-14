@@ -114,6 +114,16 @@ Tiers:
 - Webhook endpoints: 1000 req/min
 ```
 
+## Testing
+
+Use the project's test framework (defined in its stack skill); these conventions are framework-agnostic:
+
+- **Contract tests per endpoint:** one test per documented status code (200/201, 400, 401, 403, 404, 422) — an endpoint that can return it must have a test that triggers it.
+- **Response shape assertions:** validate against the standard envelope (`data`/`error`/`meta`), not just status — a 200 with the wrong shape breaks clients silently.
+- **Pagination edges:** empty result set, exactly one page, cursor beyond last item, invalid cursor value.
+- **Auth matrix:** every protected endpoint tested unauthenticated (expect 401) and with wrong-role token (expect 403).
+- **Idempotency:** replay the same POST with the same idempotency key — assert single side effect.
+
 ## Security Checklist
 
 - [ ] Auth on every endpoint (except public ones explicitly listed)

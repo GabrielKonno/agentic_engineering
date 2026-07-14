@@ -84,12 +84,13 @@ Execute these steps in order. Do not skip steps — each one produces evidence f
 - After validation passes (if Red Team ran): run **Blue Team subagent**.
 
 **Coverage gap handling:** After receiving the code-reviewer and security-reviewer
-reports, read the Coverage Gap Declaration section in each report if present. For
-each declared gap, search `.claude/agents/` descriptions for an agent whose
-description matches the gap's domain. If a matching agent is found: spawn it and
-include its report as additional evidence for the validator. If no matching agent
-is found: note the unaddressed gap in the validation report's "Items for human
-verification" section.
+reports, ALWAYS execute this sequence:
+1. READ the Coverage Gap Declaration section in each report (skip only if absent).
+2. For each declared gap, SEARCH `.claude/agents/` descriptions for an agent whose
+   description matches the gap's domain vocabulary.
+3. Match found → SPAWN it and include its report as additional evidence for the
+   validator. No match → RECORD the unaddressed gap in the validation report's
+   "Items for human verification" section.
 This instruction is generic — it names no specific agents and adds zero cost when
 no coverage gaps are declared.
 
@@ -118,7 +119,9 @@ no coverage gaps are declared.
 - Sprint proposals or implementation plans
 - Files the implementing agent wrote as task explanation
 
-Each subagent is a fresh Agent tool instance — isolated context. Code-reviewer runs first, validator runs last, receiving all prior reports.
+Each subagent is a fresh Agent tool instance — isolated context.
+
+**Ordering — ALWAYS:** spawn code-reviewer FIRST; spawn validator LAST, passing it all prior reports.
 
 ---
 
