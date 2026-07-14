@@ -48,7 +48,14 @@ it — no tier lookup needed).
 Proposing is not running — the owner decides. If both are due, propose codebase-audit first
 (code health) and note framework-audit is also due. Then continue to Step 1.
 
-### 1. Check for MODEL SWITCH continuation
+### 1. Check for MODEL SWITCH or LOOP CONTINUATION
+
+Check for a LOOP CONTINUATION block below the Progress Log table in `.claude/phases/project.md`.
+If one exists: re-enter Autonomous Loop Mode at the next approved phase — no new approval
+(see "Continuation across sessions" in the Autonomous Loop Mode section). Skip the normal
+proposal flow below.
+
+### 1b. Check for MODEL SWITCH continuation
 
 Check for a MODEL SWITCH block below the Progress Log table in `.claude/phases/project.md`. If one exists:
 - This session is a continuation — skip normal dependency analysis and task selection (steps 4a/4b)
@@ -258,3 +265,30 @@ end-to-end under this shape.
 - STOP if a discovery invalidates the approved loop plan (dependency order broken,
   scope contradiction) — re-propose instead of improvising.
 - Discovery cap: max 3 per PHASE (the sprint-approved cap, applied per phase).
+
+### Continuation across sessions — one approval covers the WHOLE backlog
+
+The loop approval is for the BACKLOG, not for one session. When the loop stops at the
+context budget with approved phases remaining, ALWAYS write a LOOP CONTINUATION block
+below the Progress Log table in `project.md` (same mechanism as the MODEL SWITCH marker)
+before running session-end:
+
+```
+<!-- LOOP CONTINUATION — active -->
+### [date] — Session N (AUTONOMOUS LOOP — in progress)
+**Approved scope:** [the phases as approved, with status per phase]
+**Completed:** [phases/tasks done this session]
+**Next phase:** [tasks N..M]
+**Stop reason:** context budget / [degradation signal]
+```
+
+On the NEXT session, Step 1 checks for this marker (alongside MODEL SWITCH). If present:
+- Re-enter loop mode DIRECTLY at the next phase — NO new approval (the original approval
+  stands until the approved scope is done or the owner revokes it).
+- ALWAYS announce the resume in one line: "Resuming autonomous loop: phase X of Y
+  ([tasks]). Say 'cancel the loop' to revoke." — visibility, not an approval gate.
+- Remove the marker when the approved scope completes (final report) or the owner revokes.
+
+**Scope integrity:** discoveries added during the loop are NEVER absorbed into the
+approved scope — they queue in pendencias and the final report proposes them as the next
+loop. Without this, the scope creeps and "the backlog" never ends.
