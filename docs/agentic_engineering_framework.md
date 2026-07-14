@@ -158,7 +158,23 @@ AI plans sprints, executes task sequences autonomously, and stops only on except
 - ✅ Auto-replan: discoveries during implementation become new tasks in pendencias.md without stopping the sprint
 - ✅ Diff-based pattern extraction: AI systematically scans session diffs and extracts patterns to Known Bug Patterns and rules files
 
-**Progression:** Start at Level 3 until the validation loop is reliable and Known Bug Patterns are accumulating naturally (typically 3-5 sessions). Then enable Level 4 by approving sprint batches instead of individual tasks. The AI will propose sprints automatically — the human just needs to say "go" or adjust.
+### Level 5 — Backlog Loop (opt-in, per session)
+The AI works through the WHOLE approved backlog in one session, switching roles: the main
+agent stops implementing and becomes an ORCHESTRATOR that delegates implementation to
+isolated subagents and reads their reports. The stop condition changes from a task count
+to a context budget (~80% of the window, checked at every phase boundary).
+- ✅ Everything from Level 4
+- ✅ One approval covers the whole backlog (grouped in dependency-ordered phases of 3-5 tasks)
+- ✅ Role inversion: small tasks done directly; medium tasks implemented by subagents — the
+  orchestrator's context holds sprint state, not implementation reasoning (this is what
+  buys the long horizon, and it keeps the orchestrator uncontaminated as a judge)
+- ✅ Risk-tiered validation: routine diffs get one merged review+validation subagent;
+  logic-heavy and security keep the full chain
+- ✅ Commit + report at every phase boundary — any stop is resumable
+- ✅ Never a default: activated only by owner request or explicit acceptance of a loop
+  proposal; large and architecture/security tasks stay out of loop scope
+
+**Progression:** Start at Level 3 until the validation loop is reliable and Known Bug Patterns are accumulating naturally (typically 3-5 sessions). Then enable Level 4 by approving sprint batches instead of individual tasks. The AI will propose sprints automatically — the human just needs to say "go" or adjust. Level 5 is a per-session opt-in on top of Level 4 for backlogs of mostly small/medium independent tasks.
 
 ---
 

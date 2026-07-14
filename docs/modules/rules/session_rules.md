@@ -51,6 +51,11 @@ never imposed. Read the profile, then apply ONLY the ceremonies its column marks
 
 Maximum 3-5 tasks per session. Up to 7 if all small+related. 1 if large.
 
+Exception: in **Autonomous Loop Mode** (Level 5, opt-in — see sprint-proposer), the task
+limit is superseded by the context budget (~80% of the window, checked at every phase
+boundary). The mode never activates by itself: owner request or explicit acceptance of a
+loop proposal only.
+
 Signals of exceeding: contradicting earlier findings, skipping validation steps, producing ⏭️ on steps that should be ✅ or ❌.
 
 ## Task presentation

@@ -38,6 +38,11 @@ Invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task n
 
 **Sprint-approved mode:** Medium tasks proceed without approval. Large still need approval. See `sprint-proposer` skill.
 
+**Autonomous Loop Mode (Level 5):** Phase A is executed by an implementer SUBAGENT for
+medium tasks (the main agent orchestrates), and Phase B for routine tasks uses ONE merged
+review+validation subagent instead of the two-judge chain. Logic-heavy and security
+routes are unchanged. Full mechanics: `sprint-proposer` skill → Autonomous Loop Mode.
+
 ### 3. Git checkpoint (medium and large)
 
 Commit current state before writing code to enable clean rollback.
