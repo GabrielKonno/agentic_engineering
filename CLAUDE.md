@@ -168,5 +168,8 @@ The user wants to define a product before bootstrapping.
   framework-layer artifact: tracked files, templates (double severity — they broadcast to every
   future project), lineage docs, `.claude/docs/` notes, or the agent's persistent memory.
   Refer to projects by role descriptor ("projeto-fonte", "the landing-page prototype") and
-  resolve the actual folder at runtime from `projects/*/`'s own docs. Enforced by `/audit` D16
-  for tracked files + `.claude/docs/`; by convention for memory.
+  resolve the actual folder at runtime from `projects/*/`'s own docs. Enforced mechanically
+  by `/audit` D16 across ALL agent-reachable surfaces: tracked files, `.claude/docs/`, the
+  agent's persistent memory (path resolved from session context), and git history —
+  commit contents AND commit messages (leaks survive deletion; unpushed hits are locally
+  fixable, pushed ones escalate to the owner).

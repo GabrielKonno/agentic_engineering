@@ -79,8 +79,22 @@ CHECKS:
   D16.3. Grep every framework-layer file for every blocklist entry, case-insensitive:
          all TRACKED files AND `.claude/docs/` (gitignored agent notes — the isolation
          principle covers the agent's own documents too). Exclude only projects/ and .git/.
-         The agent's persistent memory lives outside the repo — flag in the report that it
-         is governed by the same principle (convention, not mechanically scanned here).
+  D16.3b. Agent-layer scan (MANDATORY when resolvable): the agent's persistent memory
+         directory lives OUTSIDE the repo — resolve its path at runtime from the session
+         context (the "# Memory" section of the system prompt, or the additional working
+         directory whose path ends in `memory`). Run BOTH the blocklist grep (D16.3) and
+         the value-shape scan (D16.2b) over EVERY file in it, including MEMORY.md.
+         If the path cannot be resolved (e.g. audit adapted to run outside Claude Code),
+         report the dimension as PARTIAL with "agent memory: SKIPPED — path not
+         resolvable" — never silently omit the surface.
+  D16.3c. Git-history scan: names and values survive deletion — a leak removed from the
+         tree still lives in every commit that contained it. Scan ALL commits:
+         - Contents: `git grep -I -c -E "<blocklist|value patterns>" $(git rev-list --all)`
+         - Messages: `git log --all --format="%h|%s|%b"` grepped for the same patterns
+         Classify each hit by reachability: in UNPUSHED commits → fixable locally
+         (`git filter-branch --msg-filter` for messages, tree rewrite for contents);
+         in PUSHED history → escalate to the owner (requires history rewrite + force
+         push — owner decision, NEVER automatic).
   D16.4. Templates get DOUBLE scrutiny (docs/modules/**, examples/**): they are copied into
          every bootstrapped project — a project identifier inside a template broadcasts one
          client's information to all future clients.
@@ -111,9 +125,11 @@ REPORT FORMAT:
 - Count mismatches: [list]
 
 ### [D16] Project-Information Isolation
-- Status: PASS / FAIL
+- Status: PASS / PARTIAL / FAIL
 - Blocklist derived: [N project names + M harvested identifiers]
-- Hits: [file:line — identifier (class), or "none"]
+- Surfaces scanned: tracked files | .claude/docs/ | agent memory ([path] or SKIPPED — reason) | git history ([N] commits: contents + messages)
+- Hits: [surface — file:line or commit hash — identifier/value (class), or "none"]
+- Unpushed-vs-pushed: [for history hits — which are still locally fixable]
 ```
 
 ---
