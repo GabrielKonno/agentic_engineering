@@ -69,6 +69,13 @@ CHECKS:
   D16.2. From each project's own CLAUDE.md / project.md (read-only), harvest additional
          identifiers: client/person names, deployment domains (*.vercel.app, custom
          domains), repo URLs, infra refs (e.g. Supabase project ids).
+  D16.2b. ALSO scan for VALUE-shaped leaks (data, not just identifiers), by format:
+         secret shapes (JWT `eyJ...`, key prefixes sk-/ghp_/AKIA/xox, `user:pass@`
+         connection strings, long Bearer tokens), PII shapes (BR phone `+55...`,
+         CPF `NNN.NNN.NNN-NN`, CNPJ, real-looking e-mails), and `.env`/dump files.
+         Mentions of the CONCEPTS (security rules teaching about secrets) and
+         detection regexes inside scanner examples are legitimate — only actual
+         VALUES and synthetic-fixture violations (non-obviously-fake PII) fail.
   D16.3. Grep every framework-layer file for every blocklist entry, case-insensitive:
          all TRACKED files AND `.claude/docs/` (gitignored agent notes — the isolation
          principle covers the agent's own documents too). Exclude only projects/ and .git/.
