@@ -53,7 +53,11 @@ Proposing is not running — the owner decides. If both are due, propose codebas
 Check for a LOOP CONTINUATION block below the Progress Log table in `.claude/phases/project.md`.
 If one exists: re-enter Autonomous Loop Mode at the next approved phase — no new approval
 (see "Continuation across sessions" in the Autonomous Loop Mode section). Skip the normal
-proposal flow below.
+proposal flow below, BUT still run Step 0 first: a multi-session loop can cross
+`AUDIT_CADENCE` mid-loop. If an audit is due, do NOT silently skip it — include it in the
+resume announcement ("audit due — say 'pause for audit' to run it now, otherwise I'll
+propose it after the loop") and propose it in the final sprint report. The loop NEVER runs
+an audit autonomously; audits stay owner-gated.
 
 ### 1b. Check for MODEL SWITCH continuation
 
@@ -247,6 +251,9 @@ end-to-end under this shape.
   the first degradation signal (contradicting earlier findings, re-exploring known
   files) — STOP the loop: commit, produce the sprint report, run `/session-end`.
   NEVER start a new phase past the checkpoint.
+- The ~20% above the budget is the RESERVE that pays for the stop path (commit + report
+  + LOOP CONTINUATION marker + full session-end). NEVER spend it on one more phase —
+  a loop that ends without its session-end leaves every document stale at once.
 - Commit at every phase boundary — any stop is resumable from the last checkpoint.
 
 ### Per-phase rhythm
