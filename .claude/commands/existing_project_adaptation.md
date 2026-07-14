@@ -40,6 +40,24 @@ This session reads the existing codebase and documentation, then upgrades everyt
 
 Read the entire existing structure before making any changes. This is the most important phase — your understanding of the project determines the quality of every document you create or update.
 
+**Step 1.0 — Freshness check (MANDATORY before reading anything):**
+
+If the project has a git remote, ALWAYS verify the local copy is current BEFORE analyzing it:
+
+```bash
+git -C projects/$ARGUMENTS remote -v            # has a remote?
+git -C projects/$ARGUMENTS fetch origin
+git -C projects/$ARGUMENTS status -sb           # ahead/behind?
+```
+
+If the copy is BEHIND the remote: STOP and reconcile first (pull/reset per the owner's
+instruction) — every conclusion drawn from a stale copy is invalid, and edits made on it
+will conflict with the real history. Analyzing a snapshot that is N commits behind is the
+adaptation-level equivalent of reviewing the wrong diff.
+(Origin incident 2026-07-14: a compatibility validation ran against a projeto-fonte copy
+334 commits behind origin/dev — the report was faithful to a month-old snapshot, and the
+install had to be redone on the real base.)
+
 **Step 1.1 — Read existing documentation:**
 
 ```bash
