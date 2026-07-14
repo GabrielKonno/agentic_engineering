@@ -74,6 +74,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   ├── agents/                             # Agent templates by category (20)
 │   ├── skills/                             # Skill templates by type (9)
 │   └── rules/                              # Rules file templates (11)
+├── assets/
+│   └── docs/                               # Framework-base source notes (upgrade lineage, not copied to projects)
 └── projects/                               ← IGNORED by framework git (local-only workspace)
     └── [project-name]/                     ← Each project gets its own git repo
 ```

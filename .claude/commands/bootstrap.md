@@ -225,7 +225,8 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 1. Check if already installed: `grep -r "skill-creator" ~/.claude/plugins/installed_plugins.json 2>/dev/null`
 2. If not installed: `/plugin install skill-creator@claude-plugins-official`
-3. Enable in project settings.json — merge this key into the existing file:
+3. Enable in project settings.json. NOTE: `.claude/settings.json` is only created in Step 14 —
+   do NOT try to merge into it now. Record this key and merge it during Step 14:
    ```json
    "enabledPlugins": {
      "skill-creator@claude-plugins-official": true
@@ -242,6 +243,7 @@ Enable the Skill Creator plugin for automated skill evaluation:
 **Process skills (11 — inline, copied to `.claude/skills/`):**
 
 ```bash
+mkdir -p projects/$ARGUMENTS/.claude/skills projects/$ARGUMENTS/.claude/agents
 cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 # Tier-gated skills are copied ONLY by Step 5.8 per risk profile; README.md is framework docs.
 # Without this removal, file-presence tier-gating silently activates every ceremony on every tier.
@@ -266,7 +268,7 @@ cp docs/modules/agents/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/age
 - **Before implementing:** criteria-enforcer (called by validation-orchestrator skill)
 - **Session end:** diff-pattern-extractor (called by session-end skill, item 1)
 
-These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 10 run inline (main agent reads SKILL.md and follows steps in its own context).
+These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 11 run inline (main agent reads SKILL.md and follows steps in its own context).
 
 **Session rules (copied to `.claude/rules/`):**
 
@@ -662,4 +664,9 @@ git commit -m "chore: bootstrap from agentic framework"
 
 ### Next session should:
 - [specific action from first Build Order item]
+
+### Attach your remote (run these yourself — bootstrap never pushes):
+    cd projects/[project-name]
+    git remote add origin [project-repo-url]
+    git push -u origin main
 ```

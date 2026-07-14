@@ -40,7 +40,7 @@ Write a conventional commit message following the project's existing style:
 
 ### Step 5 — Commit
 Run `git commit` with the drafted message, ending with:
-  Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+  Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### Step 6 — Verify
 Run `git log --oneline -3` and show user the result to confirm the commit landed correctly.

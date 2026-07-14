@@ -32,7 +32,7 @@ Invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task n
 
 ### 2. Classify and route
 
-**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. Architecture/Security triggers model switch protocol (see execution protocol).
+**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. For Architecture/Security tasks, ALWAYS initiate the model switch protocol (see execution protocol).
 
 **Threshold:** Small (single file) → implement directly. Medium (2-5 files) → propose plan, wait for approval. Large (new module, cross-module) → propose plan with risks, wait for approval.
 
@@ -144,7 +144,7 @@ Each subagent is a fresh Agent tool instance — isolated context. Code-reviewer
 
 ⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css/.html` or template files were modified, or for Tests if business logic + test framework exists, or for Migration if migration files are in the diff. ⏭️ is NOT "I skipped it." If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 attempts): use ❌ with reason, list VERIFY: criteria as MANUAL:.
 
-If any finding is worth mentioning in the report, create a task in pendencias.md for it. Findings that die in prose are invisible.
+ALWAYS create a task in pendencias.md for every finding mentioned in the report — findings that die in prose are invisible.
 
 ---
 

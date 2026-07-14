@@ -207,7 +207,7 @@ When invoked as subagent, do NOT read:
 
 After completing all sections above, declare domains where inline code review
 provides only partial coverage and a specialized agent would add deeper analysis.
-Include this section in every Code Review Report.
+ALWAYS include this section in every Code Review Report.
 
 **If diff touches UI components, forms, navigation, or interactive elements:**
 > Accessibility gap: inline checklist covers ARIA attributes, keyboard navigation,

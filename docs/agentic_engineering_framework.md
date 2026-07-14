@@ -47,7 +47,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/skills/` | 14 pre-built skills (11 lifecycle: sprint-proposer, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 3 tier-gated: codebase-audit, framework-audit, skill-gate) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated skills copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | 6 slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`, `/audit`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. `/audit` is a read-only utility for framework integrity checks. |
-| `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
+| `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline (15 primary steps plus sub-steps like 5.7/5.8/14.5) that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
 | `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo from Step 0 — bootstrap runs `git init` inside the project folder before writing any file. |
 
 ### Suggested reading order
@@ -312,7 +312,7 @@ TOOLKIT PROMPTS                 TEMPLATES                    PROCESS SKILLS
 
 ### The bootstrap pipeline
 
-The bootstrap prompt (`.claude/commands/bootstrap.md`) is a 15-step pipeline that transforms a PRD into a complete AI workspace. Each step reads from the framework (read-only) and writes to the project folder:
+The bootstrap prompt (`.claude/commands/bootstrap.md`) is a 15-step pipeline (15 primary steps plus sub-steps such as 5.7, 5.8, and 14.5) that transforms a PRD into a complete AI workspace. Each step reads from the framework (read-only) and writes to the project folder:
 
 ```
 Step     Source (framework repo)                     Output (project folder)

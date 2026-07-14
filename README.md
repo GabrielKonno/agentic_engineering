@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.3.0
+# Agentic Engineering Framework v2.4.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -132,7 +132,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.3.0)
+│   ├── modules/                            ← Single source of truth (v2.4.0)
 │   │   ├── templates/                      ← Document and config templates (5)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -201,11 +201,11 @@ The framework has six component types, each serving a distinct role:
 TOOLKIT PROMPTS          TEMPLATES               PROCESS SKILLS
 (human entry points)     (what to create)        (how to execute)
 
-  /bootstrap ----------> claude_md.md -------.   11 pre-built skills
+  /bootstrap ----------> claude_md.md -------.   11 inline skills (+3 tier-gated)
   /prd_planning          project_md.md       |   implement Session Protocol
   /prd_change            pendencias_md.md    |   + Execution Protocol
-  /existing_adaptation   agent templates (9) |        |
-                         rules templates (3) |   copied to project
+  /existing_adaptation   agent templates (10)|        |
+                         rules templates (5) |   copied to project
                               |              |   at bootstrap
                      created at bootstrap    |        |
                               |              |        v
