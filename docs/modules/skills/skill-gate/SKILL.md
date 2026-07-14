@@ -106,8 +106,22 @@ marker, moves the draft to the official directory, and appends to
 
 **Observation mode:** while `rubric.md` frontmatter contains `mode: observation`
 (the default for a new project's first 2 weeks / 5 promotions), promotion requires
-explicit owner confirmation — ask, then re-run the script with `--confirmed`.
-Exiting observation mode (deleting the line) is the owner's decision.
+explicit owner confirmation. When asking, ALWAYS present:
+- **Component:** name and one-line purpose
+- **Verdict summary:** the reviewer's `summary` field
+- **Cycles used:** N/3, with each earlier reproval's problem types
+- **Empirical claims:** count + excerpts (these will carry `verified: false`)
+
+Then re-run the script with `--confirmed`. Exiting observation mode (deleting the
+line) is the owner's decision.
+
+**Observation-mode session report:** while in observation mode, at the end of ANY
+session where the gate ran, ALWAYS report to the owner:
+- **Gate activity:** drafts reviewed, cycles per draft, reprovals by problem type
+- **Calibration signal:** any reproval you judged to be a false positive (rubric
+  too strict), stated plainly — this is the data the owner needs to decide when
+  to exit observation mode; reports rotting unread in `review_reports/` defeat
+  the mode's purpose.
 
 **After promotion** — for `invocation: subagent` agents only: run the standard
 creation eval (2 test scenarios) per rules-agents-updater Step 4. The gate replaces
