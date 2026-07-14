@@ -163,3 +163,10 @@ The user wants to define a product before bootstrapping.
 - **Copy `examples/` into the project** during bootstrap (Step 1.5) — projects get their own copy
 - **Each project is self-contained** — after bootstrap, development happens from within the project folder with its own CLAUDE.md
 - **This CLAUDE.md is for framework operations only** — project development uses the project's own CLAUDE.md
+- **Project-information isolation is TOTAL.** No project-specific information (project/client
+  names, people, domains, infra identifiers, single-project vocabulary in examples) in ANY
+  framework-layer artifact: tracked files, templates (double severity — they broadcast to every
+  future project), lineage docs, `.claude/docs/` notes, or the agent's persistent memory.
+  Refer to projects by role descriptor ("projeto-fonte", "the landing-page prototype") and
+  resolve the actual folder at runtime from `projects/*/`'s own docs. Enforced by `/audit` D16
+  for tracked files + `.claude/docs/`; by convention for memory.

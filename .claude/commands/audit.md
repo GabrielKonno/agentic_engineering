@@ -69,8 +69,11 @@ CHECKS:
   D16.2. From each project's own CLAUDE.md / project.md (read-only), harvest additional
          identifiers: client/person names, deployment domains (*.vercel.app, custom
          domains), repo URLs, infra refs (e.g. Supabase project ids).
-  D16.3. Grep every TRACKED framework file (exclude projects/, .git/, .claude/docs/ —
-         gitignored) for every blocklist entry, case-insensitive.
+  D16.3. Grep every framework-layer file for every blocklist entry, case-insensitive:
+         all TRACKED files AND `.claude/docs/` (gitignored agent notes — the isolation
+         principle covers the agent's own documents too). Exclude only projects/ and .git/.
+         The agent's persistent memory lives outside the repo — flag in the report that it
+         is governed by the same principle (convention, not mechanically scanned here).
   D16.4. Templates get DOUBLE scrutiny (docs/modules/**, examples/**): they are copied into
          every bootstrapped project — a project identifier inside a template broadcasts one
          client's information to all future clients.
