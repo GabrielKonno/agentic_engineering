@@ -123,6 +123,14 @@ session where the gate ran, ALWAYS report to the owner:
   to exit observation mode; reports rotting unread in `review_reports/` defeat
   the mode's purpose.
 
+**Proposing the exit:** when `promotion.log` shows 5+ promotions AND ~2 weeks
+have passed since the gate was installed AND recent sessions raised no
+false-positive calibration signals, ALWAYS propose exiting observation mode in
+the same report, citing those numbers. NEVER remove the `mode: observation`
+line yourself — per evolution-policy this is a BEHAVIOR change: the owner
+deletes it (or tells you to). Until then, keep proposing at most once per
+session — never silently give up on the proposal.
+
 **After promotion** — for `invocation: subagent` agents only: run the standard
 creation eval (2 test scenarios) per rules-agents-updater Step 4. The gate replaces
 self-approval, not the behavioral eval.
