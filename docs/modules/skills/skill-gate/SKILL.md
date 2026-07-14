@@ -115,6 +115,15 @@ explicit owner confirmation. When asking, ALWAYS present:
 Then re-run the script with `--confirmed`. Exiting observation mode (deleting the
 line) is the owner's decision.
 
+**In sprint-approved mode, NEVER pause the sprint to ask for promotion
+confirmation** — the exception-stops list in sprint-proposer is closed and the
+gate is not on it. Defer instead: leave the draft in place (the approving verdict
+stays archived), register a pendency ("draft [name] approved — awaiting owner
+confirmation to promote"), report it in the sprint report, and continue with the
+next task. When the owner later confirms: if the verdict is older than 60 minutes
+the promotion script will refuse it — re-run the skill-reviewer (one quick cycle
+on an already-approved draft) and promote with the fresh verdict.
+
 **Observation-mode session report:** while in observation mode, at the end of ANY
 session where the gate ran, ALWAYS report to the owner:
 - **Gate activity:** drafts reviewed, cycles per draft, reprovals by problem type

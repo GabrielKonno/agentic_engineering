@@ -164,6 +164,11 @@ Sprint-approved mode pauses only for these conditions:
 - Current task blocked by a discovery requiring human input
 - False ❌ from subagent escalated by arbitrator (genuinely ambiguous — human decides)
 
+This list is closed. Skill-gate events are deliberately NOT on it: a draft that
+fails 3 review cycles, hits a duplicate overlap, or needs observation-mode
+promotion confirmation becomes a pendency + sprint-report line and the sprint
+continues (see skill-gate SKILL.md, "In sprint-approved mode").
+
 ---
 
 ## Between Tasks (after validation passes)
@@ -184,5 +189,6 @@ After the validation-orchestrator skill completes successfully:
 ### Discoveries added to backlog: [N new tasks]
 ### Known Bug Patterns added: [N]
 ### Rules files created/updated: [list]
+### Skill-gate activity (if installed): [promoted / awaiting owner confirmation / failed review → pendency / none]
 ### Next sprint suggestion: [top 3-5 tasks]
 ```
