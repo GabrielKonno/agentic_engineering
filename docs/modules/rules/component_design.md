@@ -152,10 +152,10 @@ Use "READ X into context, THEN execute its process" to force contract loading.
 | Descriptive (dangerous) | `"Run .claude/skills/pendencias-updater/SKILL.md — moves completed tasks"` | Main Claude executes from memory; requirements inside the sub-skill are lost |
 | Imperative (safe) | `"READ .claude/skills/pendencias-updater/SKILL.md into context, THEN execute its process"` | Sub-skill loaded before execution; contracts are respected |
 
-**Reference incident:** Session 1 of project `the-landing-page-prototype` — sub-skill
-executed from memory lost the "full metadata intact" clause; three tasks were moved as
-one-line summaries instead of full blocks, destroying the audit trail sprint-proposer
-depends on. Caught only during user review.
+**Reference incident:** Session 1 of a prior project — a sub-skill executed from memory
+lost the "full metadata intact" clause; three tasks were moved as one-line summaries
+instead of full blocks, destroying the audit trail sprint-proposer depends on. Caught
+only during user review.
 
 **Applies to:** process steps in skills, checklist items in agents, constraint rules
 in rules files — any instruction where inconsistent execution causes a bug.

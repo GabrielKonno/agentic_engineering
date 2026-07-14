@@ -54,8 +54,8 @@ If the copy is BEHIND the remote: STOP and reconcile first (pull/reset per the o
 instruction) — every conclusion drawn from a stale copy is invalid, and edits made on it
 will conflict with the real history. Analyzing a snapshot that is N commits behind is the
 adaptation-level equivalent of reviewing the wrong diff.
-(Origin incident 2026-07-14: a compatibility validation ran against a projeto-fonte copy
-334 commits behind origin/dev — the report was faithful to a month-old snapshot, and the
+(Origin incident 2026-07-14: a compatibility validation ran against a project copy
+334 commits behind its origin — the report was faithful to a month-old snapshot, and the
 install had to be redone on the real base.)
 
 **Step 1.1 — Read existing documentation:**

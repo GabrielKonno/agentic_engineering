@@ -1,6 +1,6 @@
 # Framework-Base Upgrade Spec — abstrações para o gerador de bootstrap
 
-**Origem:** Sessão S146 (2026-06-22) — uma auditoria de qualidade do projeto projeto-fonte revelou 6 pontos cegos do FRAMEWORK (não bugs de código), todos implementados nesta instância. Este documento **abstrai** essas melhorias (e a lição de COMO o framework evoluiu ao longo de 146 sessões — ver §8) para o **gerador de bootstrap**, de modo que TODO projeto novo já nasça mais robusto.
+**Origem:** Sessão S146 (2026-06-22) — uma auditoria de qualidade do projeto-fonte revelou 6 pontos cegos do FRAMEWORK (não bugs de código), todos implementados nesta instância. Este documento **abstrai** essas melhorias (e a lição de COMO o framework evoluiu ao longo de 146 sessões — ver §8) para o **gerador de bootstrap**, de modo que TODO projeto novo já nasça mais robusto.
 
 **Escopo:** este doc é para o repositório do GERADOR, não para o projeto-fonte. Aqui não há nada específico de Supabase/Vercel no CORE — o que é de stack vira módulo plugável (§6).
 

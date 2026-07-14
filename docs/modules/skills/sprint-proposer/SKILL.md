@@ -266,6 +266,11 @@ end-to-end under this shape.
 5. Backlog done OR budget reached → final sprint report + full `/session-end` ONCE
    (never a heavyweight session-end per phase).
 
+**Audit-cadence equivalence:** for `AUDIT_CADENCE` counting, a loop session counts as
+ONE session PER COMPLETED PHASE (record "counts as N sessions for audit cadence" in the
+sprint report). A loop session ships several sessions' worth of code — counting it as
+one would silently thin audit coverage exactly when code volume spikes.
+
 ### Loop-specific guardrails (in addition to the exception stops)
 - STOP the loop if 2 CONSECUTIVE tasks fail validation after retries — that is a
   systemic signal (wrong assumptions, degraded context), not a task-local one.
