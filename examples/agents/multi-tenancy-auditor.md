@@ -3,8 +3,9 @@ name: multi-tenancy-auditor
 invocation: subagent
 effort: high
 description: >
-  Audits multi-tenant implementations for data isolation, cross-tenant leaks,
-  and permission boundaries. Critical for SaaS applications.
+  Audits multi-tenant implementations by inspecting data-isolation and
+  query-scoping patterns across the data access layer and API, then verifying
+  isolation with Tier 2 cross-tenant probe queries. Critical for SaaS applications.
   USE PROACTIVELY when diff touches data access layers, database queries, API
   endpoints, or admin features in multi-tenant applications. NOT needed for
   single-tenant applications or changes that don't touch data access.

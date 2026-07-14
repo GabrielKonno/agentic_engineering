@@ -3,7 +3,9 @@ name: deploy-validator
 invocation: subagent
 effort: medium
 description: >
-  Pre-deployment checklist ensuring the application is ready for production.
+  Validates production readiness by walking a pre-deployment checklist across
+  build, environment variables, config schema, database migrations, security
+  settings, monitoring, and rollback plan.
   USE PROACTIVELY before deploying to staging or production, or after significant
   changes (new modules, dependency updates, infrastructure changes). NOT needed
   for local development or draft PRs. Without this, broken builds, missing

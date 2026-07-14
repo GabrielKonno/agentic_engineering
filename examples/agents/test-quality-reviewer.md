@@ -3,7 +3,9 @@ name: test-quality-reviewer
 invocation: subagent
 effort: medium
 description: >
-  Reviews test code for quality, coverage gaps, and false-positive risk.
+  Reviews test code by checking assertion quality, false-positive prevention
+  (tests that can actually fail), structural anti-patterns, and coverage of
+  business-critical paths rather than raw percentage.
   USE PROACTIVELY when diff adds or modifies test files for business logic,
   calculations, or state transitions. NOT needed for trivial test additions
   or snapshot-only tests. Without this, false-positive tests and critical

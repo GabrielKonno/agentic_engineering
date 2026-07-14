@@ -3,8 +3,9 @@ name: dependency-auditor
 invocation: subagent
 effort: medium
 description: >
-  Audits project dependencies for security vulnerabilities, outdated packages,
-  unused imports, and license compliance.
+  Audits project dependencies by running security scans (npm audit or stack
+  equivalent), checking package freshness and maintenance signals against
+  registries, measuring bundle impact, and verifying license compliance.
   USE PROACTIVELY when adding new dependencies, before major releases, or when
   build size increases unexpectedly. NOT needed for code-only changes that don't
   modify dependency files. Without this, vulnerable or unmaintained dependencies

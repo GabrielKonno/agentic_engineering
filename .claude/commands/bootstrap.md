@@ -115,7 +115,7 @@ These examples serve as quality reference for creating agents, skills, and rules
 - Fill Architecture from PRD section 5
 - Fill Key Patterns based on the stack
 - Fill Build Order from PRD module dependencies
-- Fill Design System reference
+- Fill Design System reference from PRD section 6 (Design and UX)
 - Fill Environment Variables from stack requirements
 - Leave Commands, MCP Servers, Skills & Agents, Hooks empty (filled in later steps)
 
@@ -149,6 +149,8 @@ Create at `.claude/phases/project.md`.
 - Fill tasks from Build Order with full Context/State/Constraints/Complexity/Criteria
 - Ensure every task has acceptance criteria with `BUILD:`/`VERIFY:`/`QUERY:`/`REVIEW:`/`MANUAL:` tags
 - Criteria quality standard: every criterion must have 3 parts (action, expected result, failure signal)
+- Consult PRD section 4 (NFRs) when writing criteria: performance, security, and compliance NFRs become `VERIFY:`/`REVIEW:` criteria on the tasks they constrain
+- Seed "Future Improvements" with watch-items from PRD section 9 (Risks and Dependencies), stamped `[added s0]` — risks tracked nowhere are risks forgotten
 
 Create at `.claude/phases/pendencias.md`.
 

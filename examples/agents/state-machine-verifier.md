@@ -3,8 +3,9 @@ name: state-machine-verifier
 invocation: subagent
 effort: high
 description: >
-  Verifies state machine implementations for completeness, invalid transitions,
-  and edge cases.
+  Verifies state machine implementations by extracting states and transitions
+  from the code, building the full transition matrix, and checking it for
+  invalid transitions, unreachable states, and missing guards.
   USE PROACTIVELY when diff implements or modifies entities with status/state
   columns and transition rules (orders, appointments, subscriptions, tickets).
   NOT needed for stateless operations or entities without lifecycle transitions.
