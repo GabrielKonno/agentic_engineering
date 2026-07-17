@@ -111,7 +111,7 @@ This repository supports 5 session modes, each activated by its slash command:
 
 Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
 
-**Utilities:** `/audit` — read-only integrity check across 16 dimensions (structural, references, process logic, quality, document accuracy, project-information isolation). Launches 5 parallel audit agents and produces a consolidated report. No files are modified.
+**Utilities:** `/audit` — read-only integrity check across 17 dimensions (structural, references, process logic, quality, document accuracy, project-information isolation, and one meta dimension — D17 process coverage, which hunts flows the repo executes or promises but never documented). Launches 6 parallel audit agents and produces a consolidated report. No files are modified.
 
 **Alternative (non-Claude Code):** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 

@@ -10,6 +10,8 @@ This is a **read-only audit session** for the agentic_engineering framework repo
 
 **Rules:**
 - Every check is mechanical: compare claim against fact, report mismatch
+  (EXCEPTION: D17/Agent 6 hunts ABSENCES — evidence gathering is mechanical, the verdict
+  requires judgment; its findings are reported gaps, never fixes)
 - Do not fix anything — report only
 - Do not suggest improvements beyond identifying the mismatch
 - Each agent produces a structured report with PASS/FAIL per dimension
@@ -18,7 +20,7 @@ This is a **read-only audit session** for the agentic_engineering framework repo
 
 ## Phase 1 — Dispatch Audit Agents
 
-Launch ALL 5 agents below **in a single message** using 5 parallel Agent tool calls.
+Launch ALL 6 agents below **in a single message** using 6 parallel Agent tool calls.
 Do NOT wait for one to finish before launching the next.
 
 Each agent receives its full contract as the prompt. Use `subagent_type: "general-purpose"` for all.
@@ -471,9 +473,69 @@ REPORT FORMAT:
 
 ---
 
+### Agent 6: Process Coverage — meta (Dimension D17)
+
+> Unlike D1–D16, this dimension hunts ABSENCES, not mismatches. A flow the repo executes in
+> practice with no written instruction contradicts nothing on disk — a claim-vs-fact check
+> is structurally blind to it (twice in this framework's history such gaps were caught only
+> by the owner asking the meta-question). Evidence gathering here is mechanical (git history,
+> greps); the verdict requires judgment. Findings are GAPS to report, never fixes to apply.
+
+```
+You are a process-coverage (meta) auditor for the Agentic Engineering Framework.
+You hunt for flows this repository EXECUTES or PROMISES but does not DOCUMENT — the gap
+class that claim-vs-fact checks cannot catch, because an absence breaks no reference and
+mismatches no count. Do NOT fix anything. Read-only audit.
+
+INPUTS:
+1. `git log --format="%h|%ad|%s" --date=short -40` — the operations actually performed
+2. .claude/commands/*.md (all commands — what IS documented)
+3. CLAUDE.md ("Session Modes", "What You Do Here", "Rules")
+4. README.md (workflow sections)
+5. docs/modules/ templates that reference MOTHER-REPO behaviors — grep for
+   "mother framework", "framework repo", "/maintenance", "upstream", "lineage"
+6. assets/docs/ lineage records (what past absorption sessions actually did)
+
+CHECKS:
+
+[D17] Process coverage — three bounded questions
+  D17.1 UNDOCUMENTED EXECUTED FLOWS: classify the recent commits by operation type
+        (maintenance correction, upstream absorption, audit-fix application, template
+        evolution, release/versioning, ...). For each operation type observed in history:
+        which command/doc section instructs it? An operation performed 2+ times with no
+        written home is a finding.
+  D17.2 REFERENCED-BUT-UNOWNED CONVENTIONS: for each mother-repo behavior a TEMPLATE
+        promises (the grep set above — e.g. "the owner runs a /maintenance session in the
+        mother framework repo", "recorded in the mother repo's lineage"), verify the
+        mother-side instruction exists (a command section, a CLAUDE.md process). A template
+        promising a behavior the mother repo nowhere documents is a finding.
+  D17.3 ASPIRATIONAL MECHANISMS: grep CLAUDE.md/README.md/docs/ for claims that something
+        happens "periodically", "on a cadence", "always", "every session" AT THE
+        FRAMEWORK-REPO level — verify each has an owner (a command that runs it, a
+        documented trigger). Claimed-but-ownerless = finding. (Project-level cadences are
+        owned by project skills — out of scope here.)
+
+For each finding report: the flow/claim, the EVIDENCE (commit hashes / file:line), and
+where the missing instruction would naturally live. "No gaps" is a valid outcome — do not
+manufacture findings to seem useful.
+
+REPORT FORMAT:
+
+## Agent 6: Process Coverage (meta)
+
+### [D17] Process Coverage
+- Status: PASS / FINDINGS
+- Commits classified: [N commits → operation types with counts]
+- Undocumented executed flows: [flow — evidence — suggested home, or "none"]
+- Referenced-but-unowned conventions: [template promise — file:line — missing mother-side home, or "none"]
+- Aspirational mechanisms: [claim — file:line — missing owner, or "none"]
+```
+
+---
+
 ## Phase 2 — Merge Reports
 
-After ALL 5 agents return, consolidate their reports into a single audit report.
+After ALL 6 agents return, consolidate their reports into a single audit report.
 
 ### Consolidated Report Format
 
@@ -482,8 +544,8 @@ After ALL 5 agents return, consolidate their reports into a single audit report.
 
 **Date:** [today's date]
 **Framework version:** [from README.md]
-**Dimensions checked:** 16
-**Agents dispatched:** 5
+**Dimensions checked:** 17
+**Agents dispatched:** 6
 
 ## Summary
 
@@ -505,11 +567,12 @@ After ALL 5 agents return, consolidate their reports into a single audit report.
 | D14 | Bootstrap output | Process | 2 | PASS/FAIL | [1-line summary] |
 | D15 | Doc factual accuracy | Currency | 5 | PASS/FAIL | [1-line summary] |
 | D16 | Project-info isolation | Privacy | 1 | PASS/FAIL | [1-line summary] |
+| D17 | Process coverage (meta) | Meta | 6 | PASS/FINDINGS | [1-line summary] |
 ```
 
 ### Detailed Findings
 
-Paste each agent's full report in order (Agent 1 through Agent 5).
+Paste each agent's full report in order (Agent 1 through Agent 6).
 
 ### Recommended Fixes
 
