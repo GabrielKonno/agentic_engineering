@@ -71,8 +71,16 @@ missing criterion before proceeding:
 | Cross-org / multi-tenant / row-level security / anonymous access | **tenancy** — isolation: org A cannot read/write org B; anon is denied |
 | Calendar dates, scheduling, "today", recurring, timezone | **date-boundary** — day boundary in user TZ, DST, month/year edges |
 | Async refresh, cache, derived/denormalized data, eventual consistency | **async-staleness** — stale read / out-of-order update is handled |
+| Task CREATES a new invariant spanning >1 row/record/entity — an atomic pair, a group id, a claim+stamp, an FK↔status agreement | **cross-entity invariant net** — a read-only reconciliation-style check (query/count with an explicit healthy result, typically 0 anomalies) ships in the SAME delivery and appears in a criterion. Write-path guards alone are WEAK: guards cover the paths the author foresaw; the reconciliation catches the ones nobody did (privileged/system paths, future migrations, direct edits). If the project has an ops-rules reconciliation set, the check is filed there. |
 
 Surfaces NOT present in the task add zero criteria — this checklist is silent unless triggered.
+
+> **NB (anti-ossification):** this table encodes the failure classes KNOWN when it was last
+> extended. When a new RULE elsewhere defines a new check-worthy concept, this table does not
+> learn it automatically — the checklist-alignment sweep (rules-agents-updater Step 2b) is the
+> mechanism that routes new concepts here. And note that author and enforcer share this same
+> checklist: two passes of the SAME lens do not compose coverage — an item absent from the
+> table is invisible twice.
 
 ### 4c. AUTHORING mode (run ONLY when a brand-new full-template task is being written)
 
@@ -86,6 +94,16 @@ extra spec-level tests that catch bugs MANDATED by the spec itself (root-cause c
   add a criterion that proves the adaptation is correct, not just copied.
 - **Variant-threading:** when an existing path gains a NEW branch/variant, ask which fields
   become NULL/unset/default on the new branch. Add a criterion asserting each is handled.
+- **Review-chain pre-classification:** does the plan add a privileged WRITE/mutation (a new
+  server-side mutation, an elevated-permission path, a money/credential-touching operation)?
+  If yes, the task block must PRE-DECLARE the expected security review — adversarial review
+  (red-team) required / lightweight adversarial pass / N/A citing the NAMED exception rule that
+  covers it — and, for an N/A, the condition that REVOKES it ("if the operation gains reach
+  beyond X, the exception falls and the adversarial review returns"). This practice tends to
+  exist only as folklore in well-authored tasks, and folklore applies inconsistently; a late
+  classification has real cost (a task can be deferred a whole session when the fraud surface
+  only surfaces at pre-implementation review). Absence on a privileged-write task = WEAK spec —
+  the implementation session re-litigates the chain or, worse, skips the debate.
 
 A spec bug caught here dies before any code exists — far cheaper than catching it in validation.
 

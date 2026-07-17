@@ -284,6 +284,20 @@ sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/component_design.md | sed
 
 This creates session-rules.md (task limits, documentation quality, reasoning depth, scripts convention), evolution-policy.md (evolution classification, auto-evolution boundaries), and component-design.md (agent/skill/rule design principles: gap-declaration activation, Pushy Descriptions, vocabulary alignment, tiered architecture, Preservar+Adicionar).
 
+**Component-registry liveness guard (ALL tiers — copied to `scripts/`):**
+
+```bash
+mkdir -p projects/$ARGUMENTS/scripts
+sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs
+```
+
+An invalid YAML frontmatter does not error — it makes the component silently VANISH from the
+registry (FRAMEWORK-AGENT-YAML-01; see component-design.md §8). This guard fails loud instead.
+It is dependency-free Node; the scripts convention applies (use if Node is available, otherwise
+the manual check is reading the frontmatter of every agent/skill after editing it). If/when the
+project gains a `package.json`, register `"check:agents": "node scripts/check-agent-frontmatter.mjs"`
+so sessions and CI can invoke it uniformly.
+
 Skills and agents are auto-discovered by Claude Code from `.claude/skills/` and `.claude/agents/`. No explicit listing is needed in CLAUDE.md.
 
 ---
@@ -551,6 +565,9 @@ pipeline never starts out empty and added "later."
 - Emit a minimal pipeline that runs, in order: install → lint → build → test. Each step uses the
   REAL command if it exists; if a command is not yet defined (e.g., no tests yet), emit it
   commented with a `# TODO: enable when [command] exists` marker — never silently omit the stage.
+- Add a `guards` stage running `node scripts/check-agent-frontmatter.mjs` (copied in Step 5.7 —
+  dependency-free, needs no install). CI catches a broken component frontmatter before merge; the
+  session-start/loop-start run (session-rules) catches it earlier, before any PR exists.
 - This is the per-diff CI gate (the lowest gate tier). It is distinct from the per-task validation
   gate and the production+ DEPLOY GUARD.
 
@@ -618,6 +635,9 @@ git commit -m "chore: bootstrap from agentic framework"
 - .claude/rules/session-rules.md (task limits, documentation quality, reasoning depth, scripts convention)
 - .claude/rules/evolution-policy.md (evolution classification, auto-evolution boundaries)
 - .claude/rules/component-design.md (agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment, tiered architecture)
+
+### Guards: copied from framework (Step 5.7):
+- scripts/check-agent-frontmatter.mjs (component-registry liveness — FRAMEWORK-AGENT-YAML-01; CI stage wired in Step 14.2)
 
 ### Domain rules pre-created (from example templates — Step 13):
 - .claude/rules/[domain]-rules.md ← seeded, refined by rules-agents-updater

@@ -52,11 +52,57 @@ never imposed. Read the profile, then apply ONLY the ceremonies its column marks
 Maximum 3-5 tasks per session. Up to 7 if all small+related. 1 if large.
 
 Exception: in **Autonomous Loop Mode** (Level 5, opt-in — see sprint-proposer), the task
-limit is superseded by the context budget (~80% of the window, checked at every phase
-boundary). The mode never activates by itself: owner request or explicit acceptance of a
+limit is superseded NOT by a context-percentage gate but by a **per-task persistence
+discipline**: max ONE task in flight (uncommitted) at a time; each task CLOSED to disk —
+code committed + LOOP CONTINUATION marker updated + discoveries filed + new decisions in
+their owning doc — before the next opens. There is **NO numeric cap** on context %,
+autocompacts, or subagent reports: a count is a stand-in for context usage, which the
+model cannot observe (an instructed "estimate" produces confabulation dressed as
+measurement). The session runs until the approved backlog SEGMENT is done or an
+emergency-degradation signal fires; it ends only at a natural TASK boundary, never
+mid-task. The mode never activates by itself: owner request or explicit acceptance of a
 loop proposal only.
 
 Signals of exceeding: contradicting earlier findings, skipping validation steps, producing ⏭️ on steps that should be ✅ or ❌.
+
+> **In loop mode, the "Signals of exceeding" are the EMERGENCY stop (→ `/context-recovery`
+> immediately), NOT a pacing knob.** Autocompacts are non-events: per-task persistence +
+> re-anchoring from the DISK after each compact refreshes grounding from canonical docs (so
+> successive compacts do NOT compound drift), and a subagent report is disposable — if a
+> compact blurs it mid-task, re-derive the implementation from the working-tree diff and
+> RE-RUN a read-only validation rather than trust the compressed memory (NEVER commit on a
+> verdict a compact intervened on). A mid-work autocompact costs at most the single
+> in-flight task.
+
+## Autonomous loop watchdog — liveness vs judgment, and the receipt discipline
+
+A watchdog is only worth anything if it is INDEPENDENT of what it watches. The loop
+orchestrator (the main agent) shares context and biases with the work it produces → it is
+NOT independent for JUDGMENT errors (a vacuous test, a weak check — the class fresh-context
+reviewers exist to catch). But it IS the natural authority for LIVENESS (did the reviewer
+actually RUN? does the component EXIST in the registry?). The rule separates the two and
+never collapses them:
+
+- **LIVENESS — the ORCHESTRATOR's duty (mechanical, not rationalizable):**
+  1. At **loop start** and before any **money-path/security** task, run the component
+     liveness guard (`node scripts/check-agent-frontmatter.mjs`, or `npm run check:agents`
+     when registered). A component whose frontmatter fails to parse VANISHES from the
+     registry silently (see component-design §8) — the class that can disable the very
+     reviewers that enforce rigor.
+  2. A review-agent spawn that returns **"Agent type not found"** is a **HARD STOP** —
+     never a silent fallback to a general-purpose agent. If a substitute is genuinely
+     needed (registry broken mid-session), it is DECLARED in the report, never disguised
+     as the named reviewer's approval.
+- **JUDGMENT — the duty of an INDEPENDENT SUBAGENT (fresh context):** whether the code is
+  right, whether the test proves what it claims. The orchestrator CANNOT self-review this —
+  it would inherit its own blind spot. Money-path and security work require the real
+  subagent (code-reviewer / red-team / data reviewers), not the orchestrator's correlated
+  second opinion.
+- **RECEIPT — the bridge between the two:** a review verdict only COUNTS when accompanied
+  by a verifiable artifact from a real subagent (the spawn's agent id + the structured
+  report it returned). A "reviewer APPROVE" written from the orchestrator's own MEMORY is
+  not evidence that a review happened and cannot enter the log/commit. No receipt → the
+  review didn't happen → the task does not close.
 
 ## Task presentation
 

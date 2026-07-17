@@ -162,7 +162,12 @@ AI plans sprints, executes task sequences autonomously, and stops only on except
 The AI works through the WHOLE approved backlog in one session, switching roles: the main
 agent stops implementing and becomes an ORCHESTRATOR that delegates implementation to
 isolated subagents and reads their reports. The stop condition changes from a task count
-to a context budget (~80% of the window, checked at every phase boundary).
+to a per-task PERSISTENCE discipline (max one task in flight; each task closed to disk —
+commit + continuation marker + discoveries filed — before the next opens; the loop runs
+until the approved backlog segment is done or an emergency degradation signal fires,
+ending only at a task boundary). There is deliberately NO numeric context gate: the model
+cannot observe its own context usage, so a "% used" rule is unexecutable — persistence
+makes autocompaction a non-event instead.
 - ✅ Everything from Level 4
 - ✅ One approval covers the whole backlog (grouped in dependency-ordered phases of 3-5 tasks)
 - ✅ Role inversion: small tasks done directly; medium tasks implemented by subagents — the

@@ -160,6 +160,16 @@ only during user review.
 **Applies to:** process steps in skills, checklist items in agents, constraint rules
 in rules files — any instruction where inconsistent execution causes a bug.
 
+**Banned process anti-patterns need a MECHANICAL self-check.** When an evolution BANS a
+process anti-pattern (not a code one), the textual prohibition is not enough — the executor
+operates under end-of-session context pressure, and the anti-pattern is usually the path of
+least resistance. Attach to the rule a one-line mechanical self-check (a grep/count with an
+explicit expected result), executed and REPORTED by the very step the rule governs. Evidence
+(production project, 2026-07): the exact prohibition of a backlog anti-pattern lived as
+normative text inside the executing skill and still failed for ~50 sessions, costing two mass
+cleanups. Code checks (lint, type ratchets) already follow this discipline — process checks
+must too.
+
 ## 7. Native Mechanisms — Don't Reinvent
 
 Claude Code provides these natively — do not build custom replacements:
@@ -174,4 +184,43 @@ Claude Code provides these natively — do not build custom replacements:
 **Subagent depth limit:** Only main Claude can use the Agent tool. Design
 activation flows that route through main Claude's report reading, not through
 direct agent-to-agent calls.
+
+## 8. Component Frontmatter — invalid YAML makes the component VANISH silently (FRAMEWORK-AGENT-YAML-01)
+
+A component's `name:`/`description:` frontmatter is how the harness discovers it (§7). But
+the failure mode of BROKEN frontmatter is not an error — it is **silent disappearance**: an
+invalid YAML block fails to parse, the harness cannot read `name:`, and the component is
+simply ABSENT from the registry. The Agent tool then answers `Agent type '<name>' not found`
+and lists the survivors, with **no boot-time error**. "The file exists" is NOT "the component
+is in the registry".
+
+**The confirmed instance (2026-07, production project — self-inflicted by a process
+improvement):** an automated metadata stamp wrote a `last_eval:` value as an UNQUOTED YAML
+scalar containing `: ` (colon-space):
+
+```yaml
+last_eval: 2026-07-14 (retrospective — healthy: CLEAN verdict …)   # BROKEN — YAML reads `healthy:` as a nested map
+last_eval: "2026-07-14 (retrospective — healthy: CLEAN verdict …)" # FIXED  — quoted scalar
+```
+
+It silently disabled the three reviewer agents that ENFORCE rigor, and stayed broken until a
+fresh session tried to spawn a mandatory reviewer and failed loud. The registry reloads when
+the file is READ, so the break only manifests in a session that reads the broken file at
+start — never the session that wrote it.
+
+**Rules:**
+1. **Any frontmatter scalar containing `:` / `#` / a leading `& * ! @ %` — or free-text
+   prose — MUST be quoted.** When in doubt, quote it. A stamped metadata value (eval notes,
+   dates with parentheticals) is the classic offender.
+2. **The mechanical guard is `scripts/check-agent-frontmatter.mjs`** (copied at bootstrap):
+   it validates every `.claude/agents/*.md` + `.claude/skills/*/SKILL.md` frontmatter,
+   asserts `name:` matches the file, and fails loud (exit 1) on the colon-space class and on
+   a full YAML-parse failure. Run it after ANY edit to a component's frontmatter — especially
+   an automated metadata stamp — and keep it wired as a CI stage.
+3. **CI catches it before merge; a session needs it earlier.** The registry breaks
+   mid-session, before any PR exists — so sessions that spawn reviewers run the guard at
+   start, and a review-agent spawn that returns "not found" is a HARD STOP, never a silent
+   fallback to a general-purpose agent (see session-rules → "Autonomous loop watchdog",
+   including the receipt discipline: a review verdict only counts with a verifiable artifact
+   from a real independent subagent).
 ````

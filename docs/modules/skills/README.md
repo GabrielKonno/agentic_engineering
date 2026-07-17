@@ -13,7 +13,7 @@ Every skill in this directory is copied VERBATIM to projects of ANY type — Saa
 pipeline, CLI, static site. Therefore:
 
 - **Process skills MUST be project-type-agnostic.** They speak in workflow concepts
-  (tasks, criteria, diffs, commits, phases, context budget) and framework files
+  (tasks, criteria, diffs, commits, phases, persistence discipline) and framework files
   (`pendencias`, `project.md`) — never in the vocabulary of one project archetype.
 - **Surface-specific behavior is CONDITIONALLY GATED**, never assumed: "if UI files
   modified", "if migration files in diff", "if `.claude/rules/X.md` exists". A project

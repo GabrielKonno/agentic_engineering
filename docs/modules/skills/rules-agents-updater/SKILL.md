@@ -46,6 +46,29 @@ Path: `.claude/rules/[domain]-rules.md`. See `assets/examples/rules/` for refere
 
 For each discovery: "If I were reading this agent/skill in a new session, would I miss the pattern I just found?" If yes, add it now. Route discoveries to the appropriate agent or skill based on the type of finding.
 
+### 2b. Checklist-alignment sweep (anti-ossification)
+
+When THIS session created or materially extended a RULE that defines a new CHECK-WORTHY
+CONCEPT — a reconciliation/observability invariant, a security classification or named
+exception, a new non-happy-path failure class, a new single-source-of-truth discipline —
+ask explicitly: **"which upstream CHECKLIST should now reference this concept?"** Route by
+where the check belongs:
+
+- `criteria-enforcer` (4b class table / 4c authoring tests) — if the concept should shape
+  acceptance criteria at task-AUTHORING time;
+- `code-reviewer` (checklist / Rules-Driven Checks) — if it should be verified per-diff;
+- `validation-orchestrator` (routing) — if it changes WHICH reviewers a class of change needs;
+- `codebase-audit` (steps — when installed) — if it is a periodic/aggregate concern.
+
+Rationale: **rules apply where they are ROUTED, not where they are written.** A checklist
+encodes the failure classes known at the date of its last extension — it does not learn a new
+rule automatically, and a rule referenced by no checklist is folklore: applied only when an
+author happens to remember it (and author + reviewer sharing the same checklist means the gap
+is invisible twice). Adding the checklist item is autonomous (evolution-policy: ADDING checks).
+"No checklist needs this" is a valid outcome — record it in the session log. This is the
+CHECKLIST counterpart of the code back-sweep (evolution-policy's back-sweep greps CODE for
+pre-existing violations of the new rule; this sweeps ROUTING for blind spots).
+
 ### 3. Update PRD (rare)
 
 ONLY if product scope changed. Always update changelog with new version.
@@ -68,6 +91,14 @@ This route applies to CREATION only. Steps 1-2 above (updating existing rules/ag
 - **Subagent agents** (`invocation: subagent`): Generate 2 test scenarios (one with issue agent should detect, one clean). Spawn via Agent tool against each. Verify: issue detected + no false flags. Update lineage: `last_eval: sN (2/2 passed)`. If eval fails: improve and re-test.
 - **Skills** (`invocation: inline`): If Skill Creator plugin is installed, use it for eval (automates test case generation, grading, iteration). If not installed: skip eval for inline skills (knowledge references, not judgment agents).
 - **Deferrable:** If context window is low, log "Eval deferred to session N" and set `last_eval: none (deferred)`.
+
+> **Frontmatter stamping safety (FRAMEWORK-AGENT-YAML-01):** any `last_eval:`/lineage value
+> richer than a bare `sN (N/N passed)` — anything containing a `:`, a `#`, or free-text
+> prose — MUST be written as a QUOTED scalar (`last_eval: "…"`). An unquoted colon-space
+> makes the whole frontmatter unparseable and the component silently VANISHES from the
+> registry (component-design §8) — the confirmed instance disabled three reviewer agents at
+> once via exactly this kind of automated stamp. After ANY metadata stamp on a component,
+> run the liveness guard: `node scripts/check-agent-frontmatter.mjs`.
 
 ### 5. Log evolutions
 

@@ -88,6 +88,12 @@ in the same session:
 The executor is the `diff-pattern-extractor` (end of session — it already promotes rules,
 so it owns the sweep). Back-sweep ARCHIVES findings as tasks; it never auto-edits code.
 
+**Companion — checklist-alignment sweep (routing sibling):** the back-sweep above sweeps
+CODE for pre-existing violations; when the promoted rule defines a new CHECK-WORTHY CONCEPT,
+the same session also asks which upstream CHECKLIST (task-authoring / per-diff review /
+validation routing / periodic audit) should now reference it — see rules-agents-updater
+Step 2b. Rules apply where they are ROUTED, not where they are written.
+
 **Profile gate:** skip for `prototype` (forward-only is acceptable for throwaway code).
 Active for `internal-tool`, `production`, `production-financial`.
 ````
