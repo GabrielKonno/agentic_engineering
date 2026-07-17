@@ -76,6 +76,22 @@ Todas em `sprint-proposer/SKILL.md` (Autonomous Loop Mode):
 | P4 — lentes correlacionadas não compõem | NB anti-ossificação no preâmbulo do 4b (rationale, não mecanismo próprio) | Autor e enforcer compartilham o checklist → item ausente é invisível 2× |
 | P5 — anti-padrão banido exige SELF-CHECK mecânico | `component_design.md` §6 (template E cópia ativa) | Formulação portável; a instância (grep do backlog do projeto-fonte) não subiu |
 
+## 5. Ciclo de vida dos docs de evolução + protocolo de upstream (adendo 2026-07-17) — ABSORVIDA INTEGRAL
+
+O próprio FLUXO projeto→framework-mãe não era documentado em lugar nenhum normativo — os lotes
+de 2026-06-23 e 2026-07-16 funcionaram porque o dono carregou o protocolo ad-hoc. O projeto-fonte
+aprovou em 2026-07-17 (na sua própria evolution-policy) a convenção de ciclo de vida dos docs
+`framework-evolution-*.md`; ela graduou junto com o fechamento das três pontas:
+
+| Ponta | Destino |
+|---|---|
+| Projeto (convenção + 4 estágios pending-upstream → upstreamed → efficacy-evaluated → archivable + regras invioláveis) | `docs/modules/rules/evolution_policy.md` → seção "Framework-evolution docs — the upstream lifecycle" |
+| Produtor (o framework-audit produz E consome os docs; Q4 avalia eficácia dos mecanismos instalados) | `docs/modules/skills/framework-audit/SKILL.md` → "Framework-evolution docs (ALWAYS, both directions)" |
+| Receptor (intake do `/maintenance`: ler dos projetos, decidir por evolução, genericizar D16, lineage em `assets/docs/`, nunca editar `projects/`) | `.claude/commands/maintenance.md` → "Upstream intake" + CLAUDE.md → "What You Do Here §4" |
+
+Gap identificado pelo dono pós-audit de 2026-07-17 (o `/audit` mecânico não detecta AUSÊNCIA de
+processo — essa é a pergunta da classe framework-audit, não de integridade claim-vs-fact).
+
 ## Deliberadamente NÃO absorvido
 
 - **Instâncias de projeto:** os itens de reconciliação específicos, o grep self-check do

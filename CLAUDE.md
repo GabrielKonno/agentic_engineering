@@ -155,6 +155,19 @@ The user wants to define a product before bootstrapping.
 2. The command guides an interactive process of discovery, architecture, and deep-dive
 3. PRD is saved to `projects/[project-name]/assets/docs/prd.md`
 
+### 4. Absorb framework evolutions from a project (upstream)
+
+Projects discover framework-level lessons and record them as
+`projects/[name]/.claude/docs/framework-evolution-*.md` (a convention shipped in the
+evolution-policy template). Upstreaming them is a **maintenance** operation:
+
+**Process:**
+1. Run `/maintenance` naming the evolution docs as sources
+2. Follow the command's "Upstream intake" section: read each doc, decide per evolution
+   (graduate / adapt / reject), genericize (isolation is TOTAL), record the batch in a
+   lineage doc under `assets/docs/`
+3. Never edit the project's own docs — the project marks them `upstreamed` in its own session
+
 ## Rules
 
 - **Never modify files in `docs/` or `examples/` during bootstrap operations** — these are

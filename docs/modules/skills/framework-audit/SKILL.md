@@ -79,6 +79,17 @@ auto-modify protocol. Per `evolution-policy.md`, a BEHAVIOR-class batch requires
 owner approval before implementing** — the human gate is mandatory here. Read-only / dry-run
 friendly until approved.
 
+**Framework-evolution docs (ALWAYS, both directions — see evolution-policy →
+"Framework-evolution docs — the upstream lifecycle"):**
+- **Produce:** every approved improvement batch is recorded (or an existing doc updated) as
+  `.claude/docs/framework-evolution-YYYY-MM-DD-<slug>.md`, including the PORTABLE formulation —
+  it is the upstream vehicle to the mother framework repo AND the anchor the NEXT audit
+  evaluates.
+- **Consume:** at the start of the run, READ every framework-evolution doc not yet
+  `efficacy-evaluated` whose evolution installed a mechanism — Q4 MUST evaluate whether that
+  mechanism actually RAN and WORKED since (this is the step that closes the recursive loop
+  and advances the doc's lifecycle stage).
+
 ```
 ## Framework Audit Report — Session N
 ### Q1 Dimension coverage: [orphaned dimensions, or "all owned"]
