@@ -243,13 +243,14 @@ end-to-end under this shape.
   - **Output contract:** files changed, diff summary, build/test results, and anything
     NOT done or discovered. The orchestrator reads the report — never re-derives the
     implementation reasoning into its own context. That separation is what buys the
-    long horizon. The implementer prompt MUST include the anti-silent-death clause:
+    long horizon.
+  - **Anti-silent-death clause — ALWAYS include it in the implementer prompt:**
     "NEVER end the turn waiting on a background process; if the final result is not
     available, report the explicit PARTIAL STATE (what is done, what is running, where
     the log is)." An implementer that dies waiting on a monitor returns a useless report
     over real, possibly irreversible work.
-  - **Trust-but-verify (mandatory):** after EVERY implementer return, the orchestrator
-    verifies state from the DISK before any commit/validation — working-tree status plus
+  - **Trust-but-verify (mandatory):** after EVERY implementer return, ALWAYS verify
+    state from the DISK before any commit/validation — working-tree status plus
     a spot-check of the report's central claims (report says "migration applied" → check
     the target; says "suite green" → check the log/output). The report GUIDES the
     verification; it never substitutes for it. This is what turns a dead or partial
@@ -302,15 +303,15 @@ end-to-end under this shape.
 Parallel subagents (implementers, session-end steps) collide on shared resources in ways a
 serial session never exercised: two test runs against the same live environment produce
 ROTATING flakes; two writers on the same phase doc clobber each other; one session-end step
-can hold a file another step needs. The orchestrator keeps an explicit RESOURCE map when
-dispatching:
+can hold a file another step needs. The orchestrator MUST keep an explicit RESOURCE map
+when dispatching:
 
-- Each subagent's prompt DECLARES the exclusive resources it touches — its FILE set, the
+- Each subagent's prompt MUST DECLARE the exclusive resources it touches — its FILE set, the
   shared TEST ENVIRONMENT/database, the PHASE DOCS (pendencias/project.md).
 - **At most ONE live-test process at a time**, always owned by the orchestrator — never an
   implementer running the suite in parallel with another agent's run (rotating flakes cost
   multiple re-runs just to tell flake from regression).
-- **Phase docs have one writer at a time** — including session-end's own steps, which were
+- **NEVER run two writers on the same phase doc at once** — including session-end's own steps, which were
   written for serial execution and CAN conflict with each other (one step editing a file
   another step targets is a skip/collision, not a hypothetical).
 - Minimal practical rule when the full map feels heavy: parallelize only work with DISJOINT

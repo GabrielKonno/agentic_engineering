@@ -48,7 +48,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | 6 slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`, `/audit`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. `/audit` is a read-only utility for framework integrity checks. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline (15 primary steps plus sub-steps like 5.7/5.8/14.5) that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
-| `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo from Step 0 — bootstrap runs `git init` inside the project folder before writing any file. |
+| `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo from the Setup phase — bootstrap runs `git init` inside the project folder before writing any file. |
 
 ### Suggested reading order
 

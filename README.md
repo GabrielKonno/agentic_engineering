@@ -18,7 +18,7 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 5 doc templates |           | 10 agent .md files  |
+                         |  - 6 doc templates |           | 10 agent .md files  |
                          |  - 10 agent files  |           | 14 process skills   |
                          |  - 5 rules files   |           | 5 rules files       |
                          |  - 14 skills       |           | examples/ (copy)    |

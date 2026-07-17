@@ -37,6 +37,13 @@ when the diff's domain is recognized via this agent's description.
 - `APPROVE` → accessibility coverage ✅ — include as evidence in validator prompt
 - `FIX REQUIRED` → accessibility ❌ — list findings in validation report, address before proceeding
 
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+
 ## When to invoke
 
 After implementing or modifying:
