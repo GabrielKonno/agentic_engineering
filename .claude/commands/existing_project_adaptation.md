@@ -467,10 +467,28 @@ for tmpl in session_rules evolution_policy component_design; do
 done
 ```
 
+**Copy the component-registry liveness guard (all tiers — to `scripts/`):**
+```bash
+mkdir -p projects/$ARGUMENTS/scripts
+if [ ! -f "projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs" ]; then
+  sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > "projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs"
+  echo "Copied guard: scripts/check-agent-frontmatter.mjs"
+else
+  echo "SKIPPED (already exists): check-agent-frontmatter.mjs — verify manually against framework version"
+fi
+```
+
+An invalid YAML frontmatter makes a component silently VANISH from the registry
+(FRAMEWORK-AGENT-YAML-01 — see component-design.md §8); this guard fails loud instead. If the
+project has a `package.json`, register `"check:agents": "node scripts/check-agent-frontmatter.mjs"`;
+if it has a CI pipeline, add a `guards` stage running it (dependency-free, no install needed).
+Then RUN it once now — an adapted project may already carry a broken frontmatter.
+
 **Expected after this step:**
 - **Process skills (11 lifecycle):** sprint-proposer, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit
 - **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
 - **Rules (3 core):** session-rules.md, evolution-policy.md, component-design.md
+- **Guards (1):** scripts/check-agent-frontmatter.mjs (component-registry liveness — run once during adaptation)
 
 Skills and agents are auto-discovered by Claude Code. No explicit listing is needed in CLAUDE.md.
 

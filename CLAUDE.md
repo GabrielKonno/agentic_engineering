@@ -50,7 +50,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── claude_md.md                # Config file template (orchestrator format)
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
 │   │   │   ├── metrics_md.md               # Code health time series (internal-tool+)
-│   │   │   └── settings_json.md            # Settings + hooks template
+│   │   │   ├── settings_json.md            # Settings + hooks template
+│   │   │   └── check_agent_frontmatter.md  # Component-registry liveness guard (all tiers → scripts/)
 │   │   ├── agents/                         # Agent templates (copied to .claude/agents/)
 │   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
 │   │   │   ├── validator.md, arbitrator.md # Validation agent templates

@@ -133,7 +133,7 @@ agentic_engineering/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
 │   ├── modules/                            ← Single source of truth (v2.5.0)
-│   │   ├── templates/                      ← Document and config templates (5)
+│   │   ├── templates/                      ← Document and config templates (6, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
 │   │   └── skills/                         ← 14 pre-built skills (11 lifecycle + 3 tier-gated)
@@ -174,6 +174,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/agents/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
+| `scripts/check-agent-frontmatter.mjs` | `modules/templates/check_agent_frontmatter.md` | Component-registry liveness guard — invalid agent/skill frontmatter fails loud instead of silently vanishing (also wired as a CI `guards` stage) |
 | `.claude/skills/codebase-audit/` *(internal-tool+)* | `modules/skills/codebase-audit/` | MACRO axis — periodic system health audit |
 | `.claude/phases/metrics.md` *(internal-tool+)* | `modules/templates/metrics_md.md` | Code health time series (one row per audit) |
 | `.claude/skills/skill-gate/` + `.claude/agents/skill-reviewer.md` + `.claude/drafts/` *(internal-tool+)* | `modules/skills/skill-gate/`, `modules/agents/skill_reviewer.md` | Creation gate — new skills/rules drafted, blind-reviewed, and promoted (never self-approved) |
