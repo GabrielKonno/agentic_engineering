@@ -162,7 +162,10 @@ Projects discover framework-level lessons and record them as
 evolution-policy template). Upstreaming them is a **maintenance** operation:
 
 **Process:**
-1. Run `/maintenance` naming the evolution docs as sources
+1. Run `/maintenance` — its **Step 0 discovery sweep** runs in EVERY maintenance session and
+   reports which evolution docs are still pending (`grep -L "STATUS.*upstreamed"` over
+   `projects/*/.claude/docs/framework-evolution-*.md`; empty output = nothing pending). Naming
+   the docs explicitly in the prompt also works, and skips waiting for the sweep.
 2. Follow the command's "Upstream intake" section: read each doc, decide per evolution
    (graduate / adapt / reject), genericize (isolation is TOTAL), record the batch in a
    lineage doc under `assets/docs/`

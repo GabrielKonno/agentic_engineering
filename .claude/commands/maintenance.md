@@ -13,7 +13,33 @@ This is a framework maintenance session, not a project bootstrap.
 - All changes must be committed with descriptive messages
 - Verify cross-references after modifying any document
 
-**Workflow:** Read the maintenance prompt/correction plan provided by the user, apply all changes in order, run the post-change checklist below, commit.
+**Workflow:** Run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction plan provided by the user, apply all changes in order, run the post-change checklist, commit.
+
+## Step 0 — Upstream discovery sweep (runs FIRST, in EVERY maintenance session)
+
+Discovery is the one link in the project→framework upstream chain with no mechanical owner:
+the project writes the evolution doc and its own framework-audit reminds THE PROJECT, but the
+repo that must ACT on it is this one. Without this sweep the chain depends on the owner
+remembering — the exact failure class the upstream protocol exists to eliminate.
+
+**ALWAYS run this sweep before any edit, in every maintenance session — including sessions
+whose stated task has nothing to do with upstream:**
+
+```bash
+grep -L "STATUS.*upstreamed" projects/*/.claude/docs/framework-evolution-*.md 2>/dev/null
+```
+
+Expected result: **EMPTY output = nothing pending.** Every path printed is an evolution doc
+whose disposition this repo still owes. (Reading `projects/` never violates the no-touch rule.)
+
+**ALWAYS report the outcome to the owner in one line, even when empty:**
+- Empty → `Upstream sweep: 0 pending.`
+- Non-empty → `Upstream sweep: N pending — <paths>`, followed by ONE question: does this
+  session absorb them (→ "Upstream intake" below), or defer?
+
+**NEVER absorb a pending doc without the owner's answer, and NEVER let the sweep displace the
+session's stated task.** A pending doc is a REPORT, not a mandate — deferring is a valid
+answer, and the sweep runs again next session.
 
 ## Post-change checklist (same session — the periodic /audit is the NET, never the primary)
 
@@ -57,7 +83,8 @@ Projects record framework-level lessons in their own
 readable — those docs are legitimate INPUTS to a maintenance session (READING them never
 violates the no-touch rule).
 
-When the maintenance prompt asks for an upstream (or names such docs as sources), ALWAYS:
+When the maintenance prompt asks for an upstream (or names such docs as sources), or when Step 0's
+sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
 1. **READ each evolution doc fully**; anchor on its PORTABLE formulation section when present.
 2. **Decide PER EVOLUTION:** graduate to `docs/modules/` / adapt (genericize) / reject — with
    a one-line reason each. "Evaluated and kept project-local" is a valid disposition.
