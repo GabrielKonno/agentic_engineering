@@ -50,7 +50,9 @@ Produce a structured Validation Report:
 [build command output summary]
 
 ### Tests: ✅/❌/⏭️
-[N passed, N failed — or "no testable logic"]
+[N EXECUTED, N passed, N failed, wall time — or "no testable logic"]
+**Execution proof:** [ALWAYS state the executed count and the runner's own summary line. Exit 0
+with ZERO executed, or a summary you could not parse, is ❌ with the reason — never ✅, never ⏭️.]
 **Test quality:** [Do tests actually assert what criteria describe? Are assertions meaningful or superficial?]
 
 ### Criteria Results:
@@ -59,7 +61,7 @@ Produce a structured Validation Report:
 | 1 | [criterion text] | VERIFY/QUERY/BUILD/REVIEW | ✅/❌ | [what was observed] |
 
 ### Mutation Tests: ✅/⏭️
-[N mutations tested, N criteria confirmed — or "routine task, skipped"]
+[N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
 | # | Mutation | Criterion affected | Criteria failed? | Result |
 |---|---------|-------------------|-------------------|--------|
 | 1 | [what was changed] | [criterion] | Yes/No | ✅/❌ |
@@ -68,7 +70,7 @@ Produce a structured Validation Report:
 [migration ran + rollback verified — or "no migration files in diff" — or "destructive without rollback: ❌"]
 
 ### Regression: ✅/❌
-[full test suite results or re-checked prior criteria]
+[full test suite results INCLUDING the executed count and wall time, or re-checked prior criteria]
 
 ### Prior Review Findings:
 - Code Review: [summary of findings, all addressed?]
@@ -85,7 +87,11 @@ Execute in order:
 
 1. **Read the git diff** via `git diff HEAD~1` — understand what changed
 2. **Re-run build** — verify it compiles/builds without errors
-3. **Re-run tests** — verify all tests pass. Then evaluate test quality:
+3. **Re-run tests** — verify all tests pass. **ALWAYS capture the EXECUTED COUNT and the wall
+   time from the runner's own summary, and report both** (session-rules → "Execution proof"): a
+   run that exits 0 having executed ZERO tests, or whose summary is unparseable, is ❌ — the
+   absence of execution produces the same green as success, and DURATION is usually the only
+   clue. Then evaluate test quality:
    - Do tests actually test what the acceptance criteria describe?
    - Are assertions checking real values, not just "no error thrown"?
    - Are edge cases covered (empty, null, zero, negative)?
@@ -107,7 +113,14 @@ Execute in order:
 5. **Execute QUERY: criteria** via database tool. If data missing: create test data, document it.
 6. **Migration verification:** If diff includes migration files: verify the migration ran successfully (covered by build step — if build passed, migration syntax is valid). If a rollback/down migration exists in the diff: verify it also runs without errors. If the migration is destructive (drops column/table) and no rollback migration exists: mark Migration as ❌ with reason "destructive migration without rollback". If no migration files in diff: ⏭️.
 7. **Decompose multi-step criteria** into atomic sub-checks. Each sub-check gets its own ✅/❌. The criterion only passes when ALL sub-checks pass.
-8. **Mutation tests (logic-heavy and arch/security tasks):** Pick 1-3 critical lines, break each one (comment out, change value), re-run affected criteria. Criteria MUST fail with broken code. If they still pass → criteria don't test what they claim → report as ❌. Restore code after each mutation. Max 3 mutations.
+8. **Mutation tests (logic-heavy and arch/security tasks):** Pick 1-3 critical lines, break each one, re-run affected criteria. Criteria MUST fail with broken code. If they still pass → criteria don't test what they claim → report as ❌. Restore code after each mutation. Max 3 mutations.
+
+   **ALWAYS prefer the NEUTER mutant over the DELETE mutant.** DELETE (comment the line out)
+   often breaks compilation or throws, so the criterion fails for the WRONG reason and proves
+   nothing. NEUTER keeps the guard's shape and kills only its EFFECT — the condition still
+   evaluates, the branch still exists, but the consequence (throw / return / reject / flag) is
+   removed. That is the mutant a weak assertion actually survives, and therefore the one worth
+   running. Record which mutants were NEUTER in the report.
 9. **Regression:** Run full test suite if exists. If no suite: re-run QUERY: criteria from last 2-3 completed tasks. If results changed → regression.
 10. **Evaluate prior review reports:** Check if code-reviewer findings were addressed. Check security findings if applicable.
 

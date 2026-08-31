@@ -201,3 +201,35 @@ start — never the session that wrote it.
 3. **A session that spawns a named agent and gets "Agent type not found" treats it as a
    HARD STOP** — never a silent fallback to a general-purpose agent (projects: see
    session-rules → "Autonomous loop watchdog" and its receipt discipline).
+
+## 9. Activation instructions belong to the INVOKER, never to the INVOKED
+
+A component's `description:` frontmatter is read when the harness builds the REGISTRY (§7) — NOT
+when someone needs to REMEMBER to invoke it. A mandate written inside the component that must be
+spawned ("runs at the start of every session") is therefore read by nobody: its only reader would
+be a session that had already decided to spawn it. **The instruction to invoke X belongs to
+whoever executes the moment X must run.**
+
+**When declaring that a component MUST run at some point in the cycle, ALWAYS:**
+1. **Write the instruction in the component that OWNS that moment** — the session-start skill, the
+   session-end skill, the orchestrator, the command. Cross-referencing it from the invoked
+   component's frontmatter is fine as documentation; it is NEVER the only home.
+2. **Attach a one-line MECHANICAL self-check** with an explicit expected result (a grep/count),
+   executed AND REPORTED by that same step (§6) — normative prose alone does not survive
+   end-of-session context pressure.
+3. **Require the skip to be SAID.** A conscious skip is legitimate; SILENCE is not — a silence is
+   indistinguishable from a forgetting. The invoking step ALWAYS reports "ran — [outcome]" or
+   "skipped — [reason]", never nothing.
+4. **PROVE the self-check by NEGATION before trusting it.** Run it against a state where it MUST
+   go red; a check that can never fail is decoration, not a control. (The very session that
+   catalogued this class shipped a self-check grepping the WRONG token — it matched prose in the
+   body instead of the canonical line, and would have passed forever.)
+
+> Evidence (production project): an agent declared "mandatory at the start of every session"
+> logged ZERO spawns across 24 audited sessions. The mandate lived in that agent's own frontmatter
+> and in an inventory list; the skill that actually opens a session never mentioned it. Nobody
+> reads the frontmatter of an agent that is not being invoked.
+
+**Same family as §6 (banned anti-patterns need a mechanical self-check) and §8 (a component can be
+PRESENT and absent from the registry).** In all three, only a mechanical check separates
+"installed" from "actually running" — the textual claim never does.

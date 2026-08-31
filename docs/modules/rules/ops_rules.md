@@ -32,6 +32,14 @@ everything AFTER: the runtime health of the deployed system. Walked category-by-
 
 ## 3. CI / deploy safety
 - [ ] CI runs lint + build + test as a hard gate on every change (the t=0 floor)?
+- [ ] **Every green stage PROVES it executed** — the test/lint/type-check stage asserts a
+      non-zero unit count, and a stage that SKIPPED (missing secrets, missing config, no matching
+      files) fails RED instead of reporting the same green as a real run? *(session-rules →
+      "Execution proof". A CI job that skips on missing secrets and reports `pass` in seconds for
+      hundreds of test files is the canonical instance — the only clue was the DURATION.)*
+- [ ] The execution-proof VERDICT lives in a pure, testable module — not buried inside the
+      wrapper that spawns the runner (a verdict provable only by reading its source is the weak
+      proxy this whole check exists to replace)?
 - [ ] Deploys are reversible (rollback path) and migrations are backward-safe?
 - [ ] Environment parity: staging/prod config differs only by secrets, not behavior?
 - Stack content: [fill — CI provider, deploy target, migration runner]

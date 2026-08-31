@@ -71,6 +71,13 @@ expected = 0; any nonzero is a high-priority finding.
 Append one row to `.claude/phases/metrics.md` (the code health time series). Compare against
 `.claude/rules/quality-budgets.md` caps; each breached budget → a finding.
 
+**ALWAYS fill the row's `Status` column LAST, from what actually ran** — `COMPLETE`, or
+`INCOMPLETE (steps N,M not run — reason)`. Steps 1-4 are the expensive half and are exactly the
+ones a usage limit, a dead fan-out agent, or an owner interrupt kills first; step 5 is cheap and
+survives. NEVER write `COMPLETE` because the metrics step itself succeeded (session-rules →
+"Cadence integrity"). The data in a partial row stays valid and readable; only the completeness
+claim is withheld — and withholding it is what keeps the cadence honest.
+
 ### 6. Debt-aging triage
 
 Read `pendencias.md` "Future Improvements". For each item older than `DEBT_AGE` (~30 sessions
@@ -89,6 +96,7 @@ that die in prose are invisible). NEVER auto-fix.
 
 ```
 ## Codebase Audit Report — Session N
+### Completion status: COMPLETE | INCOMPLETE (steps N,M not run — reason)   ← ALWAYS first line
 ### Breadth findings (by dimension):
 | Dimension | Findings | Severity | → task added |
 ### Depth findings (specialists run): [list, or "none — no confirmed money/security findings"]
@@ -99,6 +107,11 @@ that die in prose are invisible). NEVER auto-fix.
 ### Recurring escape classes: [classes flagged, or "none"]
 ### Tasks added to pendencias.md: [N]
 ```
+
+**ALWAYS emit the `Completion status` line, and make it match the `metrics.md` row's `Status`.**
+An INCOMPLETE run ALWAYS queues its unexecuted steps as a REOPEN task in `pendencias.md` — the
+cadence will not re-propose the audit on its behalf, because an INCOMPLETE entry never satisfied
+the clock in the first place.
 
 ## Safety
 

@@ -515,11 +515,17 @@ The version number is what the AI agent uses in the PRD sync check to detect cha
    - If changes detected: read full PRD, update project.md/pendencias.md/CLAUDE.md as needed, ensure changelog is updated, log in session log.
    - If ambiguous or contradicts existing decision: ASK the user.
    - If both checks show no changes: skip.
+   - **ALWAYS report the outcome in the sprint proposal — `ran — [outcome]` or `skipped —
+     [reason]`, never nothing.** This step is the INVOKER, and the invoker is the only place an
+     activation mandate can live (component-design §9): a mandate written inside the invoked
+     component's own frontmatter is read by nobody, and a SILENT skip is indistinguishable from a
+     forgetting — that is how a "mandatory every session" component reaches zero spawns unnoticed.
 4. **Read pendencias.md** — what is next and what is in progress
 5. **Propose sprint:** Based on pendencias.md, propose a batch of tasks for this session:
    ```
    ## Sprint Proposal: Session N
 
+   ### PRD sync: ran — [outcome] | skipped — [reason]   (ALWAYS present; never blank)
    ### Tasks selected (N):
    1. Task [N] — [name] (complexity, estimated scope)
    2. Task [N] — [name] (complexity, estimated scope)
@@ -935,15 +941,22 @@ Read the Coverage Gap Declaration section in each report. For each declared gap,
 
 Report template categories:
 - Build: ✅/❌
-- Tests: ✅/❌/⏭️
+- Tests: ✅/❌/⏭️ [N EXECUTED, N passed, N failed, wall time — the COUNT is mandatory evidence]
 - Review: ✅/❌ [inline or "code-reviewer subagent"]
 - Security: ✅/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes"]
-- Mutation: ✅/⏭️ [N mutations tested, N criteria confirmed — or "routine task, skipped"]
+- Mutation: ✅/⏭️ [N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
 - UI: ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
 - Migration: ✅/❌/⏭️ [migration ran + rollback verified — or "no migration files" — or "destructive without rollback: ❌"]
-- Regression: ✅/❌
+- Regression: ✅/❌ [N executed]
 - Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
+
+**Execution proof — "passed" and "ran" are different propositions.** A verification is cited WITH
+its executed count or not at all: a run that exits 0 having executed ZERO units, or whose summary
+cannot be parsed, is ❌ with the reason — never ✅ and never ⏭️. "I could not read it" is not "it is
+healthy", and an implausibly fast full suite is a skip until proven otherwise. When the check is
+scripted, its verdict lives in a pure, mutation-testable module rather than inside the wrapper
+that spawns the runner.
 
 **⏭️ is NOT valid when:**
 - UI: if ANY frontend template, component, or style file was modified in this task, UI MUST be ✅ or ❌, never ⏭️. If browser automation couldn't run after trying to start the dev server: mark as ❌ with reason, and list all VERIFY: criteria as MANUAL:.

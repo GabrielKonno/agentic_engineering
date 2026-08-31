@@ -104,6 +104,38 @@ never collapses them:
   not evidence that a review happened and cannot enter the log/commit. No receipt → the
   review didn't happen → the task does not close.
 
+## Execution proof — "passed" and "ran" are different propositions
+
+Every automated verification answers "did it PASS?". Almost none answers **"did it RUN?"** — and
+the second is the one that fails in silence, because the ABSENCE of execution produces exactly
+the same green as a successful execution. It applies to test suites, linters, type-checks,
+migration runners, and any CI job with a skip path. This is the tooling sibling of the RECEIPT
+discipline above: a receipt proves a REVIEWER ran; a count proves a TOOL ran.
+
+- **ALWAYS report a verification with its executed COUNT, and give the count a FLOOR.** "Tests
+  pass" is not evidence; "247 tests across 39 files executed, 0 failed" is.
+- **A guard on that count ALWAYS fails CLOSED in three states** — the third is the load-bearing one:
+  1. the tool exited != 0 → propagate (it already failed loudly);
+  2. the tool exited 0 having executed **ZERO** units → RED, never green;
+  3. the tool exited 0 and its summary is **UNREADABLE** → RED. *"I could not READ it" is NEVER
+     "it is healthy"* — degrading unparseable output to "0 problems" is the very class the guard
+     exists to catch.
+- **NEVER treat a skip as a pass.** A CI stage that skips on missing secrets/config reports the
+  same green as one that ran; make the skip itself RED unless the owner declared it.
+- **ALWAYS TREAT DURATION as evidence:** a full suite that finishes implausibly fast is a skip
+  until proven otherwise — say the wall time out loud alongside the count.
+- **When the guard is SCRIPTED, ALWAYS PUT the verdict in a PURE function in its own module** —
+  NEVER inside the wrapper that spawns the process. A verdict trapped in a `spawn` can only be "proven"
+  by reading its source, which is exactly the weak proxy this class teaches you to distrust. A
+  pure decision is unit- and mutation-testable, and the mutant that matters is the **NEUTER**
+  (keep the condition, kill its effect), not the DELETE.
+
+> Evidence (production project, two incidents): a CI test job fell into a missing-secrets skip
+> path and reported `pass` in 39 seconds for 200+ test files; and a stray residue left by a
+> concurrent write caused a `ReferenceError` at IMPORT time, so the suite reported SUCCESS having
+> executed ZERO tests. In both, the only clue was the DURATION and a human noticed it — never the
+> status, because no mechanism was asking.
+
 ## Task presentation
 
 When proposing sprints or listing tasks, ALWAYS include for each task:
@@ -149,6 +181,30 @@ Backlog items under "Future Improvements" in `pendencias.md` MUST carry a sessio
 sessions) with an explicit verdict per item: **KEEP** (still valid, re-stamp), **CLOSE**
 (obsolete/done), or **PROMOTE** (turn into an active task now). This prevents "documented in
 the backlog" from silently becoming "resolved forever."
+
+## Cadence integrity — a periodic mechanism anchors on CONCLUSION, never on DATE
+
+Every periodic mechanism (codebase-audit, framework-audit, retro, health-check) has TWO
+artifacts: the one that RECORDS what was done and the one that SATISFIES the clock. When they
+are the same entry and the run was PARTIAL, half a job resets the whole clock — and the failure
+mode is cruelly asymmetric: the EXPENSIVE half (broad judgment, fan-out, context) dies first,
+while the CHEAP half (counters, greps, queries) survives and writes the reassuring line.
+
+- **Writer — ALWAYS declare completion.** Every cadence entry (metrics row, Progress Log row,
+  audit report) MUST carry `status: COMPLETE` or
+  `status: INCOMPLETE (steps N,M not executed — reason)`. Recording a partial run stays CORRECT
+  and desirable: the data it produced is valid. What it may NOT do is reset the clock.
+- **Reader — ALWAYS anchor on the last `COMPLETE`.** Count cadence from the most recent
+  `COMPLETE` entry, SKIPPING partial ones. An `INCOMPLETE` entry NEVER satisfies the cadence.
+- **Anti-thrash corollary — ALWAYS separate the two claims.** An interrupted audit is not wasted
+  work: *the data it produced* stays valid (keep reading it); only *the claim of completeness* is
+  false (never trust it). NEVER discard a partial run's findings on the grounds that it was partial.
+
+> Evidence (production project): a MACRO audit lost 10 of its 11 fan-out agents to a usage
+> limit. The session logged `interrupted` honestly — but the entry the cadence reader consults
+> said "cadence FULFILLED". Three sessions later the reader correctly concluded "not due" from a
+> lying anchor. The breadth half of the audit (separation · security · performance · types)
+> stayed frozen ~16 sessions while the cheap half kept publishing reassuring numbers.
 
 ## Deploy gates (production+ profiles)
 

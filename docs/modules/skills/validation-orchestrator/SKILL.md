@@ -55,6 +55,10 @@ Commit current state before writing code to enable clean rollback.
 
 **Tests:** Write tests for testable criteria (`QUERY:`/`VERIFY:` tags with business logic). Run and verify they pass. Skip for tasks with no testable logic (pure styling, config, scaffolding).
 
+**ALWAYS read the runner's EXECUTED COUNT, not just its exit status** (session-rules → "Execution
+proof"). Exit 0 with ZERO tests executed, or a summary you cannot parse, is a ❌ — never a ✅. A
+suite that finishes implausibly fast is a skip until proven otherwise.
+
 **Commit:** Commit implementation before validation. For routine tasks using inline validation, commit can be deferred until after Phase B.
 
 ---
@@ -135,14 +139,14 @@ Each subagent is a fresh Agent tool instance — isolated context.
 - [test file]: [N] tests covering [what]
 ### Verification results:
 - Build:      ✅/❌
-- Tests:      ✅/❌/⏭️
+- Tests:      ✅/❌/⏭️  (N executed / N failed — ALWAYS the count, never just the verdict)
 - Review:     ✅/❌
 - Security:   ✅/❌/⏭️
-- Mutation:   ✅/⏭️
+- Mutation:   ✅/⏭️  (N mutants, N NEUTER)
 - DB:         ✅/❌/⏭️
 - UI:         ✅/❌/⏭️
 - Migration:  ✅/❌/⏭️
-- Regression: ✅/❌
+- Regression: ✅/❌  (N executed)
 - Validation: ✅/❌/⏭️
 ### Items for human verification:
 - [MANUAL criteria]
@@ -151,6 +155,11 @@ Each subagent is a fresh Agent tool instance — isolated context.
 ```
 
 ⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css/.html` or template files were modified, or for Tests if business logic + test framework exists, or for Migration if migration files are in the diff. ⏭️ is NOT "I skipped it." If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 attempts): use ❌ with reason, list VERIFY: criteria as MANUAL:.
+
+**ALWAYS carry the executed COUNT on Tests, Regression, and Mutation — a bare ✅ is not
+evidence.** A run that exited 0 having executed ZERO units, or whose summary could not be parsed,
+is ❌ with the reason, NEVER ✅ and NEVER ⏭️ (session-rules → "Execution proof": "I could not read
+it" is not "it is healthy").
 
 ALWAYS create a task in pendencias.md for every finding mentioned in the report — findings that die in prose are invisible.
 

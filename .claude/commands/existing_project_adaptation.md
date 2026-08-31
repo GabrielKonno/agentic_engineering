@@ -529,6 +529,11 @@ esac
 
 3. **CI floor (internal-tool+):** if the project has no CI workflow, create one (install → lint →
    build → test) or register a task to add it. **prototype:** skip all of the above.
+   **ALWAYS verify the test stage PROVES it executed** — whether the pipeline is new or
+   pre-existing (session-rules → "Execution proof"): a zero-unit run must FAIL, and any
+   conditional skip path (missing secrets/config) must exit RED with a named reason, never the
+   same green as a real run. If the existing pipeline cannot prove it, register a task rather
+   than leaving the gate aspirational.
 
 4. **Add the Post-Mortem Ledger** section to `project.md` (internal-tool+) and the **Risk profile &
    ceremony tiers** awareness via the refreshed `session-rules.md` (already copied in Step 2.9).

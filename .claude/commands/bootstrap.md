@@ -568,6 +568,11 @@ pipeline never starts out empty and added "later."
 - Add a `guards` stage running `node scripts/check-agent-frontmatter.mjs` (copied in Step 5.7 —
   dependency-free, needs no install). CI catches a broken component frontmatter before merge; the
   session-start/loop-start run (session-rules) catches it earlier, before any PR exists.
+- **ALWAYS make the test stage PROVE it executed** (session-rules → "Execution proof"): configure
+  the runner so a zero-unit run FAILS (most runners have a flag for it — e.g. "fail when no tests
+  matched"), and make any conditional skip path (missing secrets, missing config) exit RED with a
+  named reason instead of reporting the same green as a real run. A stage that skips silently
+  reports `pass` in seconds for hundreds of test files, and the only clue is the DURATION.
 - This is the per-diff CI gate (the lowest gate tier). It is distinct from the per-task validation
   gate and the production+ DEPLOY GUARD.
 

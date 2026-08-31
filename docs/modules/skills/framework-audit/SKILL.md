@@ -46,6 +46,12 @@ sessions have passed since the last framework-audit. The owner accepts or defers
 4. **Aspirational-vs-real audit** — are there fields/mechanisms CLAIMED but not running?
    (e.g., a `last_eval:` that always reads `none`; a cadence trigger never firing.) Name them
    honestly — an unenforced field is documentation debt.
+   **ALWAYS run the ORPHAN-MANDATE check as part of Q4** (component-design §9): for every
+   component whose own text claims it "must run" at some point in the cycle, grep the component
+   that OWNS that moment for an instruction to invoke it. A mandate that lives ONLY in the
+   invoked component's frontmatter/inventory has no invoker and its real spawn count is
+   typically ZERO — report the count, not the claim. Same for the self-checks themselves: a
+   check that has never gone red is unproven, not passing.
 5. **Meta-metrics review** — read `framework-metrics.md`: is the escape rate rising? Any reviewer
    with high false-positive (cry-wolf)? Any Known Bug Pattern that never triggers (dead weight)?
    If skill-gate is installed, also: any promoted skill never loaded since promotion (cross-check
@@ -72,6 +78,12 @@ code `metrics.md`), harvested from artifacts that already exist:
 
 This is a STEP of framework-audit, not a continuous system. One row per meta-audit.
 
+**ALWAYS stamp the row with `Status: COMPLETE | INCOMPLETE (questions N,M not answered — reason)`,
+derived from which of the six questions actually ran** — never from the fact that the rollup step
+itself succeeded. The six questions are the expensive half (fan-out over logs, ledgers, components);
+this rollup is the cheap half that survives an interrupt. An INCOMPLETE row records valid data but
+does NOT satisfy `FRAMEWORK_AUDIT_CADENCE` (session-rules → "Cadence integrity").
+
 ## Output & safety
 
 Produce a batch of FRAMEWORK improvements (BEHAVIOR class). This loop PROPOSES; it does not
@@ -92,6 +104,7 @@ friendly until approved.
 
 ```
 ## Framework Audit Report — Session N
+### Completion status: COMPLETE | INCOMPLETE (questions N,M not answered — reason)   ← ALWAYS first line
 ### Q1 Dimension coverage: [orphaned dimensions, or "all owned"]
 ### Q2 Axis coverage: [missing axes/bridges, or "complete"]
 ### Q3 Recurring escape classes: [classes with no owner, or "none"]

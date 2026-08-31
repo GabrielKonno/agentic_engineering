@@ -111,7 +111,13 @@ the others through the mother framework repo (the repo this project was bootstra
 - a **PORTABLE formulation** of each principle — written generically, with role descriptors
   instead of this project's names/domain vocabulary. The mother repo's project-information
   isolation forbids project identifiers in shared templates, so a pre-genericized section is
-  what makes the upstream copy-adaptable.
+  what makes the upstream copy-adaptable;
+- an **EFFICACY ANCHOR table — one row per evolution, ALWAYS**: a question with a VERIFIABLE
+  answer plus the exact command/artifact that answers it (`grep X in Y`, "count spawns in the
+  logs since sN"). NEVER prose like "check whether it helped". A question answerable by
+  re-reading this doc is not an anchor — the next framework-audit must be able to MEASURE it.
+  ALWAYS add a final `Meta` row: *did any of these remediations introduce a finding of the SAME
+  class?* — remediation-introduced defects are a recurring class, not a curiosity.
 
 The doc has a DUAL purpose — and that is what decides when it can be retired:
 1. **Upstream vehicle** (one-time): the owner runs a `/maintenance` session in the mother

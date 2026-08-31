@@ -45,6 +45,12 @@ it — no tier lookup needed).
   `FRAMEWORK_AUDIT_CADENCE` (default 35; 25 for production-financial). Propose `/framework-audit`.
   Sparser than codebase-audit by design.
 
+**ALWAYS anchor both counts on the last `COMPLETE` entry, SKIPPING any marked `INCOMPLETE`**
+(session-rules → "Cadence integrity"). An interrupted audit records valid data but does NOT reset
+the clock — treating its entry as "last run" is how the expensive half of an audit goes missing
+for many cadences while the cheap half keeps publishing healthy numbers. If the most recent entry
+is INCOMPLETE, ALWAYS say so in the proposal: `audit due — last run was INCOMPLETE (steps N,M)`.
+
 Proposing is not running — the owner decides. If both are due, propose codebase-audit first
 (code health) and note framework-audit is also due. Then continue to Step 1.
 
@@ -86,11 +92,21 @@ Read `.claude/phases/project.md`:
 
 ### 3. PRD sync check (opt-in)
 
+**This step is the INVOKER — it is the only place the prd-sync-checker mandate lives**
+(component-design §9). NEVER rely on the agent's own frontmatter to make it run: nobody reads the
+frontmatter of an agent that is not being spawned.
+
 Ask the user: **"Do you want me to run the PRD sync check?"**
 
 If yes: invoke `.claude/agents/prd-sync-checker.md` as subagent. This compares PRD version/content with project.md and propagates changes. Runs in isolated context, no session bias.
 
 If no: skip. The user knows whether the PRD changed or was already synced.
+
+**ALWAYS report the outcome in the sprint proposal (§4c) — `ran — [outcome]` or
+`skipped — [reason]`. NEVER emit nothing.** A silence is indistinguishable from a forgetting, and
+that is exactly how a "mandatory at every session start" component reaches zero spawns without
+anyone noticing. Mechanical self-check for the owner (expected result stated): grep the session
+logs for this step's outcome line — every session must have one.
 
 ### 4. Analyze pendencias.md and propose sprint
 
@@ -124,6 +140,7 @@ sprint for the task named in the marker. Context has changed and the continuatio
 
 ```
 ## Sprint Proposal: Session N
+### PRD sync: ran — [outcome] | skipped — [reason]   (ALWAYS present; never blank)
 ### Tasks selected (N):
 1. Task [N] — [name] (complexity, estimated scope)
 2. Task [N] — [name] (complexity, estimated scope)
