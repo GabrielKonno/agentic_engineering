@@ -32,9 +32,24 @@ grep -L "STATUS.*upstreamed" projects/*/.claude/docs/framework-evolution-*.md 2>
 Expected result: **EMPTY output = nothing pending.** Every path printed is an evolution doc
 whose disposition this repo still owes. (Reading `projects/` never violates the no-touch rule.)
 
+**A printed path has TWO possible meanings — ALWAYS separate them before reporting.** The grep
+only proves the project has not marked its own header yet; it cannot tell an un-absorbed doc from
+one this repo already absorbed and that is merely awaiting the project's own discharge. For EVERY
+printed path, grep this repo's lineage records for it:
+
+```bash
+grep -rl "<the doc's date or slug>" assets/docs/framework-evolution-upstream-*.md
+```
+
+- **A lineage hit → `absorbed, awaiting project-side discharge`.** NEVER re-absorb it and never
+  ask the owner to authorize it again — cite the lineage file and move on.
+- **No lineage hit → genuinely `pending absorption`.**
+
 **ALWAYS report the outcome to the owner in one line, even when empty:**
 - Empty → `Upstream sweep: 0 pending.`
-- Non-empty → `Upstream sweep: N pending — <paths>`, followed by ONE question: does this
+- Absorbed-but-undischarged only → `Upstream sweep: 0 pending (N awaiting project-side discharge —
+  <paths>).` No question follows; nothing is owed by this repo.
+- Genuinely pending → `Upstream sweep: N pending — <paths>`, followed by ONE question: does this
   session absorb them (→ "Upstream intake" below), or defer?
 
 **NEVER absorb a pending doc without the owner's answer, and NEVER let the sweep displace the
@@ -75,6 +90,51 @@ pass and was only caught by a later lens (owner question / audit):
    template), and the D16 isolation grep runs over every touched file (no project names,
    no source-project session numbers, no single-project vocabulary).
 
+4. **Back-sweep of every PROCESS rule promoted THIS session.** A newly promoted process rule
+   condemns OLDER artifacts — applying it only where it was written leaves the repo failing its
+   own new rule (the exact class an audit later reports as "rules the repo did not apply to
+   itself"). ALWAYS, for each rule added or strengthened this session: name the artifacts it
+   RETROACTIVELY governs, grep for them, and fix them in the SAME session — including THIS repo's
+   own `.claude/` commands and rules, not only `docs/modules/` templates. Mechanical assist
+   (expected result stated): for a rule about where an instruction must LIVE, grep every sibling
+   invoker of the same shape; a rule applied to one of N twins is a back-sweep MISS, not a fix.
+   `evolution-policy.md` already mandates back-sweep for PROJECTS — this item is the mother repo
+   applying that discipline to itself.
+
+5. **Component liveness — re-check the frontmatter of every component edited this session.**
+   ALWAYS run the guard over this repo's OWN `.claude/skills/` and `.claude/agents/` after touching
+   any component frontmatter (component-design §8: invalid YAML does not error — it makes the
+   component VANISH from the registry):
+   ```bash
+   sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > /tmp/guard.mjs && node /tmp/guard.mjs
+   ```
+   Expected result: **exit 0**, every component listed OK. ALWAYS REPORT the outcome —
+   `liveness: N components OK` or `liveness: skipped — [reason]`. A silence is indistinguishable
+   from a forgetting (component-design §9 rule 3). If the session edited no frontmatter at all,
+   say `liveness: skipped — no frontmatter touched`, never nothing.
+
+## Version bumps — the framework version is a CLAIM, and it decays silently
+
+The version label is CONSUMED by `existing_project_adaptation.md`, which keys migration decisions
+to it. A stale label tells an upgraded project it is current while it receives content several
+batches ahead — the same "instrument that lies" class the audits keep surfacing.
+
+**ALWAYS decide the bump when a session changes `docs/modules/` (the templates projects receive)
+or the command pipeline, and ALWAYS state the decision in the commit** — `bump: vX.Y.Z` or
+`bump: none — [reason]`. Never leave it unsaid.
+
+- **MINOR** (`v2.5.0` → `v2.6.0`): a new rule/section/template, an upstream absorption, or a schema
+  change to a document projects receive.
+- **PATCH** (`v2.6.0` → `v2.6.1`): corrections that add no new contract — broken references,
+  counts, typos, instruction-style rewrites.
+- **MAJOR:** a change that invalidates an existing project's structure without migration.
+
+**The canonical set (GREP it, never recall it):** `README.md` (title line + structure diagram),
+`docs/modules/templates/claude_md.md` (the "slim orchestrator" line), and
+`.claude/commands/existing_project_adaptation.md` (its template-generation references).
+`created: framework-vX.Y.Z` fields inside components are **LINEAGE, never the current version** —
+they record when a component was born and MUST NOT be rewritten by a bump.
+
 ## Upstream intake — absorbing framework evolutions from projects
 
 Projects record framework-level lessons in their own
@@ -100,3 +160,9 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
    `upstreamed` is the project's own next session's job, guided by this repo's lineage record.
 6. Run the post-change verification (cross-references, template fence extraction, D16
    isolation grep over every touched file) before committing.
+7. **ALWAYS HAND THE DISPOSITION BACK to the owner in the session's closing report** — one line
+   per absorbed doc: its path, the verdict (graduated / adapted / rejected), the lineage file and
+   commit that record it, and the explicit sentence that the doc is now **dischargeable**, i.e.
+   the project's own next session marks its header `upstreamed`. The no-touch rule stops this repo
+   from marking it; it does NOT excuse this repo from SAYING so. Without step 7 the last link of
+   the chain rests on owner memory — the exact failure class Step 0 exists to eliminate.

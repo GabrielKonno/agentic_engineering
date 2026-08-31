@@ -78,10 +78,18 @@ survives. NEVER write `COMPLETE` because the metrics step itself succeeded (sess
 "Cadence integrity"). The data in a partial row stays valid and readable; only the completeness
 claim is withheld — and withholding it is what keeps the cadence honest.
 
-### 6. Debt-aging triage
+### 6. Debt-aging triage — the backlog AND the Known Bug Patterns
 
 Read `pendencias.md` "Future Improvements". For each item older than `DEBT_AGE` (~30 sessions
 by its `[added sN]` stamp): verdict KEEP (re-stamp) / CLOSE (obsolete) / PROMOTE (active task).
+
+**ALWAYS triage the Known Bug Patterns in this SAME step** — this step is their INVOKER
+(component-design §9). The verdicts are DEFINED in `code-reviewer.md` → "Periodic review", which
+schedules nothing on its own. Read the KBP list with its `triggered:` / `false-positive:` counters
+and give EVERY pattern older than 10 sessions an explicit verdict: **REMOVE** (`triggered: never`),
+**REFINE** (frequent false-positive — too broad), **PROMOTE** (frequent triggered → DERIVED rule in
+a rules file), or **KEEP**. A KBP list that only ever grows is dead weight the reviewer pays for on
+every single diff.
 
 ### 7. Recurring-class scan
 
@@ -104,6 +112,7 @@ that die in prose are invisible). NEVER auto-fix.
 ### Reconciliation: [anomalies found, or "0 — clean"]   (production-financial)
 ### Metrics vs budgets: [breached budgets, or "all within caps"]
 ### Debt triage: [N KEEP / N CLOSE / N PROMOTE]
+### KBP triage: [N KEEP / N REMOVE / N REFINE / N PROMOTE]   (ALWAYS present)
 ### Recurring escape classes: [classes flagged, or "none"]
 ### Tasks added to pendencias.md: [N]
 ```

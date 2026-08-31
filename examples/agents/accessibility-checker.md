@@ -44,7 +44,7 @@ Do NOT read:
 - `.claude/logs/*.md` (session history)
 - Sprint proposals or implementation plans
 
-## When to invoke
+## When this agent is invoked
 
 After implementing or modifying:
 - Forms (inputs, labels, validation, error messages)
@@ -93,6 +93,13 @@ After implementing or modifying:
 - [ ] Error messages specific — "Email is required" not "Field is invalid"
 - [ ] Autocomplete attributes set — `autocomplete="email"`, `autocomplete="name"`, etc.
 - [ ] Form submission feedback — success/error communicated to screen readers
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1` to identify changed components and templates
+- **Component file paths** — the markup/JSX/template files the diff touched
+- **WCAG requirements context** — the target conformance level, passed via prompt
+- **Rules files** — all `.claude/rules/*.md` (an `accessibility-rules.md`, when present, is authoritative)
 
 ## Output Format
 

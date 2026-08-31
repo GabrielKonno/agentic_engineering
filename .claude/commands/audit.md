@@ -6,7 +6,10 @@ This is a **read-only audit session** for the agentic_engineering framework repo
 - Read any file in the repository
 - List directory contents
 - Launch parallel audit agents
-- No file creation, modification, or deletion
+- **Write EXACTLY ONE file: this run's report at `assets/docs/audit-YYYY-MM-DD.md`** (Phase 3).
+  Read-only refers to the AUDITED surfaces — the report is this session's output, and a report
+  that lives only in a transcript cannot be carried to the session that applies it.
+- No other file creation, modification, or deletion
 
 **Rules:**
 - Every check is mechanical: compare claim against fact, report mismatch
@@ -582,3 +585,24 @@ Group FAIL items by priority:
 3. **Quality improvements** — instruction style, description compliance
 
 End with: **Suggestion:** Run `/maintenance` to apply fixes, using this report as the correction plan.
+
+---
+
+## Phase 3 — Persist the report (ALWAYS, before ending the session)
+
+Findings that are not applied in the same session survive only in a transcript, and deferral is
+routine, not exceptional. The application half of that flow is documented (`/maintenance`); this
+step is the carry-over half.
+
+1. **ALWAYS WRITE the consolidated report to `assets/docs/audit-YYYY-MM-DD.md`** — the full
+   summary matrix plus every finding with its evidence and file:line. This is the only file the
+   audit writes.
+2. **ALWAYS give every finding a STABLE ID (`F-1`, `F-2`, …) and a status column**:
+   `open` / `applied sHASH` / `rejected — [reason]`. The ID is what a later maintenance session
+   cites; a finding without one cannot be tracked across sessions.
+3. **ALWAYS carry FORWARD the still-`open` findings from the previous audit report** (the most
+   recent `assets/docs/audit-*.md`) into the new one, re-verifying each against the current disk:
+   still true → carry with its original ID; fixed since → mark `applied`. An audit that silently
+   drops the last one's open items is how "deferred" becomes "forgotten".
+4. **ALWAYS report in one line how many findings were carried forward** — `carried: N open from
+   [previous file]`, or `carried: none — first audit`. Never nothing.

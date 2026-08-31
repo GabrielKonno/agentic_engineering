@@ -37,7 +37,16 @@ when the diff's domain is recognized via this agent's description.
 - `APPROVE` → data integrity coverage ✅ — include as evidence in validator prompt
 - `FIX REQUIRED` → data integrity ❌ — list findings in validation report, address before proceeding
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change
+- Production data beyond the read-only verification queries
+
+## When this agent is invoked
 
 - After implementing multi-table operations (order creates items, payments, stock movements)
 - After implementing delete operations (cascade effects, orphaned records)
@@ -97,6 +106,13 @@ LEFT JOIN posts p ON p.user_id = u.id
 GROUP BY u.id
 HAVING u.post_count != COUNT(p.id);
 ```
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1` to identify changed queries, writes, and transactions
+- **Database schema files** — migrations and schema definitions currently in the repo
+- **Rules files** — all `.claude/rules/*.md`, and `data-integrity-rules.md` when it exists
+- **Live database (read-only)** — SELECT-only access for the verification queries below
 
 ## Output Format
 

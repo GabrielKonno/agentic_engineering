@@ -22,7 +22,15 @@ derived_from: null
 
 # Integration Contract Tester
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change
+
+## When this agent is invoked
 
 After implementing or modifying:
 - Any call to an external API (payment gateway, email, SMS, maps, auth provider, etc.)
@@ -62,6 +70,13 @@ After implementing or modifying:
 - [ ] **Error scenarios mocked** — at minimum: timeout, 500, 422, and 401 covered by tests
 - [ ] **Mock responses reflect real API contracts** — payloads derived from actual documented response schema, not invented
 - [ ] **Contract snapshot exists** — at least one test captures the exact request shape sent and fails if shape changes unexpectedly
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1` to identify changed request/response shapes
+- **Rules files** — all `.claude/rules/*.md`
+- **CLAUDE.md Key Patterns** — the project's own integration conventions
+- **List of external services used** — passed via prompt, with each contract's source of truth
 
 ## Output Format
 

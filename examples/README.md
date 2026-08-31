@@ -83,7 +83,7 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 3. If found: use as structural reference — adapt to project's stack and domain
 4. If not found: create from scratch following the conventions visible in other examples
 
-### Key conventions to follow (visible in all examples)
+### Key conventions to follow (exhibited by every example — verify, do not assume)
 
 **Frontmatter:**
 - `name:` — lowercase, hyphenated
@@ -116,7 +116,11 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 - `invocation: subagent` for review/validation/security agents
 - `## Input` section — what the agent receives (file paths, reports, criteria)
 - `## Output` section — structured report format with examples
-- "When this agent is invoked" section — clear triggers (passive: the orchestrator decides invocation)
+- `## When this agent is invoked` section — clear TRIGGERS (passive: the orchestrator decides invocation)
+- `## When spawned` section — a DIFFERENT section, and not a naming variant of the one above: it is
+  the activation-chain contract required by component-design §1 (which reviewer gap routes here,
+  what context the prompt must carry, what main Claude does with each report outcome). Agents
+  reached through a gap declaration carry BOTH sections
 - Checklist with `- [ ]` items — actionable, verifiable
 - `## BOUNDARIES` section — what the agent must NOT read (anti-bias firewall)
 - Recommendation line: APPROVE / FIX REQUIRED / BLOCK

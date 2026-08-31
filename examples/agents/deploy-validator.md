@@ -21,7 +21,15 @@ derived_from: null
 
 # Deploy Validator
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Secret VALUES from any environment (names and presence only)
+
+## When this agent is invoked
 
 - Before deploying to staging or production
 - After significant changes (new modules, dependency updates, infrastructure changes)
@@ -77,6 +85,12 @@ derived_from: null
   - Irreversible (drop column, data transform): explicitly acknowledged; strategy documented (backup restore, feature flag, etc.)
 - [ ] **Estimated rollback duration documented** — team knows whether recovery takes 2 min or 45 min
 - [ ] **Communication plan defined** — channel, audience, and responsible person identified before deploy starts
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1`, with attention to config, IaC, and migration files
+- **Environment config** — the target environment's variable and secret manifest (names, never values)
+- **Deployment context** — target environment, rollback path, and migration ordering, passed via prompt
 
 ## Output Format
 

@@ -21,7 +21,15 @@ derived_from: null
 
 # Dependency Auditor
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change
+
+## When this agent is invoked
 
 - Before major releases or deployments
 - When adding new dependencies
@@ -81,6 +89,12 @@ npx @next/bundle-analyzer  # Next.js
 npx vite-bundle-visualizer # Vite
 npx webpack-bundle-analyzer # Webpack
 ```
+
+## Input
+
+- **Package manifest and lock files** — `package.json` / lockfile, or the stack's equivalent
+- **Git diff** — read via `git diff HEAD~1` to identify added, removed, or bumped dependencies
+- **Advisory source** — the ecosystem's audit command or vulnerability database output
 
 ## Output Format
 

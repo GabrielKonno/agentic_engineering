@@ -21,7 +21,15 @@ derived_from: null
 
 # Test Quality Reviewer
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change (the tests must stand on their own)
+
+## When this agent is invoked
 
 - After writing tests for business logic, calculations, or state transitions
 - When test suite has failures that seem unrelated to code changes
@@ -64,6 +72,12 @@ derived_from: null
 - [ ] No file system side effects — tests don't write to real paths
 - [ ] No console.log assertions — fragile; test behavior, not output format
 - [ ] No tests that only run locally — CI must reproduce the same results
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1`, covering both the tests and the code they cover
+- **Test files** — the suites added or changed by the diff
+- **Acceptance criteria context** — the task's criteria, so assertions can be matched against them
 
 ## Output Format
 

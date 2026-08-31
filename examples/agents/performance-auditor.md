@@ -37,7 +37,15 @@ the diff's domain is recognized via this agent's description.
 - `APPROVE` → performance coverage ✅ — include as evidence in validator prompt
 - `FIX REQUIRED` → performance ❌ — list findings in validation report, address before proceeding
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change
+
+## When this agent is invoked
 
 After implementing or modifying:
 - Data fetching (API calls, database queries, external services)
@@ -114,6 +122,12 @@ When baselines are established (not `_tbd_`), compare measurements:
 - INP (Interaction to Next Paint): < 200ms
 - CLS (Cumulative Layout Shift): < 0.1
 - Bundle size: report delta (+/- KB) vs previous build
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1` to identify changed queries, loops, and render paths
+- **SLA targets** — latency and payload budgets, if the project documents them
+- **Rules files** — all `.claude/rules/*.md`, and `quality-budgets.md` when it exists
 
 ## Output Format
 

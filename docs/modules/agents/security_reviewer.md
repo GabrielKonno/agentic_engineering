@@ -194,7 +194,13 @@ If any answer reveals a risk: address it before proceeding.
 - [ ] If SAST tool output unavailable: perform manual pattern review per `examples/agents/sast-scanner.md` Tier 1 checklist (injection patterns, deserialization, path traversal, XXE, SSRF, cryptography).
 - [ ] Document tooling gap as INFO finding if SAST tool is not installed — include recommendation to install.
 
-**Escalation condition:** If diff touches auth, authorization, input processing, cryptography, deserialization, file I/O, or shell execution AND a SAST tool is available → spawn `sast-scanner` subagent for dedicated SAST scan before proceeding to `validator`.
+**Escalation condition:** If diff touches auth, authorization, input processing, cryptography,
+deserialization, file I/O, or shell execution AND a dedicated SAST pass is warranted, ALWAYS
+DECLARE a **static analysis gap** in the Coverage Gap Declaration section below — NEVER attempt to
+spawn `sast-scanner` from here. This agent runs AS a subagent, and only main Claude can use the
+Agent tool (component-design §7: subagent depth limit). The gap declaration IS the escalation
+mechanism: main Claude reads it, finds `sast-scanner` by its description, and spawns it before
+`validator`.
 
 ## 11. Rate Limiting & Abuse Prevention (check when diff touches auth, public APIs, or payment endpoints)
 - [ ] Rate limit strategy matches endpoint risk: per-user + per-IP for auth, per-API-key for general

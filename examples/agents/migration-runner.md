@@ -22,7 +22,15 @@ derived_from: null
 
 # Migration Runner
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change
+
+## When this agent is invoked
 
 - Before executing any database migration
 - When creating migration files that alter existing tables (add/drop columns, change types)
@@ -79,6 +87,12 @@ SELECT constraint_name, constraint_type
 FROM information_schema.table_constraints
 WHERE table_name = '[table]';
 ```
+
+## Input
+
+- **Migration files** — the up and down migrations present in the diff
+- **Git diff** — read via `git diff HEAD~1` to see what schema state the code assumes
+- **Database schema context** — current schema state and the migration runner in use
 
 ## Output Format
 

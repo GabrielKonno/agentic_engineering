@@ -22,7 +22,16 @@ derived_from: null
 
 # Multi-Tenancy Auditor
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change
+- Real tenant data (use synthetic tenants for probes)
+
+## When this agent is invoked
 
 - After implementing any data access layer (queries, APIs, server actions)
 - After creating new database tables
@@ -73,6 +82,12 @@ SET LOCAL request.jwt.claims = '{"sub": "user-a-id"}';
 SELECT COUNT(*) FROM clients WHERE organization_id = 'tenant-b-id';
 -- Expected: 0 rows
 ```
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1`, with attention to every query and data-access path
+- **Data access layer files** — repositories, ORM models, and row-level-security policies
+- **Tenant model context** — how tenancy is represented and enforced, passed via prompt
 
 ## Output Format
 

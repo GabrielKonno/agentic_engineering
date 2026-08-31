@@ -5,7 +5,9 @@ applies_to: cart, checkout, orders, payments, inventory, pricing
 
 # E-Commerce Rules
 
-## Monetary Values
+## Inviolable Rules
+
+### Monetary Values
 
 1. **Store as integer cents** — `price_cents INTEGER`, never `FLOAT` or `DECIMAL` for currency. R$10.50 = 1050.
 2. **Display formatting is UI-only** — `formatCurrency(1050)` → `"R$ 10,50"`. Never store formatted strings.

@@ -65,7 +65,9 @@ sessions have passed since the last framework-audit. The owner accepts or defers
 ## Meta-metrics rollup (harvested, not a daemon)
 
 As part of this run, append one row to `.claude/phases/framework-metrics.md` (a sibling of the
-code `metrics.md`), harvested from artifacts that already exist:
+code `metrics.md`, created at bootstrap from `docs/modules/templates/framework_metrics_md.md` —
+that template defines the row schema, including the `Status` column), harvested from artifacts
+that already exist:
 
 | Metric | Source (already exists) | Healthy |
 |--------|-------------------------|---------|

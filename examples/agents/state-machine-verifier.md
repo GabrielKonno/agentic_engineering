@@ -22,7 +22,15 @@ derived_from: null
 
 # State Machine Verifier
 
-## When to invoke
+## BOUNDARIES
+
+Do NOT read:
+- `.claude/phases/project.md` Progress Log
+- `.claude/logs/*.md` (session history)
+- Sprint proposals or implementation plans
+- Files the implementing agent wrote to explain the change
+
+## When this agent is invoked
 
 After implementing or modifying:
 - Status workflows (e.g., order: draft → confirmed → shipped → delivered)
@@ -81,6 +89,12 @@ cancelled   |   ❌  |    ❌     |   ❌    |    ❌     |    -      |
 - [ ] Timeout/expiry states exist — "pending" for 30 days becomes "expired" automatically?
 - [ ] Re-entry handled — can an item return to a previous state? If yes, are side effects re-triggered?
 - [ ] Orphaned records checked — what happens to related records when state changes? (cascade, nullify, block)
+
+## Input
+
+- **Git diff** — read via `git diff HEAD~1` to identify changed transitions and guards
+- **State definition files** — the enum, table, or config that enumerates the states
+- **Transition rules** — the allowed edges, from rules files or the PRD's business rules
 
 ## Output Format
 

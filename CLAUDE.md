@@ -50,6 +50,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── claude_md.md                # Config file template (orchestrator format)
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
 │   │   │   ├── metrics_md.md               # Code health time series (internal-tool+)
+│   │   │   ├── framework_metrics_md.md     # Process health time series (production+)
 │   │   │   ├── settings_json.md            # Settings + hooks template
 │   │   │   └── check_agent_frontmatter.md  # Component-registry liveness guard (all tiers → scripts/)
 │   │   ├── agents/                         # Agent templates (copied to .claude/agents/)
@@ -111,7 +112,14 @@ This repository supports 5 session modes, each activated by its slash command:
 
 Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
 
-**Utilities:** `/audit` — read-only integrity check across 17 dimensions (structural, references, process logic, quality, document accuracy, project-information isolation, and one meta dimension — D17 process coverage, which hunts flows the repo executes or promises but never documented). Launches 6 parallel audit agents and produces a consolidated report. No files are modified.
+**Utilities:** `/audit` — read-only integrity check across 17 dimensions (structural, references, process logic, quality, document accuracy, project-information isolation, and one meta dimension — D17 process coverage, which hunts flows the repo executes or promises but never documented). Launches 6 parallel audit agents and produces a consolidated report, persisted to
+`assets/docs/audit-YYYY-MM-DD.md` (the only file it writes).
+
+**When it runs — ALWAYS one of these events, never a remembered interval:** (a) after every
+upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner request. The
+`/maintenance` post-change checklist is the PRIMARY control and runs every session; `/audit` is
+the periodic NET behind it, and this trigger list is what makes "periodic" a fact rather than an
+aspiration.
 
 **Alternative (non-Claude Code):** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 

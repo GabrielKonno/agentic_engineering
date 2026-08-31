@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.5.0
+# Agentic Engineering Framework v2.6.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -18,7 +18,7 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 6 doc templates |           | 10 agent .md files  |
+                         |  - 7 doc templates |           | 10 agent .md files  |
                          |  - 10 agent files  |           | 14 process skills   |
                          |  - 5 rules files   |           | 5 rules files       |
                          |  - 14 skills       |           | examples/ (copy)    |
@@ -132,8 +132,8 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.5.0)
-│   │   ├── templates/                      ← Document and config templates (6, incl. the frontmatter liveness guard)
+│   ├── modules/                            ← Single source of truth (v2.6.0)
+│   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
 │   │   └── skills/                         ← 14 pre-built skills (11 lifecycle + 3 tier-gated)
@@ -179,6 +179,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/phases/metrics.md` *(internal-tool+)* | `modules/templates/metrics_md.md` | Code health time series (one row per audit) |
 | `.claude/skills/skill-gate/` + `.claude/agents/skill-reviewer.md` + `.claude/drafts/` *(internal-tool+)* | `modules/skills/skill-gate/`, `modules/agents/skill_reviewer.md` | Creation gate — new skills/rules drafted, blind-reviewed, and promoted (never self-approved) |
 | `.claude/skills/framework-audit/` *(production+)* | `modules/skills/framework-audit/` | Meta-loop — periodic process blind-spot audit |
+| `.claude/phases/framework-metrics.md` *(production+)* | `modules/templates/framework_metrics_md.md` | Process health time series (one row per meta-audit) |
 | `.claude/rules/ops-rules.md` *(production+)* | `modules/rules/ops_rules.md` | Operate/lifecycle dimension checklist |
 | `.claude/rules/quality-budgets.md` *(production+)* | `modules/rules/quality_budgets.md` | Quality caps + code-reviewer delta gate |
 

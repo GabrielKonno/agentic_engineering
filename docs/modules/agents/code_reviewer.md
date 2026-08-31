@@ -256,10 +256,15 @@ or booking/reservation logic:**
 - `triggered` — sessions where this pattern actually caught a problem during review
 - `false-positive` — count of times the pattern flagged something that wasn't a real issue
 
-**Periodic review (every 10 sessions or via maintenance):**
+**Periodic review — the triage VERDICTS (this agent DEFINES them; it does NOT schedule itself):**
 - `triggered: never` after 10+ sessions → candidate for removal
 - Frequent `false-positive` → needs refinement (pattern too broad)
 - Frequent `triggered` → working well, candidate for DERIVED promotion to rules file
+
+> **Who runs it:** `codebase-audit` Step 6 (debt-aging + KBP triage), internal-tool+ profiles.
+> On `prototype` — where codebase-audit is not installed — this triage has NO periodic owner, by
+> design. Stated plainly here rather than left as an ownerless "every 10 sessions" mandate, which
+> is read by nobody: an activation instruction belongs to the INVOKER (component-design §9).
 
 [Empty on day 1. Populated automatically.]
 

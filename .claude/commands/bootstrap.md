@@ -315,6 +315,7 @@ by profile via its own clauses — nothing extra to copy for those.
 **`internal-tool` and above — codebase-audit + metrics + skill-gate:**
 ```bash
 cp -r docs/modules/skills/codebase-audit projects/$ARGUMENTS/.claude/skills/
+mkdir -p projects/$ARGUMENTS/.claude/phases
 sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/phases/metrics.md
 cp -r docs/modules/skills/skill-gate projects/$ARGUMENTS/.claude/skills/
 cp docs/modules/agents/skill_reviewer.md projects/$ARGUMENTS/.claude/agents/skill-reviewer.md
@@ -324,6 +325,7 @@ mkdir -p projects/$ARGUMENTS/.claude/drafts/skills projects/$ARGUMENTS/.claude/d
 **`production` and above — framework-audit + ops-rules + quality-budgets:**
 ```bash
 cp -r docs/modules/skills/framework-audit projects/$ARGUMENTS/.claude/skills/
+sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/framework_metrics_md.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/phases/framework-metrics.md
 sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/ops-rules.md
 sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/quality-budgets.md
 ```
@@ -447,8 +449,8 @@ The arbitrator is mandatory for ALL projects. Read the template at `docs/modules
 If the stack identified in the PRD has framework-specific patterns AND no existing skill was found in Step 6, create a stack skill using the Anthropic folder format:
 
 ```bash
-mkdir -p .claude/skills/[stack-name]
-# Create .claude/skills/[stack-name]/SKILL.md
+mkdir -p projects/$ARGUMENTS/.claude/skills/[stack-name]
+# Create projects/$ARGUMENTS/.claude/skills/[stack-name]/SKILL.md
 ```
 
 **Trigger:** Stack is defined in PRD + no pre-made skill found + framework has known patterns.
@@ -542,10 +544,16 @@ For modules with complex business logic but WITHOUT a matching example template:
 
 Create `.claude/logs/` directory for session logs:
 ```bash
-mkdir -p .claude/logs
+mkdir -p projects/$ARGUMENTS/.claude/logs
 ```
 
 Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/settings.json` with the permissions and hooks configuration.
+
+**ALWAYS merge the `enabledPlugins` key recorded in Step 5.5** (if that step succeeded) into the
+settings file now — this step is the RECEIVER of that handoff. The template does NOT carry the key
+(it is per-project: which plugins were actually installed is decided at runtime, not by the
+template). If Step 5.5 logged the plugin as unavailable, ALWAYS state "no enabledPlugins to merge —
+Step 5.5 reported the plugin unavailable" rather than silently writing nothing.
 
 **Prerequisite:** Prettier must be installed (`npm install -D prettier`). If the project does not use Prettier, skip the hooks section.
 
@@ -660,6 +668,7 @@ git commit -m "chore: bootstrap from agentic framework"
 - metrics.md ← [copied (internal-tool+) / skipped]
 - skill-gate skill + skill-reviewer agent + .claude/drafts/ + .claude/skill-gate/review_reports/ ← [copied (internal-tool+) / skipped (prototype)]
 - framework-audit skill ← [copied (production+) / skipped]
+- framework-metrics.md ← [copied (production+) / skipped]
 - ops-rules.md ← [copied (production+) / skipped]
 - quality-budgets.md ← [copied (production+) / skipped]
 - CI floor ← [created (internal-tool+) / skipped / deferred — task added]
@@ -689,10 +698,17 @@ git commit -m "chore: bootstrap from agentic framework"
 
 ### PRD version: v[X.X.X]
 
+### Initial commit (Step 14.5) — ALWAYS report, never omit:
+- Status: ✅ committed `[hash]` / ❌ FAILED — [reason]
+- Repo root verified: `git rev-parse --show-toplevel` → [path printed]
+- If ❌ (e.g. `user.name` / `user.email` unset): the repo has NO commit yet. Instruct the owner to
+  set the identity locally and re-run Step 14.5's two commands BEFORE the remote block below —
+  `git push` against a commit-less repo does nothing useful.
+
 ### Next session should:
 - [specific action from first Build Order item]
 
-### Attach your remote (run these yourself — bootstrap never pushes):
+### Attach your remote (run these yourself — bootstrap never pushes; requires the commit above to be ✅):
     cd projects/[project-name]
     git remote add origin [project-repo-url]
     git push -u origin main

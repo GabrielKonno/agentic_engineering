@@ -28,7 +28,14 @@ This skill covers the full implementation lifecycle for each task:
 
 ### 1. Enforce criteria quality
 
-Invoke `.claude/agents/criteria-enforcer.md` as subagent, passing `Task: [task name]`. Rewrites WEAK criteria to STRONG. Isolated context.
+**ALWAYS SPAWN `.claude/agents/criteria-enforcer.md` as a subagent before implementing any task**,
+passing `Task: [task name]`. It rewrites WEAK criteria to STRONG in an isolated context. This step
+is the INVOKER — the only place that mandate lives (component-design §9); the agent's own
+frontmatter is read when the registry is BUILT, never when a session must remember to call it.
+
+**ALWAYS REPORT the outcome in the plan and the validation report — `criteria-enforcer: ran — [N
+criteria strengthened]` or `skipped — [reason]`. NEVER emit nothing.** A silence is
+indistinguishable from a forgetting.
 
 ### 2. Classify and route
 

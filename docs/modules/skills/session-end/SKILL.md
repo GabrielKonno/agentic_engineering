@@ -42,7 +42,16 @@ mark a step ⏭️ that the archetype actually requires.
 
 ### 1. Extract patterns from diff
 
-Invoke `.claude/agents/diff-pattern-extractor.md` as subagent. Scans git diff, adds to Known Bug Patterns / Architecture Patterns. Isolated context.
+**ALWAYS SPAWN `.claude/agents/diff-pattern-extractor.md` as a subagent at the end of every
+implementation session.** It scans the git diff and adds to Known Bug Patterns / Architecture
+Patterns in an isolated context. This step is the INVOKER — the only place that mandate lives
+(component-design §9).
+
+**ALWAYS REPORT this step's outcome in the session log — `diff-pattern-extractor: ran — [N patterns
+added]`, or `skipped — [archetype] makes it N/A`. NEVER emit nothing.** The archetype branch above
+legitimately skips this step for 3 of the 4 archetypes, which is precisely why the skip must be
+SAID: an unreported skip is indistinguishable from a forgetting, and the two need opposite
+responses.
 
 ### 2. Create session log + Update project.md
 

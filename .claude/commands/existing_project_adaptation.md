@@ -185,7 +185,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.5.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.6.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -424,7 +424,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.5.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.6.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (11 inline — to `.claude/skills/`):**
 ```bash
@@ -521,6 +521,7 @@ esac
 case "$PROFILE" in
   production|production-financial)
     [ ! -d "$PROJ/.claude/skills/framework-audit" ] && cp -r docs/modules/skills/framework-audit "$PROJ/.claude/skills/"
+    [ ! -f "$PROJ/.claude/phases/framework-metrics.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/framework_metrics_md.md | sed '1d;$d' > "$PROJ/.claude/phases/framework-metrics.md"
     [ ! -f "$PROJ/.claude/rules/ops-rules.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > "$PROJ/.claude/rules/ops-rules.md"
     [ ! -f "$PROJ/.claude/rules/quality-budgets.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > "$PROJ/.claude/rules/quality-budgets.md"
     ;;
