@@ -108,7 +108,7 @@ This repository supports 5 session modes, each activated by its slash command:
 | **PRD Change** | `/prd_change [project-name]` | Modify an existing PRD with impact analysis |
 | **Bootstrap** | `/bootstrap [project-name]` | Create project structure from PRD (Session 0) |
 | **Existing Project Adaptation** | `/existing_project_adaptation [project-name]` | Upgrade existing project to current framework |
-| **Framework Maintenance** | `/maintenance` | Edit framework docs/examples (no project work) |
+| **Framework Maintenance** | `/maintenance` | Edit framework docs/examples, this repo's own `.claude/` runtime, and `assets/docs/` lineage (no project work) |
 
 Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
 
@@ -183,6 +183,7 @@ evolution-policy template). Upstreaming them is a **maintenance** operation:
 
 - **Never modify files in `docs/` or `examples/` during bootstrap operations** — these are
   read-only references for project creation. Exception: framework maintenance sessions
+  (which may also edit this repo's own `.claude/` runtime and write `assets/docs/` records)
   (activate with `/maintenance` command, or when the user explicitly states this is a
   maintenance session / provides a correction plan targeting these files).
 - **Always work inside `projects/[project-name]/`** when creating project files

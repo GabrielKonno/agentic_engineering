@@ -8,7 +8,8 @@ description: >
   shared component modifications — using pixel-diff analysis against baselines.
   USE PROACTIVELY when diff modifies shared UI components (button, modal, nav,
   form, card, layout primitives), CSS variables, design tokens, or global
-  stylesheets that cascade visually across the app. NOT needed for isolated
+  stylesheets that cascade visually across the app, or when code-reviewer or
+  validator declares a visual regression gap. NOT needed for isolated
   single-consumer components, backend-only, or data-only changes. Without this,
   CSS cascade regressions pass validation undetected across viewports and browsers.
   Produces Visual Regression Report → APPROVE / FIX REQUIRED.

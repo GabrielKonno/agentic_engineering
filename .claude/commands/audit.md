@@ -1,6 +1,8 @@
 # Framework Audit
 
-This is a **read-only audit session** for the agentic_engineering framework repository. No files will be modified.
+This is a **read-only audit session** for the agentic_engineering framework repository. **No
+AUDITED file is modified** — the audit never fixes what it finds. It writes exactly one file: its
+own report (Phase 3), which is this session's output, not a change to the thing under audit.
 
 **Authorized operations:**
 - Read any file in the repository
@@ -411,7 +413,11 @@ CHECKS:
        docs/modules/skills/commit/SKILL.md, and any other files where versions appear
   E.3. List every occurrence with file, line, and the version string
   E.4. Report any version string that does NOT match the canonical version
-  E.5. Specifically flag: commit/SKILL.md "created: framework-v2.2.1" vs README canonical version
+  E.5. NEVER report a `created: framework-vX.Y.Z` field as a version mismatch. Those fields are
+       LINEAGE — they record when a component was born, and the maintenance Version-bumps policy
+       explicitly forbids rewriting them on a bump. Components legitimately carry versions older
+       than the canonical one. Flag such a field ONLY if a bump REWROTE it (compare against the
+       previous commit), which is the actual defect.
 
 [D12] Examples follow conventions in examples/README.md
   D12.1. Read examples/README.md — extract required frontmatter fields and structural conventions
@@ -597,6 +603,10 @@ step is the carry-over half.
 1. **ALWAYS WRITE the consolidated report to `assets/docs/audit-YYYY-MM-DD.md`** — the full
    summary matrix plus every finding with its evidence and file:line. This is the only file the
    audit writes.
+   **If a report for today already exists, APPEND a `# Run N` section to it — NEVER overwrite it
+   and never invent a suffixed filename.** Two runs in one day is the normal shape of
+   audit → maintenance → re-audit, and the earlier run's ledger is what the later one carries
+   forward.
 2. **ALWAYS give every finding a STABLE ID (`F-1`, `F-2`, …) and a status column**:
    `open` / `applied sHASH` / `rejected — [reason]`. The ID is what a later maintenance session
    cites; a finding without one cannot be tracked across sessions.

@@ -1,6 +1,10 @@
 # Framework Upstream — absorção do lote "cadência e prova de execução" (2026-08-31)
 
-**Origem:** 1 nota de evolução escrita por um projeto-fonte de perfil production-financial em
+**Origem — doc absorvido (nome completo, conforme intake step 4; é o que o cross-check do Step 0
+grepa):**
+- `framework-evolution-2026-08-21-cadence-and-execution-proof.md`
+
+1 nota de evolução escrita por um projeto-fonte de perfil production-financial em
 2026-08-21, na 3ª `/framework-audit` formal dele. Três evoluções de nível FRAMEWORK, todas
 graduadas. Este doc registra O QUE subiu, ONDE cada peça caiu, o que foi ADAPTADO e o que
 deliberadamente NÃO subiu. (Isolamento de informação de projeto: o projeto é referido só por
@@ -82,6 +86,19 @@ somou ZERO spawns em 24 sessões auditadas.
   contava comentário; métrica de share que punia quem acrescenta teste vivo a um audit existente)
   — são instâncias já cobertas pela regra geral do instrumento; subir cada uma inflaria os
   templates sem adicionar controle novo.
+
+## Âncoras de eficácia — o que a próxima auditoria deve MEDIR
+
+O `evolution_policy.md` exige esta tabela de todo doc de evolução de PROJETO. O repo-mãe passa a
+aplicá-la a si mesmo (o mesmo back-sweep que o checklist item 5 agora exige). Nenhuma pergunta se
+responde relendo este doc.
+
+| # | Pergunta | Como responder |
+|---|---|---|
+| 1 | Alguma entrada de cadência nova omitiu o `status:`? Alguma audit interrompida voltou a zerar o relógio? | grep `status:` nas linhas de `metrics.md`/`framework-metrics.md` de projetos bootstrapados após este commit |
+| 2 | Algum relatório de validação citou suíte sem a contagem executada? | grep `Tests:` nos relatórios; toda ocorrência sem `(N executed)` é uma falha da regra |
+| 3 | Os invocadores passaram a REPORTAR `ran`/`skipped`? Em quantas sessões desde a absorção? | grep as linhas `criteria-enforcer:`, `diff-pattern-extractor:`, `PRD sync:` nos logs |
+| — | **Meta:** alguma destas remediações introduziu achado da MESMA classe? | a `/audit` de 2026-08-31 já respondeu SIM — 6 achados novos, todos de varredura incompleta. Ver `audit-2026-08-31.md` Run 2 |
 
 ## Verificação desta sessão
 

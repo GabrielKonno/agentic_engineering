@@ -5,7 +5,9 @@ applies_to: all modules that collect, store, process, or transmit personal data
 
 # Compliance Rules (LGPD / GDPR)
 
-## Scope
+## Inviolable Rules
+
+### Scope
 
 Aplica-se quando o sistema lida com **dados pessoais**: qualquer informação que identifica
 ou pode identificar uma pessoa natural.

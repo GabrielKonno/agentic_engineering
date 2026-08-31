@@ -97,7 +97,7 @@ WHERE table_name = '[table]';
 ## Output Format
 
 ```
-## Migration Report: [migration_name]
+## Migration Safety Report: [migration_name]
 
 ### Changes:
 - [Table X: added column Y (type, nullable, default)]

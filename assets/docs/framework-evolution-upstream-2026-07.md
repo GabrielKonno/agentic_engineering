@@ -1,6 +1,13 @@
 # Framework Upstream — absorção das evoluções do projeto-fonte (2026-07-16)
 
-**Origem:** 4 notas de evolução escritas pelo projeto-fonte (perfil production-financial) entre
+**Origem — docs absorvidos (nomes completos, conforme intake step 4; é o que o cross-check do
+Step 0 grepa):**
+- `framework-evolution-2026-07-12-authoring-blindspots.md`
+- `framework-evolution-2026-07-14-context-proprioception.md`
+- `framework-evolution-2026-07-14-loop-orchestration-gaps.md`
+- `framework-evolution-2026-07-16-watchdog-and-silent-component-loss.md`
+
+4 notas de evolução escritas pelo projeto-fonte (perfil production-financial) entre
 2026-07-12 e 2026-07-16, documentando lições do primeiro uso real do Autonomous Loop Mode
 (Level 5) e um incidente de perda silenciosa de componente. Este doc registra O QUE graduou
 para os templates compartilhados (`docs/modules/`), COMO foi adaptado, e o que deliberadamente

@@ -117,7 +117,11 @@ These examples serve as quality reference for creating agents, skills, and rules
 - Fill Build Order from PRD module dependencies
 - Fill Design System reference from PRD section 6 (Design and UX)
 - Fill Environment Variables from stack requirements
-- Leave Commands, MCP Servers, Skills & Agents, Hooks empty (filled in later steps)
+- Fill **Commands** from the PRD stack now (build / lint / test / dev). Step 14.2 READS this
+  section to generate the CI pipeline, and no later step fills it — leaving it empty produces a CI
+  floor with no commands.
+- Leave MCP Servers (Step 5), Skills & Agents (Step 6), and Hooks (Step 14) empty — those steps
+  fill them and each says so explicitly.
 
 Create the file at the project root as `CLAUDE.md`.
 
@@ -130,7 +134,7 @@ Create the file at the project root as `CLAUDE.md`.
 **If `.claude/phases/project.md` already exists:** Do NOT overwrite. Add a new index row to the Progress Log table for this migration/bootstrap session. Verify it has the required sections (Architectural Decisions, Module Relationships, Progress Log index table). Add missing sections.
 
 **If it does not exist:** Read the template at `docs/modules/templates/project_md.md`. Adapt with PRD data:
-- Fill Overview from PRD sections 1.1, 1.2, 1.3 (including `**PRD version:** v1.0.0`)
+- Fill Overview from PRD sections 1.1, 1.2, 1.3 (including `**PRD version:** [READ the latest version from the PRD's Changelog table — do NOT assume v1.0.0; a PRD revised via `/prd_change` before bootstrap carries a higher version, and this field is what prd-sync-checker compares against]`)
 - Fill Architectural Decisions table with stack decisions from PRD
 - Fill Module Relationships with dependencies from PRD
 - Fill Project Phases from Build Order
@@ -557,6 +561,11 @@ Step 5.5 reported the plugin unavailable" rather than silently writing nothing.
 
 **Prerequisite:** Prettier must be installed (`npm install -D prettier`). If the project does not use Prettier, skip the hooks section.
 
+**ALWAYS write the outcome back into CLAUDE.md's `## Hooks` section** — the template ships the
+placeholder "[Configured in Step 14 below — depends on project formatter.]", and a project whose
+CLAUDE.md still carries that line references a bootstrap step that does not exist in the project.
+Replace it with the configured hooks, or with "none — project has no formatter".
+
 **Note:** If `.claude/settings.json` or `.claude/settings.local.json` already exists, merge the keys rather than overwriting.
 
 ---
@@ -697,6 +706,9 @@ git commit -m "chore: bootstrap from agentic framework"
 - [list]
 
 ### PRD version: v[X.X.X]
+
+### Plugin enablement (Step 5.5 → Step 14) — ALWAYS report, never omit:
+- `enabledPlugins` merged into settings.json: [key] / `none — Step 5.5 reported the plugin unavailable`
 
 ### Initial commit (Step 14.5) — ALWAYS report, never omit:
 - Status: ✅ committed `[hash]` / ❌ FAILED — [reason]

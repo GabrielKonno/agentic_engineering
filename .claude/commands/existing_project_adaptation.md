@@ -509,6 +509,9 @@ The current framework scales ceremony by risk profile. Existing projects must be
 ```bash
 PROFILE="[chosen]"   # prototype | internal-tool | production | production-financial
 PROJ="projects/$ARGUMENTS"
+# EPA targets projects that may have NO framework structure — the metrics redirects below
+# fail silently without this. (bootstrap has the same guard at its Step 5.8.)
+mkdir -p "$PROJ/.claude/phases"
 case "$PROFILE" in
   internal-tool|production|production-financial)
     [ ! -d "$PROJ/.claude/skills/codebase-audit" ] && cp -r docs/modules/skills/codebase-audit "$PROJ/.claude/skills/"

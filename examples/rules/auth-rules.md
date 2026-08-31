@@ -5,7 +5,9 @@ applies_to: all modules with user access, protected resources, role-based featur
 
 # Authentication & Authorization Rules
 
-## Authentication
+## Inviolable Rules
+
+### Authentication
 
 1. **Every server-side action/endpoint MUST verify the user's session** before any operation — no exceptions.
 2. **Session validation is server-side only** — client-side checks (localStorage token, cookie presence) are UX, not security.

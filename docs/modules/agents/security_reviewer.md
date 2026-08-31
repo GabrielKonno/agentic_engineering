@@ -33,7 +33,7 @@ When invoked as subagent:
 When invoked as subagent, produce:
 ```
 ## Security Review Report: [feature/task name]
-### Sections checked: [list which sections 1-9 were applicable]
+### Sections checked: [list which of the numbered sections were applicable]
 ### Findings:
 | # | Severity | Section | Finding | Evidence | Status |
 |---|----------|---------|---------|----------|--------|
@@ -218,7 +218,7 @@ mechanism: main Claude reads it, finds `sast-scanner` by its description, and sp
 
 ## Coverage Gap Declaration
 
-After completing Sections 1-10, declare what was and was not covered.
+After completing ALL numbered sections, declare what was and was not covered.
 Include this section in every Security Review Report.
 
 ### What this review covered

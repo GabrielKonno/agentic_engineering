@@ -123,7 +123,10 @@ The framework instructs the AI to check `assets/examples/` before creating any n
   reached through a gap declaration carry BOTH sections
 - Checklist with `- [ ]` items — actionable, verifiable
 - `## BOUNDARIES` section — what the agent must NOT read (anti-bias firewall)
-- Recommendation line: APPROVE / FIX REQUIRED / BLOCK
+- Recommendation line: APPROVE / FIX REQUIRED / BLOCK — or the domain's equivalent verdict
+  vocabulary when a binary approve/fix reads wrong for the measurement (e.g. `load-tester` uses
+  WITHIN SLA / DEGRADED / BREACH). The requirement is a single explicit verdict line, not the
+  exact words
 
 **Skills (HOW to do) — Anthropic folder format:**
 - Each skill is a folder: `skill-name/SKILL.md`

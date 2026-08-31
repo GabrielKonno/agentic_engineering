@@ -42,7 +42,7 @@ The framework has 5 session modes in the framework repo, plus project-repo execu
 - `/prd_change` — Modify an existing PRD with impact analysis
 - `/bootstrap` — Create project structure from PRD (Session 0)
 - `/existing_project_adaptation` — Upgrade existing project to framework
-- `/maintenance` — Edit framework docs, examples, CLAUDE.md
+- `/maintenance` — Edit framework docs, examples, CLAUDE.md, this repo's own `.claude/` runtime, and `assets/docs/` records
 
 **Project repo** (inside the project) — The AI reads the project's own CLAUDE.md, follows the Session Protocol, proposes sprints, implements tasks, validates via subagents, and reports with evidence. The framework repo is no longer involved.
 
@@ -109,7 +109,7 @@ Run these from the framework root with Claude Code:
 | `/prd_change` | project name | Modify existing PRD with full impact analysis |
 | `/bootstrap` | project name | Bootstrap project from PRD (Session 0) |
 | `/existing_project_adaptation` | project name | Upgrade existing project to framework |
-| `/maintenance` | (none) | Edit framework docs, examples, CLAUDE.md |
+| `/maintenance` | (none) | Edit framework docs, examples, CLAUDE.md, this repo's own `.claude/` runtime, `assets/docs/` records |
 
 **Alternative:** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 
