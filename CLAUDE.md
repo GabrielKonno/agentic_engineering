@@ -65,9 +65,10 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── component_design.md         # Agent/skill/rule design: gap-declaration, Pushy Descriptions
 │   │   │   ├── ops_rules.md                # Operate/lifecycle dimension template (production+)
 │   │   │   └── quality_budgets.md          # Quality caps + delta gate (production+)
-│   │   └── skills/                         # Pre-built process skills (14: 11 lifecycle/process + 3 tier-gated)
-│   │       ├── sprint-proposer/            # Session Protocol and Execution Protocol
-│   │       ├── validation-orchestrator/    # as reusable, evolvable components
+│   │   └── skills/                         # Pre-built process skills (15: 12 lifecycle/process + 3 tier-gated)
+│   │       ├── sprint-proposer/            # Session entry + sprint proposal (Levels 3-4)
+│   │       ├── autonomous-loop/            # Level 5 — whole-segment orchestration (opt-in)
+│   │       ├── validation-orchestrator/    # Per-task lifecycle + validation routes
 │   │       ├── codebase-audit/             # MACRO axis — system health (internal-tool+)
 │   │       ├── framework-audit/            # Meta-loop — process blind spots (production+)
 │   │       ├── skill-gate/                 # Creation gate — blind review of new skills/rules (internal-tool+)

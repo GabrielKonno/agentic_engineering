@@ -5,7 +5,7 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > **Note:** 3 process components that produce decisions or analyses are proper agents:
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
-> This directory contains 14 skills: 11 **inline** (6 implementation + 3 session lifecycle + 1 PRD process + 1 commit workflow) + 3 **tier-gated** skills (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the project's risk profile warrants them.
+> This directory contains 15 skills: 12 **inline** (6 implementation + 3 session lifecycle + 1 whole-segment orchestration + 1 PRD process + 1 commit workflow) + 3 **tier-gated** skills (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the project's risk profile warrants them.
 
 ## Generality contract (inviolable)
 
@@ -37,20 +37,21 @@ These skills implement steps of the Session Protocol, Execution Protocol, PRD wo
 
 | # | Skill | Type | When triggered |
 |---|-------|------|---------------|
-| 1 | sprint-proposer | Process + judgment | Start of session (user-triggered) — loads context, proposes sprint, manages sprint-approved mode |
-| 2 | session-end | Process + judgment | End of session (user-triggered) |
-| 3 | context-recovery | Process pure | Mid-session emergency (user-triggered) |
-| 4 | validation-orchestrator | Process + judgment | Before + during implementation |
-| 5 | project-md-updater | Process + judgment | End of session (called by session-end, item 2) |
-| 6 | pendencias-updater | Process + judgment | End of session (called by session-end, item 3) |
-| 7 | config-file-updater | Process + judgment | End of session (called by session-end, item 4) |
-| 8 | rules-agents-updater | Process + judgment | End of session (called by session-end, item 5) |
-| 9 | session-log-creator | Process pure | End of session (called by session-end, with item 2) |
-| 10 | cross-cutting-analysis | Process + judgment | During PRD planning (Phase 4) and PRD change (Phase 3) — identifies and maintains transversal themes |
-| 11 | commit | Process pure | Before any non-trivial commit (user-triggered) — staging verification, intent matching, conventional messages |
-| 12 | codebase-audit | Process + judgment (tier-gated: internal-tool+) | Periodic MACRO health audit (user-triggered; proposed by sprint-proposer at AUDIT_CADENCE / phase boundary) |
-| 13 | framework-audit | Process + judgment (tier-gated: production+) | Periodic meta-audit of the project's own process (user-triggered; proposed at FRAMEWORK_AUDIT_CADENCE / phase boundary) |
-| 14 | skill-gate | Process + judgment (tier-gated: internal-tool+) | When a NEW skill or rules file is created — draft in `.claude/drafts/`, blind review by skill-reviewer, conditional promotion (enforced by PostToolUse hook) |
+| 1 | sprint-proposer | Process + judgment | Start of session (user-triggered) — owns SESSION ENTRY for every mode, proposes sprint, manages sprint-approved mode, hands off to autonomous-loop |
+| 2 | autonomous-loop | Process + judgment | Whole-segment execution (user-triggered, opt-in Level 5) — main agent orchestrates, one implementer subagent per medium task; entered after sprint-proposer or by LOOP CONTINUATION handoff |
+| 3 | session-end | Process + judgment | End of session (user-triggered) |
+| 4 | context-recovery | Process pure | Mid-session emergency (user-triggered) |
+| 5 | validation-orchestrator | Process + judgment | Before + during implementation |
+| 6 | project-md-updater | Process + judgment | End of session (called by session-end, item 2) |
+| 7 | pendencias-updater | Process + judgment | End of session (called by session-end, item 3) |
+| 8 | config-file-updater | Process + judgment | End of session (called by session-end, item 4) |
+| 9 | rules-agents-updater | Process + judgment | End of session (called by session-end, item 5) |
+| 10 | session-log-creator | Process pure | End of session (called by session-end, with item 2) |
+| 11 | cross-cutting-analysis | Process + judgment | During PRD planning (Phase 4) and PRD change (Phase 3) — identifies and maintains transversal themes |
+| 12 | commit | Process pure | Before any non-trivial commit (user-triggered) — staging verification, intent matching, conventional messages |
+| 13 | codebase-audit | Process + judgment (tier-gated: internal-tool+) | Periodic MACRO health audit (user-triggered; proposed by sprint-proposer at AUDIT_CADENCE / phase boundary) |
+| 14 | framework-audit | Process + judgment (tier-gated: production+) | Periodic meta-audit of the project's own process (user-triggered; proposed at FRAMEWORK_AUDIT_CADENCE / phase boundary) |
+| 15 | skill-gate | Process + judgment (tier-gated: internal-tool+) | When a NEW skill or rules file is created — draft in `.claude/drafts/`, blind review by skill-reviewer, conditional promotion (enforced by PostToolUse hook) |
 
 ## Skill Creator usage
 

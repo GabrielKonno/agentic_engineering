@@ -45,10 +45,16 @@ indistinguishable from a forgetting.
 
 **Sprint-approved mode:** Medium tasks proceed without approval. Large still need approval. See `sprint-proposer` skill.
 
-**Autonomous Loop Mode (Level 5):** Phase A is executed by an implementer SUBAGENT for
-medium tasks (the main agent orchestrates), and Phase B for routine tasks uses ONE merged
-review+validation subagent instead of the two-judge chain. Logic-heavy and security
-routes are unchanged. Full mechanics: `sprint-proposer` skill → Autonomous Loop Mode.
+**Autonomous Loop Mode (Level 5):** Phase A is executed by an implementer SUBAGENT for medium
+tasks under a PLAN-FIRST contract (the plan is drafted INSIDE the implementer's isolated context,
+never in the orchestrator's), and Phase B for routine tasks uses ONE merged review+validation
+subagent instead of the two-judge chain. Logic-heavy and security routes are unchanged.
+
+**Ownership of "Before Implementing" in loop mode — ALWAYS this split:** steps 1-3 above stay with
+the ORCHESTRATOR (criteria-enforcer BEFORE dispatch, classification, git checkpoint); ONLY the
+implementation plan moves down to the implementer. An implementer that strengthens its own criteria
+is grading its own exam, and the criteria are also the validator's yardstick. Full mechanics:
+`autonomous-loop` skill.
 
 ### 3. Git checkpoint (medium and large)
 

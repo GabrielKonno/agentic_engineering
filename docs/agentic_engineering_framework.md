@@ -44,7 +44,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/templates/` | 7 document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json, metrics.md, framework-metrics.md, the `scripts/check-agent-frontmatter.mjs` liveness guard). |
 | `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
 | `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design always; ops-rules, quality-budgets for production+ profiles). |
-| `docs/modules/skills/` | 14 pre-built skills (11 lifecycle: sprint-proposer, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 3 tier-gated: codebase-audit, framework-audit, skill-gate) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated skills copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
+| `docs/modules/skills/` | 15 pre-built skills (12 lifecycle: sprint-proposer, autonomous-loop, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 3 tier-gated: codebase-audit, framework-audit, skill-gate) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated skills copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | 6 slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`, `/audit`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. `/audit` is a read-only utility for framework integrity checks — it never modifies an audited file, and writes only its own dated report under `assets/docs/`. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline (15 primary steps plus sub-steps like 5.7/5.8/14.5) that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
@@ -203,7 +203,7 @@ agentic_engineering/                         # Framework root (meta-project)
 │   │   ├── templates/                        # Document and config templates for bootstrap
 │   │   ├── agents/                           # Agent templates (copied to .claude/agents/)
 │   │   ├── rules/                            # Rules templates (copied to .claude/rules/)
-│   │   └── skills/                           # 14 skills (11 lifecycle + 3 tier-gated, copied by profile)
+│   │   └── skills/                           # 15 skills (12 lifecycle + 3 tier-gated, copied by profile)
 ├── examples/                                # Reference examples for agent/skill creation
 │   ├── README.md                            # How to use examples, conventions, key patterns
 │   ├── agents/                              # Agent templates (flat .md)
@@ -283,7 +283,7 @@ The framework has six types of components. Each answers a different question:
 | **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
 | **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
 | **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (11 inline + 3 tier-gated) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
+| **Process Skills** | `modules/skills/*/SKILL.md` (12 inline + 3 tier-gated) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
@@ -346,7 +346,7 @@ Step     Source (framework repo)                     Output (project folder)
 4        modules/templates/pendencias_md.md      --> .claude/phases/pendencias.md
 5        (external: npm registry, CLI tools)     --> MCP servers installed
 5.5      (external: skill-creator plugin)        --> Plugin installed (optional)
-5.7      modules/skills/*                        --> .claude/skills/* (copy 11 lifecycle skills)
+5.7      modules/skills/*                        --> .claude/skills/* (copy 12 lifecycle skills)
          modules/agents/prd_sync_checker.md     --> .claude/agents/prd-sync-checker.md
          modules/agents/criteria_enforcer.md    --> .claude/agents/criteria-enforcer.md
          modules/agents/diff_pattern_extractor.md --> .claude/agents/diff-pattern-extractor.md

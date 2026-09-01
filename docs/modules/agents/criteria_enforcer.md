@@ -7,7 +7,7 @@ description: >
 tools: Read, Write
 effort: high
 invocation: subagent
-receives: "Task: [task name exactly as in pendencias.md]" — passed by main agent in prompt
+receives: '"Task: [task name exactly as in pendencias.md]" — passed by main agent in prompt'
 produces: criteria upgrade summary — list of upgraded criteria (WEAK→STRONG) or "all STRONG — no changes"
 created: framework-v1.6.0 (pre-validated)
 derived_from: execution_protocol "Before implementing"

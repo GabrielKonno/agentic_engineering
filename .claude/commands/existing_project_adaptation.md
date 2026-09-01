@@ -155,7 +155,7 @@ Before proceeding, present a summary of everything you read:
 - Agents: [list with names]
 - Rules: [list with names]
 - Skills: [list with names]
-- Process skills: [N of 9 installed] — [list missing: sprint-proposer, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator]
+- Process skills: [N of 12 installed] — [list missing: sprint-proposer, autonomous-loop, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit]
 - Process agents: [N of 3 installed] — [list missing: prd-sync-checker, criteria-enforcer, diff-pattern-extractor]
 - Session rules: [exists/missing] — .claude/rules/session-rules.md
 - Evolution policy: [exists/missing] — .claude/rules/evolution-policy.md
@@ -185,7 +185,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.7.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.8.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -223,7 +223,7 @@ Required sections (compare against docs/modules/templates/claude_md.md — v2.7.
 - **"Evolutions applied"** section in session log template
 
 *Process components (copied in Step 2.9):*
-- 11 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 3 core rules files (`.claude/rules/`), plus tier-gated audit skills + ops/budgets rules by risk profile (Step 2.9b)
+- 12 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 3 core rules files (`.claude/rules/`), plus tier-gated audit skills + ops/budgets rules by risk profile (Step 2.9b)
 - Without these, the skill pointers in CLAUDE.md are broken references
 
 **For each addition, log:**
@@ -424,13 +424,13 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.7.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.8.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
-**Copy process skills (11 inline — to `.claude/skills/`):**
+**Copy process skills (12 inline — to `.claude/skills/`):**
 ```bash
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
-  case "$skill_name" in codebase-audit|framework-audit) continue ;; esac  # tier-gated — copied in Step 2.9b
+  case "$skill_name" in codebase-audit|framework-audit|skill-gate) continue ;; esac  # tier-gated — copied in Step 2.9b
   if [ ! -d "projects/$ARGUMENTS/.claude/skills/$skill_name" ]; then
     cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"
     echo "Copied skill: $skill_name"
@@ -485,7 +485,7 @@ if it has a CI pipeline, add a `guards` stage running it (dependency-free, no in
 Then RUN it once now — an adapted project may already carry a broken frontmatter.
 
 **Expected after this step:**
-- **Process skills (11 lifecycle):** sprint-proposer, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit
+- **Process skills (12 lifecycle):** sprint-proposer, autonomous-loop, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit
 - **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
 - **Rules (3 core):** session-rules.md, evolution-policy.md, component-design.md
 - **Guards (1):** scripts/check-agent-frontmatter.mjs (component-registry liveness — run once during adaptation)
@@ -792,8 +792,8 @@ find projects/$ARGUMENTS/.claude/skills -name "SKILL.md" 2>/dev/null | while rea
   grep -q "effort:" "$f" 2>/dev/null || echo "MISSING effort: in $f"
 done
 
-echo "=== All 11 process skills present? ==="
-for skill in sprint-proposer session-end context-recovery validation-orchestrator project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator cross-cutting-analysis commit; do
+echo "=== All 12 process skills present? ==="
+for skill in sprint-proposer autonomous-loop session-end context-recovery validation-orchestrator project-md-updater pendencias-updater config-file-updater rules-agents-updater session-log-creator cross-cutting-analysis commit; do
   ls "projects/$ARGUMENTS/.claude/skills/$skill/SKILL.md" 2>/dev/null || echo "MISSING process skill: $skill"
 done
 
@@ -850,7 +850,7 @@ done
 - .claude/agents/arbitrator.md (if created)
 - [any other new files]
 
-### Process skills: [N of 9 copied from framework]
+### Process skills: [N of 12 copied from framework]
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
 - **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator

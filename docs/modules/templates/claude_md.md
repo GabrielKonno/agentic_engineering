@@ -1,7 +1,7 @@
 # Template: CLAUDE.md (slim orchestrator)
 
 > Create at project root as `CLAUDE.md`.
-> This is the v2.7.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
+> This is the v2.8.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
 > For design rationale and architectural decisions, see `docs/modules/README.md`.
 
 ```markdown
@@ -23,6 +23,7 @@ This file provides guidance to Claude Code when working with this repository.
 ## Session Protocol
 
 - Before implementation work, run `/sprint-proposer` to load context and propose a sprint
+- To run an approved backlog segment end-to-end (Level 5, opt-in), run `/autonomous-loop` after `/sprint-proposer`
 - Every session with implementation work MUST end with `/session-end`
 - If context degrades mid-session: run `/context-recovery`
 - Task limits, documentation quality, reasoning depth: see `.claude/rules/session-rules.md`

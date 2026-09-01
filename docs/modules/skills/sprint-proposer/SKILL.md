@@ -6,9 +6,10 @@ description: >
   Run before implementation work to load project state, sync PRD, and propose a
   sprint. Checks for model switch continuation, reads project.md, optionally syncs
   PRD, analyzes pendencias.md, selects 3-5 tasks by dependency, and presents for
-  approval. Also manages sprint-approved mode (exception stops, between-tasks
-  workflow, sprint reports) and the opt-in Autonomous Loop Mode (Level 5 —
-  whole-backlog execution with the main agent as orchestrator). Not needed for
+  approval. Owns SESSION ENTRY for every mode (audit cadence, markers, PRD sync)
+  and manages sprint-approved mode (exception stops, between-tasks workflow, sprint
+  reports); HANDS OFF to the `autonomous-loop` skill when Level 5 is requested or a
+  LOOP CONTINUATION marker is found. Not needed for
   planning discussions, task management, or quick fixes. Without this,
   implementation sessions start without project context and wrong priorities.
 created: framework-v2.1.0 (pre-validated)
@@ -54,16 +55,24 @@ is INCOMPLETE, ALWAYS say so in the proposal: `audit due — last run was INCOMP
 Proposing is not running — the owner decides. If both are due, propose codebase-audit first
 (code health) and note framework-audit is also due. Then continue to Step 1.
 
-### 1. Check for MODEL SWITCH or LOOP CONTINUATION
+### 1. Check for LOOP CONTINUATION — and HAND OFF
 
 Check for a LOOP CONTINUATION block below the Progress Log table in `.claude/phases/project.md`.
-If one exists: re-enter Autonomous Loop Mode at the next approved phase — no new approval
-(see "Continuation across sessions" in the Autonomous Loop Mode section). Skip the normal
-proposal flow below, BUT still run Step 0 first: a multi-session loop can cross
-`AUDIT_CADENCE` mid-loop. If an audit is due, do NOT silently skip it — include it in the
-resume announcement ("audit due — say 'pause for audit' to run it now, otherwise I'll
-propose it after the loop") and propose it in the final sprint report. The loop NEVER runs
-an audit autonomously; audits stay owner-gated.
+
+**If one exists, this session is a loop RESUME: ALWAYS HAND OFF to the `autonomous-loop` skill**
+at the next approved phase — no new approval (see `autonomous-loop` → "Continuation across
+sessions"). SKIP the normal proposal flow below. Step 0 has already run and its result TRAVELS
+with the handoff: a multi-session loop can cross `AUDIT_CADENCE` mid-loop. If an audit is due, do
+NOT silently skip it — include it in the resume announcement ("audit due — say 'pause for audit'
+to run it now, otherwise I'll propose it after the loop"). The loop NEVER runs an audit
+autonomously; audits stay owner-gated.
+
+**ALWAYS REPORT the check — `loop marker: none` or `loop marker: active → handing off to
+autonomous-loop (phase X of Y)`. NEVER emit nothing.** This step is the INVOKER of the loop's
+resume (component-design §9): nobody reads the `autonomous-loop` frontmatter in a session that has
+not already decided to run it. Mechanical self-check (expected result stated):
+`grep -c "LOOP CONTINUATION — active" .claude/phases/project.md` → `1` means hand off, `0` means
+continue below.
 
 ### 1b. Check for MODEL SWITCH continuation
 
@@ -162,7 +171,7 @@ Derive from each task's `Complexity:` field in pendencias.md. If no complexity f
 
 #### 4d. Handle response
 - **Human approves** → enter sprint-approved mode (medium tasks proceed without approval)
-- **Human approves in loop mode** (or requested it up front) → enter Autonomous Loop Mode (Level 5, below)
+- **Human approves in loop mode** (or requested it up front) → INVOKE the `autonomous-loop` skill (Level 5). Steps 0-3 above ARE the session entry it relies on — that skill NEVER repeats them
 - **Human adjusts** → apply adjustments and confirm
 - **Human wants task-by-task** → proceed as Level 3 (present each task individually)
 
@@ -220,174 +229,35 @@ After the validation-orchestrator skill completes successfully:
 ### Known Bug Patterns added: [N]
 ### Rules files created/updated: [list]
 ### Skill-gate activity (if installed): [promoted / awaiting owner confirmation / failed review → pendency / none]
-### Orchestration lessons (loop mode — ALWAYS present, "none" is a valid entry):
+### Orchestration lessons (loop mode only — see `autonomous-loop`; "none" is a valid entry):
 [subagent collisions/contention, implementer-report gaps, stale-premise surprises — distinct from code discoveries]
 ### Next sprint suggestion: [top 3-5 tasks]
 ```
 
 **Why the orchestration-lessons section exists:** the diff-pattern-extractor captures CODE
 lessons (it scans the diff) and the session log captures decisions — but "two subagents
-collided on the same file" appears in NO diff. Multi-agent execution produces a lesson type
-the framework's collectors don't otherwise catch; this fixed section is the capture route,
-and session-end persists it (session log + rules-agents-updater routing when a lesson
-should harden a skill/rule).
+collided on the same file" appears in NO diff. Full rationale and the loop's own report format:
+`autonomous-loop` → "Final report".
 
 ---
 
-## Autonomous Loop Mode (Level 5 — opt-in, NEVER default)
+## Autonomous Loop Mode (Level 5) — lives in its OWN skill
 
-Extends sprint-approved mode from ONE batch to the WHOLE approved backlog, with the main
-agent acting as ORCHESTRATOR instead of implementer. Validated in practice before
-formalization (framework v2.5.0): one prototype session delivered 7 build phases
-end-to-end under this shape.
+Level 5 (whole-SEGMENT execution with the main agent as ORCHESTRATOR) was extracted to
+`.claude/skills/autonomous-loop/` in framework v2.8.0. Its mechanics are deliberately NOT restated
+here: a mode whose ~150 lines load in every non-loop session is context every ordinary sprint pays
+for and never uses.
 
-### Activation
-- The owner explicitly requests it ("run the backlog in loop mode"), OR Step 4c MAY
-  OFFER it when the backlog fits: mostly small/medium independent tasks, dependencies
-  resolvable in sequence, no large task, no architecture/security task that would force
-  a model switch mid-loop. Offering is not entering — the owner decides.
-- ALWAYS present a loop proposal for approval: the phases (groups of 3-5 tasks in
-  dependency order), the per-task persistence discipline that paces it (below), and what
-  is explicitly OUT of loop scope. Owner approval of the loop proposal = prior approval
-  for every phase.
+**ALWAYS INVOKE `autonomous-loop` — NEVER improvise loop mechanics from this file — when:**
+- the owner asks to run the backlog in loop mode, OR
+- Step 1 found an active LOOP CONTINUATION marker (handoff), OR
+- Step 4c offered the loop and the owner accepted.
 
-### Orchestrator role — the main agent does NOT implement medium tasks
-- **Small tasks** (single file, routine): implement directly — spawning costs more than doing.
-- **Medium tasks:** ALWAYS spawn an implementer subagent per task with:
-  - **Input:** the task's full block from pendencias (Context/State/Constraints/Criteria),
-    the relevant rules files, CLAUDE.md Key Patterns, and target file paths — NOT the
-    session history or other tasks' reasoning.
-  - **Output contract:** files changed, diff summary, build/test results, and anything
-    NOT done or discovered. The orchestrator reads the report — never re-derives the
-    implementation reasoning into its own context. That separation is what buys the
-    long horizon.
-  - **Anti-silent-death clause — ALWAYS include it in the implementer prompt:**
-    "NEVER end the turn waiting on a background process; if the final result is not
-    available, report the explicit PARTIAL STATE (what is done, what is running, where
-    the log is)." An implementer that dies waiting on a monitor returns a useless report
-    over real, possibly irreversible work.
-  - **Trust-but-verify (mandatory):** after EVERY implementer return, ALWAYS verify
-    state from the DISK before any commit/validation — working-tree status plus
-    a spot-check of the report's central claims (report says "migration applied" → check
-    the target; says "suite green" → check the log/output). The report GUIDES the
-    verification; it never substitutes for it. This is what turns a dead or partial
-    report into a recoverable state instead of a blind commit (or a falsely-failed phase).
-- **Large tasks** stay OUT of loop scope (individual plan approval, as in sprint-approved mode).
+**Step 4c MAY OFFER the loop** when the backlog fits: mostly small/medium independent tasks,
+dependencies resolvable in sequence, no large task, no architecture/security task that would force
+a model switch mid-loop. **Offering is NOT entering** — the owner decides, and `autonomous-loop`
+re-verifies the gate before planning (its Step 1a).
 
-### Validation geometry (hybrid by risk)
-- **Routine/small:** ONE merged review+validation subagent (single report: checklist
-  review + criteria verification). The implementer is already an isolated subagent, so
-  the two-judge split loses its main justification for low-risk diffs.
-- **Logic-heavy:** full Route 2 (code-reviewer → validator), unchanged.
-- **Security-relevant:** full chain including security-reviewer (+ red-team when
-  high-risk), unchanged.
-- ❌ handling, the 3-retry cap, and arbitrator escalation are inherited unchanged.
-
-### Per-task persistence — there is NO numeric context gate
-> Supersedes the original "~80% context budget" stop condition (framework v2.5.0). That rule
-> was INEXECUTABLE as written: the model has no reliable perception of its own context usage,
-> so an instructed "estimate" produces confabulation dressed as measurement (a first real loop
-> session emitted three self-estimated percentages, all invented, >20 points off the real
-> meter). A rule without an instrument is not a rule.
-
-- The session task limit does NOT apply in loop mode — and neither does any numeric cap on
-  context %, autocompact cycles, or subagent-report counts (a count is a stand-in for the same
-  unobservable quantity).
-- **The orchestrator NEVER emits self-estimated context percentages.** If budget state must be
-  communicated, use countable units ("phase N closed; 7 subagent reports ingested") or ask the
-  owner for the real meter — never an invented "% used".
-- The discipline that REPLACES the gate (all four are CONDITIONS, not good practices):
-  1. **Max ONE task in flight** (uncommitted) at a time.
-  2. **A task is CLOSED only when it is on disk:** code committed + LOOP CONTINUATION marker
-     reflecting the next state + every discovery filed in pendencias + every new decision
-     recorded in the doc that owns it. Nothing load-bearing may exist only in the conversation.
-  3. **After an autocompact, re-anchor from the DISK** — re-read the marker + pendencias before
-     continuing. Canonical docs are the anchor; the compact summary is derived. Re-anchoring
-     every cycle means successive compacts do NOT compound drift (each re-reads the original,
-     not the previous summary).
-  4. **A subagent report is NOT state to protect:** the implementation lives in the working
-     tree (re-derivable from the diff); a read-only verdict is re-runnable (idempotent). If a
-     compact intervenes between a reviewer's verdict and acting on it, RE-RUN the reviewer —
-     NEVER commit on a verdict the compact blurred.
-- With this discipline, an autocompact is a NON-EVENT (lossy compression, not death): a
-  mid-task compact costs at most the single in-flight task. The loop runs until the approved
-  backlog SEGMENT is done or an emergency degradation signal fires (session-rules "Signals of
-  exceeding" — in loop mode they are the EMERGENCY stop → `/context-recovery`, never a pacing
-  knob), and it ends only at a natural TASK boundary, never mid-task.
-- Commit at every task/phase boundary — any stop is resumable from the last closed task.
-
-### Resource contention — the loop creates concurrency the serial flow never had
-Parallel subagents (implementers, session-end steps) collide on shared resources in ways a
-serial session never exercised: two test runs against the same live environment produce
-ROTATING flakes; two writers on the same phase doc clobber each other; one session-end step
-can hold a file another step needs. The orchestrator MUST keep an explicit RESOURCE map
-when dispatching:
-
-- Each subagent's prompt MUST DECLARE the exclusive resources it touches — its FILE set, the
-  shared TEST ENVIRONMENT/database, the PHASE DOCS (pendencias/project.md).
-- **At most ONE live-test process at a time**, always owned by the orchestrator — never an
-  implementer running the suite in parallel with another agent's run (rotating flakes cost
-  multiple re-runs just to tell flake from regression).
-- **NEVER run two writers on the same phase doc at once** — including session-end's own steps, which were
-  written for serial execution and CAN conflict with each other (one step editing a file
-  another step targets is a skip/collision, not a hypothetical).
-- Minimal practical rule when the full map feels heavy: parallelize only work with DISJOINT
-  file sets that runs NO live tests; serialize everything else.
-
-### Per-phase rhythm
-1. **RE-MEASURE every phase premise an existing instrument can measure** (quality/size
-   scripts, suite counts, greps), THEN announce the phase (tasks N..M) in one line.
-   Numbers inherited from an audit or a task block are HYPOTHESES, not contract — a phase
-   planned on stale numbers burns an exception stop on work that no longer exists (seconds
-   of re-measuring convert that stop into a silent scope adjustment). Companion of "a rule
-   without an instrument is not a rule": an instrument without a RE-READ at the moment of
-   use isn't one either.
-2. Execute each task per Between Tasks, with delegation + validation as above.
-3. At the phase boundary: verify the per-task closure conditions held for EVERY task in
-   the phase (committed + marker + discoveries filed + decisions in their owning doc —
-   these are the CONDITION for opening the next phase, not good practice); report the
-   phase to the owner (1 line per task + discoveries).
-4. Proceed DIRECTLY to the next phase — no re-approval. The ONLY pauses are the
-   exception stops (list in session-rules, unchanged — including skill-gate deferral).
-5. Backlog segment done OR emergency degradation signal → final sprint report + full
-   `/session-end` ONCE (never a heavyweight session-end per phase).
-
-**Audit-cadence equivalence:** for `AUDIT_CADENCE` counting, a loop session counts as
-ONE session PER COMPLETED PHASE (record "counts as N sessions for audit cadence" in the
-sprint report). A loop session ships several sessions' worth of code — counting it as
-one would silently thin audit coverage exactly when code volume spikes.
-
-### Loop-specific guardrails (in addition to the exception stops)
-- STOP the loop if 2 CONSECUTIVE tasks fail validation after retries — that is a
-  systemic signal (wrong assumptions, degraded context), not a task-local one.
-- STOP if a discovery invalidates the approved loop plan (dependency order broken,
-  scope contradiction) — re-propose instead of improvising.
-- Discovery cap: max 3 per PHASE (the sprint-approved cap, applied per phase).
-
-### Continuation across sessions — one approval covers the WHOLE backlog
-
-The loop approval is for the BACKLOG, not for one session. When the loop stops with
-approved phases remaining (session ended at a natural task boundary, owner pause, or an
-emergency degradation signal), ALWAYS write a LOOP CONTINUATION block below the Progress
-Log table in `project.md` (same mechanism as the MODEL SWITCH marker) before running
-session-end:
-
-```
-<!-- LOOP CONTINUATION — active -->
-### [date] — Session N (AUTONOMOUS LOOP — in progress)
-**Approved scope:** [the phases as approved, with status per phase]
-**Completed:** [phases/tasks done this session]
-**Next phase:** [tasks N..M]
-**Stop reason:** natural task boundary (session end) / owner pause / [emergency degradation signal]
-```
-
-On the NEXT session, Step 1 checks for this marker (alongside MODEL SWITCH). If present:
-- Re-enter loop mode DIRECTLY at the next phase — NO new approval (the original approval
-  stands until the approved scope is done or the owner revokes it).
-- ALWAYS announce the resume in one line: "Resuming autonomous loop: phase X of Y
-  ([tasks]). Say 'cancel the loop' to revoke." — visibility, not an approval gate.
-- Remove the marker when the approved scope completes (final report) or the owner revokes.
-
-**Scope integrity:** discoveries added during the loop are NEVER absorbed into the
-approved scope — they queue in pendencias and the final report proposes them as the next
-loop. Without this, the scope creeps and "the backlog" never ends.
+What stays HERE and is SHARED by both modes: Steps 0-3 (session entry), "Between Tasks", the
+sprint report format, and the exception-stop list. `autonomous-loop` points back at them rather
+than restating them — one home per mandate (component-design §9).

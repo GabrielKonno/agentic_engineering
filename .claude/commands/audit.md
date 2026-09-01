@@ -67,7 +67,7 @@ CHECKS:
   D9.2. List actual file/folder structure (top 3 levels, excluding .git/ and projects/)
   D9.3. For each entry in the diagram: verify it exists on disk
   D9.4. For each significant file/folder on disk (top 3 levels): verify it appears in the diagram
-  D9.5. Check count comments in the diagram (e.g., "5 slash commands", "11 process skills")
+  D9.5. Check count comments in the diagram (e.g., "5 slash commands", "12 process skills")
         against actual counts on disk
 
 [D16] Project-information isolation (privacy)
@@ -327,7 +327,9 @@ CHECKS:
         (e.g., "project-md-updater", "pendencias-updater", "config-file-updater",
         "rules-agents-updater", "session-log-creator", "diff-pattern-extractor")
   D8.2. Read validation-orchestrator/SKILL.md — extract every skill or agent name referenced
-  D8.3. Read sprint-proposer/SKILL.md — extract every skill or agent name referenced
+  D8.3. Read sprint-proposer/SKILL.md AND autonomous-loop/SKILL.md — extract every skill or
+        agent name referenced (the sprint→loop handoff is a cross-skill reference: a broken
+        link there strands an approved segment mid-backlog)
   D8.4. For each referenced skill name: verify a folder with that name exists in
         docs/modules/skills/
         (Note: orchestrators use project paths like ".claude/skills/X" but the framework
@@ -429,7 +431,7 @@ CHECKS:
 
 [D15] Framework concept doc + READMEs factual accuracy
   D15.1. From docs/agentic_engineering_framework.md — extract ALL numeric claims:
-         - Skill counts (look for "14 pre-built", "11 inline", "14 skills", "3 tier-gated")
+         - Skill counts (look for "15 pre-built", "12 inline", "15 skills", "3 tier-gated")
          - Agent counts (look for "10 agent", "3 process agents")
          - Step counts (look for "15-step")
          - Example counts (look for "20", "9", "11" for agents/skills/rules)

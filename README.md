@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.7.0
+# Agentic Engineering Framework v2.8.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -19,9 +19,9 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
                          |  - 7 doc templates |           | 10 agent .md files  |
-                         |  - 10 agent files  |           | 14 process skills   |
+                         |  - 10 agent files  |           | 15 process skills   |
                          |  - 5 rules files   |           | 5 rules files       |
-                         |  - 14 skills       |           | examples/ (copy)    |
+                         |  - 15 skills       |           | examples/ (copy)    |
                          |  - examples/       |           | settings.json       |
                          +--------------------+           +---------------------+
                                                                     |
@@ -132,11 +132,11 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.7.0)
+│   ├── modules/                            ← Single source of truth (v2.8.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
-│   │   └── skills/                         ← 14 pre-built skills (11 lifecycle + 3 tier-gated)
+│   │   └── skills/                         ← 15 pre-built skills (12 lifecycle + 3 tier-gated)
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
 │   ├── README.md                       ← Conventions for creating agents/skills
@@ -148,7 +148,7 @@ agentic_engineering/
     └── [project-name]/                 ← Each project gets its own git repo
 ```
 
-**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 14 process skills, 10 agent templates, and 5 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
+**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 15 process skills, 10 agent templates, and 5 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
 
 ---
 
@@ -167,7 +167,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/security-reviewer.md` | `modules/agents/security_reviewer.md` | OWASP Top 10 checklist |
 | `.claude/agents/red-team.md` | `modules/agents/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
 | `.claude/agents/blue-team.md` | `modules/agents/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
-| `.claude/skills/*` (11–14 skills, tier-gated) | `modules/skills/*` | Inline process skills (11) + codebase-audit/framework-audit/skill-gate (tier-gated) |
+| `.claude/skills/*` (12–15 skills, tier-gated) | `modules/skills/*` | Inline process skills (12, incl. `autonomous-loop`) + codebase-audit/framework-audit/skill-gate (tier-gated) |
 | `.claude/rules/session-rules.md` | `modules/rules/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
 | `.claude/rules/evolution-policy.md` | `modules/rules/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
 | `.claude/rules/component-design.md` | `modules/rules/component_design.md` | Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment |
@@ -203,7 +203,7 @@ The framework has six component types, each serving a distinct role:
 TOOLKIT PROMPTS          TEMPLATES               PROCESS SKILLS
 (human entry points)     (what to create)        (how to execute)
 
-  /bootstrap ----------> claude_md.md -------.   11 inline skills (+3 tier-gated)
+  /bootstrap ----------> claude_md.md -------.   12 inline skills (+3 tier-gated)
   /prd_planning          project_md.md       |   implement Session Protocol
   /prd_change            pendencias_md.md    |   + Execution Protocol
   /existing_adaptation   agent templates (10)|        |

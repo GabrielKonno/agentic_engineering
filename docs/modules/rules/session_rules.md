@@ -44,6 +44,7 @@ never imposed. Read the profile, then apply ONLY the ceremonies its column marks
 ## Session lifecycle
 
 - Before implementation work, run `/sprint-proposer` (loads project state, syncs PRD, proposes sprint)
+- To run an approved backlog SEGMENT end-to-end (Level 5, opt-in), run `/autonomous-loop` — ALWAYS after `/sprint-proposer`, which owns session entry for every mode
 - Every session with implementation work MUST end with `/session-end`
 - If context degrades mid-session, run `/context-recovery`
 
@@ -51,7 +52,7 @@ never imposed. Read the profile, then apply ONLY the ceremonies its column marks
 
 Maximum 3-5 tasks per session. Up to 7 if all small+related. 1 if large.
 
-Exception: in **Autonomous Loop Mode** (Level 5, opt-in — see sprint-proposer), the task
+Exception: in **Autonomous Loop Mode** (Level 5, opt-in — see the `autonomous-loop` skill), the task
 limit is superseded NOT by a context-percentage gate but by a **per-task persistence
 discipline**: max ONE task in flight (uncommitted) at a time; each task CLOSED to disk —
 code committed + LOOP CONTINUATION marker updated + discoveries filed + new decisions in

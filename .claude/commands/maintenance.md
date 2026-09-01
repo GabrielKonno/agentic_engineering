@@ -150,6 +150,26 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    ```bash
    sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > /tmp/guard.mjs && node /tmp/guard.mjs
    ```
+   **ALWAYS ALSO validate the RAW agent templates** — the ones bootstrap copies VERBATIM with
+   `cp` (no fence extraction), which the command above never sees because they live outside
+   `.claude/`:
+   ```bash
+   python -c "import io,yaml,glob,sys
+   bad=0
+   for p in ['docs/modules/agents/criteria_enforcer.md','docs/modules/agents/prd_sync_checker.md','docs/modules/agents/diff_pattern_extractor.md','docs/modules/agents/skill_reviewer.md']:
+       s=io.open(p,encoding='utf-8').read().replace(chr(13)+chr(10),chr(10))
+       if not s.startswith('---'): continue
+       try: yaml.safe_load(s[4:s.index(chr(10)+'---',4)+1])
+       except Exception as e: bad+=1; print('FAIL',p,type(e).__name__)
+   print('raw agent templates:', 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)"
+   ```
+   Expected result: **`raw agent templates: OK`**. A FAIL here ships a component that is PRESENT
+   in every bootstrapped project and ABSENT from its registry. (Fenced templates — the ones
+   extracted with `sed` — are correctly skipped: their source does not start with `---`.)
+   Evidence this is not hypothetical: run on 2026-09-01, this check found `criteria_enforcer.md`
+   broken since before v2.7.0 — the agent that `validation-orchestrator` and `autonomous-loop`
+   both declare ALWAYS SPAWN.
+
    Expected result: **exit 0**, every component listed OK. ALWAYS REPORT the outcome —
    `liveness: N components OK [full parse | structural-only]` or `liveness: skipped — [reason]`.
    A silence is indistinguishable from a forgetting (component-design §9 rule 3). If the session

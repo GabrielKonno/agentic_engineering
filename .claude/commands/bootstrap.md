@@ -246,7 +246,7 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ### Step 5.7 — Copy pre-built process skills, process agents, and session rules
 
-**Process skills (11 — inline, copied to `.claude/skills/`):**
+**Process skills (12 — inline, copied to `.claude/skills/`):**
 
 ```bash
 mkdir -p projects/$ARGUMENTS/.claude/skills projects/$ARGUMENTS/.claude/agents
@@ -257,6 +257,7 @@ rm -rf projects/$ARGUMENTS/.claude/skills/codebase-audit projects/$ARGUMENTS/.cl
 ```
 
 - **Session lifecycle (user-triggered):** sprint-proposer, session-end, context-recovery
+- **Whole-segment orchestration (user-triggered, opt-in Level 5):** autonomous-loop
 - **During implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **PRD workflows:** cross-cutting-analysis
@@ -274,7 +275,7 @@ cp docs/modules/agents/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/age
 - **Before implementing:** criteria-enforcer (called by validation-orchestrator skill)
 - **Session end:** diff-pattern-extractor (called by session-end skill, item 1)
 
-These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 11 run inline (main agent reads SKILL.md and follows steps in its own context).
+These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 12 run inline (main agent reads SKILL.md and follows steps in its own context).
 
 **Session rules (copied to `.claude/rules/`):**
 
@@ -643,6 +644,7 @@ git commit -m "chore: bootstrap from agentic framework"
 
 ### Process skills: copied from framework (Step 5.7):
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
+- **Whole-segment orchestration (opt-in Level 5):** autonomous-loop
 - **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **PRD workflows:** cross-cutting-analysis
