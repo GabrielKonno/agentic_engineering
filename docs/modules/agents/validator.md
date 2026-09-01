@@ -77,6 +77,18 @@ with ZERO executed, or a summary you could not parse, is ❌ with the reason —
 - Security Review: [summary if exists]
 - Red Team: [summary if exists]
 
+### Coverage Gap Declaration:
+[ALWAYS present — "none" is a valid entry. Every gap THIS validation could not close, in the
+ reviewer gap vocabulary (e.g. "visual regression gap: shared component changed, no baseline
+ comparison run"). NEVER attempt to spawn the specialist from here — this agent runs AS a
+ subagent and only main Claude can use the Agent tool (component-design §7). Main Claude reads
+ this section and spawns the specialist.]
+
+### Items for human verification:
+[ALWAYS present — "none" is a valid entry. Every MANUAL: criterion, plus every reviewer-declared
+ coverage gap for which no specialist report was provided as evidence — flagged ⚠️, NEVER ❌: a
+ coverage limitation is not a finding.]
+
 ### Overall: ✅ PASS / ❌ FAIL
 [If FAIL: which criteria failed and why]
 ```
@@ -137,7 +149,7 @@ Execute in order:
       limitation, not a finding. Flag as ⚠️ in Security row, not ❌.
 
     **Code-reviewer coverage gaps:** If the code-reviewer declared coverage gaps
-    (accessibility, performance, concurrency, data integrity) AND no specialized
+    (accessibility, performance, concurrency, visual regression, data integrity) AND no specialized
     agent report was provided as evidence: note under "Items for human verification"
     with ⚠️, not ❌. Same treatment as security-reviewer gaps — coverage limitation,
     not a finding.

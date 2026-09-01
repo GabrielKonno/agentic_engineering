@@ -232,12 +232,13 @@ or booking/reservation logic:**
 > Recommend: search `.claude/agents/` for a concurrency testing agent and invoke
 > before validator if found.
 
-**If diff modifies multi-table operations, cascading deletes, or denormalized data:**
+**If diff modifies shared UI components, CSS variables, design tokens, or global stylesheets:**
 > Visual regression gap: this review reads the diff, not rendered pixels — a shared component or
 > CSS-variable change can be correct in code and still shift every screen that consumes it.
 > Recommend: search `.claude/agents/` for a visual regression agent (baseline capture and
 > screenshot diffing across the affected screens).
 
+**If diff modifies multi-table operations, cascading deletes, or denormalized data:**
 > Data integrity gap: inline review checks referential integrity patterns.
 > Multi-table transactional consistency and denormalized data drift verification
 > require database-level queries beyond code inspection.

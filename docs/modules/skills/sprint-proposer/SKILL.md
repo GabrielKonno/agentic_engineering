@@ -140,9 +140,11 @@ sprint for the task named in the marker. Context has changed and the continuatio
 - Note complexity classification of each task
 
 #### 4b. Select tasks
-- Pick 3-5 dependency-satisfied tasks
+- **ALWAYS PICK 3-5 dependency-satisfied tasks** — the cap is the limit of a human APPROVAL's
+  attention, which is why it is a COUNT here and explicitly NOT one in loop mode
+  (`autonomous-loop` Step 1: phases are cut by dependency and resource disjointness).
 - Order by: dependency resolution first, then priority
-- Respect task limit (3-5 standard, up to 7 if all small+related, 1 if large)
+- **NEVER exceed the task limit: 3-5 standard, up to 7 ONLY if all small+related, 1 if large.**
 - Mix: prefer starting with a small warm-up task if available
 
 #### 4c. Present sprint proposal

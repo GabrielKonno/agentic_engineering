@@ -33,7 +33,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │
 │   NOTE: `.claude/` here is minimal by design — only what the framework
 │   needs to run its own 5 session modes + 1 utility. The agent templates, rules
-│   templates, and 14 process skills live under `docs/modules/` as
+│   templates, and 15 process skills live under `docs/modules/` as
 │   templates, copied to each project's `.claude/` at bootstrap (3 of the skills —
 │   codebase-audit, framework-audit, skill-gate — are tier-gated and copied only
 │   when the project's risk profile warrants them).
@@ -88,7 +88,13 @@ agentic_engineering/                        ← Cloned once, kept permanently
 
 ### Framework repo (this repo)
 - **Clone once:** `git clone [url] ~/agentic_engineering`
-- **Update periodically:** `git pull` — updates docs, examples, prompts
+- **Update before every bootstrap/adaptation:** `git fetch && git status -sb` — expected: NOT
+  behind. Then `git pull` (clone) or `git fetch upstream && git merge upstream/main` (fork — the
+  flow README recommends; a bare `git pull` on a fork pulls the fork's own origin, not upstream).
+  This is NOT a remembered interval: a stale clone silently stamps an OLD contract into a new
+  project under a version label the project will then trust. `/bootstrap` Step 1.1 and
+  `/existing_project_adaptation` Step 1.0b own the check — the symmetric twin of the
+  freshness check the adaptation command already runs on the PROJECT copy.
 - **`projects/` is in `.gitignore`** — framework git never sees project files
 - **Never modified during bootstrap** — docs/ and examples/ are read-only references
 

@@ -283,7 +283,7 @@ The framework has six types of components. Each answers a different question:
 | **Templates** | `modules/templates/*.md` | WHAT gets created? (docs + config) | Bootstrap (session 0) |
 | **Agent Templates** | `modules/agents/*.md` | WHAT agents get created? | Bootstrap (session 0) |
 | **Rules Templates** | `modules/rules/*.md` | WHAT rules files get created? | Bootstrap (session 0) |
-| **Process Skills** | `modules/skills/*/SKILL.md` (12 inline + 3 tier-gated) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
+| **Process Skills** | `modules/skills/*/SKILL.md` (12 lifecycle + 3 tier-gated) | WHEN do things happen and HOW are protocol steps executed? Implements Session Protocol + Execution Protocol concepts — no standalone protocol files. | Development sessions + PRD workflows |
 | **Examples** | `examples/agents/`, `examples/skills/`, `examples/rules/` | What does QUALITY look like? | Bootstrap + on-demand creation |
 | **Slash Commands** | `.claude/commands/*.md` | How does the HUMAN start? | Bootstrap + PRD management |
 
@@ -353,6 +353,7 @@ Step     Source (framework repo)                     Output (project folder)
          modules/rules/session_rules.md         --> .claude/rules/session-rules.md
          modules/rules/evolution_policy.md      --> .claude/rules/evolution-policy.md
          modules/rules/component_design.md     --> .claude/rules/component-design.md
+         modules/templates/check_agent_frontmatter.md --> scripts/check-agent-frontmatter.mjs
 5.8      modules/skills/{codebase-audit,skill-gate,framework-audit}, agents/skill_reviewer.md --> tier-gated skeletons (by profile)
 6        (external: skill registries)            --> Stack-specific skills (optional)
 7        modules/agents/code_reviewer.md          --> .claude/agents/code-reviewer.md

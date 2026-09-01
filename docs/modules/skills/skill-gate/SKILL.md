@@ -11,7 +11,7 @@ description: >
   that wrote a component also approves it — correlated errors pass, and unverified
   empirical claims enter the library as fact.
 created: framework-v2.4.0 (pre-validated)
-derived_from: skill-gate-spec v1.1 (.claude/docs/skill-gate-spec.md in the framework repo)
+derived_from: skill-gate-spec v1.1 (framework-repo internal design record — NOT published; do not attempt to resolve a path)
 ---
 
 # Skill Gate — creation, blind review, promotion
@@ -26,6 +26,13 @@ components are out of scope (see `.claude/rules/evolution-policy.md`).
 - Creating a NEW skill or rules file → this skill applies.
 - Updating an EXISTING component → STOP, follow evolution-policy instead. If the
   update ADDS an empirical claim, ALWAYS mark that claim `verified: false` inline.
+- **EXTRACTING part of an existing component into a new one (a SPLIT) → this skill APPLIES to
+  the new component, and evolution-policy governs the edit to the source.** A split is both
+  branches at once; the tie-break is that the new component is what a future session will read
+  cold, so it is what needs the blind review. Review its EXTRACTED content as written, not as
+  inherited: content that was correct nested inside its parent can be incomplete standing alone
+  (missing entry conditions, an invoker that no longer sees it). Classify the source-side edit as
+  RELOCATE (component-design §5) and verify the source POINTS rather than restates.
 
 ## 1. Draft
 
@@ -115,8 +122,9 @@ explicit owner confirmation. When asking, ALWAYS present:
 Then re-run the script with `--confirmed`. Exiting observation mode (deleting the
 line) is the owner's decision.
 
-**In sprint-approved mode, NEVER pause the sprint to ask for promotion
-confirmation** — the exception-stops list in sprint-proposer is closed and the
+### In sprint-approved mode
+
+**NEVER pause the sprint to ask for promotion confirmation** — the exception-stops list in sprint-proposer is closed and the
 gate is not on it. Defer instead: leave the draft in place (the approving verdict
 stays archived), register a pendency ("draft [name] approved — awaiting owner
 confirmation to promote"), report it in the sprint report, and continue with the

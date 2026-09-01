@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.8.0
+# Agentic Engineering Framework v2.9.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -132,7 +132,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.8.0)
+│   ├── modules/                            ← Single source of truth (v2.9.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -167,7 +167,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/agents/security-reviewer.md` | `modules/agents/security_reviewer.md` | OWASP Top 10 checklist |
 | `.claude/agents/red-team.md` | `modules/agents/red_team.md` | Adversarial security testing (conditional — if project has auth, payments, etc.) |
 | `.claude/agents/blue-team.md` | `modules/agents/blue_team.md` | Defensive security verification (conditional — only if red-team exists) |
-| `.claude/skills/*` (12–15 skills, tier-gated) | `modules/skills/*` | Inline process skills (12, incl. `autonomous-loop`) + codebase-audit/framework-audit/skill-gate (tier-gated) |
+| `.claude/skills/*` (12–15 skills, tier-gated) | `modules/skills/*` | Lifecycle process skills (12, incl. `autonomous-loop`) + codebase-audit/framework-audit/skill-gate (tier-gated) |
 | `.claude/rules/session-rules.md` | `modules/rules/session_rules.md` | Task limits, documentation quality, reasoning depth, scripts convention |
 | `.claude/rules/evolution-policy.md` | `modules/rules/evolution_policy.md` | Evolution classification (FIX/DERIVED/CAPTURED) + auto-evolution boundaries |
 | `.claude/rules/component-design.md` | `modules/rules/component_design.md` | Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment |
@@ -203,7 +203,7 @@ The framework has six component types, each serving a distinct role:
 TOOLKIT PROMPTS          TEMPLATES               PROCESS SKILLS
 (human entry points)     (what to create)        (how to execute)
 
-  /bootstrap ----------> claude_md.md -------.   12 inline skills (+3 tier-gated)
+  /bootstrap ----------> claude_md.md -------.   12 lifecycle skills (+3 tier-gated)
   /prd_planning          project_md.md       |   implement Session Protocol
   /prd_change            pendencias_md.md    |   + Execution Protocol
   /existing_adaptation   agent templates (10)|        |

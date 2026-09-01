@@ -94,6 +94,9 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 - `invocation:` — how the agent/skill is activated:
   - `subagent` — spawned as an independent process via Agent tool. Isolated context, no access to implementing agent's reasoning. Required for all validation/review/security agents.
   - `inline` — read as a reference document by another agent. Default for skills and knowledge documents.
+  - `user` — invoked by the owner as a slash command (`/sprint-proposer`, `/autonomous-loop`,
+    `/session-end`, `/context-recovery`, `/commit`, and the tier-gated audits). Used by lifecycle
+    skills that OPEN or CLOSE a unit of work rather than being read mid-task by another agent.
 - `receives:` — (subagent only) what the orchestrating agent passes: git diff, reports, criteria, file paths
 - `produces:` — (subagent only) what the subagent returns: structured report format
 - **Lineage fields** (added at creation, maintained during evolution):
@@ -116,6 +119,11 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 - `invocation: subagent` for review/validation/security agents
 - `## Input` section — what the agent receives (file paths, reports, criteria)
 - `## Output` section — structured report format with examples
+- **`## Input` ALWAYS IMMEDIATELY PRECEDES `## Output`** — the pair is the agent's contract and is
+  read as one unit (verified: 20/20 examples, zero headings between them). The PAIR's position is
+  deliberately NOT fixed: it sits near the top in agents whose contract is the first thing a
+  reader needs, and just before the verdict line in agents whose checklist dominates the file.
+  Either placement is correct; SPLITTING the pair is not
 - `## When this agent is invoked` section — clear TRIGGERS (passive: the orchestrator decides invocation)
 - `## When spawned` section — a DIFFERENT section, and not a naming variant of the one above: it is
   the activation-chain contract required by component-design §1 (which reviewer gap routes here,
@@ -136,8 +144,13 @@ The framework instructs the AI to check `assets/examples/` before creating any n
   - `references/` — heavy docs loaded on demand (progressive disclosure)
   - `assets/` — templates, icons, files used in output
 - Key patterns with code examples
-- Common pitfalls table (Pitfall | Symptom | Fix)
-- Testing section with framework and conventions
+- Common pitfalls table (Pitfall | Symptom | Fix) — **stack skills**; domain/process-pattern
+  skills may carry a domain-appropriate equivalent instead (e.g. `## Verification Queries`)
+- **`## Testing` section with framework and conventions — REQUIRED for STACK skills**
+  (a stack has a test runner and conventions to state). Domain and process-pattern skills
+  (`e-commerce-patterns`, `multi-tenancy-patterns`, `scheduling-patterns`,
+  `database-migration-guide`, `ci-cd-pipeline`) describe patterns that are tested BY the stack,
+  not by themselves — for those the section is OPTIONAL and its absence is not a violation
 - STRONG criteria examples where applicable
 
 **Rules (WHAT constraints apply):**

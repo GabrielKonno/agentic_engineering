@@ -109,7 +109,28 @@ sections that contain useful information.
 3. The content conflicts with current architecture
 
 When planning changes, classify each as: ADD (new section — default),
-SUBSTITUTE (replace — must justify), DELETE (remove — must justify).
+SUBSTITUTE (replace — must justify), DELETE (remove — must justify), or
+RELOCATE (move to another component — must justify, and see below).
+
+### RELOCATE — extracting content into another component
+
+An EXTRACTION (content leaving one component to live in another) is neither an ADD nor a DELETE:
+the content survives, but its home changes. It is the operation that produces a component split,
+and it has one rule that decides whether the split helps or hurts:
+
+**The SOURCE component ALWAYS POINTS at the relocated content — it NEVER restates it.** Two
+copies of a mandate is the failure §9 describes one level up: the next editor fixes one home and
+the other silently diverges. A pointer that names the target component and the section is the
+whole obligation.
+
+**When relocating, ALWAYS:**
+1. **NAME what stays SHARED** and point at it from the new component, rather than duplicating it.
+2. **SWEEP every INVOKER of the moved content** — every component that referenced it by section
+   name now cites a heading in a different file (component-design §9: the instruction to invoke X
+   belongs to whoever executes the moment X runs, and that invoker just moved).
+3. **RUN the inventory sweep for the NEW component** (counts, indexes, install lists in BOTH
+   command twins) — a split ADDS an artifact even though nothing was created from scratch.
+4. **REPORT the classification** — `relocated: [what] from [source] to [target]; source now points`.
 
 ## 6. Instruction Writing — Imperative over Descriptive
 

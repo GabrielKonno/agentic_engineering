@@ -8,8 +8,12 @@ This is a framework maintenance session, not a project bootstrap.
 - Edit `CLAUDE.md` (framework contract)
 - Edit `README.md`
 - Edit this repo's OWN runtime under `.claude/` — `commands/`, `rules/`, `skills/`. The framework
-  evolves its own session modes here, and three items below MANDATE it (item 4's class sweep,
-  item 5's back-sweep of this repo's `.claude/`, item 6's liveness guard over `.claude/skills/`).
+  evolves its own session modes here, and four numbered items below MANDATE it (item 4's class
+  sweep, item 5's back-sweep of this repo's `.claude/`, item 6's liveness guard over
+  `.claude/skills/`, and item 7's version bump, whose canonical set includes
+  `.claude/commands/existing_project_adaptation.md`) — as does the "New component creation"
+  section, which places new components under this repo's own `.claude/` when the framework needs
+  them at runtime.
 - Write lineage and audit records under `assets/docs/` — Upstream intake step 4 MANDATES the
   lineage doc, and `/audit` Phase 3 writes the dated report a later session applies.
 
@@ -96,6 +100,10 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    Principle (graduated from a source project): correcting/adding a factual claim means
    correcting ALL live copies in the SAME session — executed surfaces first (commands,
    templates the AI obeys), descriptive surfaces second. Grep, never memory.
+   **ALWAYS REPORT the result — `inventory sweep: N surfaces checked, M stale claims fixed` or
+   `inventory sweep: N/A — no artifact added, removed, renamed or split`. NEVER emit nothing.**
+   A count that lives in PROSE (a NOTE paragraph, an intro sentence) is the one that survives a
+   sweep of the diagram — grep the NUMBER across the file, never only the structure.
 
 2. **Instruction-style check on NEW normative text.** Every new or edited BEHAVIORAL
    instruction (a step the AI must execute every time — in commands, skills, agents, rules)
@@ -104,6 +112,8 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    output/format where applicable. Mechanical assist: re-read every bullet you WROTE this
    session and flag any whose verb is descriptive present tense ("keeps", "verifies",
    "declares") — that is the exact form the audit's dimension C fails.
+   **ALWAYS REPORT the result — `instruction style: N new behavioral instructions checked, M
+   rewritten` or `instruction style: N/A — no normative text written`. NEVER emit nothing.**
 
 3. **Reference & isolation verification** (as already required by Upstream intake step 6,
    but for EVERY maintenance change, not only upstreams): cross-references resolve (grep
@@ -111,6 +121,10 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    (`sed -n '/^````markdown$/,/^````$/p'` — and the `js` variant — over every edited
    template), and the D16 isolation grep runs over every touched file (no project names,
    no source-project session numbers, no single-project vocabulary).
+   **ALWAYS REPORT all three results — `references: N cited sections resolved | fences: N
+   templates extract non-empty | isolation: N files scanned, 0 hits`. NEVER emit nothing, and
+   NEVER collapse the three into one verdict** — a fence check that silently returned 0 lines is
+   the failure this item exists to catch, and a merged "verified" hides it.
 
 4. **Class sweep of every POINT FIX applied this session — the four directions.** Item 1
    fires on adding an *artifact*; item 5 fires on promoting a *rule*. Applying a fix named by an
@@ -186,6 +200,21 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    not a control — and the session that catalogued that class shipped a self-check grepping the
    wrong token.
 
+7. **Version bump — decide it, APPLY it, and REPORT it.** The full policy is the
+   "Version bumps" section below; this item is what makes the checklist REACH it. The bump lived
+   as an H2 outside these numbered items, so the governing line above ("Run EVERY numbered item
+   below") never covered it — and it carried no report line at a time when items 4-6 already did
+   (items 1-3 gained theirs in the same pass that added this one).
+   **ALWAYS REPORT — `version: vX.Y.Z applied to N/N canonical surfaces` or
+   `version: none — [reason]`. NEVER emit nothing.** The count is the load-bearing half:
+   *declaring* a bump and *applying* it are different acts, and only one of them is verifiable.
+   Mechanical self-check (expected result stated): `grep -rn "vX\.Y\.Z" README.md
+   docs/modules/templates/claude_md.md .claude/commands/existing_project_adaptation.md` →
+   every canonical surface returns a hit; any surface still on the OLD version is RED.
+
+   > Evidence this is not hypothetical: `cc6e31d` exists solely because "the previous commit
+   > declared a bump it never applied". A silent bump is indistinguishable from a forgotten one.
+
 ## Version bumps — the framework version is a CLAIM, and it decays silently
 
 The version label is CONSUMED by `existing_project_adaptation.md`, which keys migration decisions
@@ -212,6 +241,35 @@ require it.)
 `.claude/commands/existing_project_adaptation.md` (its template-generation references).
 `created: framework-vX.Y.Z` fields inside components are **LINEAGE, never the current version** —
 they record when a component was born and MUST NOT be rewritten by a bump.
+
+## New component creation — the mother repo's own gate
+
+This repo SHIPS `skill-gate` to every internal-tool+ project as the mandatory creation gate for
+new skills and rules, and has authored 4+ components of its own (`commit`, `codebase-audit`,
+`framework-audit`, `skill-gate` itself, `autonomous-loop`) without ever running it here. That was
+never a decision — it was a silence. This section is the decision.
+
+**The framework repo does NOT run `skill-gate` on its own components.** The gate's mechanism is a
+blind review by a `skill-reviewer` subagent against a rubric, and it presumes the project
+ceremony that surrounds it (`.claude/drafts/`, the PostToolUse hook, the tier profile) — none of
+which this repo installs, because this repo has no code to review and no risk profile. The gate
+this repo uses instead is `/audit` (17 dimensions, 6 agents, event-triggered per CLAUDE.md) plus
+the post-change checklist above. **Stating the exemption is the point: an unstated exemption is
+indistinguishable from a forgetting.**
+
+**When this session CREATES a new framework component (skill, agent template, rule, command),
+ALWAYS:**
+1. **PLACE it per CLAUDE.md's dual-placement rule** — `docs/modules/` always; this repo's own
+   `.claude/` ONLY if the framework itself needs it at runtime.
+2. **WRITE its frontmatter to survive the registry** — `name:` matching the file/folder, every
+   free-text scalar quoted (component-design §8), then run checklist item 6.
+3. **NAME its INVOKER** — the component that executes the moment this one must run, and put the
+   instruction THERE (component-design §9). A component whose only activation notice lives in its
+   own frontmatter is read by nobody.
+4. **RUN checklist item 1** — a new component is an added artifact; its counts and index rows are
+   the surfaces that go stale first.
+5. **REPORT — `new component: [name] — placed [where], invoker [who], liveness [result]`, or
+   `new component: none this session`. NEVER emit nothing.**
 
 ## Audit intake — applying a persisted audit report
 

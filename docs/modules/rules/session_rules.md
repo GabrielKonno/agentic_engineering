@@ -64,7 +64,9 @@ emergency-degradation signal fires; it ends only at a natural TASK boundary, nev
 mid-task. The mode never activates by itself: owner request or explicit acceptance of a
 loop proposal only.
 
-Signals of exceeding: contradicting earlier findings, skipping validation steps, producing ⏭️ on steps that should be ✅ or ❌.
+### Signals of exceeding
+
+Contradicting earlier findings, skipping validation steps, producing ⏭️ on steps that should be ✅ or ❌.
 
 > **In loop mode, the "Signals of exceeding" are the EMERGENCY stop (→ `/context-recovery`
 > immediately), NOT a pacing knob.** Autocompacts are non-events: per-task persistence +

@@ -34,6 +34,29 @@ Execute in order. Report results after each part.
 
 ## Process
 
+### Step 1.1 — Framework-clone freshness check (MANDATORY, before any copy)
+
+**ALWAYS RUN before Step 1.5 copies anything out of this repo:**
+
+```bash
+git fetch && git status -sb | head -1
+```
+
+Expected result: the branch line does **NOT** contain `behind`. If it does, **STOP and tell the
+owner** — a stale clone silently stamps an OLD contract into a new project under a version label
+(`framework-vX.Y.Z`) the project will then trust, and `/existing_project_adaptation` later keys
+migration decisions to that same label. Update first (`git pull`, or
+`git fetch upstream && git merge upstream/main` on a fork), then restart.
+
+If the repo has no remote, say so and continue — there is nothing to be behind.
+
+**ALWAYS REPORT — `framework freshness: up to date` / `behind by N commits — STOPPED` /
+`no remote — skipped`. NEVER emit nothing.** This is the symmetric twin of
+`existing_project_adaptation.md` Step 1.0, which already runs a freshness check on the PROJECT
+copy; the framework copy had none.
+
+---
+
 ### Step 1 — Read the PRD
 
 If `projects/$ARGUMENTS/assets/docs/prd.md` exists, read it completely. Extract:
@@ -48,6 +71,26 @@ If `projects/$ARGUMENTS/assets/docs/prd.md` exists, read it completely. Extract:
 - Business model
 
 If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. Use information from the user or CLAUDE.md to populate documents. Mark unknown sections as "to be defined".
+
+---
+
+### Step 1.1b — Read the PRD's Cross-cutting Concerns
+
+**ALWAYS READ the PRD's `Cross-cutting Concerns` section when present** (written by
+`/prd_planning` Phase 4, maintained by `/prd_change` Phase 3). It names the themes that span
+multiple PRD sections and must stay consistent when any of them changes — the highest-value
+context the PRD carries and the only section no bootstrap step used to read.
+
+**ALWAYS ROUTE each concern to the artifact that owns it:**
+- A concern that constrains CODE → a `.claude/rules/` domain rules file (Step 13's signal table
+  is the first place to look for a matching example).
+- A concern that constrains ARCHITECTURE → a row in `project.md`'s Architectural Decisions
+  table (Step 3).
+- A concern that needs WORK → a task in `pendencias.md` (Step 4).
+
+**ALWAYS REPORT — `cross-cutting: N concerns routed (R rules, A decisions, T tasks)` or
+`cross-cutting: none — PRD has no such section`. NEVER emit nothing.** A concern that reaches no
+artifact is a concern the project will rediscover as a bug.
 
 ---
 
@@ -221,7 +264,15 @@ Use ONLY if sources 1 and 2 returned no result.
 
 If any fails: do not install, log reason. If uncertain: ASK user.
 
-**Rules:** Max 5 MCPs on day 1. Only install if resource exists. Register in CLAUDE.md "MCP Servers" section.
+**Rules:** Max 5 MCPs on day 1. Only install if resource exists.
+
+**ALWAYS REPLACE the `[Filled in Step 5 below]` placeholder in CLAUDE.md's "MCP Servers" section
+before this step ends — with the installed servers, or with the literal line `None installed.`**
+NEVER leave the placeholder in a shipped CLAUDE.md: a project whose config still reads "filled in
+Step 5 below" references a bootstrap step that does not exist inside the project, and the AI
+reading it has no way to tell "none installed" from "this step never ran". Same rule, same reason
+as Step 14's Hooks placeholder. **ALWAYS REPORT — `MCP: N installed [names]` or
+`MCP: none installed — placeholder replaced`.**
 
 ---
 
@@ -377,7 +428,8 @@ Only if Sources 1 and 2 returned no result.
 - ❌ Contradicts PRD or CLAUDE.md patterns → do NOT install
 - ❌ Covers 3+ languages/frameworks → too generic, do NOT install
 
-Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills are optional.
+Register in CLAUDE.md "Skills & Agents" section (the template's actual heading — Step 2 names it
+correctly). No skill found? That is fine — skills are optional.
 
 ---
 
@@ -391,7 +443,7 @@ Register in CLAUDE.md "Skills" section. No skill found? That is fine — skills 
 
 **If it does not exist:** Read the template at `docs/modules/agents/code_reviewer.md`. Adapt:
 - **Pre-fill "Architecture Patterns" from PRD:** Read the PRD's stack, framework, and architectural constraints. Add 3-7 stack-specific structural rules that are predictable from the technology choice (e.g., Next.js App Router → server/client component separation; Prisma → transaction usage for multi-table ops; Django → fat models/thin views). Keep the existing generic rules and append project-specific ones below them. Do NOT invent speculative patterns — only add rules that are well-established conventions for the chosen stack.
-- **Pre-select Coverage Gap Declarations from PRD:** Review the four optional gap sections (accessibility, performance, concurrency, data integrity). Remove sections that are clearly irrelevant to this project's domain (e.g., remove accessibility gap if project has no UI; remove concurrency gap if project has no shared state or booking logic). Keep sections that match PRD features. When in doubt, keep the section — it is conditional and only activates when matching diffs appear.
+- **Pre-select Coverage Gap Declarations from PRD:** Review the five optional gap sections (accessibility, performance, concurrency, visual regression, data integrity). Remove sections that are clearly irrelevant to this project's domain (e.g., remove accessibility gap if project has no UI; remove concurrency gap if project has no shared state or booking logic; remove visual regression gap if the project ships no UI or has no shared components/design tokens). Keep sections that match PRD features. When in doubt, keep the section — it is conditional and only activates when matching diffs appear.
 - **Keep "Known Bug Patterns" empty** — this section is populated by `rules-agents-updater` as real bugs emerge during development, not from predictions.
 - Create at `.claude/agents/code-reviewer.md`
 
@@ -485,6 +537,7 @@ Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/securit
 | accessibility gap (code-reviewer) | accessibility-checker.md |
 | performance gap (code-reviewer) | performance-auditor.md |
 | concurrency gap (code-reviewer) | concurrency-tester.md |
+| visual regression gap (code-reviewer + validator) | visual-regression-tester.md |
 | data integrity gap (code-reviewer) | data-integrity-checker.md |
 | static analysis gap (security-reviewer) | sast-scanner.md |
 | secrets coverage gap (security-reviewer) | secrets-scanner.md |
@@ -518,17 +571,17 @@ Analyze the PRD for domain signals. For each domain that is a **core feature or 
 
 | PRD signal (keywords/features) | Rules file to create | Example template |
 |---|----|---|
-| Multilingual, i18n, localization, multi-language | i18n-rules.md | examples/rules/i18n-rules.md |
-| Microservices, event-driven, message queue, saga | distributed-systems-rules.md | examples/rules/distributed-systems-rules.md |
-| Scheduling, cron, appointments, calendar, booking | scheduling-rules.md | examples/rules/scheduling-rules.md |
-| High-availability, retry, circuit-breaker, fallback | resilience-rules.md | examples/rules/resilience-rules.md |
-| Rate limiting, throttling, API quotas | rate-limiting-rules.md | examples/rules/rate-limiting-rules.md |
-| E-commerce, cart, checkout, payment, orders | e-commerce-rules.md | examples/rules/e-commerce-rules.md |
-| Full-stack, frontend + backend, SSR, API + UI | frontend-backend-integration-rules.md | examples/rules/frontend-backend-integration-rules.md |
-| Auth, login, permissions, roles, OAuth | auth-rules.md | examples/rules/auth-rules.md |
-| PII, LGPD, GDPR, personal data, consent | compliance-rules.md | examples/rules/compliance-rules.md |
-| Multi-tenancy, organization isolation, RLS | multi-tenancy-rules.md | examples/rules/multi-tenancy-rules.md |
-| Observability, logging, tracing, metrics, alerts | observability-rules.md | examples/rules/observability-rules.md |
+| Multilingual, i18n, localization, multi-language | i18n-rules.md | assets/examples/rules/i18n-rules.md |
+| Microservices, event-driven, message queue, saga | distributed-systems-rules.md | assets/examples/rules/distributed-systems-rules.md |
+| Scheduling, cron, appointments, calendar, booking | scheduling-rules.md | assets/examples/rules/scheduling-rules.md |
+| High-availability, retry, circuit-breaker, fallback | resilience-rules.md | assets/examples/rules/resilience-rules.md |
+| Rate limiting, throttling, API quotas | rate-limiting-rules.md | assets/examples/rules/rate-limiting-rules.md |
+| E-commerce, cart, checkout, payment, orders | e-commerce-rules.md | assets/examples/rules/e-commerce-rules.md |
+| Full-stack, frontend + backend, SSR, API + UI | frontend-backend-integration-rules.md | assets/examples/rules/frontend-backend-integration-rules.md |
+| Auth, login, permissions, roles, OAuth | auth-rules.md | assets/examples/rules/auth-rules.md |
+| PII, LGPD, GDPR, personal data, consent | compliance-rules.md | assets/examples/rules/compliance-rules.md |
+| Multi-tenancy, organization isolation, RLS | multi-tenancy-rules.md | assets/examples/rules/multi-tenancy-rules.md |
+| Observability, logging, tracing, metrics, alerts | observability-rules.md | assets/examples/rules/observability-rules.md |
 
 **Guard:** Only pre-create when BOTH conditions are met: (1) the domain is a core feature or architectural pattern in the PRD, and (2) a matching example template exists in `assets/examples/rules/`.
 
@@ -637,6 +690,7 @@ git commit -m "chore: bootstrap from agentic framework"
 - .claude/agents/blue-team.md ([lines] lines) ← if created (Step 9)
 - .claude/agents/validator.md ([lines] lines) ← mandatory (Step 10)
 - .claude/agents/arbitrator.md ([lines] lines) ← mandatory (Step 11)
+- .claude/skills/[stack-name]/SKILL.md ([lines] lines) ← if created (Step 12)
 - .claude/skills/[domain]-test-patterns/SKILL.md ([lines] lines) ← if created (Step 12)
 - .claude/settings.json
 - .claude/logs/ (initialized — session logs start from session 1)

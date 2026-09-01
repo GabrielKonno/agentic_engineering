@@ -58,7 +58,12 @@ is grading its own exam, and the criteria are also the validator's yardstick. Fu
 
 ### 3. Git checkpoint (medium and large)
 
-Commit current state before writing code to enable clean rollback.
+**ALWAYS COMMIT the current state before writing code**, so the task has a clean rollback
+boundary. In loop mode this step stays with the ORCHESTRATOR — the rollback boundary belongs to
+whoever owns the working tree (`autonomous-loop` §3a).
+
+**ALWAYS REPORT — `checkpoint: committed [hash]` or `skipped — [reason: small task / tree already
+clean at a commit]`. NEVER emit nothing.**
 
 ---
 

@@ -40,7 +40,23 @@ This session reads the existing codebase and documentation, then upgrades everyt
 
 Read the entire existing structure before making any changes. This is the most important phase — your understanding of the project determines the quality of every document you create or update.
 
-**Step 1.0 — Freshness check (MANDATORY before reading anything):**
+**Step 1.0b — FRAMEWORK-clone freshness check (MANDATORY, before copying anything out of this repo):**
+
+```bash
+git fetch && git status -sb | head -1
+```
+
+Expected result: the branch line does **NOT** contain `behind`. If it does, **STOP and tell the
+owner** — this command keys migration decisions to the framework version label, so a stale clone
+tells an upgraded project it is current while handing it an older contract. Update first
+(`git pull`, or `git fetch upstream && git merge upstream/main` on a fork), then restart. No
+remote → say so and continue.
+
+**ALWAYS REPORT — `framework freshness: up to date` / `behind by N commits — STOPPED` /
+`no remote — skipped`. NEVER emit nothing.** Step 1.0 below checks the PROJECT copy; this checks
+the FRAMEWORK copy. Both, or neither is worth much.
+
+**Step 1.0 — Freshness check of the PROJECT copy (MANDATORY before reading anything):**
 
 If the project has a git remote, ALWAYS verify the local copy is current BEFORE analyzing it:
 
@@ -185,7 +201,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.8.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.9.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -322,7 +338,7 @@ cd projects/$ARGUMENTS && git log --oneline --all | grep -iE "fix|bug|hotfix|pat
 ```
 For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the mistake) with efficacy tracking metadata: `[added: adaptation | triggered: never | false-positive: 0]`.
 
-**Pre-select Coverage Gap Declarations:** Review the four optional gap sections (accessibility, performance, concurrency, data integrity). Remove sections clearly irrelevant to this project's domain based on the codebase analysis from Step 1. Keep sections that match actual code patterns found (e.g., keep concurrency gap if project has database transactions with concurrent access). When in doubt, keep — gaps are conditional and only activate when matching diffs appear.
+**Pre-select Coverage Gap Declarations:** Review the five optional gap sections (accessibility, performance, concurrency, visual regression, data integrity). Remove sections clearly irrelevant to this project's domain based on the codebase analysis from Step 1. Keep sections that match actual code patterns found (e.g., keep concurrency gap if project has database transactions with concurrent access; keep visual regression gap if the codebase has shared UI components or design tokens). When in doubt, keep — gaps are conditional and only activate when matching diffs appear.
 
 **Step 2.5 — Upgrade security-reviewer:**
 
@@ -424,7 +440,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.8.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.9.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 inline — to `.claude/skills/`):**
 ```bash
