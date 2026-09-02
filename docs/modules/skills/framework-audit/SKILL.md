@@ -52,6 +52,13 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    invoked component's frontmatter/inventory has no invoker and its real spawn count is
    typically ZERO — report the count, not the claim. Same for the self-checks themselves: a
    check that has never gone red is unproven, not passing.
+   **ALWAYS run the DID-IT-LAND check as part of Q4:** for every improvement this audit APPROVED
+   in an earlier session, do not ask "is the required text present?" — read the structure AROUND
+   it. Classify each as **CONFIRMED** / **PARTIALLY-APPLIED** / **APPLIED-BUT-CLASS-NOT-SWEPT** /
+   **INTRODUCED-A-DEFECT**, with file:line evidence per verdict. A fix that landed under the wrong
+   heading, contradicts its neighbour, or orphaned the block below it passes every presence check
+   and is still broken. **ALWAYS REPORT the tally — `did-it-land: N confirmed, M defective` or
+   `did-it-land: N/A — no prior approvals`. NEVER emit nothing.**
 5. **Meta-metrics review** — read `framework-metrics.md`: is the escape rate rising? Any reviewer
    with high false-positive (cry-wolf)? Any Known Bug Pattern that never triggers (dead weight)?
    If skill-gate is installed, also: any promoted skill never loaded since promotion (cross-check
@@ -110,7 +117,7 @@ friendly until approved.
 ### Q1 Dimension coverage: [orphaned dimensions, or "all owned"]
 ### Q2 Axis coverage: [missing axes/bridges, or "complete"]
 ### Q3 Recurring escape classes: [classes with no owner, or "none"]
-### Q4 Aspirational-vs-real: [claimed-but-not-running mechanisms, or "none"]
+### Q4 Aspirational-vs-real: [claimed-but-not-running mechanisms, or "none"] + did-it-land: [N confirmed, M defective | N/A]
 ### Q5 Meta-metrics: [escape rate trend, dead KBPs, cry-wolf reviewers]
 ### Q6 Process back-sweep: [old artifacts a new process rule condemns]
 ### Proposed framework improvements (BEHAVIOR — needs owner approval):

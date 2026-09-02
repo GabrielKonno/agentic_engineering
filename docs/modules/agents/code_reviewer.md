@@ -245,7 +245,10 @@ or booking/reservation logic:**
 > Recommend: search `.claude/agents/` for a data integrity agent and invoke
 > before validator if found.
 
-**If none of the above apply:** omit Coverage Gap Declaration from the report.
+**If none of the above apply:** keep the section and set the field to `None` — NEVER omit the
+heading. An absent section and an unwritten one are indistinguishable to the reader, and the
+report schema at the top of this file already declares the field as `[None | list of gaps]`.
+(`security_reviewer.md` resolves the same tension the same way.)
 
 ## Known Bug Patterns (check EVERY review)
 
@@ -262,7 +265,9 @@ or booking/reservation logic:**
 - `triggered` — sessions where this pattern actually caught a problem during review
 - `false-positive` — count of times the pattern flagged something that wasn't a real issue
 
-**Periodic review — the triage VERDICTS (this agent DEFINES them; it does NOT schedule itself):**
+### Periodic review — the triage VERDICTS
+
+This agent DEFINES the verdicts; it does NOT schedule itself.
 - `triggered: never` after 10+ sessions → candidate for removal
 - Frequent `false-positive` → needs refinement (pattern too broad)
 - Frequent `triggered` → working well, candidate for DERIVED promotion to rules file

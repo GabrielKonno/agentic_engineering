@@ -118,9 +118,12 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 **Agents (WHAT to verify):**
 - `invocation: subagent` for review/validation/security agents
 - `## Input` section — what the agent receives (file paths, reports, criteria)
-- `## Output` section — structured report format with examples
-- **`## Input` ALWAYS IMMEDIATELY PRECEDES `## Output`** — the pair is the agent's contract and is
-  read as one unit (verified: 20/20 examples, zero headings between them). The PAIR's position is
+- An OUTPUT section — structured report format with examples. Two spellings are both sanctioned
+  and equally correct: `## Output` (10 of 20 examples) and `## Output Format` (the other 10).
+  Grep for either when verifying
+- **`## Input` ALWAYS IMMEDIATELY PRECEDES the output section** — the pair is the agent's contract
+  and is read as one unit (verified: 20/20 examples have `## Input` immediately followed by
+  `## Output` or `## Output Format`, zero headings between them). The PAIR's position is
   deliberately NOT fixed: it sits near the top in agents whose contract is the first thing a
   reader needs, and just before the verdict line in agents whose checklist dominates the file.
   Either placement is correct; SPLITTING the pair is not
@@ -149,7 +152,7 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 - **`## Testing` section with framework and conventions — REQUIRED for STACK skills**
   (a stack has a test runner and conventions to state). Domain and process-pattern skills
   (`e-commerce-patterns`, `multi-tenancy-patterns`, `scheduling-patterns`,
-  `database-migration-guide`, `ci-cd-pipeline`) describe patterns that are tested BY the stack,
+  `database-migration-guide`, `ci-cd-pipeline`, `api-design-patterns`) describe patterns that are tested BY the stack,
   not by themselves — for those the section is OPTIONAL and its absence is not a violation
 - STRONG criteria examples where applicable
 

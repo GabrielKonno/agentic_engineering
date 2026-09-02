@@ -5,8 +5,12 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > **Note:** 3 process components that produce decisions or analyses are proper agents:
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
-> This directory contains 15 skills: 12 **lifecycle** (always copied — the `invocation:`
-> field varies: `user` for the ones the owner calls, `inline` for the ones other skills read) (6 implementation + 3 session lifecycle + 1 whole-segment orchestration + 1 PRD process + 1 commit workflow) + 3 **tier-gated** skills (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the project's risk profile warrants them.
+> This directory contains 15 skills: 12 **lifecycle** — ALWAYS copied, broken down as
+> 6 implementation + 3 session lifecycle + 1 whole-segment orchestration + 1 PRD process +
+> 1 commit workflow; their `invocation:` field varies independently of that (`user` for the ones
+> the owner calls, `inline` for the ones other components read) — plus 3 **tier-gated** skills
+> (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the
+> project's risk profile warrants them.
 
 ## Generality contract (inviolable)
 
@@ -31,7 +35,7 @@ pipeline, CLI, static site. Therefore:
 These skills implement steps of the Session Protocol, Execution Protocol, PRD workflows, commit hygiene, and the periodic MACRO/meta audits. The main agent reads the SKILL.md and follows the steps in its own context. In v2.1.0, protocol logic moved from CLAUDE.md into skills — CLAUDE.md retains only pointers. Skills are:
 
 1. **Copied** to each project's `.claude/skills/` at bootstrap
-2. **Triggered** by convention (sprint-proposer/session-end are user-invoked; others are called by orchestrating skills)
+2. **Triggered** by convention — read each skill's `invocation:` field, never this sentence: **7 declare `user`** (sprint-proposer, session-end, context-recovery, commit, autonomous-loop, codebase-audit, framework-audit — the owner invokes them) and **8 declare `inline`** (the rest — an orchestrating skill or agent reads SKILL.md in its own context)
 3. **Evolvable** via the standard evolution mechanisms (FIX/DERIVED/CAPTURED — see `.claude/rules/evolution-policy.md`)
 
 ## Skills list

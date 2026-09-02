@@ -8,7 +8,7 @@ description: >
   and writes conventional messages. USE when committing any change — especially after multi-file
   sessions where unrelated files may have accumulated in staging.
 created: framework-v2.2.1 (pre-validated)
-derived_from: commit_hygiene "Before every commit"
+derived_from: 'commit_hygiene "Before every commit" — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Commit

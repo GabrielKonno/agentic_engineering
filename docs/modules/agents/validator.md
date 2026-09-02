@@ -55,6 +55,15 @@ Produce a structured Validation Report:
 with ZERO executed, or a summary you could not parse, is ❌ with the reason — never ✅, never ⏭️.]
 **Test quality:** [Do tests actually assert what criteria describe? Are assertions meaningful or superficial?]
 
+### Review: ✅/❌/⏭️
+[Were the code-reviewer's findings addressed? ❌ if any BLOCK/FIX-REQUIRED finding is still open.
+ ⏭️ if no Code Review Report was provided. Detail goes under Prior Review Findings below.]
+
+### Security: ✅/⚠️/❌/⏭️
+[Were the security-reviewer's findings addressed? ⚠️ — NEVER ❌ — for a DECLARED coverage gap with
+ no specialist report as evidence: a coverage limitation is not a finding. ⏭️ if no Security
+ Review Report was provided.]
+
 ### Criteria Results:
 | # | Criterion | Type | Result | Evidence |
 |---|-----------|------|--------|----------|
@@ -65,6 +74,16 @@ with ZERO executed, or a summary you could not parse, is ❌ with the reason —
 | # | Mutation | Criterion affected | Criteria failed? | Result |
 |---|---------|-------------------|-------------------|--------|
 | 1 | [what was changed] | [criterion] | Yes/No | ✅/❌ |
+
+### DB: ✅/❌/⏭️
+[Result of every QUERY: criterion executed against the database, with the query and the row(s)
+ observed. ⏭️ if the task carried no QUERY: criteria.]
+
+### UI: ✅/❌/⏭️/BASELINE-CREATED
+[Browser-automation result: pages visited, snapshot findings, responsive (≤430px) and
+ cross-browser coverage actually exercised. ❌ with the reason if the browser-automation MCP was
+ unavailable — inference is NEVER a substitute. ⏭️ if no UI files were modified.
+ BASELINE-CREATED when the visual-regression specialist ran and captured first baselines.]
 
 ### Migration: ✅/❌/⏭️
 [migration ran + rollback verified — or "no migration files in diff" — or "destructive without rollback: ❌"]

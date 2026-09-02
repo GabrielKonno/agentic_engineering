@@ -8,7 +8,7 @@ description: >
   MUST run at end of every session (item 3). Without this, the backlog drifts from
   reality and the next session starts with wrong priorities.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 3
+derived_from: 'session_protocol end-of-session item 3 — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # pendencias.md Updater

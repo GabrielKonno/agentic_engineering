@@ -79,7 +79,9 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   ├── skills/                             # Skill templates by type (9)
 │   └── rules/                              # Rules file templates (11)
 ├── assets/
-│   └── docs/                               # Framework-base source notes (upgrade lineage, not copied to projects)
+│   └── docs/                               # Framework-layer records, none copied to projects: framework-base
+│                                           # source notes, upstream lineage docs, and the persisted
+│                                           # /audit reports (audit-YYYY-MM-DD.md)
 └── projects/                               ← IGNORED by framework git (local-only workspace)
     └── [project-name]/                     ← Each project gets its own git repo
 ```
@@ -88,13 +90,16 @@ agentic_engineering/                        ← Cloned once, kept permanently
 
 ### Framework repo (this repo)
 - **Clone once:** `git clone [url] ~/agentic_engineering`
-- **Update before every bootstrap/adaptation:** `git fetch && git status -sb` — expected: NOT
-  behind. Then `git pull` (clone) or `git fetch upstream && git merge upstream/main` (fork — the
-  flow README recommends; a bare `git pull` on a fork pulls the fork's own origin, not upstream).
+- **Update before every bootstrap/adaptation:** `git fetch && git status -sb` — expected: a `...`
+  tracking segment and NOT behind. A bare `## main` with no tracking segment is RED, not green —
+  the command compared against nothing. Then `git pull` (clone) or
+  `git fetch upstream && git merge upstream/main` (fork — the flow README recommends; a bare
+  `git pull` on a fork pulls the fork's own origin, not upstream).
   This is NOT a remembered interval: a stale clone silently stamps an OLD contract into a new
-  project under a version label the project will then trust. `/bootstrap` Step 1.1 and
-  `/existing_project_adaptation` Step 1.0b own the check — the symmetric twin of the
-  freshness check the adaptation command already runs on the PROJECT copy.
+  project under a version label the project will then trust. `/bootstrap` **Step 0.5** and
+  `/existing_project_adaptation` **Step 0.5** own the check (both fail CLOSED on an unreadable
+  comparison) — the symmetric twin of the freshness check the adaptation command already runs on
+  the PROJECT copy in its Step 1.0.
 - **`projects/` is in `.gitignore`** — framework git never sees project files
 - **Never modified during bootstrap** — docs/ and examples/ are read-only references
 
@@ -120,13 +125,19 @@ This repository supports 5 session modes, each activated by its slash command:
 Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
 
 **Utilities:** `/audit` — read-only integrity check across 17 dimensions (structural, references, process logic, quality, document accuracy, project-information isolation, and one meta dimension — D17 process coverage, which hunts flows the repo executes or promises but never documented). Launches 6 parallel audit agents and produces a consolidated report, persisted to
-`assets/docs/audit-YYYY-MM-DD.md` (the only file it writes).
+`assets/docs/audit-YYYY-MM-DD.md` (the only file it writes). It runs in one of two MODES,
+decided in its Phase 0: `baseline` (claim vs fact) or `verification` (the 17 dimensions PLUS a
+Part 1 pass that re-reads the structure around every already-`applied` fix).
 
 **When it runs — ALWAYS one of these events, never a remembered interval:** (a) after every
-upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner request. The
-`/maintenance` post-change checklist is the PRIMARY control and runs every session; `/audit` is
-the periodic NET behind it, and this trigger list is what makes "periodic" a fact rather than an
-aspiration.
+upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner request,
+(d) **after a `/maintenance` session applies an audit batch** — in `verification` mode
+(`/audit` Phase 0), which re-reads the structure around every `applied` fix instead of only
+checking that the required text is present. Trigger (d) exists because the fixes themselves
+introduce defects: its first two documented executions found problems in 8 of 15 and 12 of 24
+applied findings. The `/maintenance` post-change checklist is the PRIMARY control and runs every
+session; `/audit` is the periodic NET behind it, and this trigger list is what makes "periodic" a
+fact rather than an aspiration.
 
 **Alternative (non-Claude Code):** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 

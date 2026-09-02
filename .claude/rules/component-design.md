@@ -1,6 +1,6 @@
 ---
 domain: component-design
-applies_to: "docs/modules/agents/**,docs/modules/skills/**,docs/modules/rules/**,examples/agents/**,examples/skills/**,examples/rules/**"
+applies_to: "docs/modules/agents/**,docs/modules/skills/**,docs/modules/rules/**,examples/agents/**,examples/skills/**,examples/rules/**,.claude/commands/**,.claude/skills/**,.claude/rules/**,.claude/agents/**"
 ---
 
 # Component Design Policy

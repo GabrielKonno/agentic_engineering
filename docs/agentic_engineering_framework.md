@@ -338,7 +338,9 @@ The bootstrap prompt (`.claude/commands/bootstrap.md`) is a 15-step pipeline (15
 ```
 Step     Source (framework repo)                     Output (project folder)
 ----     -------------------------                   -----------------------
+0.5      (this repo's git remote/upstream)       --> Framework-clone freshness verified (fails CLOSED)
 1        assets/docs/prd.md                      --> Extract product data
+1.1      prd.md "Cross-cutting Concerns"         --> routing list consumed by Steps 3 / 4 / 13
 1.2      (PRD signals + owner confirm)           --> Risk profile set (scales all ceremony)
 1.5      examples/*                              --> assets/examples/ (copy)
 2        modules/templates/claude_md.md          --> CLAUDE.md
@@ -595,7 +597,7 @@ Since v1.6.0, each end-of-session item is implemented by a pre-built process ski
    ```
    The code-reviewer subagent reports which patterns were triggered. The implementing agent updates tracking fields here.
 
-   **Periodic review (every 10 sessions):** `triggered: never` after 10+ sessions → removal candidate. Frequent `false-positive` → refine. Frequent `triggered` → promote to rules file.
+   **Periodic review — the triage VERDICTS:** `triggered: never` after 10+ sessions → removal candidate. Frequent `false-positive` → refine. Frequent `triggered` → promote to rules file. The code-reviewer DEFINES these verdicts; its INVOKER is `codebase-audit` Step 6 (internal-tool+ profiles). On `prototype`, where codebase-audit is not installed, the triage has no periodic owner by design — stated rather than left as an ownerless "every 10 sessions" mandate (component-design §9).
 
 2. **Create session log + update project.md** → run `session-log-creator` then `project-md-updater` skills
 
@@ -951,6 +953,17 @@ Report template categories:
 - Migration: ✅/❌/⏭️ [migration ran + rollback verified — or "no migration files" — or "destructive without rollback: ❌"]
 - Regression: ✅/❌ [N executed]
 - Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
+- Criteria Results: a row per acceptance criterion (#, criterion, type, result, evidence)
+- Prior Review Findings: code review / security review / red team summaries
+- Coverage Gap Declaration: ALWAYS present — "none" is a valid entry. Every gap this validation
+  could not close, in the reviewer gap vocabulary. NEVER spawn the specialist from inside the
+  validator (component-design §7: subagent depth limit) — main Claude reads this and spawns it
+- Items for human verification: ALWAYS present — "none" is a valid entry. Every MANUAL: criterion,
+  plus every declared coverage gap with no specialist report as evidence, flagged ⚠️ and NEVER ❌
+- Overall: ✅ PASS / ❌ FAIL
+
+This list and `docs/modules/agents/validator.md`'s Output template are TWINS — a category added to
+either MUST be added to both, and to the validator's `produces:` field.
 
 **Execution proof — "passed" and "ran" are different propositions.** A verification is cited WITH
 its executed count or not at all: a run that exits 0 having executed ZERO units, or whose summary

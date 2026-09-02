@@ -152,7 +152,7 @@ Derive from each task's `Complexity:` field. If no complexity field exists, clas
 
 1. **Agent-level (automatic):** `effort:` in agent/skill frontmatter. Security agents always `effort: high`.
 2. **Task-level (2 seconds):** AI MUST recommend effort level in plan and sprint proposal. Human adjusts if needed.
-3. **Session-level model switch (5 seconds):** AI saves state with MODEL SWITCH marker → requests restart. See execution protocol for full model switch initiation; `sprint-proposer` skill detects the marker on restart.
+3. **Session-level model switch (5 seconds):** AI saves state with MODEL SWITCH marker → requests restart. The procedure lives in two installed components: `project-md-updater` §"MODEL SWITCH entries" WRITES the marker block into `.claude/phases/project.md`, and `sprint-proposer` §1b DETECTS it on restart and resumes from it.
 
 Mechanisms stack: a standard-effort session uses high effort when security agents run (mechanism 1), can switch to high effort for a financial task (mechanism 2), and can switch to a more capable model for an architecture task (mechanism 3).
 

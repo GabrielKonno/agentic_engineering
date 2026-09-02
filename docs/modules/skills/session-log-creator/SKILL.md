@@ -8,7 +8,7 @@ description: >
   BEFORE project-md-updater (which references the log filename). Without logs,
   debugging past decisions requires re-reading all session context.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 2
+derived_from: 'session_protocol end-of-session item 2 — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Session Log Creator

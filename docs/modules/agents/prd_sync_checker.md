@@ -10,7 +10,7 @@ invocation: subagent
 receives: no extra context needed — reads assets/docs/prd.md and .claude/phases/project.md autonomously
 produces: one of three outcomes — "synced vX→vY [changes]", "no changes detected", or "mismatch found — awaiting user input"
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol step 3
+derived_from: 'session_protocol step 3 — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # PRD Sync Checker

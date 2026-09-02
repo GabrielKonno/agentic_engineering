@@ -26,7 +26,11 @@ This is a framework maintenance session, not a project bootstrap.
 - All changes must be committed with descriptive messages
 - Verify cross-references after modifying any document
 
-**Workflow:** Run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction plan provided by the user, apply all changes in order, run the post-change checklist, commit.
+**Workflow:** Run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction
+plan provided by the user (an audit report → "Audit intake"; project evolution docs → "Upstream
+intake"), apply all changes in order, run the post-change checklist — whose items 8 and 9 route
+into "New component creation" and component-design §5 when this session created or relocated
+anything — then apply the version bump ("Version bumps") and commit.
 
 ## Step 0 — Upstream discovery sweep (runs FIRST, in EVERY maintenance session)
 
@@ -215,6 +219,33 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    > Evidence this is not hypothetical: `cc6e31d` exists solely because "the previous commit
    > declared a bump it never applied". A silent bump is indistinguishable from a forgotten one.
 
+8. **Classify every change with the component-design §5 verbs — and honour RELOCATE's rule.**
+   `component-design.md` §5 defines ADD / SUBSTITUTE / DELETE / RELOCATE and requires each change
+   to be classified and justified, but until now NOTHING in this file invoked §5: its only invoker
+   was `skill-gate`, a project-side skill this repo exempts itself from (see "New component
+   creation" below). This item is §5's mother-side invoker.
+   **ALWAYS CLASSIFY each change this session as ADD / SUBSTITUTE / DELETE / RELOCATE**, and for
+   every SUBSTITUTE, DELETE or RELOCATE state the justification §5 requires.
+   **For every RELOCATE, ALWAYS RUN §5's four obligations** — the source POINTS at the moved
+   content and never restates it; name what stays SHARED; sweep every INVOKER that cited the moved
+   section by name; run item 1's inventory sweep for the new component.
+   Mechanical self-check (expected result stated): for each RELOCATE, grep the moved section's
+   heading text across the repo — **expected: exactly ONE definition plus N pointers; two
+   definitions is RED** (the divergence §5 exists to prevent).
+   **ALWAYS REPORT — `classification: A add, S substitute, D delete, R relocate` (plus the
+   per-RELOCATE grep result) or `classification: N/A — no component content changed`. NEVER emit
+   nothing.**
+
+9. **New-component gate — run the "New component creation" section when this session created one.**
+   That section (below) carries five ALWAYS obligations and its own `new component: …` report
+   line, and until now no step invoked it: the Workflow line never named it and no checklist item
+   referenced it, leaving its report owed by nobody — the exact §9 class this checklist enforces
+   elsewhere. This item is its invoker.
+   **ALWAYS RUN the "New component creation" section in full whenever this session created a
+   skill, agent template, rule, command, or script**, and **ALWAYS EMIT its report line here** —
+   `new component: [name] — placed [where], invoker [who], liveness [result]`, or
+   `new component: none this session`. **NEVER emit nothing.**
+
 ## Version bumps — the framework version is a CLAIM, and it decays silently
 
 The version label is CONSUMED by `existing_project_adaptation.md`, which keys migration decisions
@@ -230,9 +261,9 @@ this section is its invoker. A bump publishes the current state as a contract; t
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 
-- **MINOR** (`v2.5.0` → `v2.6.0`): a new rule/section/template, an upstream absorption, or a schema
-  change to a document projects receive.
-- **PATCH** (`v2.6.0` → `v2.6.1`): corrections that add no new contract — broken references,
+- **MINOR** (`v2.9.0` → `v2.10.0`): a new rule/section/template, an upstream absorption, or a
+  schema change to a document projects receive.
+- **PATCH** (`v2.10.0` → `v2.10.1`): corrections that add no new contract — broken references,
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
@@ -292,6 +323,12 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    that waits for the next run is a status nobody wrote.
 5. **State explicitly which findings were NOT applied and why.** Deferring is legitimate;
    silently dropping is not — they must still read `open` for the next carry-forward.
+6. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
+   in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
+   moment where the fixes themselves are the least-verified thing in the repo: the two documented
+   executions of this pass found defects in 8 of 15 and 12 of 24 applied findings, and step 2's
+   re-verification runs BEFORE applying, never after. Report
+   `verification audit: proposed / ran / skipped — [owner deferred]`; NEVER nothing.
 
 ## Upstream intake — absorbing framework evolutions from projects
 
@@ -311,7 +348,12 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
    session numbers, no single-project vocabulary — templates get DOUBLE scrutiny (they
    broadcast to every future project). Proven artifacts (guard scripts, mutation-tested code)
    keep their code byte-identical; only provenance headers/comments are genericized.
-4. **Record the batch in a lineage doc under `assets/docs/`** — what graduated, where each
+4. **Record the batch in a lineage doc under `assets/docs/`, named
+   `framework-evolution-upstream-<date>[-slug].md`** (existing records use `YYYY-MM`; `YYYY-MM-DD` is equally valid) — the `framework-evolution-upstream-`
+   prefix is MANDATORY, not a convention: Step 0's cross-check globs exactly that pattern, and a
+   record filed under any other name makes the check silently return no hit, so the next session
+   reads a false `pending absorption` and re-absorbs a batch already disposed of. Record what
+   graduated, where each
    piece landed, what was adapted, and what was deliberately NOT absorbed (with why). That
    commit is the AUTHORITATIVE disposition for every doc in the batch.
    **ALWAYS cite each absorbed doc by its FULL FILENAME** (e.g.

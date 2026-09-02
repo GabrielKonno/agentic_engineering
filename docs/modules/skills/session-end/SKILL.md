@@ -7,7 +7,7 @@ description: >
   extraction, session log, project/pendencias/config/rules updates in priority
   order. Without this, the next session starts with stale context and lost patterns.
 created: framework-v2.1.0 (pre-validated)
-derived_from: session_protocol "At the END of every session"
+derived_from: 'session_protocol "At the END of every session" — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Session End
@@ -59,17 +59,31 @@ READ `.claude/skills/session-log-creator/SKILL.md` into context, THEN execute it
 
 READ `.claude/skills/project-md-updater/SKILL.md` into context, THEN execute its process. Writes index row referencing the log + PRD version + phase status.
 
+**ALWAYS REPORT — `session log + project.md: ran — [log filename]` or `skipped — [reason]`. NEVER
+emit nothing.**
+
 ### 3. Update pendencias.md
 
 READ `.claude/skills/pendencias-updater/SKILL.md` into context, THEN execute its process. Moves completed tasks to `done_tasks.md` (full metadata, verbatim — never a summary) and adds new discoveries.
+
+**ALWAYS REPORT — `pendencias: ran — [N moved, M added]` or `skipped — [reason]`. NEVER emit
+nothing.**
 
 ### 4. Update CLAUDE.md
 
 READ `.claude/skills/config-file-updater/SKILL.md` into context, THEN execute its process. Updates module status, patterns, File Map when changed.
 
+**ALWAYS REPORT — `CLAUDE.md: ran — [what changed]` or `deferred — [reason]`. NEVER emit
+nothing.** This step is explicitly deferrable (see "Priority and context limits"), which is
+exactly why the deferral must be SAID.
+
 ### 5. Update rules/agents/skills/PRD
 
 READ `.claude/skills/rules-agents-updater/SKILL.md` into context, THEN execute its process. Creates rules files, updates agents with discoveries.
+
+**ALWAYS REPORT — `rules/agents/skills: ran — [what changed]` or `deferred — [reason]`. NEVER
+emit nothing.** This step is explicitly deferrable, which is exactly why the deferral must be
+SAID.
 
 ### 6. Self-verification
 
@@ -83,9 +97,19 @@ After steps 2–3, verify output integrity — defense in depth against summariz
 
 If any check fails, fix it in the same session — do NOT defer.
 
+**ALWAYS REPORT — `self-verification: N/N checks passed` or `N/M — [which failed, how fixed]`.
+NEVER emit nothing.**
+
 ## Priority and context limits
 
 Items 1-3 are the critical minimum. Items 4-5 can be deferred if context window is low.
+
+**A deferral is legitimate; a SILENCE is not.** Every step 1-6 carries its own
+`ran — [outcome]` / `skipped|deferred — [reason]` report line above, and **ALWAYS emit all six,
+including for the steps you deferred** (component-design §9 rule 3: an unreported skip is
+indistinguishable from a forgetting, and the two need opposite responses).
+Mechanical self-check, run before closing the session: count the report lines you emitted —
+**expected result: exactly 6, one per step.** Fewer than 6 is RED; name the missing step.
 
 **Item 6 (self-verification) MUST always run — never defer it.** It is fast and catches consistency bugs that would compound across sessions.
 

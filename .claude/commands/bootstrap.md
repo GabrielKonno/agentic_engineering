@@ -34,26 +34,42 @@ Execute in order. Report results after each part.
 
 ## Process
 
-### Step 1.1 — Framework-clone freshness check (MANDATORY, before any copy)
+### Step 0.5 — Framework-clone freshness check (MANDATORY, before any copy)
 
 **ALWAYS RUN before Step 1.5 copies anything out of this repo:**
 
 ```bash
-git fetch && git status -sb | head -1
+git remote -v | head -1                              # (a) does this clone have a remote at all?
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch track one?
+git fetch && git status -sb | head -1                # (c) ahead/behind
 ```
 
-Expected result: the branch line does **NOT** contain `behind`. If it does, **STOP and tell the
-owner** — a stale clone silently stamps an OLD contract into a new project under a version label
-(`framework-vX.Y.Z`) the project will then trust, and `/existing_project_adaptation` later keys
-migration decisions to that same label. Update first (`git pull`, or
-`git fetch upstream && git merge upstream/main` on a fork), then restart.
+**Classify into exactly one of FOUR outcomes — the check FAILS CLOSED, never open:**
 
-If the repo has no remote, say so and continue — there is nothing to be behind.
+| Observation | Verdict |
+|-------------|---------|
+| (a) empty — no remote configured | `no remote — skipped`. Nothing to be behind; CONTINUE. |
+| (a) non-empty, (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
+| (c) branch line contains `behind` | **RED — STOP.** `behind by N commits — STOPPED`. |
+| (c) branch line shows a `...` tracking segment and no `behind` | `up to date`. CONTINUE. |
 
-**ALWAYS REPORT — `framework freshness: up to date` / `behind by N commits — STOPPED` /
-`no remote — skipped`. NEVER emit nothing.** This is the symmetric twin of
-`existing_project_adaptation.md` Step 1.0, which already runs a freshness check on the PROJECT
-copy; the framework copy had none.
+**NEVER read a bare `## main` (no `...upstream` segment) as "up to date".** With a remote present
+but no tracking branch, `git status -sb` prints the branch name alone — the command exits 0 having
+compared against NOTHING. That is the third state `session_rules.md → Execution proof` requires to
+fail CLOSED: *"the tool exited 0 and its summary is UNREADABLE → RED. 'I could not READ it' is
+NEVER 'it is healthy'."* Verify the tracking segment is PRESENT before trusting the absence of
+`behind`.
+
+On any RED, **STOP and tell the owner** — a stale clone silently stamps an OLD contract into a new
+project under a version label (`framework-vX.Y.Z`) the project will then trust, and
+`/existing_project_adaptation` later keys migration decisions to that same label. Update or attach
+the upstream first (`git pull`, `git fetch upstream && git merge upstream/main` on a fork, or
+`git branch --set-upstream-to=origin/main`), then restart.
+
+**ALWAYS REPORT one of the four verdict strings above — `up to date` / `behind by N commits —
+STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`. NEVER emit
+nothing.** This is the symmetric twin of `existing_project_adaptation.md` Step 0.5, which runs the
+same check there, and of its Step 1.0, which checks the PROJECT copy.
 
 ---
 
@@ -74,23 +90,30 @@ If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. Use 
 
 ---
 
-### Step 1.1b — Read the PRD's Cross-cutting Concerns
+### Step 1.1 — Read the PRD's Cross-cutting Concerns
 
 **ALWAYS READ the PRD's `Cross-cutting Concerns` section when present** (written by
 `/prd_planning` Phase 4, maintained by `/prd_change` Phase 3). It names the themes that span
 multiple PRD sections and must stay consistent when any of them changes — the highest-value
 context the PRD carries and the only section no bootstrap step used to read.
 
-**ALWAYS ROUTE each concern to the artifact that owns it:**
-- A concern that constrains CODE → a `.claude/rules/` domain rules file (Step 13's signal table
-  is the first place to look for a matching example).
-- A concern that constrains ARCHITECTURE → a row in `project.md`'s Architectural Decisions
-  table (Step 3).
-- A concern that needs WORK → a task in `pendencias.md` (Step 4).
+None of the receiving artifacts exist yet at this point in the run, so this step does NOT write
+them. **ALWAYS BUILD the routing list here and CARRY IT FORWARD** — each destination step below
+is the RECEIVER that writes it, and each says so in its own text.
 
-**ALWAYS REPORT — `cross-cutting: N concerns routed (R rules, A decisions, T tasks)` or
-`cross-cutting: none — PRD has no such section`. NEVER emit nothing.** A concern that reaches no
-artifact is a concern the project will rediscover as a bug.
+**ALWAYS CLASSIFY each concern to the artifact that owns it:**
+
+| Concern constrains… | Destination artifact | Written by |
+|---|---|---|
+| CODE | a `.claude/rules/` domain rules file (Step 13's signal table is the first place to look for a matching example) | **Step 13 — RECEIVER** |
+| ARCHITECTURE | a row in `project.md`'s Architectural Decisions table | **Step 3 — RECEIVER** |
+| WORK still to do | a task in `pendencias.md` | **Step 4 — RECEIVER** |
+
+**ALWAYS REPORT the LIST, not a completed routing — `cross-cutting: N concerns classified
+(R → rules/Step 13, A → decisions/Step 3, T → tasks/Step 4)` or `cross-cutting: none — PRD has
+no such section`. NEVER emit nothing.** Step 15 re-reports the same counts as DELIVERED, which is
+the line that proves each receiver consumed its share. A concern that reaches no artifact is a
+concern the project will rediscover as a bug.
 
 ---
 
@@ -183,6 +206,10 @@ Create the file at the project root as `CLAUDE.md`.
 - Fill Project Phases from Build Order
 - **For each phase, ALWAYS include a Module Breakdown** — for every module in the phase, include: 1-line objective, key features with concrete details (component names, data values, IDs), key business rules that affect implementation, and integration points with other modules. This is what makes project.md useful as a session entry point without re-reading the full PRD every time.
 - Add Session 0 row to Progress Log index table: `| 0 (Bootstrap) | [date] | PRD analyzed, docs + agents created, stack confirmed | — |`
+- **This step is the RECEIVER of Step 1.1's ARCHITECTURE concerns.** ALWAYS add one Architectural
+  Decisions row per cross-cutting concern Step 1.1 classified as architectural, naming the concern
+  and the sections it spans. REPORT `cross-cutting received: A/A architecture concerns written` —
+  a mismatch with Step 1.1's count is RED.
 
 Create at `.claude/phases/project.md`.
 
@@ -198,6 +225,10 @@ Create at `.claude/phases/project.md`.
 - Criteria quality standard: every criterion must have 3 parts (action, expected result, failure signal)
 - Consult PRD section 4 (NFRs) when writing criteria: performance, security, and compliance NFRs become `VERIFY:`/`REVIEW:` criteria on the tasks they constrain
 - Seed "Future Improvements" with watch-items from PRD section 9 (Risks and Dependencies), stamped `[added s0]` — risks tracked nowhere are risks forgotten
+- **This step is the RECEIVER of Step 1.1's WORK concerns.** ALWAYS create one task per
+  cross-cutting concern Step 1.1 classified as work, with full acceptance criteria like any other
+  task. REPORT `cross-cutting received: T/T work concerns written` — a mismatch with Step 1.1's
+  count is RED.
 
 Create at `.claude/phases/pendencias.md`.
 
@@ -297,7 +328,7 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ### Step 5.7 — Copy pre-built process skills, process agents, and session rules
 
-**Process skills (12 — inline, copied to `.claude/skills/`):**
+**Process skills (12 lifecycle — ALWAYS copied to `.claude/skills/`):**
 
 ```bash
 mkdir -p projects/$ARGUMENTS/.claude/skills projects/$ARGUMENTS/.claude/agents
@@ -326,7 +357,7 @@ cp docs/modules/agents/diff_pattern_extractor.md projects/$ARGUMENTS/.claude/age
 - **Before implementing:** criteria-enforcer (called by validation-orchestrator skill)
 - **Session end:** diff-pattern-extractor (called by session-end skill, item 1)
 
-These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where inline execution risks skipping steps. The remaining 12 run inline (main agent reads SKILL.md and follows steps in its own context).
+These 3 run as isolated subagents via Agent tool — they produce decisions or analyses where in-context execution risks skipping steps. The 12 lifecycle skills split by `invocation:` — **7 `inline`** (config-file-updater, cross-cutting-analysis, pendencias-updater, project-md-updater, rules-agents-updater, session-log-creator, validation-orchestrator: another component reads SKILL.md and follows its steps in its own context) and **5 `user`** (autonomous-loop, commit, context-recovery, session-end, sprint-proposer: the owner invokes them). "Copied to every project" and "`invocation: inline`" are DIFFERENT properties — never use one word for both.
 
 **Session rules (copied to `.claude/rules/`):**
 
@@ -583,6 +614,12 @@ Analyze the PRD for domain signals. For each domain that is a **core feature or 
 | Multi-tenancy, organization isolation, RLS | multi-tenancy-rules.md | assets/examples/rules/multi-tenancy-rules.md |
 | Observability, logging, tracing, metrics, alerts | observability-rules.md | assets/examples/rules/observability-rules.md |
 
+**This step is the RECEIVER of Step 1.1's CODE concerns.** ALWAYS run the signal table against
+the cross-cutting concerns Step 1.1 classified as code-constraining, not only against the PRD's
+module list — a concern with no matching template falls to the `pendencias.md` registration clause
+at the end of this step, never to silence. REPORT `cross-cutting received: R/R code concerns
+placed (rules file or pendencias task)` — a mismatch with Step 1.1's count is RED.
+
 **Guard:** Only pre-create when BOTH conditions are met: (1) the domain is a core feature or architectural pattern in the PRD, and (2) a matching example template exists in `assets/examples/rules/`.
 
 For each match: copy from `assets/examples/rules/` to `.claude/rules/`, adapting:
@@ -678,6 +715,16 @@ git commit -m "chore: bootstrap from agentic framework"
 
 ```
 ## Session 0 — Bootstrap Complete
+
+### Framework freshness (Step 0.5) — ALWAYS report, never omit:
+- `up to date` / `behind by N commits — STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` /
+  `no remote — skipped`
+
+### Cross-cutting concerns (Step 1.1 → Steps 3/4/13) — ALWAYS report, never omit:
+- Classified at Step 1.1: [N] (R → rules, A → decisions, T → tasks)
+- Delivered by receivers: R/R rules (Step 13) · A/A decisions (Step 3) · T/T tasks (Step 4)
+- [or `none — PRD has no Cross-cutting Concerns section`]
+- **Any receiver count below its Step 1.1 count is RED** — name the dropped concern.
 
 ### Files created:
 - CLAUDE.md ([lines] lines)

@@ -10,7 +10,7 @@ invocation: subagent
 receives: '"Task: [task name exactly as in pendencias.md]" — passed by main agent in prompt'
 produces: criteria upgrade summary — list of upgraded criteria (WEAK→STRONG) or "all STRONG — no changes"
 created: framework-v1.6.0 (pre-validated)
-derived_from: execution_protocol "Before implementing"
+derived_from: 'execution_protocol "Before implementing" — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Criteria Enforcer

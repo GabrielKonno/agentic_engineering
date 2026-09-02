@@ -23,6 +23,58 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 
 ---
 
+## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
+
+An audit run has two modes. They differ in what each agent is told to look at, and the difference
+is not cosmetic: the verification mode found defects in **12 of 24** already-`applied` findings on
+its first documented execution. The mode was practice before it was instruction — executed twice
+with its verdict vocabulary supplied by the invoking prompt rather than by this file. That gap is
+what this phase closes.
+
+**ALWAYS DECIDE the mode from the trigger, and ALWAYS STATE it in the report header —
+`mode: baseline` or `mode: verification (over sHASH)`. NEVER emit nothing.**
+
+| Trigger | Mode |
+|---|---|
+| Owner request with no prior application to check; a scheduled net; before a MINOR/MAJOR bump | **baseline** |
+| **Immediately after a `/maintenance` session applied an audit batch** (CLAUDE.md trigger (d)) | **verification** |
+| After an upstream absorption | **baseline**, plus verification over that absorption's commit |
+
+### Baseline mode
+
+Checks *claim vs fact* across the 17 dimensions. This is Phase 1 as written below, unchanged.
+
+### Verification mode — ADDITIVE, never a replacement
+
+Verification mode runs the full 17 dimensions **and** gives every agent a **Part 1 mandate**
+before them. Baseline mode is structurally blind to a fix that is PRESENT but landed in the wrong
+place, contradicts its neighbour, or orphaned the block below it — every such defect passes an
+"is the required text present?" check.
+
+**In verification mode, ALWAYS ADD this mandate to every agent's prompt, verbatim:**
+
+> **Part 1 (do this FIRST).** Read `assets/docs/audit-<the applied report>.md` and the commit that
+> applied it. For every finding marked `applied sHASH` that falls in your dimensions: read the
+> structure AROUND the fix — the heading it now sits under, the blocks immediately after it, the
+> sibling twin file, the instruction that cites it — and classify it with ONE of these verdicts:
+> - **CONFIRMED-FIXED** — the fix landed, in the right place, and its class was swept.
+> - **PARTIALLY-FIXED** — the named instance is fixed; something the finding required is not.
+> - **FIXED-BUT-CLASS-NOT-SWEPT** — correct at the named line; the same defect survives elsewhere.
+> - **INTRODUCED-A-DEFECT** — the fix is present AND created a new problem (wrong nesting, a
+>   contradiction with a neighbouring line, a forward reference with no receiver, a stale count).
+>   May combine with any verdict above.
+>
+> Cite file:line evidence for EVERY verdict. A verdict with no structural evidence is not a
+> verdict. Any verdict other than CONFIRMED-FIXED becomes a NEW finding with a new ID.
+
+**ALWAYS OPEN the merged report with a Part 1 verification ledger** — one row per applied finding
+(ID | verdict | evidence) — followed by the score line
+`N clean · N class-not-swept · N introduced-a-defect`, and THEN the new findings. Phase 3's
+carry-forward rule (still-`open` findings) is unchanged and additional to this ledger: **an
+`applied` finding is re-verified in this mode, never skipped because its status says applied.**
+
+---
+
 ## Phase 1 — Dispatch Audit Agents
 
 Launch ALL 6 agents below **in a single message** using 6 parallel Agent tool calls.
@@ -237,7 +289,9 @@ FILES TO READ:
 3. All other files in docs/modules/agents/ (validator, arbitrator, red_team, blue_team,
    criteria_enforcer, prd_sync_checker, diff_pattern_extractor)
 4. examples/agents/ — list all files, read those that match gap-declaration domains
-   (e.g., concurrency, performance, accessibility, data-integrity, secrets, compliance, etc.)
+   (e.g., concurrency, performance, accessibility, visual regression, data-integrity, secrets,
+   compliance, etc. — visual regression is named explicitly because its install link has broken
+   twice, on the bootstrap path and then on the EPA path)
 5. .claude/rules/component-design.md (sections 1-3: Gap-Declaration, Pushy Description,
    Vocabulary Alignment)
 
@@ -431,7 +485,10 @@ CHECKS:
 
 [D15] Framework concept doc + READMEs factual accuracy
   D15.1. From docs/agentic_engineering_framework.md — extract ALL numeric claims:
-         - Skill counts (look for "15 pre-built", "12 inline", "15 skills", "3 tier-gated")
+         - Skill counts (look for "15 pre-built", "12 lifecycle", "15 skills", "3 tier-gated")
+         - ALSO grep for the BANNED sense of "inline" — "N inline process skills", "inline (always
+           copied)". `invocation: inline` is a real value; "inline" meaning "always copied" is the
+           renamed term and any survivor is a FINDING.
          - Agent counts (look for "10 agent", "3 process agents")
          - Step counts (look for "15-step")
          - Example counts (look for "20", "9", "11" for agents/skills/rules)
@@ -555,7 +612,8 @@ After ALL 6 agents return, consolidate their reports into a single audit report.
 
 **Date:** [today's date]
 **Framework version:** [from README.md]
-**Dimensions checked:** 17
+**Run mode:** `baseline` | `verification (over sHASH)` — ALWAYS state it (Phase 0)
+**Dimensions checked:** 17 [+ a Part 1 fix-verification pass, in verification mode]
 **Agents dispatched:** 6
 
 ## Summary
@@ -618,3 +676,9 @@ step is the carry-over half.
    drops the last one's open items is how "deferred" becomes "forgotten".
 4. **ALWAYS report in one line how many findings were carried forward** — `carried: N open from
    [previous file]`, or `carried: none — first audit`. Never nothing.
+5. **In `verification` mode, ALWAYS persist the Part 1 ledger too** — one row per re-verified
+   `applied` finding with its verdict and structural evidence, plus the score line. A finding
+   whose verdict is anything other than CONFIRMED-FIXED gets a NEW ID and status `open`; the
+   original keeps its `applied sHASH` status and gains a pointer to the new ID. **NEVER silently
+   reopen an applied finding under its old ID** — the ledger is how a later session tells "this
+   was never fixed" from "this was fixed and the fix was wrong".

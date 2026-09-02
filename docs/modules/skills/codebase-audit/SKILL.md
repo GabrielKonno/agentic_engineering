@@ -84,7 +84,7 @@ Read `pendencias.md` "Future Improvements". For each item older than `DEBT_AGE` 
 by its `[added sN]` stamp): verdict KEEP (re-stamp) / CLOSE (obsolete) / PROMOTE (active task).
 
 **ALWAYS triage the Known Bug Patterns in this SAME step** — this step is their INVOKER
-(component-design §9). The verdicts are DEFINED in `code-reviewer.md` → "Periodic review", which
+(component-design §9). The verdicts are DEFINED in `code-reviewer.md` → `### Periodic review — the triage VERDICTS`, which
 schedules nothing on its own. Read the KBP list with its `triggered:` / `false-positive:` counters
 and give EVERY pattern older than 10 sessions an explicit verdict: **REMOVE** (`triggered: never`),
 **REFINE** (frequent false-positive — too broad), **PROMOTE** (frequent triggered → DERIVED rule in

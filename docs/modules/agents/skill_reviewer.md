@@ -16,7 +16,7 @@ invocation: subagent
 receives: draft path + rubric path (.claude/skills/skill-gate/rubric.md) + component index (names and descriptions only) + review cycle number. NOTHING else — no session history, no authorial intent, no explanation of the draft.
 produces: JSON verdict (schema below) written to .claude/skill-gate/review_reports/ and returned as the report
 created: framework-v2.4.0 (pre-validated)
-derived_from: skill-gate-spec v1.1 §4.2
+derived_from: "skill-gate-spec v1.1 §4.2 (framework-repo internal design record — NOT published; do not attempt to resolve a path)"
 ---
 
 # Skill Reviewer — blind review of draft components

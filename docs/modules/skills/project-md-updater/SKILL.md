@@ -8,7 +8,7 @@ description: >
   session-log-creator. Without this, the next session has no context of what
   happened and cross-session domain accumulation is lost.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 2
+derived_from: 'session_protocol end-of-session item 2 — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # project.md Updater

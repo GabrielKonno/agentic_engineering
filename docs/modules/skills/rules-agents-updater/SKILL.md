@@ -8,7 +8,7 @@ description: >
   logic accumulates. MUST evaluate at end of every session (item 5). Without this,
   agents and rules become stale and stop matching the project's actual patterns.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 5
+derived_from: 'session_protocol end-of-session item 5 — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Rules, Agents, and Skills Updater

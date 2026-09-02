@@ -7,7 +7,7 @@ description: >
   Runs at end of session (item 4) when relevant changes occurred. Keeps the project
   contract accurate — stale config means the AI works with wrong assumptions next session.
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 4
+derived_from: 'session_protocol end-of-session item 4 — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Config File Updater (CLAUDE.md)

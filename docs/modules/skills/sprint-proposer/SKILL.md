@@ -13,7 +13,7 @@ description: >
   planning discussions, task management, or quick fixes. Without this,
   implementation sessions start without project context and wrong priorities.
 created: framework-v2.1.0 (pre-validated)
-derived_from: session_protocol "At the START of implementation sessions"
+derived_from: 'session_protocol "At the START of implementation sessions" — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Sprint Proposer
@@ -140,11 +140,13 @@ sprint for the task named in the marker. Context has changed and the continuatio
 - Note complexity classification of each task
 
 #### 4b. Select tasks
-- **ALWAYS PICK 3-5 dependency-satisfied tasks** — the cap is the limit of a human APPROVAL's
-  attention, which is why it is a COUNT here and explicitly NOT one in loop mode
-  (`autonomous-loop` Step 1: phases are cut by dependency and resource disjointness).
+- **ALWAYS PICK dependency-satisfied tasks within the task limit — 3-5 by default; up to 7 ONLY
+  if all are small AND related; exactly 1 if the task is large.** The cap is the limit of a human
+  APPROVAL's attention, which is why it is a COUNT here and explicitly NOT one in loop mode
+  (`autonomous-loop` Step 1: phases are cut by dependency and resource disjointness). The 3-5
+  default is what you pick absent a reason; the 7 and 1 cases are the only sanctioned departures
+  from it, and each requires the stated condition to hold.
 - Order by: dependency resolution first, then priority
-- **NEVER exceed the task limit: 3-5 standard, up to 7 ONLY if all small+related, 1 if large.**
 - Mix: prefer starting with a small warm-up task if available
 
 #### 4c. Present sprint proposal

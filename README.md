@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.9.0
+# Agentic Engineering Framework v2.10.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -19,8 +19,8 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
                          |  - 7 doc templates |           | 10 agent .md files  |
-                         |  - 10 agent files  |           | 15 process skills   |
-                         |  - 5 rules files   |           | 5 rules files       |
+                         |  - 10 agent files  |           | 12-15 process skills|
+                         |  - 5 rules files   |           | 3-5 rules files     |
                          |  - 15 skills       |           | examples/ (copy)    |
                          |  - examples/       |           | settings.json       |
                          +--------------------+           +---------------------+
@@ -29,8 +29,10 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
                                                           claude
 ```
 
-> Counts shown are the full set. **Tier-gating by risk profile** (`prototype` → `production-financial`)
-> means a project receives a subset: a `prototype` gets the lean core (no audits/ops/budgets/CI),
+> The **Reads** column is the full framework set. The **Output** column is a RANGE because of
+> **tier-gating by risk profile** (`prototype` → `production-financial`): the low number is the
+> baseline every project gets (12 lifecycle skills, 3 core rules files), the high number is the
+> `production-financial` maximum. A `prototype` gets the lean core (no audits/ops/budgets/CI),
 > while `production`+ gets everything. See `docs/modules/rules/session_rules.md` → *Risk profile & ceremony tiers*.
 
 ### Session modes
@@ -132,7 +134,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.9.0)
+│   ├── modules/                            ← Single source of truth (v2.10.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -161,6 +163,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `CLAUDE.md` | `modules/templates/claude_md.md` | AI instructions — orchestrates skills that implement Session Protocol + Execution Protocol |
 | `.claude/phases/project.md` | `modules/templates/project_md.md` | Engineering handoff (architectural decisions, phase status, progress log) |
 | `.claude/phases/pendencias.md` | `modules/templates/pendencias_md.md` | Prioritized backlog with verifiable acceptance criteria |
+| `.claude/phases/done_tasks.md` | (created inline by bootstrap Step 4) | Destination for completed tasks — `pendencias-updater` moves them here at session end |
 | `.claude/agents/code-reviewer.md` | `modules/agents/code_reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
 | `.claude/agents/validator.md` | `modules/agents/validator.md` | Independent validation subagent — verifies with isolated context |
 | `.claude/agents/arbitrator.md` | `modules/agents/arbitrator.md` | Resolves conflicts between validator judgment and mechanical evidence |

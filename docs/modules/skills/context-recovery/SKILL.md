@@ -7,7 +7,7 @@ description: >
   3 end-of-session sub-skills, commits WIP, and requests a new session.
   Trigger: contradicting earlier decisions, repeating mistakes, losing track.
 created: framework-v2.1.0 (pre-validated)
-derived_from: session_protocol "Mid-session context recovery"
+derived_from: 'session_protocol "Mid-session context recovery" — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Context Recovery

@@ -36,25 +36,46 @@ This session reads the existing codebase and documentation, then upgrades everyt
 
 ---
 
+### Step 0.5 — FRAMEWORK-clone freshness check (MANDATORY, before Phase 1 and before copying anything out of this repo)
+
+```bash
+git remote -v | head -1                              # (a) does this clone have a remote at all?
+git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch track one?
+git fetch && git status -sb | head -1                # (c) ahead/behind
+```
+
+**Classify into exactly one of FOUR outcomes — the check FAILS CLOSED, never open:**
+
+| Observation | Verdict |
+|-------------|---------|
+| (a) empty — no remote configured | `no remote — skipped`. Nothing to be behind; CONTINUE. |
+| (a) non-empty, (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
+| (c) branch line contains `behind` | **RED — STOP.** `behind by N commits — STOPPED`. |
+| (c) branch line shows a `...` tracking segment and no `behind` | `up to date`. CONTINUE. |
+
+**NEVER read a bare `## main` (no `...upstream` segment) as "up to date".** With a remote present
+but no tracking branch, `git status -sb` prints the branch name alone — the command exits 0 having
+compared against NOTHING. That is the third state `session_rules.md → Execution proof` requires to
+fail CLOSED: *"the tool exited 0 and its summary is UNREADABLE → RED. 'I could not READ it' is
+NEVER 'it is healthy'."* Verify the tracking segment is PRESENT before trusting the absence of
+`behind`.
+
+On any RED, **STOP and tell the owner** — this command keys migration decisions to the framework
+version label, so a stale clone tells an upgraded project it is current while handing it an older
+contract. Update or attach the upstream first (`git pull`,
+`git fetch upstream && git merge upstream/main` on a fork, or
+`git branch --set-upstream-to=origin/main`), then restart.
+
+**ALWAYS REPORT one of the four verdict strings above — `up to date` / `behind by N commits —
+STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`. NEVER emit
+nothing.** Phase 1's Step 1.0 below checks the PROJECT copy; this checks the FRAMEWORK copy.
+Both, or neither is worth much.
+
+---
+
 ### Phase 1 — Read Everything (DO NOT write anything yet)
 
 Read the entire existing structure before making any changes. This is the most important phase — your understanding of the project determines the quality of every document you create or update.
-
-**Step 1.0b — FRAMEWORK-clone freshness check (MANDATORY, before copying anything out of this repo):**
-
-```bash
-git fetch && git status -sb | head -1
-```
-
-Expected result: the branch line does **NOT** contain `behind`. If it does, **STOP and tell the
-owner** — this command keys migration decisions to the framework version label, so a stale clone
-tells an upgraded project it is current while handing it an older contract. Update first
-(`git pull`, or `git fetch upstream && git merge upstream/main` on a fork), then restart. No
-remote → say so and continue.
-
-**ALWAYS REPORT — `framework freshness: up to date` / `behind by N commits — STOPPED` /
-`no remote — skipped`. NEVER emit nothing.** Step 1.0 below checks the PROJECT copy; this checks
-the FRAMEWORK copy. Both, or neither is worth much.
 
 **Step 1.0 — Freshness check of the PROJECT copy (MANDATORY before reading anything):**
 
@@ -201,7 +222,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.9.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.10.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -239,7 +260,7 @@ Required sections (compare against docs/modules/templates/claude_md.md — v2.9.
 - **"Evolutions applied"** section in session log template
 
 *Process components (copied in Step 2.9):*
-- 12 inline process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 3 core rules files (`.claude/rules/`), plus tier-gated audit skills + ops/budgets rules by risk profile (Step 2.9b)
+- 12 lifecycle process skills (`.claude/skills/`) + 3 process agents (`.claude/agents/`) + 3 core rules files (`.claude/rules/`), plus tier-gated audit skills + ops/budgets rules by risk profile (Step 2.9b)
 - Without these, the skill pointers in CLAUDE.md are broken references
 
 **For each addition, log:**
@@ -402,17 +423,17 @@ Based on the codebase analysis from Step 1 and the existing/retroactive PRD, ide
 
 | Domain signal | Rules file | Example template |
 |---|---|---|
-| Multilingual / i18n | i18n-rules.md | examples/rules/i18n-rules.md |
-| Microservices / event-driven | distributed-systems-rules.md | examples/rules/distributed-systems-rules.md |
-| Scheduling / cron / calendar | scheduling-rules.md | examples/rules/scheduling-rules.md |
-| High-availability / retry | resilience-rules.md | examples/rules/resilience-rules.md |
-| Rate limiting / throttling | rate-limiting-rules.md | examples/rules/rate-limiting-rules.md |
-| E-commerce / cart / payment | e-commerce-rules.md | examples/rules/e-commerce-rules.md |
-| Full-stack / FE+BE | frontend-backend-integration-rules.md | examples/rules/frontend-backend-integration-rules.md |
-| Auth / login / permissions | auth-rules.md | examples/rules/auth-rules.md |
-| PII / LGPD / GDPR | compliance-rules.md | examples/rules/compliance-rules.md |
-| Multi-tenancy / org isolation | multi-tenancy-rules.md | examples/rules/multi-tenancy-rules.md |
-| Observability / logging | observability-rules.md | examples/rules/observability-rules.md |
+| Multilingual / i18n | i18n-rules.md | assets/examples/rules/i18n-rules.md |
+| Microservices / event-driven | distributed-systems-rules.md | assets/examples/rules/distributed-systems-rules.md |
+| Scheduling / cron / calendar | scheduling-rules.md | assets/examples/rules/scheduling-rules.md |
+| High-availability / retry | resilience-rules.md | assets/examples/rules/resilience-rules.md |
+| Rate limiting / throttling | rate-limiting-rules.md | assets/examples/rules/rate-limiting-rules.md |
+| E-commerce / cart / payment | e-commerce-rules.md | assets/examples/rules/e-commerce-rules.md |
+| Full-stack / FE+BE | frontend-backend-integration-rules.md | assets/examples/rules/frontend-backend-integration-rules.md |
+| Auth / login / permissions | auth-rules.md | assets/examples/rules/auth-rules.md |
+| PII / LGPD / GDPR | compliance-rules.md | assets/examples/rules/compliance-rules.md |
+| Multi-tenancy / org isolation | multi-tenancy-rules.md | assets/examples/rules/multi-tenancy-rules.md |
+| Observability / logging | observability-rules.md | assets/examples/rules/observability-rules.md |
 
 For each match: copy from `assets/examples/rules/` to `.claude/rules/`, adapting:
 - `applies_to:` frontmatter: reference actual module names found in the codebase
@@ -440,9 +461,9 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.9.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.10.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
-**Copy process skills (12 inline — to `.claude/skills/`):**
+**Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
@@ -722,7 +743,7 @@ mkdir -p projects/$ARGUMENTS/.claude/skills/[stack-name]
 # Create projects/$ARGUMENTS/.claude/skills/[stack-name]/SKILL.md with key patterns, common mistakes, security settings
 ```
 
-Register in CLAUDE.md "Skills" section.
+Register in CLAUDE.md "Skills & Agents" section.
 
 **Step 4.6 — Pre-create domain rules from retroactive PRD:**
 
@@ -744,6 +765,7 @@ Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/securit
 | accessibility gap (code-reviewer) | accessibility-checker.md |
 | performance gap (code-reviewer) | performance-auditor.md |
 | concurrency gap (code-reviewer) | concurrency-tester.md |
+| visual regression gap (code-reviewer + validator) | visual-regression-tester.md |
 | data integrity gap (code-reviewer) | data-integrity-checker.md |
 | static analysis gap (security-reviewer) | sast-scanner.md |
 | secrets coverage gap (security-reviewer) | secrets-scanner.md |
@@ -754,6 +776,10 @@ Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/securit
 For each match: copy from `assets/examples/agents/` to `.claude/agents/`, adapting only:
 - `created:` lineage: change from `example` to `adaptation (pre-installed from example template)`
 - Verify the `description:` gap phrase matches the reviewer's gap declaration vocabulary
+
+If a gap was KEPT but no matching example exists in `assets/examples/agents/`: register in
+`pendencias.md` — "Create specialist agent for [gap] when domain implementation begins." A kept
+gap that installs nothing and registers nothing is a gap the project can never act on.
 
 After installation, validate activation chains for every pre-installed specialist:
 1. Verify it has a matching Coverage Gap Declaration in the reviewer whose domain vocabulary echoes the agent's Pushy Description

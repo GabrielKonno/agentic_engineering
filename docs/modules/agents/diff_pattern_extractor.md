@@ -10,7 +10,7 @@ invocation: subagent
 receives: no extra context needed — reads git diff and .claude/agents/code-reviewer.md autonomously
 produces: summary of patterns added/modified/removed, with FIX/DERIVED/CAPTURED classification for each
 created: framework-v1.6.0 (pre-validated)
-derived_from: session_protocol end-of-session item 1
+derived_from: 'session_protocol end-of-session item 1 — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Diff-based Pattern Extractor

@@ -132,6 +132,12 @@ next task. When the owner later confirms: if the verdict is older than 60 minute
 the promotion script will refuse it — re-run the skill-reviewer (one quick cycle
 on an already-approved draft) and promote with the fresh verdict.
 
+### Observation-mode reporting and exit — applies in EVERY mode
+
+> These blocks are NOT part of the sprint-approved subsection above. They govern every promotion
+> regardless of how the session was approved; a session that skips the sprint-approved subsection
+> ALWAYS still executes them.
+
 **Observation-mode session report:** while in observation mode, at the end of ANY
 session where the gate ran, ALWAYS report to the owner:
 - **Gate activity:** drafts reviewed, cycles per draft, reprovals by problem type
@@ -148,9 +154,12 @@ line yourself — per evolution-policy this is a BEHAVIOR change: the owner
 deletes it (or tells you to). Until then, keep proposing at most once per
 session — never silently give up on the proposal.
 
-**After promotion** — for `invocation: subagent` agents only: run the standard
-creation eval (2 test scenarios) per rules-agents-updater Step 4. The gate replaces
-self-approval, not the behavioral eval.
+### After promotion — MANDATORY in EVERY mode
+
+**ALWAYS run the standard creation eval after promoting** — for `invocation: subagent` agents
+only: 2 test scenarios per rules-agents-updater Step 4. The gate replaces self-approval, not the
+behavioral eval. This is owed by every promotion, in observation mode and out of it, in a
+sprint-approved session and outside one.
 
 ## Consuming components with `verified: false`
 

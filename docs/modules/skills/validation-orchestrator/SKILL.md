@@ -10,7 +10,7 @@ description: >
   MUST run for every task. Skipping this means the human finds the bugs instead
   of the framework.
 created: framework-v2.1.0 (pre-validated)
-derived_from: execution_protocol "Before implementing", "During implementation", "Validation Failure Post-Mortem"
+derived_from: 'execution_protocol "Before implementing", "During implementation", "Validation Failure Post-Mortem" — section of docs/agentic_engineering_framework.md in the FRAMEWORK repo; lineage only, NOT shipped to projects, do not attempt to resolve a project path'
 ---
 
 # Validation Orchestrator
@@ -39,7 +39,7 @@ indistinguishable from a forgetting.
 
 ### 2. Classify and route
 
-**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. For Architecture/Security tasks, ALWAYS initiate the model switch protocol (see execution protocol).
+**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. For Architecture/Security tasks, ALWAYS initiate the model switch protocol: the escalation ladder is `.claude/rules/session-rules.md` §"Reasoning depth" step 3, `project-md-updater` §"MODEL SWITCH entries" writes the marker, and `sprint-proposer` §1b resumes from it.
 
 **Threshold:** Small (single file) → implement directly. Medium (2-5 files) → propose plan, wait for approval. Large (new module, cross-module) → propose plan with risks, wait for approval.
 
@@ -59,8 +59,9 @@ is grading its own exam, and the criteria are also the validator's yardstick. Fu
 ### 3. Git checkpoint (medium and large)
 
 **ALWAYS COMMIT the current state before writing code**, so the task has a clean rollback
-boundary. In loop mode this step stays with the ORCHESTRATOR — the rollback boundary belongs to
-whoever owns the working tree (`autonomous-loop` §3a).
+boundary. In loop mode the ownership split is the one stated once above under
+§"Ownership of 'Before Implementing' in loop mode" — this step is covered by it and does not
+restate it (component-design §9: one home per mandate).
 
 **ALWAYS REPORT — `checkpoint: committed [hash]` or `skipped — [reason: small task / tree already
 clean at a commit]`. NEVER emit nothing.**
