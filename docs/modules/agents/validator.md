@@ -17,8 +17,12 @@ receives: >
   git diff, acceptance criteria, Code Review Report, Security Review Report (if exists),
   Vulnerability Report (if exists), rules files, Architectural Decisions table from project.md
 produces: >
-  Validation Report with ✅/❌/⏭️ per category (Build, Tests, Review, Security,
-  Mutation, DB, UI, Migration, Regression) + mutation test results + test quality evaluation
+  Validation Report with a verdict per category. Verdict-bearing categories (14):
+  Build, Tests, Review, Security, Criteria Results, Mutation Tests, DB, UI, Migration,
+  Regression, Prior Review Findings, Coverage Gap Declaration, Items for human verification,
+  Overall. The vocabulary is per-category and defined by the Output template below — most are
+  ✅/❌/⏭️, Security adds ⚠️ for a declared-but-unclosed gap, and UI adds BASELINE-CREATED.
+  Plus mutation test results and test quality evaluation.
 created: s0 (bootstrap)
 last_eval: s0 (2/2 passed)
 fixes: []

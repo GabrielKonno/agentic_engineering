@@ -28,9 +28,11 @@ This is a framework maintenance session, not a project bootstrap.
 
 **Workflow:** Run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction
 plan provided by the user (an audit report → "Audit intake"; project evolution docs → "Upstream
-intake"), apply all changes in order, run the post-change checklist — whose items 8 and 9 route
-into "New component creation" and component-design §5 when this session created or relocated
-anything — then apply the version bump ("Version bumps") and commit.
+intake"), apply all changes in order, then run the post-change checklist to completion — every numbered
+item, including item 7 (which OWNS the version bump) and items 8 and 9 (which route into
+component-design §5 and "New component creation") — and commit. The bump is NOT a step after the
+checklist: it is item 7 inside it, and naming it separately here is what re-externalizes the H2
+that item 7 exists to abolish (`/audit` 2026-09-02 K-17).
 
 ## Step 0 — Upstream discovery sweep (runs FIRST, in EVERY maintenance session)
 
@@ -143,8 +145,27 @@ Each item encodes a real miss that survived a first pass and was only caught by 
      authorization paragraph above the new permission, the intro sentence that states a count.
    - **DESCENDING** — the same defect one level down: if a step now MUST report something, does
      the report template have a field for it?
-   **ALWAYS REPORT the result — `class sweep: N directions checked, M extra instances found and
-   fixed` or `class sweep: N/A — no point fixes this session`. NEVER emit nothing.**
+   **ALWAYS REPORT the result as a PER-FIX RECEIPT — one row per finding ID, never one aggregate
+   line for the session.** An aggregate cannot be wrong about a single fix among thirty, which is
+   precisely why three consecutive sessions emitted an honest aggregate while missing a direction
+   on individual fixes. The table is the control; the total is not.
+
+   | Fix ID | LATERAL | PARALLEL | ADJACENT | DESCENDING | Extra instances found |
+   |--------|---------|----------|----------|------------|----------------------|
+   | [K-3]  | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
+
+   Use `✓` (ran, and say what you grepped), `✗` (NOT run — which is legitimate only with a
+   stated reason on the same row), or `n/a` (the direction cannot apply, e.g. the artifact has no
+   twin). **A row with a `✗` and no reason is RED.** Close with the total:
+   `class sweep: N fixes × 4 directions, M extra instances found and fixed`, or
+   `class sweep: N/A — no point fixes this session`. **NEVER emit nothing, and NEVER emit the
+   total without the table.**
+
+   > Evidence this is not hypothetical: applying the 2026-09-02 batch, the session reported
+   > `4 directions, 15 extra instances` in good faith while running DESCENDING on one file
+   > (`framework-audit`, which gained the new report field) and skipping it on that file's
+   > mother-side sibling (`/audit`'s own report template) — shipping K-6. A per-fix row for that
+   > finding would have carried `DESCENDING ✗` with nothing to write in the reason column.
 
 5. **Back-sweep of every PROCESS rule promoted THIS session.** A newly promoted process rule
    condemns OLDER artifacts — applying it only where it was written leaves the repo failing its
@@ -230,8 +251,15 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    content and never restates it; name what stays SHARED; sweep every INVOKER that cited the moved
    section by name; run item 1's inventory sweep for the new component.
    Mechanical self-check (expected result stated): for each RELOCATE, grep the moved section's
-   heading text across the repo — **expected: exactly ONE definition plus N pointers; two
-   definitions is RED** (the divergence §5 exists to prevent).
+   heading text across the repo and **count only the definitions OUTSIDE a declared twin pair**.
+   **Expected: exactly ONE definition per twin-set, plus N pointers.** Two definitions across a
+   `docs/modules/` ↔ `.claude/` twin pair is the NORMAL case CLAUDE.md's dual-placement rule
+   REQUIRES — it is GREEN, and the obligation there is that the two stay byte-identical in the
+   moved section. **RED is:** two definitions inside the SAME file, two in files that are not a
+   twin pair, or a twin pair whose copies of the moved section DIFFER. A pointer that restates the
+   content instead of citing it is also RED.
+   (This check was written in `a28f661` with "two definitions is RED" flat, which fires on every
+   twinned component and would have been disabled by its first user — `/audit` 2026-09-02 K-8.)
    **ALWAYS REPORT — `classification: A add, S substitute, D delete, R relocate` (plus the
    per-RELOCATE grep result) or `classification: N/A — no component content changed`. NEVER emit
    nothing.**
@@ -261,9 +289,9 @@ this section is its invoker. A bump publishes the current state as a contract; t
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 
-- **MINOR** (`v2.9.0` → `v2.10.0`): a new rule/section/template, an upstream absorption, or a
+- **MINOR** (`v2.10.0` → `v2.11.0`): a new rule/section/template, an upstream absorption, or a
   schema change to a document projects receive.
-- **PATCH** (`v2.10.0` → `v2.10.1`): corrections that add no new contract — broken references,
+- **PATCH** (`v2.11.0` → `v2.11.1`): corrections that add no new contract — broken references,
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
@@ -325,8 +353,7 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    silently dropping is not — they must still read `open` for the next carry-forward.
 6. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
-   moment where the fixes themselves are the least-verified thing in the repo: the two documented
-   executions of this pass found defects in 8 of 15 and 12 of 24 applied findings, and step 2's
+   moment where the fixes themselves are the least-verified thing in the repo: the three documented executions found defects in **2 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2) and **11 of 30** (2026-09-02 Run 3) applied findings, and step 2's
    re-verification runs BEFORE applying, never after. Report
    `verification audit: proposed / ran / skipped — [owner deferred]`; NEVER nothing.
 
@@ -349,13 +376,13 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
    broadcast to every future project). Proven artifacts (guard scripts, mutation-tested code)
    keep their code byte-identical; only provenance headers/comments are genericized.
 4. **Record the batch in a lineage doc under `assets/docs/`, named
-   `framework-evolution-upstream-<date>[-slug].md`** (existing records use `YYYY-MM`; `YYYY-MM-DD` is equally valid) — the `framework-evolution-upstream-`
-   prefix is MANDATORY, not a convention: Step 0's cross-check globs exactly that pattern, and a
-   record filed under any other name makes the check silently return no hit, so the next session
-   reads a false `pending absorption` and re-absorbs a batch already disposed of. Record what
-   graduated, where each
-   piece landed, what was adapted, and what was deliberately NOT absorbed (with why). That
-   commit is the AUTHORITATIVE disposition for every doc in the batch.
+   `framework-evolution-upstream-<date>[-slug].md`.** The `framework-evolution-upstream-` prefix
+   is MANDATORY, not a convention: Step 0's cross-check globs exactly that pattern, and a record
+   filed under any other name makes the check silently return no hit — so the next session reads
+   a false `pending absorption` and re-absorbs a batch already disposed of. (Existing records use
+   `YYYY-MM`; `YYYY-MM-DD` is equally valid.)
+   Record what graduated, where each piece landed, what was adapted, and what was deliberately NOT
+   absorbed (with why). That commit is the AUTHORITATIVE disposition for every doc in the batch.
    **ALWAYS cite each absorbed doc by its FULL FILENAME** (e.g.
    `framework-evolution-2026-08-21-cadence-and-execution-proof.md`), not by date alone. The
    filename is what Step 0's cross-check greps for; a lineage doc that records only a date leaves

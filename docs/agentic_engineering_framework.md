@@ -47,7 +47,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/skills/` | 15 pre-built skills (12 lifecycle: sprint-proposer, autonomous-loop, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 3 tier-gated: codebase-audit, framework-audit, skill-gate) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated skills copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
 | `.claude/commands/` | 6 slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`, `/audit`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. `/audit` is a read-only utility for framework integrity checks — it never modifies an audited file, and writes only its own dated report under `assets/docs/`. |
-| `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline (15 primary steps plus sub-steps like 5.7/5.8/14.5) that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
+| `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline (15 primary steps 1-15, plus Step 0.5 as a pre-PRD gate and sub-steps like 5.7/5.8/14.5) that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
 | `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo from the Setup phase — bootstrap runs `git init` inside the project folder before writing any file. |
 
 ### Suggested reading order
@@ -333,7 +333,7 @@ TOOLKIT PROMPTS                 TEMPLATES                    PROCESS SKILLS
 
 ### The bootstrap pipeline
 
-The bootstrap prompt (`.claude/commands/bootstrap.md`) is a 15-step pipeline (15 primary steps plus sub-steps such as 5.7, 5.8, and 14.5) that transforms a PRD into a complete AI workspace. Each step reads from the framework (read-only) and writes to the project folder:
+The bootstrap prompt (`.claude/commands/bootstrap.md`) is a 15-step pipeline (15 primary steps 1-15, plus Step 0.5 as a pre-PRD gate and sub-steps such as 5.7, 5.8, and 14.5) that transforms a PRD into a complete AI workspace. Each step reads from the framework (read-only) and writes to the project folder:
 
 ```
 Step     Source (framework repo)                     Output (project folder)
@@ -945,14 +945,14 @@ Read the Coverage Gap Declaration section in each report. For each declared gap,
 Report template categories:
 - Build: ✅/❌
 - Tests: ✅/❌/⏭️ [N EXECUTED, N passed, N failed, wall time — the COUNT is mandatory evidence]
-- Review: ✅/❌ [inline or "code-reviewer subagent"]
-- Security: ✅/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes"]
+- Review: ✅/❌/⏭️ [inline or "code-reviewer subagent" — ⏭️ when no Code Review Report was provided]
+- Security: ✅/⚠️/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes" — ⚠️, NEVER ❌, for a declared coverage gap with no specialist report]
 - Mutation: ✅/⏭️ [N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
-- UI: ✅/❌/⏭️ [screenshot evidence or "no UI changes in this task"]
+- UI: ✅/❌/⏭️/BASELINE-CREATED [screenshot evidence or "no UI changes in this task" — BASELINE-CREATED when the visual-regression specialist captured first baselines]
 - Migration: ✅/❌/⏭️ [migration ran + rollback verified — or "no migration files" — or "destructive without rollback: ❌"]
 - Regression: ✅/❌ [N executed]
-- Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"]
+- Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"] — **ORCHESTRATOR-ONLY.** This row records whether the validator RAN; the validator's own report cannot contain it (the validator IS the validation). It is deliberately absent from `validator.md` and from its `produces:`.
 - Criteria Results: a row per acceptance criterion (#, criterion, type, result, evidence)
 - Prior Review Findings: code review / security review / red team summaries
 - Coverage Gap Declaration: ALWAYS present — "none" is a valid entry. Every gap this validation
@@ -962,8 +962,13 @@ Report template categories:
   plus every declared coverage gap with no specialist report as evidence, flagged ⚠️ and NEVER ❌
 - Overall: ✅ PASS / ❌ FAIL
 
-This list and `docs/modules/agents/validator.md`'s Output template are TWINS — a category added to
-either MUST be added to both, and to the validator's `produces:` field.
+**Twin rule — stated precisely, because the loose version was false at birth.** This list and
+`docs/modules/agents/validator.md`'s Output template are TWINS **except for the one row marked
+ORCHESTRATOR-ONLY above**. ALWAYS, when adding or renaming a category: add it to BOTH lists AND to
+`validator.md`'s `produces:` field, using the SAME verdict vocabulary in all three. `validator.md`
+is the AUTHORITY on the vocabulary — it is the executed surface every project receives; this list
+follows it. Verify by reading all three, never by assuming: the three-way sync has already drifted
+once (`/audit` 2026-09-02 Run 3, K-3).
 
 **Execution proof — "passed" and "ran" are different propositions.** A verification is cited WITH
 its executed count or not at all: a run that exits 0 having executed ZERO units, or whose summary

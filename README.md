@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.10.0
+# Agentic Engineering Framework v2.11.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -134,7 +134,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.10.0)
+│   ├── modules/                            ← Single source of truth (v2.11.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -163,7 +163,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `CLAUDE.md` | `modules/templates/claude_md.md` | AI instructions — orchestrates skills that implement Session Protocol + Execution Protocol |
 | `.claude/phases/project.md` | `modules/templates/project_md.md` | Engineering handoff (architectural decisions, phase status, progress log) |
 | `.claude/phases/pendencias.md` | `modules/templates/pendencias_md.md` | Prioritized backlog with verifiable acceptance criteria |
-| `.claude/phases/done_tasks.md` | (created inline by bootstrap Step 4) | Destination for completed tasks — `pendencias-updater` moves them here at session end |
+| `.claude/phases/done_tasks.md` | (written directly by bootstrap Step 4 — no template) | Destination for completed tasks — `pendencias-updater` moves them here at session end |
 | `.claude/agents/code-reviewer.md` | `modules/agents/code_reviewer.md` | Quality checklist + Known Bug Patterns (grows every session) |
 | `.claude/agents/validator.md` | `modules/agents/validator.md` | Independent validation subagent — verifies with isolated context |
 | `.claude/agents/arbitrator.md` | `modules/agents/arbitrator.md` | Resolves conflicts between validator judgment and mechanical evidence |

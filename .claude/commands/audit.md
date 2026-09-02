@@ -11,6 +11,10 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 - **Write EXACTLY ONE file: this run's report at `assets/docs/audit-YYYY-MM-DD.md`** (Phase 3).
   Read-only refers to the AUDITED surfaces — the report is this session's output, and a report
   that lives only in a transcript cannot be carried to the session that applies it.
+- **`git add` + `git commit` of THAT ONE FILE** (Phase 3 item 5). A report that lives only in the
+  working tree does not survive a `git clean`, a `git checkout`, or a session boundary — which is
+  exactly what happened to every report written before this line existed. No other git operation
+  is authorized: never `push`, never a commit touching any other path.
 - No other file creation, modification, or deletion
 
 **Rules:**
@@ -26,19 +30,36 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 ## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
 
 An audit run has two modes. They differ in what each agent is told to look at, and the difference
-is not cosmetic: the verification mode found defects in **12 of 24** already-`applied` findings on
-its first documented execution. The mode was practice before it was instruction — executed twice
-with its verdict vocabulary supplied by the invoking prompt rather than by this file. That gap is
-what this phase closes.
+is not cosmetic: across its three documented executions the verification mode found defects in
+**2 of 15**, then **13 of 24**, then **11 of 30** already-`applied` findings. The mode was practice
+before it was instruction — executed twice with its verdict vocabulary supplied by the invoking
+prompt rather than by this file. That gap is what this phase closes.
+
+**ALWAYS COUNT the score over the FINDINGS, never over the ledger's row total.** A ledger also
+carries `VERSION` and any carried-forward IDs from an earlier run; counting rows instead of
+findings is what produced the contradictory score line in Run 2 of `audit-2026-09-02.md` (`11 clean`
+in its prose, `12 clean` in its score line, over 26 rows for 24 findings). State the denominator.
 
 **ALWAYS DECIDE the mode from the trigger, and ALWAYS STATE it in the report header —
 `mode: baseline` or `mode: verification (over sHASH)`. NEVER emit nothing.**
 
-| Trigger | Mode |
+**The rows below are the FOUR events in `CLAUDE.md` → "When it runs", and nothing else.** That
+list is the authority; this table only maps each event to a mode. **NEVER add a trigger here that
+`CLAUDE.md` does not carry** — in particular never a time-based one: `CLAUDE.md` says "ALWAYS one
+of these events, **never a remembered interval**", and a scheduled row here would be a trigger with
+no owner (`/audit` 2026-09-02 K-18).
+
+| CLAUDE.md trigger | Mode |
 |---|---|
-| Owner request with no prior application to check; a scheduled net; before a MINOR/MAJOR bump | **baseline** |
-| **Immediately after a `/maintenance` session applied an audit batch** (CLAUDE.md trigger (d)) | **verification** |
-| After an upstream absorption | **baseline**, plus verification over that absorption's commit |
+| (a) after an upstream absorption | **baseline** |
+| (b) before a MINOR or MAJOR version bump | **baseline** |
+| (c) owner request | **baseline**, unless the owner names a batch to verify |
+| (d) after a `/maintenance` session applied an audit batch | **verification (over that batch's commit)** |
+
+**Verification mode requires an audit report with `applied sHASH` findings** — that is what its
+Part 1 re-reads. Only trigger (d) supplies one. An upstream absorption has no report and no applied
+findings, so (a) is baseline; if the owner ALSO wants that absorption's commit re-read, the
+did-it-land discipline for it lives in `framework-audit`'s Q4, not here (`/audit` 2026-09-02 K-19).
 
 ### Baseline mode
 
@@ -163,6 +184,11 @@ CHECKS:
 
 REPORT FORMAT:
 
+### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
+| ID | Verdict | Structural evidence (file:line) |
+|----|---------|--------------------------------|
+
+
 ## Agent 1: Structural Sync
 
 ### [A] Dual Placement
@@ -246,6 +272,11 @@ CHECKS:
 
 REPORT FORMAT:
 
+### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
+| ID | Verdict | Structural evidence (file:line) |
+|----|---------|--------------------------------|
+
+
 ## Agent 2: Bootstrap Integrity
 
 ### [D5] File References
@@ -287,7 +318,8 @@ FILES TO READ:
 1. docs/modules/agents/code_reviewer.md
 2. docs/modules/agents/security_reviewer.md
 3. All other files in docs/modules/agents/ (validator, arbitrator, red_team, blue_team,
-   criteria_enforcer, prd_sync_checker, diff_pattern_extractor)
+   criteria_enforcer, prd_sync_checker, diff_pattern_extractor, skill_reviewer) — ALL of them;
+   verify the count against `ls docs/modules/agents/` rather than trusting this list
 4. examples/agents/ — list all files, read those that match gap-declaration domains
    (e.g., concurrency, performance, accessibility, visual regression, data-integrity, secrets,
    compliance, etc. — visual regression is named explicitly because its install link has broken
@@ -311,6 +343,19 @@ CHECKS:
         description (= specialist will never be activated)
   D6.6. Report orphaned specialists: agent description references a gap phrase that no
         reviewer declares (= agent exists but can never be triggered)
+  D6.7. **INSTALL-LINK PARITY — the link that has broken TWICE.** For every gap from D6.1/D6.2,
+        verify a matching row exists in the specialist install table of BOTH
+        `.claude/commands/bootstrap.md` AND `.claude/commands/existing_project_adaptation.md`.
+        Mechanical: `diff` the two tables — **expected: empty**. A gap that is declared and has a
+        specialist but no install row on ONE path is a FAIL, not a nit: the reviewer will declare
+        it forever and the specialist will never be installed on that path. This is exactly how
+        `visual regression` broke as H-2 (bootstrap) and again as J-5 (EPA), while D6 returned
+        PASS both times because it only checked phrase alignment.
+  D6.8. **GAP SOURCES — count them, do not assume two.** Extract every component that DECLARES a
+        gap, not only the two reviewers: grep `gap` across `docs/modules/agents/`. Verify that
+        `component-design.md` §1/§3 (BOTH twins: `.claude/rules/` and `docs/modules/rules/`)
+        enumerate the same set. A specialist description naming a source the policy does not list
+        is a FAIL.
 
 [D7] Pushy Description pattern compliance
   D7.1. From component-design.md §2, the required pattern is:
@@ -331,6 +376,11 @@ CHECKS:
 
 REPORT FORMAT:
 
+### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
+| ID | Verdict | Structural evidence (file:line) |
+|----|---------|--------------------------------|
+
+
 ## Agent 3: Activation Chain
 
 ### [D6] Vocabulary Alignment
@@ -339,9 +389,12 @@ REPORT FORMAT:
   - code-reviewer: [list of gap names]
   - security-reviewer: [list of gap names]
 - Specialist matches:
-  | Gap | Reviewer | Specialist file | Phrase match | Status |
-  |-----|----------|----------------|--------------|--------|
-  [one row per gap]
+  | Gap | Declared by | Specialist file | Phrase match | bootstrap install row | EPA install row |
+  |-----|-------------|-----------------|--------------|-----------------------|-----------------|
+  [one row per gap — the last two columns are D6.7 and are MANDATORY, never blank]
+- Install-table diff (D6.7): [`diff` of the two tables — expected empty; paste any difference]
+- Gap SOURCES found (D6.8): [every component that declares a gap] — policy §1/§3 lists: [set];
+  match: [yes / NO — which twin is stale]
 - Broken links (gap → no specialist): [list, or "none"]
 - Orphaned specialists (specialist → no gap): [list, or "none"]
 
@@ -368,11 +421,18 @@ FILES TO READ:
 1. docs/modules/skills/session-end/SKILL.md
 2. docs/modules/skills/validation-orchestrator/SKILL.md
 3. docs/modules/skills/sprint-proposer/SKILL.md
-4. docs/modules/skills/cross-cutting-analysis/SKILL.md
-5. .claude/commands/prd_planning.md
-6. .claude/commands/prd_change.md
-7. List folders in docs/modules/skills/
-8. List files in docs/modules/agents/
+4. docs/modules/skills/autonomous-loop/SKILL.md
+5. docs/modules/skills/skill-gate/SKILL.md
+6. docs/modules/skills/codebase-audit/SKILL.md and framework-audit/SKILL.md
+7. docs/modules/skills/cross-cutting-analysis/SKILL.md
+8. .claude/commands/prd_planning.md and .claude/commands/prd_change.md
+9. .claude/commands/maintenance.md and .claude/commands/audit.md
+10. List folders in docs/modules/skills/
+11. List files in docs/modules/agents/
+
+**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+while the list omits it is how the working check ends up living in the invoking prompt instead of
+in this file (`/audit` 2026-09-02 K-15).
 
 CHECKS:
 
@@ -392,6 +452,15 @@ CHECKS:
         (Note: agent file names use underscores — map hyphenated references like
         "diff-pattern-extractor" to "diff_pattern_extractor.md")
   D8.6. Report any reference that does NOT resolve
+  D8.7. **CROSS-SECTION CITATIONS — the class that fails most often.** For every citation of a
+        §heading INSIDE another component (`X → "Some Heading"`, `§"Some Heading"`), verify the
+        cited text is a REAL markdown heading (`#`/`##`/`###`) in the target file, matching
+        EXACTLY. **A bold paragraph lead-in is NOT a heading** — that is the recurring defect
+        (H-19a, J-4, J-17, K-14), and a substring match that resolves by luck (citing
+        "Reasoning depth" when the heading is "Reasoning depth mechanisms (complementary)") is a
+        FINDING, not a pass. Report: | Citer | Cited heading | Target file | Exact match? |
+  D8.8. Read `skill-gate` and `codebase-audit`: `codebase-audit` cites a §heading inside
+        `code_reviewer.md` by text — apply D8.7 to it.
 
 [D10] Command → skill invocation paths
   D10.1. Read prd_planning.md — extract every reference to a skill
@@ -399,10 +468,28 @@ CHECKS:
   D10.2. Read prd_change.md — extract every reference to a skill
   D10.3. For each referenced skill: verify the folder exists in docs/modules/skills/
   D10.4. For skills that the framework uses at runtime (cross-cutting-analysis):
-         verify it ALSO exists in .claude/skills/
-  D10.5. Report any reference that does NOT resolve
+         verify it ALSO exists in .claude/skills/ **AND that the two copies are BYTE-IDENTICAL**
+         (`diff -r` / `cmp` — expected: no output). "It exists in both places" is a weaker claim
+         than the one past reports have asserted; run the comparison rather than inferring it.
+  D10.5. **THE COMMAND FILES' OWN CITATIONS.** Read `.claude/commands/maintenance.md` and
+         `.claude/commands/audit.md` and verify every section they cite in another file resolves
+         to a real heading — component-design §5/§6/§8/§9, "New component creation",
+         "Version bumps", "Audit intake", "Upstream intake", `/audit` Phase 0, CLAUDE.md's
+         trigger letters (a)-(d), and `session_rules.md` → "Execution proof". Apply D8.7's
+         exact-match rule. These two files are EXECUTED every maintenance and audit session; a
+         dangling citation here misroutes the session itself.
+  D10.6. **TRIGGER-LIST PARITY.** `audit.md` Phase 0's trigger table and `CLAUDE.md` → "When it
+         runs" MUST name the same set of events. A trigger present in one and absent from the
+         other is a FINDING in whichever direction — an unowned trigger (`/audit` K-18) or an
+         undocumented one.
+  D10.7. Report any reference that does NOT resolve
 
 REPORT FORMAT:
+
+### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
+| ID | Verdict | Structural evidence (file:line) |
+|----|---------|--------------------------------|
+
 
 ## Agent 4: Orchestration & Commands
 
@@ -412,14 +499,21 @@ REPORT FORMAT:
   | Source file | Referenced name | Expected path | Exists? |
   |-------------|----------------|---------------|---------|
   [one row per reference]
+- Cross-section citations (D8.7/D8.8) — MANDATORY, never blank:
+  | Citer | Cited heading | Target file | Real heading? | Exact match? |
+  |-------|---------------|-------------|---------------|--------------|
+  [one row per §heading citation — "a bold lead-in" in the "Real heading?" column is a FINDING]
 - Unresolved: [list, or "none"]
 
 ### [D10] Command → Skill Paths
 - Status: PASS / FAIL
 - References found:
-  | Command file | Referenced skill | Expected location | Exists? |
-  |-------------|-----------------|-------------------|---------|
-  [one row per reference]
+  | Command file | Referenced skill/section | Expected location | Exists? |
+  |-------------|--------------------------|-------------------|---------|
+  [one row per reference, INCLUDING the D10.5 citations inside maintenance.md and audit.md]
+- Runtime dual copy (D10.4): `cross-cutting-analysis` present in both | byte-identical: [yes/NO]
+- Trigger-list parity (D10.6): CLAUDE.md events [list] vs audit.md Phase 0 rows [list] —
+  match: [yes / NO — which side carries the extra trigger]
 - Unresolved: [list, or "none"]
 ```
 
@@ -501,6 +595,11 @@ CHECKS:
   D15.8. Report every factual inaccuracy: file, line (approximate), claim, actual value
 
 REPORT FORMAT:
+
+### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
+| ID | Verdict | Structural evidence (file:line) |
+|----|---------|--------------------------------|
+
 
 ## Agent 5: Document Accuracy
 
@@ -589,6 +688,11 @@ manufacture findings to seem useful.
 
 REPORT FORMAT:
 
+### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
+| ID | Verdict | Structural evidence (file:line) |
+|----|---------|--------------------------------|
+
+
 ## Agent 6: Process Coverage (meta)
 
 ### [D17] Process Coverage
@@ -615,6 +719,19 @@ After ALL 6 agents return, consolidate their reports into a single audit report.
 **Run mode:** `baseline` | `verification (over sHASH)` — ALWAYS state it (Phase 0)
 **Dimensions checked:** 17 [+ a Part 1 fix-verification pass, in verification mode]
 **Agents dispatched:** 6
+
+**carried: [N] open from [previous report file]** | `carried: none — first audit` — ALWAYS present
+(Phase 3 item 4)
+
+## Part 1 — Verification ledger for [sHASH]   ← verification mode ONLY; omit the whole section in baseline
+
+| ID | Verdict | Evidence (file:line — STRUCTURAL, not "the text is present") |
+|----|---------|------|
+| [ID] | CONFIRMED-FIXED / PARTIALLY-FIXED / FIXED-BUT-CLASS-NOT-SWEPT / INTRODUCED-A-DEFECT | [what the structure AROUND the fix shows] |
+
+**Score, counted over the FINDINGS (state the denominator — never the ledger's row total):
+[N] of [M] clean, [K] not clean.** Of the not-clean: [N] partially-fixed, [N] class-not-swept,
+[N] introduced-a-defect.
 
 ## Summary
 
@@ -676,7 +793,18 @@ step is the carry-over half.
    drops the last one's open items is how "deferred" becomes "forgotten".
 4. **ALWAYS report in one line how many findings were carried forward** — `carried: N open from
    [previous file]`, or `carried: none — first audit`. Never nothing.
-5. **In `verification` mode, ALWAYS persist the Part 1 ledger too** — one row per re-verified
+5. **ALWAYS COMMIT the report in THIS session** — writing it to disk is not persisting it.
+   ```bash
+   git add assets/docs/audit-YYYY-MM-DD.md && git commit -m "docs(audit): persist [run] — [N] findings open"
+   ```
+   Mechanical self-check (expected result stated): `git status --porcelain assets/docs/` →
+   **expected: EMPTY**. Any output means the report is still only in the working tree.
+   **ALWAYS REPORT — `report committed: sHASH` or `NOT committed — [reason]`. NEVER emit nothing.**
+   This is the ONE git operation this session performs, and it does not violate the read-only
+   rule: the report is this session's OUTPUT, never an audited surface. Evidence it is needed —
+   all three reports before this instruction existed entered git via a LATER session's commit, and
+   one of them crossed a session boundary as an untracked file (`/audit` 2026-09-02 K-20).
+6. **In `verification` mode, ALWAYS persist the Part 1 ledger too** — one row per re-verified
    `applied` finding with its verdict and structural evidence, plus the score line. A finding
    whose verdict is anything other than CONFIRMED-FIXED gets a NEW ID and status `open`; the
    original keeps its `applied sHASH` status and gains a pointer to the new ID. **NEVER silently

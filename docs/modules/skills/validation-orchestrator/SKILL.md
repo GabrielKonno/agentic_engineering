@@ -50,7 +50,9 @@ tasks under a PLAN-FIRST contract (the plan is drafted INSIDE the implementer's 
 never in the orchestrator's), and Phase B for routine tasks uses ONE merged review+validation
 subagent instead of the two-judge chain. Logic-heavy and security routes are unchanged.
 
-**Ownership of "Before Implementing" in loop mode — ALWAYS this split:** steps 1-3 above stay with
+### Ownership of "Before Implementing" in loop mode
+
+**ALWAYS this split:** steps 1-3 above stay with
 the ORCHESTRATOR (criteria-enforcer BEFORE dispatch, classification, git checkpoint); ONLY the
 implementation plan moves down to the implementer. An implementer that strengthens its own criteria
 is grading its own exam, and the criteria are also the validator's yardstick. Full mechanics:
@@ -59,9 +61,10 @@ is grading its own exam, and the criteria are also the validator's yardstick. Fu
 ### 3. Git checkpoint (medium and large)
 
 **ALWAYS COMMIT the current state before writing code**, so the task has a clean rollback
-boundary. In loop mode the ownership split is the one stated once above under
-§"Ownership of 'Before Implementing' in loop mode" — this step is covered by it and does not
-restate it (component-design §9: one home per mandate).
+boundary. In loop mode this step stays with the ORCHESTRATOR under the split stated once above at
+`### Ownership of "Before Implementing" in loop mode` — this step is covered by it and does not
+restate it (component-design §9: one home per mandate). Full loop-side mechanics:
+`autonomous-loop` §`3a. Before dispatch — the ORCHESTRATOR owns "Before Implementing"`.
 
 **ALWAYS REPORT — `checkpoint: committed [hash]` or `skipped — [reason: small task / tree already
 clean at a commit]`. NEVER emit nothing.**

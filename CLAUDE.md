@@ -134,8 +134,10 @@ upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner 
 (d) **after a `/maintenance` session applies an audit batch** — in `verification` mode
 (`/audit` Phase 0), which re-reads the structure around every `applied` fix instead of only
 checking that the required text is present. Trigger (d) exists because the fixes themselves
-introduce defects: its first two documented executions found problems in 8 of 15 and 12 of 24
-applied findings. The `/maintenance` post-change checklist is the PRIMARY control and runs every
+introduce defects: its three documented executions found defects in **2 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2) and **11 of 30** (2026-09-02 Run 3) applied findings. Each figure is the
+count of applied findings whose Part 1 verdict was anything other than CONFIRMED-FIXED, counted
+over the FINDINGS only — never over the ledger's row total, which also carries `VERSION` and any
+carried-forward IDs. The `/maintenance` post-change checklist is the PRIMARY control and runs every
 session; `/audit` is the periodic NET behind it, and this trigger list is what makes "periodic" a
 fact rather than an aspiration.
 

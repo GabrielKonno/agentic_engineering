@@ -206,12 +206,14 @@ Create the file at the project root as `CLAUDE.md`.
 - Fill Project Phases from Build Order
 - **For each phase, ALWAYS include a Module Breakdown** — for every module in the phase, include: 1-line objective, key features with concrete details (component names, data values, IDs), key business rules that affect implementation, and integration points with other modules. This is what makes project.md useful as a session entry point without re-reading the full PRD every time.
 - Add Session 0 row to Progress Log index table: `| 0 (Bootstrap) | [date] | PRD analyzed, docs + agents created, stack confirmed | — |`
-- **This step is the RECEIVER of Step 1.1's ARCHITECTURE concerns.** ALWAYS add one Architectural
-  Decisions row per cross-cutting concern Step 1.1 classified as architectural, naming the concern
-  and the sections it spans. REPORT `cross-cutting received: A/A architecture concerns written` —
-  a mismatch with Step 1.1's count is RED.
-
 Create at `.claude/phases/project.md`.
+
+**This step is the RECEIVER of Step 1.1's ARCHITECTURE concerns — on BOTH branches above.**
+ALWAYS add one Architectural Decisions row per cross-cutting concern Step 1.1 classified as
+architectural, naming the concern and the sections it spans. This applies whether `project.md` was
+just created OR already existed: a pre-existing file is exactly the case where the concerns have
+never been recorded. **REPORT `cross-cutting received: A/A architecture concerns written` — a
+mismatch with Step 1.1's count is RED.**
 
 ---
 
@@ -225,12 +227,13 @@ Create at `.claude/phases/project.md`.
 - Criteria quality standard: every criterion must have 3 parts (action, expected result, failure signal)
 - Consult PRD section 4 (NFRs) when writing criteria: performance, security, and compliance NFRs become `VERIFY:`/`REVIEW:` criteria on the tasks they constrain
 - Seed "Future Improvements" with watch-items from PRD section 9 (Risks and Dependencies), stamped `[added s0]` — risks tracked nowhere are risks forgotten
-- **This step is the RECEIVER of Step 1.1's WORK concerns.** ALWAYS create one task per
-  cross-cutting concern Step 1.1 classified as work, with full acceptance criteria like any other
-  task. REPORT `cross-cutting received: T/T work concerns written` — a mismatch with Step 1.1's
-  count is RED.
-
 Create at `.claude/phases/pendencias.md`.
+
+**This step is the RECEIVER of Step 1.1's WORK concerns — on BOTH branches above.** ALWAYS create
+one task per cross-cutting concern Step 1.1 classified as work, with full acceptance criteria like
+any other task. This applies whether `pendencias.md` was just created OR already existed.
+**REPORT `cross-cutting received: T/T work concerns written` — a mismatch with Step 1.1's count
+is RED.**
 
 **ALWAYS create `.claude/phases/done_tasks.md`** if it does not exist. This file is the destination for completed tasks — the `pendencias-updater` skill moves tasks here at end of each session. Without it, the task lifecycle breaks silently.
 
