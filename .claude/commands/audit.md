@@ -12,7 +12,7 @@ own report (Phase 3), which is this session's output, not a change to the thing 
   Read-only refers to the AUDITED surfaces — the report is this session's output, and a report
   that lives only in a transcript cannot be carried to the session that applies it.
 - **READ-ONLY git inspection, anywhere in the repo** — `git log`, `git show`, `git status`,
-  `git diff`, `git grep`, `git rev-list`, `git check-ignore`. Several checks below MANDATE these
+  `git diff`, `git grep`, `git rev-list`, `git check-ignore`, `git reflog`. Several checks below MANDATE these
   (D16.3c scans all commits and messages; Agent 6's D17.1 classifies `git log`; Phase 3's own
   self-check runs `git status`). They read history; they change nothing.
 - **`git add` + `git commit` of THAT ONE FILE** (Phase 3's COMMIT item, the last one). A report that lives only in the
@@ -891,6 +891,25 @@ Group FAIL items by priority:
    looking like a deferred quick fix (`/audit` 2026-09-02 M-26).
 5. **ACCEPTED-RISK — no action** — one line per item, citing its record. Present so a reader can
    see the item was decided, not forgotten.
+
+### Errata and superseded status — how a persisted report is CORRECTED
+
+A report is a record, so it is amended, never silently rewritten. **ALWAYS use these two forms and
+no others** (`/audit` 2026-09-03 N-45, N-47):
+- **`> **Errata N (added by the [which] application, finding [ID]).**`** — a blockquote inserted
+  directly ABOVE the text it corrects, numbered in the order the errata were added, naming the RUN
+  that authored it and the finding that required it. **NEVER label an erratum with the run that
+  has not happened yet** — two were mislabelled that way in one batch.
+- **`*(superseded)* [the old text]`** — for a status line replaced by a later disposition. The old
+  line stays, marked, so a reader can see the sequence.
+
+### ID allocation — ALWAYS check for a collision before writing a finding
+
+**Each run allocates ONE letter series** (`F`, `G`, `H`, `J`, `K`, `L`, `M`, `N` …), skipping
+letters that read as digits. **ALWAYS grep the report for the ID before writing a row**
+(`grep -c "^| <ID> |"` → expected 0) and **ALWAYS number sequentially with no suffixes** — a
+`N-28b` is off-scheme and a reused ID costs a re-file and an erratum, both of which happened
+(`/audit` 2026-09-03 N-46, and the `M-16` collision it names).
 
 ### Meta-observation — ALWAYS present (`## Meta-observation`)
 

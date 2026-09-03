@@ -19,6 +19,15 @@ This is a framework maintenance session, not a project bootstrap.
   ONLY after D16 over the unpushed commits comes back GREEN.** NEVER push on your own initiative:
   the unpushed/pushed boundary is what makes a privacy hit cheap or expensive to fix
   (`CLAUDE.md` → Repository Lifecycle; `/audit` 2026-09-02 M-56).
+  **ALWAYS REPORT `push:` in the session's closing report and in the persisted receipts** —
+  `push: not requested` / `push: requested — D16 [GREEN | RED] over N unpushed commits → [pushed
+  sHASH | BLOCKED, reason]`. **NEVER emit nothing.** The gate had a rule and no invoker, no report
+  key and no receipt, and it went unhonoured on the very next push 108 seconds after it was
+  written (`/audit` 2026-09-03 N-41).
+  **A D16 hit that is an AUDIT REPORT naming its own OPEN finding does NOT block the push** — the
+  finding is the point, and the identifier is already reachable through the instance the finding
+  names. Say so explicitly in the `push:` line rather than reading it as GREEN
+  (`/audit` 2026-09-03 N-49).
 - Write lineage and audit records under `assets/docs/` — Upstream intake step 4 MANDATES the
   lineage doc, and `/audit` Phase 3 writes the dated report a later session applies.
 
@@ -107,7 +116,9 @@ Mechanical self-check (expected result stated): after committing, over **THIS ru
 section only** — the text between that H2 and the next H1/H2, never the whole file — run
 
 ```bash
-for k in "inventory sweep" "instruction style" "references" "fences" "isolation"          "class sweep" "back-sweep" "liveness" "negation proof" "version"          "classification" "new component"; do
+for k in "inventory sweep" "instruction style" "references" "fences" "isolation" \
+         "class sweep" "back-sweep" "liveness" "negation proof" "version" \
+         "classification" "new component" "gates" "push"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
@@ -162,7 +173,11 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    ("see step 7", "item 4's class sweep", "per Phase 3 item 5") silently starts pointing at the
    wrong thing. Mechanical self-check (expected result stated): grep the edited file AND the whole
    repo for `step N`, `item N`, `Phase \d item N` for every ordinal at or after the insertion
-   point — **expected: every hit still names the content it meant.** Two live instances were
+   point. **SWEEP `assets/docs/` TOO** — the audit reports cite ordinals ("per Phase 3 item 5") and
+   one of the two instances this rule was written for lived there; a path list that omits them
+   reports GREEN on a state it never measured. **MATCH ALL THREE FORMS**: `item N`, `item N's`, and
+   `Phase N item M` — a pattern requiring the possessive misses roughly 60% of real citations.
+   **Expected: every hit still names the content it meant.** Two live instances were
    created this way before this rule existed (`/audit` 2026-09-02 L-9, L-15). Where a citation
    would be fragile, cite the item's NAME instead of its number.
 
@@ -428,9 +443,9 @@ this section is its invoker. A bump publishes the current state as a contract; t
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 
-- **MINOR** (`v2.14.1` → `v2.15.0`): a new rule/section/template, an upstream absorption, or a
+- **MINOR** (`v2.14.2` → `v2.15.0`): a new rule/section/template, an upstream absorption, or a
   schema change to a document projects receive.
-- **PATCH** (`v2.14.0` → `v2.14.1`): corrections that add no new contract — broken references,
+- **PATCH** (`v2.15.0` → `v2.15.1`): corrections that add no new contract — broken references,
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
@@ -506,7 +521,20 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
      record; NEVER as `open`, NEVER as grounds to propose a history rewrite.
    - **What WOULD re-open it** — stated explicitly, or the record closes more than it should.
    **ALWAYS set that finding's status to `accepted-risk — see [record]`**, never to `applied`.
-6. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
+   Mechanical self-check (expected result stated): for every accepted-risk record in the report,
+   `grep -cE "^- \*\*(Decision|Working tree|Residue|Standing instruction|What WOULD re-open it)"`
+   within that record → **expected: exactly 5**. Fewer means it is not a closure. The rule shipped
+   without this check and was never applied backward to the one record that pre-dated it, which
+   carried four fields under different labels while two later surfaces asserted it carried five
+   (`/audit` 2026-09-03 N-43).
+6. **A batch MAY be split across several commits — and every commit in it carries the full
+   contract.** Splitting is legitimate (process-file repairs alone, then the content fixes), but
+   each commit ALWAYS states its own `bump:` decision and the batch ALWAYS ends with ONE receipts
+   section per commit that changed anything. **NEVER let a closing commit carry neither.** When the
+   dispositions span hashes, the `Application status` line names them all —
+   `PARTIAL — N of M applied (X in sAAA, Y in sBBB)` — because the enumeration at `/audit` Phase 3
+   admits no two-hash form otherwise (`/audit` 2026-09-03 N-44).
+7. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
    moment where the fixes themselves are the least-verified thing in the repo: the five documented executions of
    this pass found defects in **4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5)
