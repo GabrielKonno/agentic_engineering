@@ -11,10 +11,15 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 - **Write EXACTLY ONE file: this run's report at `assets/docs/audit-YYYY-MM-DD.md`** (Phase 3).
   Read-only refers to the AUDITED surfaces — the report is this session's output, and a report
   that lives only in a transcript cannot be carried to the session that applies it.
+- **READ-ONLY git inspection, anywhere in the repo** — `git log`, `git show`, `git status`,
+  `git diff`, `git grep`, `git rev-list`, `git check-ignore`. Several checks below MANDATE these
+  (D16.3c scans all commits and messages; Agent 6's D17.1 classifies `git log`; Phase 3's own
+  self-check runs `git status`). They read history; they change nothing.
 - **`git add` + `git commit` of THAT ONE FILE** (Phase 3 item 5). A report that lives only in the
   working tree does not survive a `git clean`, a `git checkout`, or a session boundary — which is
-  exactly what happened to every report written before this line existed. No other git operation
-  is authorized: never `push`, never a commit touching any other path.
+  exactly what happened to every report written before this line existed. **This is the ONLY
+  git operation that WRITES.** NEVER `push`, NEVER `commit --amend`, NEVER a commit touching any
+  other path, NEVER any history rewrite.
 - No other file creation, modification, or deletion
 
 **Rules:**
@@ -30,8 +35,8 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 ## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
 
 An audit run has two modes. They differ in what each agent is told to look at, and the difference
-is not cosmetic: across its three documented executions the verification mode found defects in
-**2 of 15**, then **13 of 24**, then **11 of 30** already-`applied` findings. The mode was practice
+is not cosmetic: across its four documented executions the verification mode found defects in
+**4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) and **8 of 17** (Run 4) already-`applied` findings. The mode was practice
 before it was instruction — executed twice with its verdict vocabulary supplied by the invoking
 prompt rather than by this file. That gap is what this phase closes.
 
@@ -118,6 +123,10 @@ FILES TO READ:
 3. List contents of .claude/skills/ (folders only)
 4. List contents of docs/modules/skills/ (folders only, exclude README.md)
 
+**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+while the list omits it is how a working check ends up living in the invoking prompt instead of in
+this file (`/audit` 2026-09-02 K-15, L-3).
+
 CHECKS:
 
 [A] Dual placement compliance
@@ -184,12 +193,12 @@ CHECKS:
 
 REPORT FORMAT:
 
+
+## Agent 1: Structural Sync
+
 ### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
 | ID | Verdict | Structural evidence (file:line) |
 |----|---------|--------------------------------|
-
-
-## Agent 1: Structural Sync
 
 ### [A] Dual Placement
 - Status: PASS / FAIL
@@ -235,6 +244,10 @@ FILES TO READ:
 6. docs/modules/templates/claude_md.md
 7. .claude/commands/prd_planning.md (the PRD Structure template section near the end)
 
+**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+while the list omits it is how a working check ends up living in the invoking prompt instead of in
+this file (`/audit` 2026-09-02 K-15, L-3).
+
 CHECKS:
 
 [D5] Bootstrap file references resolve
@@ -272,12 +285,12 @@ CHECKS:
 
 REPORT FORMAT:
 
+
+## Agent 2: Bootstrap Integrity
+
 ### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
 | ID | Verdict | Structural evidence (file:line) |
 |----|---------|--------------------------------|
-
-
-## Agent 2: Bootstrap Integrity
 
 ### [D5] File References
 - Status: PASS / FAIL
@@ -326,6 +339,14 @@ FILES TO READ:
    twice, on the bootstrap path and then on the EPA path)
 5. .claude/rules/component-design.md (sections 1-3: Gap-Declaration, Pushy Description,
    Vocabulary Alignment)
+6. docs/modules/rules/component_design.md — the TEMPLATE twin of the same rule (D6.8 checks BOTH)
+7. .claude/commands/bootstrap.md — the specialist install table (D6.7)
+8. .claude/commands/existing_project_adaptation.md — the twin install table (D6.7)
+
+**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+while the list omits it is how a working check ends up living in the invoking prompt instead of in
+this file (`/audit` 2026-09-02 K-15, L-3).
+
 
 CHECKS:
 
@@ -343,7 +364,8 @@ CHECKS:
         description (= specialist will never be activated)
   D6.6. Report orphaned specialists: agent description references a gap phrase that no
         reviewer declares (= agent exists but can never be triggered)
-  D6.7. **INSTALL-LINK PARITY — the link that has broken TWICE.** For every gap from D6.1/D6.2,
+  D6.7. **INSTALL-LINK PARITY — the link that has broken TWICE.** For every gap from D6.1/D6.2
+        AND every gap D6.8 attributes to any OTHER declaring component (run D6.8 first),
         verify a matching row exists in the specialist install table of BOTH
         `.claude/commands/bootstrap.md` AND `.claude/commands/existing_project_adaptation.md`.
         Mechanical: `diff` the two tables — **expected: empty**. A gap that is declared and has a
@@ -376,12 +398,12 @@ CHECKS:
 
 REPORT FORMAT:
 
+
+## Agent 3: Activation Chain
+
 ### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
 | ID | Verdict | Structural evidence (file:line) |
 |----|---------|--------------------------------|
-
-
-## Agent 3: Activation Chain
 
 ### [D6] Vocabulary Alignment
 - Status: PASS / FAIL
@@ -428,7 +450,10 @@ FILES TO READ:
 8. .claude/commands/prd_planning.md and .claude/commands/prd_change.md
 9. .claude/commands/maintenance.md and .claude/commands/audit.md
 10. List folders in docs/modules/skills/
-11. List files in docs/modules/agents/
+11. List files in docs/modules/agents/, and READ docs/modules/agents/code_reviewer.md (D8.8)
+12. .claude/rules/component-design.md AND docs/modules/rules/component_design.md (D10.5 §5/§6/§8/§9)
+13. docs/modules/rules/session_rules.md (D10.5 → "Execution proof")
+14. CLAUDE.md (D10.5 trigger letters (a)-(d); D10.6 parity)
 
 **Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
 while the list omits it is how the working check ends up living in the invoking prompt instead of
@@ -454,11 +479,16 @@ CHECKS:
   D8.6. Report any reference that does NOT resolve
   D8.7. **CROSS-SECTION CITATIONS — the class that fails most often.** For every citation of a
         §heading INSIDE another component (`X → "Some Heading"`, `§"Some Heading"`), verify the
-        cited text is a REAL markdown heading (`#`/`##`/`###`) in the target file, matching
-        EXACTLY. **A bold paragraph lead-in is NOT a heading** — that is the recurring defect
-        (H-19a, J-4, J-17, K-14), and a substring match that resolves by luck (citing
-        "Reasoning depth" when the heading is "Reasoning depth mechanisms (complementary)") is a
-        FINDING, not a pass. Report: | Citer | Cited heading | Target file | Exact match? |
+        cited text resolves to a REAL markdown heading (`#`/`##`/`###`) in the target file.
+        **The FINDING is a citation whose target is not a heading at all** — a bold paragraph
+        lead-in is NOT a heading, and that is the recurring defect (H-19a, J-4, J-17, K-14).
+        **SANCTIONED and NOT a finding:** citing the PREFIX of a `## Name — subtitle` heading, or
+        dropping a trailing parenthetical. `## Name — subtitle` is this repo's dominant heading
+        shape and ~15 citation sites legitimately cite the name half; flagging them would fire the
+        check on the healthy state, which is how the RELOCATE check had to be repaired (K-8).
+        **RED is:** the target is not a heading; the prefix is ambiguous (matches two headings in
+        the same file); or the cited text appears nowhere in the target.
+        Report: | Citer | Cited heading | Target file | Real heading? | Exact / sanctioned-prefix / RED |
   D8.8. Read `skill-gate` and `codebase-audit`: `codebase-audit` cites a §heading inside
         `code_reviewer.md` by text — apply D8.7 to it.
 
@@ -486,12 +516,12 @@ CHECKS:
 
 REPORT FORMAT:
 
+
+## Agent 4: Orchestration & Commands
+
 ### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
 | ID | Verdict | Structural evidence (file:line) |
 |----|---------|--------------------------------|
-
-
-## Agent 4: Orchestration & Commands
 
 ### [D8] Orchestrator References
 - Status: PASS / FAIL
@@ -543,6 +573,10 @@ FILES TO READ:
 10. 2 agent files: docs/modules/agents/code_reviewer.md,
     docs/modules/agents/validator.md
 11. Sample from examples/: 3 agents, 2 skills, 2 rules (pick representative files)
+
+**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+while the list omits it is how a working check ends up living in the invoking prompt instead of in
+this file (`/audit` 2026-09-02 K-15, L-3).
 
 CHECKS:
 
@@ -596,12 +630,12 @@ CHECKS:
 
 REPORT FORMAT:
 
+
+## Agent 5: Document Accuracy
+
 ### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
 | ID | Verdict | Structural evidence (file:line) |
 |----|---------|--------------------------------|
-
-
-## Agent 5: Document Accuracy
 
 ### [C] Instruction Style
 - Status: PASS / FAIL
@@ -663,9 +697,13 @@ INPUTS:
    "mother framework", "framework repo", "/maintenance", "upstream", "lineage"
 6. assets/docs/ lineage records (what past absorption sessions actually did)
 
+**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+while the list omits it is how a working check ends up living in the invoking prompt instead of in
+this file (`/audit` 2026-09-02 K-15, L-3).
+
 CHECKS:
 
-[D17] Process coverage — three bounded questions
+[D17] Process coverage — six bounded questions
   D17.1 UNDOCUMENTED EXECUTED FLOWS: classify the recent commits by operation type
         (maintenance correction, upstream absorption, audit-fix application, template
         evolution, release/versioning, ...). For each operation type observed in history:
@@ -681,6 +719,22 @@ CHECKS:
         FRAMEWORK-REPO level — verify each has an owner (a command that runs it, a
         documented trigger). Claimed-but-ownerless = finding. (Project-level cadences are
         owned by project skills — out of scope here.)
+  D17.4 SELF-CHECK PROVABILITY — BOTH directions. For every mechanical self-check the commands
+        mandate (a grep with a stated expected result), assess whether it CAN go red AND whether
+        it CAN go green. A check whose token no longer exists in the repo, or that is trivially
+        satisfied, is decoration. A check that fires on the NORMAL, healthy state is equally
+        broken — that inversion shipped twice (K-8's RELOCATE check, L-7's D8.7). Report both
+        directions per check, and verify no NEW unprovable check was introduced by the batch
+        under verification.
+  D17.5 SELF-REPORTED CONTROLS — who verifies them? For every control the post-change checklist
+        mandates, state WHO checks it and WHERE its output is persisted. A control whose verifier
+        is its own author, or whose output exists only in a transcript, is not a gate. Name each
+        one; do not soften.
+  D17.6 CONVERGENCE — the honest question. Given the defect rate of the last runs, assess
+        MECHANICALLY whether the controls the batch under verification added address the CAUSES
+        of the defects that batch was fixing, or add process without adding a gate. Cite evidence.
+        **"The controls are adequate" is a valid conclusion when the evidence supports it — NEVER
+        manufacture a finding to seem useful.**
 
 For each finding report: the flow/claim, the EVIDENCE (commit hashes / file:line), and
 where the missing instruction would naturally live. "No gaps" is a valid outcome — do not
@@ -688,12 +742,12 @@ manufacture findings to seem useful.
 
 REPORT FORMAT:
 
+
+## Agent 6: Process Coverage (meta)
+
 ### PART 1 — Verification ledger (verification mode ONLY; write `Part 1: N/A — baseline mode` otherwise)
 | ID | Verdict | Structural evidence (file:line) |
 |----|---------|--------------------------------|
-
-
-## Agent 6: Process Coverage (meta)
 
 ### [D17] Process Coverage
 - Status: PASS / FINDINGS
@@ -701,6 +755,9 @@ REPORT FORMAT:
 - Undocumented executed flows: [flow — evidence — suggested home, or "none"]
 - Referenced-but-unowned conventions: [template promise — file:line — missing mother-side home, or "none"]
 - Aspirational mechanisms: [claim — file:line — missing owner, or "none"]
+- Unprovable self-checks (D17.4): | Check | Can go RED? | Can go GREEN? | Verdict |
+- Self-reported controls (D17.5): | Control | Verified by whom | Output persisted where | Gate? |
+- Convergence assessment (D17.6): [mechanical judgement with evidence]
 ```
 
 ---
@@ -756,6 +813,15 @@ After ALL 6 agents return, consolidate their reports into a single audit report.
 | D17 | Process coverage (meta) | Meta | 6 | PASS/FINDINGS | [1-line summary] |
 ```
 
+### Findings ledger — ALWAYS present, one row per finding (Phase 3 items 2-4)
+
+| ID | Severity | Location | Finding | Status |
+|----|----------|----------|---------|--------|
+| [stable ID] | HIGH/MEDIUM/LOW | file:line | [one sentence] | one of the five values in Phase 3 item 2 |
+
+**Carried forward from [previous report]:** one row per still-`open` and `escalated` finding,
+keeping its ORIGINAL ID, re-verified against the current disk (Phase 3 item 3).
+
 ### Detailed Findings
 
 Paste each agent's full report in order (Agent 1 through Agent 6).
@@ -767,7 +833,24 @@ Group FAIL items by priority:
 2. **Structural fixes** — missing references, broken activation chains
 3. **Quality improvements** — instruction style, description compliance
 
+### Meta-observation — ALWAYS present (`## Meta-observation`)
+
+One or two paragraphs naming the RECURRING CLASS this run saw — not a summary of the findings.
+Executed in every run since 2026-09-01 and owned by nobody until now; it is the section that
+produced the per-fix receipt. **ALWAYS state the class, its evidence, and — where the evidence
+supports it — where the NEXT batch's defects will come from, so the prediction is checkable next
+run.** NEVER manufacture a class to fill the section: "no new class this run" is a valid finding.
+
 End with: **Suggestion:** Run `/maintenance` to apply fixes, using this report as the correction plan.
+
+### Closing status lines — ALWAYS both, verbatim keys, enumerated values
+
+- **`Report status:`** — `COMPLETE` (all agents returned, all dimensions evaluated) or
+  `INCOMPLETE — [which agents or dimensions did not return]`.
+- **`Application status:`** — exactly one of `PENDING` / `PARTIAL — N of M applied in sHASH` /
+  `APPLIED — M of M in sHASH` / `SUPERSEDED by [later run]`.
+  **NEVER invent a value outside this set** — three runs produced three different vocabularies
+  before this enumeration existed (`/audit` 2026-09-02 L-13).
 
 ---
 
@@ -784,29 +867,39 @@ step is the carry-over half.
    and never invent a suffixed filename.** Two runs in one day is the normal shape of
    audit → maintenance → re-audit, and the earlier run's ledger is what the later one carries
    forward.
-2. **ALWAYS give every finding a STABLE ID (`F-1`, `F-2`, …) and a status column**:
-   `open` / `applied sHASH` / `rejected — [reason]`. The ID is what a later maintenance session
+2. **ALWAYS give every finding a STABLE ID (`F-1`, `F-2`, …) and a status column** — exactly one
+   of: `open` / `applied sHASH` / `rejected — [reason]` / **`escalated — owner decision pending`** /
+   **`accepted-risk — see [record]`**. The last two exist because a pushed privacy hit (D16.3c)
+   cannot be fixed by this repo alone: without them an escalated item is neither `open` nor
+   closed, and item 3 below cannot see it (`/audit` 2026-09-02 L-8). The ID is what a later maintenance session
    cites; a finding without one cannot be tracked across sessions.
-3. **ALWAYS carry FORWARD the still-`open` findings from the previous audit report** (the most
+3. **ALWAYS carry FORWARD every finding that is NOT closed — `open` AND `escalated`** — from the previous audit report (the most
    recent `assets/docs/audit-*.md`) into the new one, re-verifying each against the current disk:
    still true → carry with its original ID; fixed since → mark `applied`. An audit that silently
    drops the last one's open items is how "deferred" becomes "forgotten".
-4. **ALWAYS report in one line how many findings were carried forward** — `carried: N open from
-   [previous file]`, or `carried: none — first audit`. Never nothing.
-5. **ALWAYS COMMIT the report in THIS session** — writing it to disk is not persisting it.
-   ```bash
-   git add assets/docs/audit-YYYY-MM-DD.md && git commit -m "docs(audit): persist [run] — [N] findings open"
-   ```
-   Mechanical self-check (expected result stated): `git status --porcelain assets/docs/` →
-   **expected: EMPTY**. Any output means the report is still only in the working tree.
-   **ALWAYS REPORT — `report committed: sHASH` or `NOT committed — [reason]`. NEVER emit nothing.**
-   This is the ONE git operation this session performs, and it does not violate the read-only
-   rule: the report is this session's OUTPUT, never an audited surface. Evidence it is needed —
-   all three reports before this instruction existed entered git via a LATER session's commit, and
-   one of them crossed a session boundary as an untracked file (`/audit` 2026-09-02 K-20).
-6. **In `verification` mode, ALWAYS persist the Part 1 ledger too** — one row per re-verified
+4. **ALWAYS report in one line how many findings were carried forward** — `carried: N open + M
+   escalated from [previous file]`, or `carried: none — first audit`. Never nothing.
+   **An `accepted-risk` item is NOT carried forward as a finding.** Report it once per run as an
+   OBSERVATION citing its record, and NEVER re-open it — the record states what WOULD re-open it
+   (a new working-tree occurrence, or an identifier of a different class). A finding with a
+   written owner decision is closed; a finding without one is immortal.
+5. **In `verification` mode, ALWAYS persist the Part 1 ledger too** — one row per re-verified
    `applied` finding with its verdict and structural evidence, plus the score line. A finding
    whose verdict is anything other than CONFIRMED-FIXED gets a NEW ID and status `open`; the
    original keeps its `applied sHASH` status and gains a pointer to the new ID. **NEVER silently
    reopen an applied finding under its old ID** — the ledger is how a later session tells "this
    was never fixed" from "this was fixed and the fix was wrong".
+6. **ALWAYS COMMIT the report in THIS session — LAST, after every content item above** — writing it to disk is not persisting it.
+   ```bash
+   git add assets/docs/audit-YYYY-MM-DD.md && git commit -m "docs(audit): persist [run] — [N] findings open"
+   ```
+   Mechanical self-check (expected result stated):
+   `git status --porcelain assets/docs/audit-YYYY-MM-DD.md` — **THIS run's report path, not the
+   whole directory** → **expected: EMPTY**. Any output means the report is still only in the
+   working tree. (Scoping matters: `assets/docs/` also holds lineage docs an unrelated session may
+   have left dirty, which would turn this red for the wrong reason.)
+   **ALWAYS REPORT — `report committed: sHASH` or `NOT committed — [reason]`. NEVER emit nothing.**
+   This is the ONE git operation this session performs, and it does not violate the read-only
+   rule: the report is this session's OUTPUT, never an audited surface. Evidence it is needed —
+   all three reports before this instruction existed entered git via a LATER session's commit, and
+   one of them crossed a session boundary as an untracked file (`/audit` 2026-09-02 K-20).

@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.11.0
+# Agentic Engineering Framework v2.12.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -18,7 +18,7 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 7 doc templates |           | 10 agent .md files  |
+                         |  - 7 doc templates |           | 7-10 agent .md files|
                          |  - 10 agent files  |           | 12-15 process skills|
                          |  - 5 rules files   |           | 3-5 rules files     |
                          |  - 15 skills       |           | examples/ (copy)    |
@@ -45,6 +45,9 @@ The framework has 5 session modes in the framework repo, plus project-repo execu
 - `/bootstrap` — Create project structure from PRD (Session 0)
 - `/existing_project_adaptation` — Upgrade existing project to framework
 - `/maintenance` — Edit framework docs, examples, CLAUDE.md, this repo's own `.claude/` runtime, and `assets/docs/` records
+
+Plus one utility, not a session mode:
+- `/audit` — read-only integrity check across 17 dimensions via 6 parallel agents; writes and commits one dated report under `assets/docs/`
 
 **Project repo** (inside the project) — The AI reads the project's own CLAUDE.md, follows the Session Protocol, proposes sprints, implements tasks, validates via subagents, and reports with evidence. The framework repo is no longer involved.
 
@@ -112,6 +115,7 @@ Run these from the framework root with Claude Code:
 | `/bootstrap` | project name | Bootstrap project from PRD (Session 0) |
 | `/existing_project_adaptation` | project name | Upgrade existing project to framework |
 | `/maintenance` | (none) | Edit framework docs, examples, CLAUDE.md, this repo's own `.claude/` runtime, `assets/docs/` records |
+| `/audit` | (none) | Read-only integrity check across 17 dimensions via 6 parallel agents; writes and commits one dated report to `assets/docs/` |
 
 **Alternative:** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 
@@ -134,7 +138,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.11.0)
+│   ├── modules/                            ← Single source of truth (v2.12.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -150,7 +154,7 @@ agentic_engineering/
     └── [project-name]/                 ← Each project gets its own git repo
 ```
 
-**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes. The 15 process skills, 10 agent templates, and 5 rules templates live under `docs/modules/` as **templates** that get copied into bootstrapped projects' `.claude/` — not into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
+**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes + 1 utility. The 15 process skills, 10 agent templates and 5 rules templates live under `docs/modules/` as **templates**, and each project receives a TIER-GATED SUBSET of them — 12 skills + 3 rules at the baseline, the full set only at `production-financial` — copied into that project's `.claude/`, never into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
 
 ---
 

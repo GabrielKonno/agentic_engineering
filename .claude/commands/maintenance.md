@@ -28,11 +28,12 @@ This is a framework maintenance session, not a project bootstrap.
 
 **Workflow:** Run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction
 plan provided by the user (an audit report → "Audit intake"; project evolution docs → "Upstream
-intake"), apply all changes in order, then run the post-change checklist to completion — every numbered
-item, including item 7 (which OWNS the version bump) and items 8 and 9 (which route into
-component-design §5 and "New component creation") — and commit. The bump is NOT a step after the
-checklist: it is item 7 inside it, and naming it separately here is what re-externalizes the H2
-that item 7 exists to abolish (`/audit` 2026-09-02 K-17).
+intake"), apply all changes in order, then run the post-change checklist to completion — **EVERY numbered
+item in it, counted in the file** — and commit. The checklist OWNS the version bump, the §5
+classification and the new-component gate; **NEVER name those as separate steps here.** Doing so
+re-externalizes what the checklist internalized, and enumerating item NUMBERS in this sentence
+makes it an inventory surface that goes stale the moment an item is added
+(`/audit` 2026-09-02 K-17, L-27).
 
 ## Step 0 — Upstream discovery sweep (runs FIRST, in EVERY maintenance session)
 
@@ -85,6 +86,24 @@ sentence.** (A fixed number here goes stale the moment an item is added, and the
 missing are the newest ones — exactly what happened when items 4-6 were added under a header that
 still said "three". This checklist is itself an inventory surface; see item 1.)
 
+**ALWAYS PERSIST every report line this checklist produces — saying it in the session is not
+reporting it.** Each numbered item below ends in an `ALWAYS REPORT` mandate, and a line that lives
+only in a transcript cannot be re-read by the `/audit` that verifies this batch, by the next
+maintenance session, or by you. Write them ALL, verbatim, into:
+- **the audit report file**, under a `### Post-change checklist receipts (sHASH)` heading, when
+  this session applied an audit batch (Audit intake step 4 already writes to that file); OR
+- **the commit message body**, when there is no report file.
+
+Mechanical self-check (expected result stated): after committing, grep the persisted surface for
+each item's report key — `inventory sweep:`, `instruction style:`, `references:`, `class sweep:`,
+`back-sweep:`, `liveness:`, `negation proof:`, `version:`, `classification:`, `new component:` —
+**expected: every key present exactly once.** A missing key is RED.
+Evidence this is not hypothetical: for `afccff3`, eight of the nine receipts existed nowhere on
+disk, which is why that batch's `negation proof:` claim is unverifiable to this day
+(`/audit` 2026-09-02 L-16). A control nobody can re-read afterwards is indistinguishable from one
+that never ran — the same proposition `session_rules.md` → "Execution proof" makes about test
+suites, which this checklist had never applied to itself.
+
 Each item encodes a real miss that survived a first pass and was only caught by a later lens
 (owner question / audit):
 
@@ -110,6 +129,14 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    `inventory sweep: N/A — no artifact added, removed, renamed or split`. NEVER emit nothing.**
    A count that lives in PROSE (a NOTE paragraph, an intro sentence) is the one that survives a
    sweep of the diagram — grep the NUMBER across the file, never only the structure.
+   **ORDINAL SWEEP — ALWAYS run it when you INSERT or REORDER a numbered item in any list.**
+   Inserting an item renumbers every item after it, and every sentence that cites one by ordinal
+   ("see step 7", "item 4's class sweep", "per Phase 3 item 5") silently starts pointing at the
+   wrong thing. Mechanical self-check (expected result stated): grep the edited file AND the whole
+   repo for `step N`, `item N`, `Phase \d item N` for every ordinal at or after the insertion
+   point — **expected: every hit still names the content it meant.** Two live instances were
+   created this way before this rule existed (`/audit` 2026-09-02 L-9, L-15). Where a citation
+   would be fragile, cite the item's NAME instead of its number.
 
 2. **Instruction-style check on NEW normative text.** Every new or edited BEHAVIORAL
    instruction (a step the AI must execute every time — in commands, skills, agents, rules)
@@ -154,9 +181,17 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    |--------|---------|----------|----------|------------|----------------------|
    | [K-3]  | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
 
-   Use `✓` (ran, and say what you grepped), `✗` (NOT run — which is legitimate only with a
-   stated reason on the same row), or `n/a` (the direction cannot apply, e.g. the artifact has no
-   twin). **A row with a `✗` and no reason is RED.** Close with the total:
+   Use `✓` (ran — and **ALWAYS QUOTE the actual grep pattern or command in the cell**, never a
+   bare glyph: an unquoted `✓` is unverifiable by anyone but its author), `✗` (NOT run —
+   legitimate ONLY with a stated reason on the same row), or `n/a` (the direction cannot apply,
+   e.g. the artifact has no twin). **A row with a `✗` and no reason is RED. A `✓` with no quoted
+   pattern is RED.**
+   **Mechanical self-check (expected result stated): the table's row count MUST equal the number
+   of findings applied this session.** Count both and state both — **expected: equal**. Merging
+   two findings into one row is how a fix whose sweep was skipped disappears into a neighbour
+   (`/audit` 2026-09-02 L-23: 17 findings reported in 14 rows). If two findings genuinely share
+   one fix, give them one row each and write "same edit as [ID]" in the last column.
+   Close with the total:
    `class sweep: N fixes × 4 directions, M extra instances found and fixed`, or
    `class sweep: N/A — no point fixes this session`. **NEVER emit nothing, and NEVER emit the
    total without the table.**
@@ -271,8 +306,11 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    elsewhere. This item is its invoker.
    **ALWAYS RUN the "New component creation" section in full whenever this session created a
    skill, agent template, rule, command, or script**, and **ALWAYS EMIT its report line here** —
-   `new component: [name] — placed [where], invoker [who], liveness [result]`, or
-   `new component: none this session`. **NEVER emit nothing.**
+   the format is defined ONCE, in that section's obligation 5; this item does not restate it
+   (component-design §9: one home per mandate).
+   Mechanical self-check (expected result stated): `grep -c "new component:" ` over the persisted
+   receipts → **expected: exactly 1**. Zero means the line was never emitted; two means the format
+   was restated somewhere and the two homes can now diverge.
 
 ## Version bumps — the framework version is a CLAIM, and it decays silently
 
@@ -289,9 +327,9 @@ this section is its invoker. A bump publishes the current state as a contract; t
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 
-- **MINOR** (`v2.10.0` → `v2.11.0`): a new rule/section/template, an upstream absorption, or a
+- **MINOR** (`v2.11.0` → `v2.12.0`): a new rule/section/template, an upstream absorption, or a
   schema change to a document projects receive.
-- **PATCH** (`v2.11.0` → `v2.11.1`): corrections that add no new contract — broken references,
+- **PATCH** (`v2.12.0` → `v2.12.1`): corrections that add no new contract — broken references,
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
@@ -349,11 +387,18 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
 4. **ALWAYS WRITE THE STATUS BACK into the report file in this same session** — `applied sHASH`
    or `rejected — [reason]` per ID. The applying session owns this, not the next audit: a status
    that waits for the next run is a status nobody wrote.
+   **ALWAYS WRITE THE POST-CHANGE CHECKLIST RECEIPTS into that same file**, under
+   `### Post-change checklist receipts (sHASH)` — all of them, verbatim, including the per-fix
+   receipt table. This step is the RECEIVER of the checklist's persistence mandate (see the
+   checklist header); without it those receipts exist only in a transcript and the verification
+   audit cannot check any of them.
 5. **State explicitly which findings were NOT applied and why.** Deferring is legitimate;
    silently dropping is not — they must still read `open` for the next carry-forward.
 6. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
-   moment where the fixes themselves are the least-verified thing in the repo: the three documented executions found defects in **2 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2) and **11 of 30** (2026-09-02 Run 3) applied findings, and step 2's
+   moment where the fixes themselves are the least-verified thing in the repo: the four documented executions of
+   this pass found defects in **4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) and **8 of 17** (Run 4)
+   applied findings, and step 2's
    re-verification runs BEFORE applying, never after. Report
    `verification audit: proposed / ran / skipped — [owner deferred]`; NEVER nothing.
 
@@ -401,5 +446,5 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
    per absorbed doc: its path, the verdict (graduated / adapted / rejected), the lineage file and
    commit that record it, and the explicit sentence that the doc is now **dischargeable**, i.e.
    the project's own next session marks its header `upstreamed`. The no-touch rule stops this repo
-   from marking it; it does NOT excuse this repo from SAYING so. Without step 7 the last link of
+   from marking it; it does NOT excuse this repo from SAYING so. Without THIS step the last link of
    the chain rests on owner memory — the exact failure class Step 0 exists to eliminate.

@@ -345,7 +345,7 @@ Step     Source (framework repo)                     Output (project folder)
 1.5      examples/*                              --> assets/examples/ (copy)
 2        modules/templates/claude_md.md          --> CLAUDE.md
 3        modules/templates/project_md.md         --> .claude/phases/project.md
-4        modules/templates/pendencias_md.md      --> .claude/phases/pendencias.md
+4        modules/templates/pendencias_md.md      --> .claude/phases/pendencias.md + done_tasks.md
 5        (external: npm registry, CLI tools)     --> MCP servers installed
 5.5      (external: skill-creator plugin)        --> Plugin installed (optional)
 5.7      modules/skills/*                        --> .claude/skills/* (copy 12 lifecycle skills)
@@ -914,7 +914,7 @@ Output: Code Review Report with findings.
 **Step 5 — validator subagent:**
 Input: git diff, acceptance criteria, Code Review Report (+ Security/Vulnerability Reports if they exist), rules files, Architectural Decisions table.
 The validator independently: re-runs build, re-runs tests, navigates browser for VERIFY: criteria, runs QUERY: criteria, executes mutation tests, runs regression, produces the Validation Report.
-Output: Validation Report with ✅/❌/⏭️ per category.
+Output: Validation Report with a per-category verdict (mostly ✅/❌/⏭️; Security adds ⚠️, UI adds BASELINE-CREATED).
 
 **If security-relevant** (auth, RLS, payment, AI/LLM, multi-tenancy, file upload, secrets):
 
@@ -947,7 +947,7 @@ Report template categories:
 - Tests: ✅/❌/⏭️ [N EXECUTED, N passed, N failed, wall time — the COUNT is mandatory evidence]
 - Review: ✅/❌/⏭️ [inline or "code-reviewer subagent" — ⏭️ when no Code Review Report was provided]
 - Security: ✅/⚠️/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes" — ⚠️, NEVER ❌, for a declared coverage gap with no specialist report]
-- Mutation: ✅/⏭️ [N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
+- Mutation Tests: ✅/⏭️ [N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
 - UI: ✅/❌/⏭️/BASELINE-CREATED [screenshot evidence or "no UI changes in this task" — BASELINE-CREATED when the visual-regression specialist captured first baselines]
 - Migration: ✅/❌/⏭️ [migration ran + rollback verified — or "no migration files" — or "destructive without rollback: ❌"]
@@ -1158,7 +1158,7 @@ The most complex subagent. It performs the complete verification independently:
 6. Executes mutation tests (logic-heavy and arch/security tasks): identifies 1-3 critical mutations, applies one at a time, verifies criteria fail, restores code. Max 3 mutations.
 7. Runs regression (full test suite or last 2-3 tasks' QUERY: criteria)
 8. Evaluates prior review reports (code-reviewer, security-reviewer, Red Team) as additional evidence
-9. Produces structured Validation Report with ✅/❌/⏭️ per category
+9. Produces structured Validation Report with a per-category verdict (mostly ✅/❌/⏭️; Security adds ⚠️, UI adds BASELINE-CREATED)
 
 ### Arbitrator agent
 
@@ -1593,7 +1593,7 @@ Agents with `invocation: subagent` declare their I/O contract via frontmatter:
 
 ```yaml
 receives: git diff, acceptance criteria, rules files
-produces: Validation Report with ✅/❌/⏭️ per category
+produces: Validation Report with a per-category verdict (mostly ✅/❌/⏭️; Security adds ⚠️, UI adds BASELINE-CREATED) — the vocabulary is per-category and defined by the agent's own Output template; NEVER flatten it to one triple
 ```
 
 - `receives` — what the orchestrating agent must pass to the subagent (via the tool's task description / prompt). The subagent reads these from the filesystem; the orchestrator provides file paths and scope, not data blobs.

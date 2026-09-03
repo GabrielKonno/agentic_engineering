@@ -236,7 +236,10 @@ or booking/reservation logic:**
 > Visual regression gap: this review reads the diff, not rendered pixels — a shared component or
 > CSS-variable change can be correct in code and still shift every screen that consumes it.
 > Recommend: search `.claude/agents/` for a visual regression agent (baseline capture and
-> screenshot diffing across the affected screens).
+> screenshot diffing across the affected screens). NOTE — this block deliberately OMITS the
+> "and invoke before validator if found" closer the other four gaps carry: the validator ALSO
+> declares this gap (`validator.md`), so the specialist may legitimately be spawned after the
+> validator's report. The divergence is intentional and stated rather than silent (`/audit` K-31).
 
 **If diff modifies multi-table operations, cascading deletes, or denormalized data:**
 > Data integrity gap: inline review checks referential integrity patterns.
@@ -248,7 +251,8 @@ or booking/reservation logic:**
 **If none of the above apply:** keep the section and set the field to `None` — NEVER omit the
 heading. An absent section and an unwritten one are indistinguishable to the reader, and the
 report schema at the top of this file already declares the field as `[None | list of gaps]`.
-(`security_reviewer.md` resolves the same tension the same way.)
+(`security_reviewer.md` carries the identical resolution — verified, not assumed: both files were
+changed in the same session that wrote this sentence.)
 
 ## Known Bug Patterns (check EVERY review)
 

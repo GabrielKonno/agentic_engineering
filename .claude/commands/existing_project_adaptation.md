@@ -39,7 +39,7 @@ This session reads the existing codebase and documentation, then upgrades everyt
 ### Step 0.5 — FRAMEWORK-clone freshness check (MANDATORY, before Phase 1 and before copying anything out of this repo)
 
 ```bash
-git remote -v | head -1                              # (a) does this clone have a remote at all?
+git remote -v                                        # (a) EVERY remote — NEVER `head -1`: a fork's `upstream` is usually the second
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch track one?
 git fetch && git status -sb | head -1                # (c) ahead/behind
 ```
@@ -48,10 +48,13 @@ git fetch && git status -sb | head -1                # (c) ahead/behind
 
 | Observation | Verdict |
 |-------------|---------|
-| (a) empty — no remote configured | `no remote — skipped`. Nothing to be behind; CONTINUE. |
-| (a) non-empty, (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
+| (a) empty — no remote configured at all | `no remote — skipped`. Nothing to be behind; CONTINUE. |
+| (a) lists an `upstream` remote (this clone is a FORK) | Compare against **`upstream`**, never `origin`: `git fetch upstream && git rev-list --count HEAD..upstream/main` → **0 = `up to date`; anything else = RED, `behind upstream by N — STOPPED`**. On a fork `@{upstream}` points at the FORK's own `origin`, so the rows below would read GREEN while the clone is arbitrarily behind the real upstream. |
+| (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
+| (c) produced NO line — `git fetch` failed, so `&&` short-circuited | **RED — STOP.** `fetch failed — UNVERIFIABLE, STOPPED`. Re-run the two commands separately to see the error. |
 | (c) branch line contains `behind` | **RED — STOP.** `behind by N commits — STOPPED`. |
 | (c) branch line shows a `...` tracking segment and no `behind` | `up to date`. CONTINUE. |
+| **anything else — any observation matching no row above** | **RED — STOP.** `unverifiable — STOPPED`. This CATCH-ALL is what makes the check fail CLOSED; without it an unmatched state is undefined rather than red (`/audit` 2026-09-02 K-1). |
 
 **NEVER read a bare `## main` (no `...upstream` segment) as "up to date".** With a remote present
 but no tracking branch, `git status -sb` prints the branch name alone — the command exits 0 having
@@ -67,8 +70,8 @@ contract. Update or attach the upstream first (`git pull`,
 `git branch --set-upstream-to=origin/main`), then restart.
 
 **ALWAYS REPORT one of the four verdict strings above — `up to date` / `behind by N commits —
-STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`. NEVER emit
-nothing.** Phase 1's Step 1.0 below checks the PROJECT copy; this checks the FRAMEWORK copy.
+STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped` / `fetch failed — UNVERIFIABLE,
+STOPPED` / `behind upstream by N — STOPPED` / `unverifiable — STOPPED`. NEVER emit nothing.** Phase 1's Step 1.0 below checks the PROJECT copy; this checks the FRAMEWORK copy.
 Both, or neither is worth much.
 
 ---
@@ -222,7 +225,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.11.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.12.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -270,6 +273,11 @@ Added to CLAUDE.md: [section name] — [reason: missing from current version]
 
 **Step 2.2 — Upgrade project.md:**
 
+**If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/project_md.md` and create `.claude/phases/project.md` exactly as
+`/bootstrap` would, then continue with the upgrade checks above. **NEVER assume the file exists** —
+Steps 4.6.5 and 5.1 read it unconditionally, and this command's own Reading Report has an
+`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11).
+
 Check for required sections:
 ```
 □ Overview (stack, repo, deploy, database)
@@ -313,6 +321,11 @@ Upgraded project documentation to Agentic Engineering Framework v[current].
 
 **Step 2.3 — Upgrade pendencias.md (or equivalent):**
 
+**If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/pendencias_md.md` and create `.claude/phases/pendencias.md` exactly as
+`/bootstrap` would, then continue with the upgrade checks above. **NEVER assume the file exists** —
+Steps 4.6.5 and 5.1 read it unconditionally, and this command's own Reading Report has an
+`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11).
+
 The file may have a non-standard name (e.g., `[nome-fora-do-padrao].md`). **Do NOT rename it** — update the reference in CLAUDE.md to point to the actual filename.
 
 Check and upgrade:
@@ -332,6 +345,12 @@ Check and upgrade:
 **Before Steps 2.4-2.8:** If `assets/examples/README.md` exists, read it for conventions (frontmatter fields, structure, output format, invocation types). Use these conventions when creating or upgrading any agent or skill.
 
 **Step 2.4 — Upgrade code-reviewer agent/skill:**
+
+**If it does NOT exist: CREATE it.** Read the template at `docs/modules/agents/code_reviewer.md` and create `.claude/agents/code-reviewer.md` exactly as
+`/bootstrap` Step 7 would, then continue with the upgrade checks above. **NEVER assume the
+file exists** — Steps 4.6.5 and 5.1 read `.claude/agents/code-reviewer.md` unconditionally, and
+this command's own Reading Report has an `[exists/missing]` slot for it
+(`/audit` 2026-09-02 K-11).
 
 Check for:
 ```
@@ -362,6 +381,12 @@ For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the m
 **Pre-select Coverage Gap Declarations:** Review the five optional gap sections (accessibility, performance, concurrency, visual regression, data integrity). Remove sections clearly irrelevant to this project's domain based on the codebase analysis from Step 1. Keep sections that match actual code patterns found (e.g., keep concurrency gap if project has database transactions with concurrent access; keep visual regression gap if the codebase has shared UI components or design tokens). When in doubt, keep — gaps are conditional and only activate when matching diffs appear.
 
 **Step 2.5 — Upgrade security-reviewer:**
+
+**If it does NOT exist: CREATE it.** Read the template at `docs/modules/agents/security_reviewer.md` and create `.claude/agents/security-reviewer.md` exactly as
+`/bootstrap` Step 8 would, then continue with the upgrade checks above. **NEVER assume the
+file exists** — Steps 4.6.5 and 5.1 read `.claude/agents/code-reviewer.md` unconditionally, and
+this command's own Reading Report has an `[exists/missing]` slot for it
+(`/audit` 2026-09-02 K-11).
 
 Check frontmatter:
 ```
@@ -419,6 +444,8 @@ Read each rules file. No structural changes needed — rules files are project-s
 
 **Step 2.7.1 — Pre-create missing domain rules from codebase analysis:**
 
+**PRECONDITION — `assets/examples/rules/` may not exist yet.** Phase 4 Step 4.1 is what copies it into the project; on a never-bootstrapped project this step runs BEFORE that. **ALWAYS CHECK first** (`ls projects/$ARGUMENTS/assets/examples/rules/ 2>/dev/null`): if it is missing, do NOT silently no-op — record the domain matches you found and **DEFER the copying to Step 4.1b**, which runs after the examples land. **ALWAYS REPORT — `domain rules: N created` or `N matches deferred to Step 4.1b — examples not yet present`. NEVER emit nothing.**
+
 Based on the codebase analysis from Step 1 and the existing/retroactive PRD, identify domain signals that match example templates. For each domain that is a core feature or architectural pattern in the project, check if the corresponding rules file ALREADY EXISTS in `.claude/rules/`. If it does NOT exist and a matching example template is available in `assets/examples/rules/`, pre-create it:
 
 | Domain signal | Rules file | Example template |
@@ -461,7 +488,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.11.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.12.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -587,6 +614,26 @@ The PRD does not need to be speculative — it describes what already exists plu
 
 Create `projects/$ARGUMENTS/assets/docs/prd.md` with this approach:
 
+**`## Cross-cutting Concerns` — ALWAYS populate it FIRST.** It is the FIRST section of the PRD
+Structure template (`prd_planning.md`), and omitting it produces a retroactive PRD that fails its
+own template. **ALWAYS INVOKE the `cross-cutting-analysis` skill in CONSULTATION-then-GENERATION
+mode over the codebase analysis from Phase 1** — this command installs that skill at Step 2.9 and,
+until now, never exercised it (`/audit` 2026-09-02 L-1). Themes that span modules and must stay
+consistent (auth, tenancy, i18n, money handling, audit trail) are exactly what an existing
+codebase makes visible and a retroactive PRD most needs.
+**ALWAYS REPORT — `cross-cutting: N concerns identified` or `none — no theme spans 2+ modules`.
+NEVER emit nothing.**
+
+**`## Cross-cutting Concerns` — ALWAYS populate it FIRST.** It is the FIRST section of the PRD
+Structure template (`prd_planning.md`), and omitting it produces a retroactive PRD that fails its
+own template. **ALWAYS INVOKE the `cross-cutting-analysis` skill over the Phase 1 codebase
+analysis** — this command installs that skill and, until now, never exercised it
+(`/audit` 2026-09-02 L-1). Themes that span modules and must stay consistent (auth, tenancy, i18n,
+money handling, audit trail) are exactly what an existing codebase makes visible and what a
+retroactive PRD most needs.
+**ALWAYS REPORT — `cross-cutting: N concerns identified` or `none — no theme spans 2+ modules`.
+NEVER emit nothing.**
+
 **Sections to populate from codebase analysis (what IS):**
 - 1.1 Problem — infer from the project's purpose
 - 1.2 Solution — describe what the product does today
@@ -631,6 +678,48 @@ If missing, copy from the framework root:
 ```bash
 cp -r ./examples/ projects/$ARGUMENTS/assets/examples/ 2>/dev/null || echo "Framework examples not accessible — copy manually from the framework's examples/ directory"
 ```
+
+**Step 4.1b — Route the PRD's Cross-cutting Concerns (RECEIVER of Phase 3's list):**
+
+**ALWAYS ROUTE each concern Phase 3 identified to the artifact that owns it** — the same three
+destinations bootstrap Step 1.1 uses, so an adapted project and a bootstrapped one end up with the
+same structure:
+
+| Concern constrains… | Destination | Written by |
+|---|---|---|
+| CODE | a `.claude/rules/` domain rules file (Step 2.7.1's signal table) | **Step 2.7.1 — RECEIVER** |
+| ARCHITECTURE | a row in `project.md`'s Architectural Decisions table | **Step 2.2 — RECEIVER** |
+| WORK still to do | a task in `pendencias.md` | **Step 2.3 — RECEIVER** |
+
+Those three steps run in Phase 2, BEFORE the PRD exists — so on the first pass they cannot receive
+anything. **ALWAYS RE-VISIT all three here, after Phase 3, and write the concerns in.** This is the
+one place in this command where a Phase-2 artifact is legitimately reopened, and it is reopened
+because the PRD that feeds it is created in Phase 3.
+
+**ALWAYS REPORT — `cross-cutting routed: R rules, A decisions, T tasks (of N identified)` or
+`cross-cutting: none identified`. A total below N is RED — name the dropped concern. NEVER emit
+nothing.**
+
+**Step 4.1b — Route the PRD's Cross-cutting Concerns (RECEIVER of Phase 3's list):**
+
+**ALWAYS ROUTE each concern Phase 3 identified to the artifact that owns it** — the same three
+destinations bootstrap Step 1.1 uses, so an adapted project and a bootstrapped one end up with the
+same structure:
+
+| Concern constrains… | Destination | Receiver step |
+|---|---|---|
+| CODE | a `.claude/rules/` domain rules file (Step 2.7.1's signal table) | Step 2.7.1 |
+| ARCHITECTURE | a row in `project.md`'s Architectural Decisions table | Step 2.2 |
+| WORK still to do | a task in `pendencias.md` | Step 2.3 |
+
+Those three steps run in Phase 2, BEFORE the PRD exists, so on the first pass they cannot receive
+anything. **ALWAYS RE-VISIT all three HERE, after Phase 3, and write the concerns in.** This is the
+one place in this command where a Phase-2 artifact is legitimately reopened, and it is reopened
+because the PRD that feeds it is created in Phase 3.
+
+**ALWAYS REPORT — `cross-cutting routed: R rules, A decisions, T tasks (of N identified)` or
+`cross-cutting: none identified`. A total below N is RED — name the dropped concern. NEVER emit
+nothing.**
 
 **Step 4.2 — Create settings.json and initialize logs (if missing):**
 
@@ -842,6 +931,7 @@ done
 echo "=== Rules files present? ==="
 ls "projects/$ARGUMENTS/.claude/rules/session-rules.md" 2>/dev/null || echo "MISSING session-rules.md"
 ls "projects/$ARGUMENTS/.claude/rules/evolution-policy.md" 2>/dev/null || echo "MISSING evolution-policy.md"
+ls "projects/$ARGUMENTS/.claude/rules/component-design.md" 2>/dev/null || echo "MISSING component-design.md"
 
 echo "=== All 3 process agents present? ==="
 for agent in prd-sync-checker criteria-enforcer diff-pattern-extractor; do
@@ -877,6 +967,20 @@ done
 ```
 ## Adaptation Complete — Framework Upgrade Report
 
+### Framework + project freshness (Steps 0.5 and 1.0) — ALWAYS report, never omit:
+- Framework clone: `up to date` / `behind by N — STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`
+- Project copy: `up to date` / `behind by N — reconciled before analysis` / `no remote — skipped`
+
+### Cross-cutting concerns (Phase 3 → Step 4.1b) — ALWAYS report, never omit:
+- Identified: [N] · Routed: R rules · A decisions · T tasks — [or `none identified`]
+
+### Framework + project freshness (Steps 0.5 and 1.0) — ALWAYS report, never omit:
+- Framework clone: `up to date` / `behind by N — STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`
+- Project copy: `up to date` / `behind by N — reconciled before analysis` / `no remote — skipped`
+
+### Cross-cutting concerns (Phase 3 → Step 4.1b) — ALWAYS report, never omit:
+- Identified: [N] · Routed: R rules · A decisions · T tasks — [or `none identified`]
+
 ### Documents upgraded:
 - CLAUDE.md: [sections added/modified]
 - project.md: [adaptation entry added, sections added]
@@ -894,8 +998,11 @@ done
 
 ### Process skills: [N of 12 copied from framework]
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
+- **Whole-segment orchestration (opt-in Level 5):** autonomous-loop
 - **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
+- **PRD workflows:** cross-cutting-analysis
+- **Commit workflow:** commit
 - [list copied / list skipped (already existed)]
 
 ### Rules:

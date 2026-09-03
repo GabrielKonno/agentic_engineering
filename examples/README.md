@@ -83,7 +83,12 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 3. If found: use as structural reference — adapt to project's stack and domain
 4. If not found: create from scratch following the conventions visible in other examples
 
-### Key conventions to follow (exhibited by every example — verify, do not assume)
+### Key conventions to follow — PER KIND, verify, do not assume
+
+**A convention stated for one kind is NEVER automatically true of another.** The `**Frontmatter:**`
+block below is the AGENT and SKILL contract; **rules examples do not use it at all** — 11 of 11
+carry `domain:` / `applies_to:` instead, with no `name:`, `effort:` or `invocation:` field. Read
+the per-kind sections and measure before citing any of these as universal (`/audit` K-29, L-31).
 
 **Frontmatter:**
 - `name:` — lowercase, hyphenated
@@ -118,12 +123,15 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 **Agents (WHAT to verify):**
 - `invocation: subagent` for review/validation/security agents
 - `## Input` section — what the agent receives (file paths, reports, criteria)
-- An OUTPUT section — structured report format with examples. Two spellings are both sanctioned
-  and equally correct: `## Output` (10 of 20 examples) and `## Output Format` (the other 10).
-  Grep for either when verifying
+- An OUTPUT section — structured report format with examples. **Every one of the 20 agent examples
+  carries `## Output Format`**; 10 of them ALSO carry a shorter `## Output` summary section ahead of
+  it, and 10 carry only `## Output Format`. So it is a STRUCTURAL variance (one output section or
+  two), not a spelling variance — grep for `## Output Format` when verifying presence, and for
+  either heading when verifying what immediately follows `## Input`
 - **`## Input` ALWAYS IMMEDIATELY PRECEDES the output section** — the pair is the agent's contract
-  and is read as one unit (verified: 20/20 examples have `## Input` immediately followed by
-  `## Output` or `## Output Format`, zero headings between them). The PAIR's position is
+  and is read as one unit (verified: 20/20 examples have `## Input` immediately followed by an
+  output heading, zero headings between them; that heading is `## Output` in 10 and
+  `## Output Format` in 10). The PAIR's position is
   deliberately NOT fixed: it sits near the top in agents whose contract is the first thing a
   reader needs, and just before the verdict line in agents whose checklist dominates the file.
   Either placement is correct; SPLITTING the pair is not
@@ -158,6 +166,7 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 
 **Rules (WHAT constraints apply):**
 - Inviolable rules numbered — non-negotiable boundaries
-- Checklists for new entities (new table, new endpoint, etc.)
+- Checklists for new entities (new table, new endpoint, etc.) — **where the domain HAS an
+  entity-creation flow: 6 of 11 examples carry one.** Its absence is not a violation
 - Testing section with verification queries
 - Domain-specific edge cases

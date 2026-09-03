@@ -133,11 +133,14 @@ Part 1 pass that re-reads the structure around every already-`applied` fix).
 upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner request,
 (d) **after a `/maintenance` session applies an audit batch** — in `verification` mode
 (`/audit` Phase 0), which re-reads the structure around every `applied` fix instead of only
-checking that the required text is present. Trigger (d) exists because the fixes themselves
-introduce defects: its three documented executions found defects in **2 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2) and **11 of 30** (2026-09-02 Run 3) applied findings. Each figure is the
-count of applied findings whose Part 1 verdict was anything other than CONFIRMED-FIXED, counted
-over the FINDINGS only — never over the ledger's row total, which also carries `VERSION` and any
-carried-forward IDs. The `/maintenance` post-change checklist is the PRIMARY control and runs every
+checking that the required text is present. Trigger (d) exists because the fixes
+themselves introduce defects. The **verification mode** has run four times and found defects in
+**4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) and **8 of 17** (Run 4) applied findings. (The first three ran
+under trigger (c)/owner request; trigger (d) was created after them.) Each figure counts applied findings whose Part 1 verdict was anything other than CONFIRMED-FIXED,
+**counted over the FINDINGS and RECOMPUTED from the ledger** — never over the row total (which
+also carries `VERSION` and carried-forward IDs), and **never copied from a prior report's summary
+prose**: a summary is a claim, not data, and copying one is how `2 of 15` reached three surfaces
+when the ledger says four (`/audit` 2026-09-02 L-4). The `/maintenance` post-change checklist is the PRIMARY control and runs every
 session; `/audit` is the periodic NET behind it, and this trigger list is what makes "periodic" a
 fact rather than an aspiration.
 
@@ -219,4 +222,13 @@ evolution-policy template). Upstreaming them is a **maintenance** operation:
   by `/audit` D16 across ALL agent-reachable surfaces: tracked files, `.claude/docs/`, the
   agent's persistent memory (path resolved from session context), and git history —
   commit contents AND commit messages (leaks survive deletion; unpushed hits are locally
-  fixable, pushed ones escalate to the owner).
+  fixable, pushed ones escalate to the owner, and an owner decision is written as an
+  `accepted-risk` record so the finding CLOSES instead of recurring forever).
+  **`.claude/settings.local.json` is EXEMPT** — gitignored, machine-local, and auto-written by the
+  permission prompt with absolute paths that necessarily contain project folder names. Stating the
+  exemption is the point: it was named neither in nor out for four audit runs (`/audit` K-37).
+  **The blocklist is derived from THREE sources, always all three:** project folder names;
+  identifiers harvested from project DOCS; and **source-project CODE identifiers** — function,
+  table, column and route names appearing in examples inside framework templates. The third was
+  missing until 2026-09-02, which is why a source-project function name in a shipped template
+  survived four consecutive runs (`/audit` L-19).

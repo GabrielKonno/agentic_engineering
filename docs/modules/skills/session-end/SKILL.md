@@ -73,16 +73,16 @@ nothing.**
 
 READ `.claude/skills/config-file-updater/SKILL.md` into context, THEN execute its process. Updates module status, patterns, File Map when changed.
 
-**ALWAYS REPORT — `CLAUDE.md: ran — [what changed]` or `deferred — [reason]`. NEVER emit
-nothing.** This step is explicitly deferrable (see "Priority and context limits"), which is
+**ALWAYS REPORT — `CLAUDE.md: ran — [what changed]` / `deferred — [reason]` /
+`skipped — [archetype] makes it N/A`. NEVER emit nothing.** This step is explicitly deferrable (see "Priority and context limits"), which is
 exactly why the deferral must be SAID.
 
 ### 5. Update rules/agents/skills/PRD
 
 READ `.claude/skills/rules-agents-updater/SKILL.md` into context, THEN execute its process. Creates rules files, updates agents with discoveries.
 
-**ALWAYS REPORT — `rules/agents/skills: ran — [what changed]` or `deferred — [reason]`. NEVER
-emit nothing.** This step is explicitly deferrable, which is exactly why the deferral must be
+**ALWAYS REPORT — `rules/agents/skills: ran — [what changed]` / `deferred — [reason]` /
+`skipped — [archetype] makes it N/A`. NEVER emit nothing.** This step is explicitly deferrable, which is exactly why the deferral must be
 SAID.
 
 ### 6. Self-verification
@@ -104,7 +104,9 @@ NEVER emit nothing.**
 
 Items 1-3 are the critical minimum. Items 4-5 can be deferred if context window is low.
 
-**A deferral is legitimate; a SILENCE is not.** Every step 1-6 carries its own
+**A deferral is legitimate, and so is an archetype N/A — a SILENCE is not, and the two are
+DIFFERENT verdicts: `deferred` means context ran short, `skipped — [archetype] makes it N/A`
+means the step never applied. NEVER report one as the other.** Every step 1-6 carries its own
 `ran — [outcome]` / `skipped|deferred — [reason]` report line above, and **ALWAYS emit all six,
 including for the steps you deferred** (component-design §9 rule 3: an unreported skip is
 indistinguishable from a forgetting, and the two need opposite responses).

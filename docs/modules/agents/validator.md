@@ -12,12 +12,14 @@ description: >
   Independent validation agent. Spawned via Agent tool after implementation.
   Re-runs build, tests, criteria checks, and mutation tests with isolated context.
   Receives prior review reports (code-reviewer, security-reviewer, Red Team) as
-  additional evidence. Produces the Validation Report with ✅/❌/⏭️ per category.
+  additional evidence. Produces the Validation Report with a per-category verdict (mostly ✅/❌/⏭️; Security adds ⚠️, UI adds BASELINE-CREATED).
 receives: >
   git diff, acceptance criteria, Code Review Report, Security Review Report (if exists),
   Vulnerability Report (if exists), rules files, Architectural Decisions table from project.md
 produces: >
-  Validation Report with a verdict per category. Verdict-bearing categories (14):
+  Validation Report with one entry per category. The 14 categories (10 carry a verdict
+  token; Criteria Results, Prior Review Findings, Coverage Gap Declaration and Items for human
+  verification are table/prose sections):
   Build, Tests, Review, Security, Criteria Results, Mutation Tests, DB, UI, Migration,
   Regression, Prior Review Findings, Coverage Gap Declaration, Items for human verification,
   Overall. The vocabulary is per-category and defined by the Output template below — most are

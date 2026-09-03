@@ -9,7 +9,9 @@ applies_to: "docs/modules/agents/**,docs/modules/skills/**,docs/modules/rules/**
 
 Specialist agents are activated through gap declarations, not hardcoded routing.
 
-**Flow:** Reviewer agent (code-reviewer, security-reviewer) declares what it CANNOT
+**Flow:** A DECLARING component — there are THREE: `code-reviewer`, `security-reviewer` and
+`validator` (which declares the visual regression gap from inside its own Validation Report) —
+declares what it CANNOT
 fully cover → main Claude reads the gap declaration in the report → searches
 `.claude/agents/` descriptions for a matching specialist → spawns if found.
 
@@ -60,7 +62,7 @@ The activation chain has three layers that must use matching vocabulary:
 | Layer | Produces | Key phrase |
 |-------|----------|------------|
 | validation-orchestrator | Reads gap declarations from reports | "Coverage Gap Declaration" |
-| Reviewer (code-reviewer, security-reviewer) | Gap declaration in report | "X gap: ... Recommend: search .claude/agents/" |
+| Declaring component (code-reviewer, security-reviewer, **validator**) | Gap declaration in report | "X gap: ... Recommend: search .claude/agents/" |
 | Specialist agent | Pushy Description | "when [reviewer] declares a X gap" |
 
 If vocabulary breaks at ANY link, the specialist exists but is never spawned.

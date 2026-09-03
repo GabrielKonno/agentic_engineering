@@ -39,7 +39,7 @@ Execute in order. Report results after each part.
 **ALWAYS RUN before Step 1.5 copies anything out of this repo:**
 
 ```bash
-git remote -v | head -1                              # (a) does this clone have a remote at all?
+git remote -v                                        # (a) EVERY remote — NEVER `head -1`: a fork's `upstream` is usually the second
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch track one?
 git fetch && git status -sb | head -1                # (c) ahead/behind
 ```
@@ -48,10 +48,13 @@ git fetch && git status -sb | head -1                # (c) ahead/behind
 
 | Observation | Verdict |
 |-------------|---------|
-| (a) empty — no remote configured | `no remote — skipped`. Nothing to be behind; CONTINUE. |
-| (a) non-empty, (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
+| (a) empty — no remote configured at all | `no remote — skipped`. Nothing to be behind; CONTINUE. |
+| (a) lists an `upstream` remote (this clone is a FORK) | Compare against **`upstream`**, never `origin`: `git fetch upstream && git rev-list --count HEAD..upstream/main` → **0 = `up to date`; anything else = RED, `behind upstream by N — STOPPED`**. On a fork `@{upstream}` points at the FORK's own `origin`, so the rows below would read GREEN while the clone is arbitrarily behind the real upstream. |
+| (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
+| (c) produced NO line — `git fetch` failed, so `&&` short-circuited | **RED — STOP.** `fetch failed — UNVERIFIABLE, STOPPED`. Re-run the two commands separately to see the error. |
 | (c) branch line contains `behind` | **RED — STOP.** `behind by N commits — STOPPED`. |
 | (c) branch line shows a `...` tracking segment and no `behind` | `up to date`. CONTINUE. |
+| **anything else — any observation matching no row above** | **RED — STOP.** `unverifiable — STOPPED`. This CATCH-ALL is what makes the check fail CLOSED; without it an unmatched state is undefined rather than red (`/audit` 2026-09-02 K-1). |
 
 **NEVER read a bare `## main` (no `...upstream` segment) as "up to date".** With a remote present
 but no tracking branch, `git status -sb` prints the branch name alone — the command exits 0 having
@@ -67,8 +70,8 @@ the upstream first (`git pull`, `git fetch upstream && git merge upstream/main` 
 `git branch --set-upstream-to=origin/main`), then restart.
 
 **ALWAYS REPORT one of the four verdict strings above — `up to date` / `behind by N commits —
-STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`. NEVER emit
-nothing.** This is the symmetric twin of `existing_project_adaptation.md` Step 0.5, which runs the
+STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped` / `fetch failed — UNVERIFIABLE,
+STOPPED` / `behind upstream by N — STOPPED` / `unverifiable — STOPPED`. NEVER emit nothing.** This is the symmetric twin of `existing_project_adaptation.md` Step 0.5, which runs the
 same check there, and of its Step 1.0, which checks the PROJECT copy.
 
 ---
@@ -86,7 +89,7 @@ If `projects/$ARGUMENTS/assets/docs/prd.md` exists, read it completely. Extract:
 - External integrations
 - Business model
 
-If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. Use information from the user or CLAUDE.md to populate documents. Mark unknown sections as "to be defined".
+If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. **ALWAYS REWRITE the generated CLAUDE.md's `**PRD:**` line to the no-PRD variant** the template carries — never leave a pointer to a file no step creates (`/audit` 2026-09-02 L-30). Use information from the user or CLAUDE.md to populate documents. Mark unknown sections as "to be defined".
 
 ---
 

@@ -278,7 +278,10 @@ Declare in report:
 > Recommend: search `.claude/agents/` for an IaC security agent and invoke
 > before validator if found.
 
-**If none of the above apply:** omit Coverage Gap Declaration from the report (set field to `None`).
+**If none of the above apply:** keep the section and set the field to `None` — **NEVER omit the
+heading.** An absent section and an unwritten one are indistinguishable to the reader, and `:39`
+already declares the field as `[None | list of gaps]`. (`code_reviewer.md` resolves this the same
+way; the two are deliberately identical.)
 ```
 
 ## Creation eval

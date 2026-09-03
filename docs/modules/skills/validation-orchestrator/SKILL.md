@@ -39,7 +39,7 @@ indistinguishable from a forgetting.
 
 ### 2. Classify and route
 
-**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. For Architecture/Security tasks, ALWAYS initiate the model switch protocol: the escalation ladder is `.claude/rules/session-rules.md` §"Reasoning depth" step 3, `project-md-updater` §"MODEL SWITCH entries" writes the marker, and `sprint-proposer` §1b resumes from it.
+**Complexity:** Routine (UI, simple CRUD, text) | Logic-heavy (business rules, calculations, state machines) | Architecture/Security (new module, cross-module, security). Recommend reasoning depth accordingly. For Architecture/Security tasks, ALWAYS initiate the model switch protocol: the escalation ladder is `.claude/rules/session-rules.md` §"Reasoning depth mechanisms (complementary)" step 3, `project-md-updater` §"MODEL SWITCH entries" writes the marker, and `sprint-proposer` §1b resumes from it.
 
 **Threshold:** Small (single file) → implement directly. Medium (2-5 files) → propose plan, wait for approval. Large (new module, cross-module) → propose plan with risks, wait for approval.
 
@@ -50,7 +50,7 @@ tasks under a PLAN-FIRST contract (the plan is drafted INSIDE the implementer's 
 never in the orchestrator's), and Phase B for routine tasks uses ONE merged review+validation
 subagent instead of the two-judge chain. Logic-heavy and security routes are unchanged.
 
-### Ownership of "Before Implementing" in loop mode
+### 2a. Ownership of "Before Implementing" in loop mode
 
 **ALWAYS this split:** steps 1-3 above stay with
 the ORCHESTRATOR (criteria-enforcer BEFORE dispatch, classification, git checkpoint); ONLY the
@@ -62,7 +62,7 @@ is grading its own exam, and the criteria are also the validator's yardstick. Fu
 
 **ALWAYS COMMIT the current state before writing code**, so the task has a clean rollback
 boundary. In loop mode this step stays with the ORCHESTRATOR under the split stated once above at
-`### Ownership of "Before Implementing" in loop mode` — this step is covered by it and does not
+`### 2a. Ownership of "Before Implementing" in loop mode` — this step is covered by it and does not
 restate it (component-design §9: one home per mandate). Full loop-side mechanics:
 `autonomous-loop` §`3a. Before dispatch — the ORCHESTRATOR owns "Before Implementing"`.
 
@@ -82,6 +82,7 @@ proof"). Exit 0 with ZERO tests executed, or a summary you cannot parse, is a �
 suite that finishes implausibly fast is a skip until proven otherwise.
 
 **Commit:** Commit implementation before validation. For routine tasks using inline validation, commit can be deferred until after Phase B.
+**ALWAYS REPORT — `phase-A commit: [hash]` or `deferred — routine task, committing after Phase B`. NEVER emit nothing.** This is a DIFFERENT commit from the Step 3 git checkpoint, whose report line does not reach it (component-design §9 rule 3: a sanctioned skip must still be said).
 
 ---
 
@@ -109,14 +110,31 @@ Execute these steps in order. Do not skip steps — each one produces evidence f
 - If high-risk (auth/RLS/payment/AI): add **Red Team subagent**.
 - After validation passes (if Red Team ran): run **Blue Team subagent**.
 
-**Coverage gap handling:** After receiving the code-reviewer and security-reviewer
-reports, ALWAYS execute this sequence:
-1. READ the Coverage Gap Declaration section in each report (skip only if absent).
+**Coverage gap handling — THREE components declare gaps, and they are read in TWO passes.**
+The declaring components are `code-reviewer`, `security-reviewer` and **`validator`**
+(component-design §1). The first two report BEFORE the validator; the validator reports AFTER it,
+so a single pass structurally cannot reach the third.
+
+**Pass 1 — ALWAYS, after receiving the code-reviewer and security-reviewer reports:**
+1. READ the Coverage Gap Declaration section in each report. The section is ALWAYS present and
+   reads `None` when empty — an ABSENT section is a defect in that agent, not a skip condition.
 2. For each declared gap, SEARCH `.claude/agents/` descriptions for an agent whose
    description matches the gap's domain vocabulary.
 3. Match found → SPAWN it and include its report as additional evidence for the
    validator. No match → RECORD the unaddressed gap in the validation report's
    "Items for human verification" section.
+
+**Pass 2 — ALWAYS, after the VALIDATOR's report comes back, before processing its verdict:**
+4. READ the Coverage Gap Declaration section of the **validator's own report** and repeat steps
+   2-3 for every gap it declares. The validator is the only declarer of the `visual regression
+   gap` on the UI path, and without this pass that declaration is written into a report nobody
+   re-reads (`/audit` 2026-09-02 K-4).
+5. A specialist spawned in pass 2 returns AFTER the validator, so its report cannot be evidence
+   FOR the validator: attach it to the validation report as a post-hoc finding, and if it
+   contradicts a ✅ the validator gave, treat that as a ❌ and re-enter the fix loop.
+
+**ALWAYS REPORT — `coverage gaps: pass 1 [N declared, M spawned] | pass 2 [N declared, M spawned]`,
+or `none declared` for either pass. NEVER emit nothing.**
 This instruction is generic — it names no specific agents and adds zero cost when
 no coverage gaps are declared.
 

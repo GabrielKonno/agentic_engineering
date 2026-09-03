@@ -19,6 +19,8 @@ Before any non-trivial commit, or whenever `git status` might have surprises.
 ## Process
 
 ### Step 1 — Show staging state
+
+**ALWAYS SHOW the user exactly which files are staged and which are not, before anything else.**
 Run `git status` and show the user exactly which files are staged, unstaged, and untracked.
 
 ### Step 2 — Verify intent
@@ -35,7 +37,7 @@ Ask user to confirm the grouping before committing.
 Write a conventional commit message following the project's existing style:
 - Format: `type(scope): short description`
 - Types: feat, fix, chore, docs, refactor, style, test
-- Be specific: "Fix checkout total ignoring applied discounts" NOT "Fix a bug"
+- **ALWAYS BE SPECIFIC:** "Fix checkout total ignoring applied discounts", NEVER "Fix a bug"
 - Include WHY when non-obvious
 
 ### Step 5 — Commit
@@ -43,4 +45,7 @@ Run `git commit` with the drafted message, ending with:
   Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### Step 6 — Verify
+
+**ALWAYS VERIFY the commit landed and REPORT it — `commit: [hash] [subject]` or
+`NOT committed — [reason]`. NEVER emit nothing.**
 Run `git log --oneline -3` and show user the result to confirm the commit landed correctly.
