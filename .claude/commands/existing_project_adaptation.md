@@ -624,16 +624,6 @@ codebase makes visible and a retroactive PRD most needs.
 **ALWAYS REPORT — `cross-cutting: N concerns identified` or `none — no theme spans 2+ modules`.
 NEVER emit nothing.**
 
-**`## Cross-cutting Concerns` — ALWAYS populate it FIRST.** It is the FIRST section of the PRD
-Structure template (`prd_planning.md`), and omitting it produces a retroactive PRD that fails its
-own template. **ALWAYS INVOKE the `cross-cutting-analysis` skill over the Phase 1 codebase
-analysis** — this command installs that skill and, until now, never exercised it
-(`/audit` 2026-09-02 L-1). Themes that span modules and must stay consistent (auth, tenancy, i18n,
-money handling, audit trail) are exactly what an existing codebase makes visible and what a
-retroactive PRD most needs.
-**ALWAYS REPORT — `cross-cutting: N concerns identified` or `none — no theme spans 2+ modules`.
-NEVER emit nothing.**
-
 **Sections to populate from codebase analysis (what IS):**
 - 1.1 Problem — infer from the project's purpose
 - 1.2 Solution — describe what the product does today
@@ -685,40 +675,23 @@ cp -r ./examples/ projects/$ARGUMENTS/assets/examples/ 2>/dev/null || echo "Fram
 destinations bootstrap Step 1.1 uses, so an adapted project and a bootstrapped one end up with the
 same structure:
 
-| Concern constrains… | Destination | Written by |
-|---|---|---|
-| CODE | a `.claude/rules/` domain rules file (Step 2.7.1's signal table) | **Step 2.7.1 — RECEIVER** |
-| ARCHITECTURE | a row in `project.md`'s Architectural Decisions table | **Step 2.2 — RECEIVER** |
-| WORK still to do | a task in `pendencias.md` | **Step 2.3 — RECEIVER** |
-
-Those three steps run in Phase 2, BEFORE the PRD exists — so on the first pass they cannot receive
-anything. **ALWAYS RE-VISIT all three here, after Phase 3, and write the concerns in.** This is the
-one place in this command where a Phase-2 artifact is legitimately reopened, and it is reopened
-because the PRD that feeds it is created in Phase 3.
-
-**ALWAYS REPORT — `cross-cutting routed: R rules, A decisions, T tasks (of N identified)` or
-`cross-cutting: none identified`. A total below N is RED — name the dropped concern. NEVER emit
-nothing.**
-
-**Step 4.1b — Route the PRD's Cross-cutting Concerns (RECEIVER of Phase 3's list):**
-
-**ALWAYS ROUTE each concern Phase 3 identified to the artifact that owns it** — the same three
-destinations bootstrap Step 1.1 uses, so an adapted project and a bootstrapped one end up with the
-same structure:
-
 | Concern constrains… | Destination | Receiver step |
 |---|---|---|
-| CODE | a `.claude/rules/` domain rules file (Step 2.7.1's signal table) | Step 2.7.1 |
-| ARCHITECTURE | a row in `project.md`'s Architectural Decisions table | Step 2.2 |
-| WORK still to do | a task in `pendencias.md` | Step 2.3 |
+| CODE | a `.claude/rules/` domain rules file | **Step 4.6** — "Pre-create domain rules from retroactive PRD", the PRD-derived analogue of bootstrap Step 13. NOT Step 2.7.1, which is codebase-derived and runs before the PRD exists. |
+| ARCHITECTURE | a row in `project.md`'s Architectural Decisions table | **Step 2.2** |
+| WORK still to do | a task in `pendencias.md` | **Step 2.3** |
 
-Those three steps run in Phase 2, BEFORE the PRD exists, so on the first pass they cannot receive
-anything. **ALWAYS RE-VISIT all three HERE, after Phase 3, and write the concerns in.** This is the
-one place in this command where a Phase-2 artifact is legitimately reopened, and it is reopened
-because the PRD that feeds it is created in Phase 3.
+**THIS step writes the concerns in** — the "Receiver step" column names where each concern LANDS,
+not who performs the write. Steps 2.2 and 2.3 ran in Phase 2, before the PRD existed, so they
+cannot have received anything; Step 4.6 runs after this one and consumes the CODE rows.
+Reopening a Phase-2 artifact from Phase 4 is normal in this command, not exceptional — Phase 3's
+closing line reopens Step 2.1's CLAUDE.md and Step 4.6 reopens Step 2.7.1's rules files.
+
+**ALWAYS CLASSIFY each concern as CODE / ARCHITECTURE / WORK before routing** — Phase 3 emits the
+COUNT (`N concerns identified`) and does not split it, so the R/A/T breakdown is produced HERE.
 
 **ALWAYS REPORT — `cross-cutting routed: R rules, A decisions, T tasks (of N identified)` or
-`cross-cutting: none identified`. A total below N is RED — name the dropped concern. NEVER emit
+`cross-cutting: none identified`. R+A+T below N is RED — name the dropped concern. NEVER emit
 nothing.**
 
 **Step 4.2 — Create settings.json and initialize logs (if missing):**
@@ -966,13 +939,6 @@ done
 
 ```
 ## Adaptation Complete — Framework Upgrade Report
-
-### Framework + project freshness (Steps 0.5 and 1.0) — ALWAYS report, never omit:
-- Framework clone: `up to date` / `behind by N — STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`
-- Project copy: `up to date` / `behind by N — reconciled before analysis` / `no remote — skipped`
-
-### Cross-cutting concerns (Phase 3 → Step 4.1b) — ALWAYS report, never omit:
-- Identified: [N] · Routed: R rules · A decisions · T tasks — [or `none identified`]
 
 ### Framework + project freshness (Steps 0.5 and 1.0) — ALWAYS report, never omit:
 - Framework clone: `up to date` / `behind by N — STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`

@@ -15,7 +15,7 @@ own report (Phase 3), which is this session's output, not a change to the thing 
   `git diff`, `git grep`, `git rev-list`, `git check-ignore`. Several checks below MANDATE these
   (D16.3c scans all commits and messages; Agent 6's D17.1 classifies `git log`; Phase 3's own
   self-check runs `git status`). They read history; they change nothing.
-- **`git add` + `git commit` of THAT ONE FILE** (Phase 3 item 5). A report that lives only in the
+- **`git add` + `git commit` of THAT ONE FILE** (Phase 3's COMMIT item, the last one). A report that lives only in the
   working tree does not survive a `git clean`, a `git checkout`, or a session boundary — which is
   exactly what happened to every report written before this line existed. **This is the ONLY
   git operation that WRITES.** NEVER `push`, NEVER `commit --amend`, NEVER a commit touching any
@@ -122,8 +122,19 @@ FILES TO READ:
 2. CLAUDE.md (the "Repository Structure" section with ASCII diagram)
 3. List contents of .claude/skills/ (folders only)
 4. List contents of docs/modules/skills/ (folders only, exclude README.md)
+5. ALL tracked files (D16.3) — `git ls-files`
+6. `.claude/docs/` (D16.3) and `docs/modules/**` + `examples/**` (D16.4, double scrutiny)
+7. Each project's own `CLAUDE.md` / `.claude/phases/project.md` / `assets/docs/prd.md` (D16.2),
+   and each project's CODE and SCHEMA files — needed by the third blocklist source `CLAUDE.md`
+   declares. **That source is NOT yet a numbered check in D16 below** (`/audit` 2026-09-02 M-36);
+   the files are listed here so installing it does not require touching this list again.
+8. The agent's persistent memory directory, every file incl. `MEMORY.md` (D16.3b) — path resolved
+   from the session context
+9. Git history: `git rev-list --all` contents AND `git log --all` messages (D16.3c)
+10. The PREVIOUS audit report in `assets/docs/` — required to emit the `accepted-risk` OBSERVATION
+    Phase 3 mandates instead of re-reporting a closed item as a hit
 
-**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+**Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
 this file (`/audit` 2026-09-02 K-15, L-3).
 
@@ -243,8 +254,11 @@ FILES TO READ:
 5. List folders in docs/modules/skills/
 6. docs/modules/templates/claude_md.md
 7. .claude/commands/prd_planning.md (the PRD Structure template section near the end)
+8. docs/agentic_engineering_framework.md — the "N-step pipeline" claims and the pipeline ASCII
+   diagram (D11.7 compares both against the command file)
+9. CLAUDE.md — cited by the step-numbering and output checks
 
-**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+**Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
 this file (`/audit` 2026-09-02 K-15, L-3).
 
@@ -343,7 +357,7 @@ FILES TO READ:
 7. .claude/commands/bootstrap.md — the specialist install table (D6.7)
 8. .claude/commands/existing_project_adaptation.md — the twin install table (D6.7)
 
-**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+**Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
 this file (`/audit` 2026-09-02 K-15, L-3).
 
@@ -449,15 +463,16 @@ FILES TO READ:
 7. docs/modules/skills/cross-cutting-analysis/SKILL.md
 8. .claude/commands/prd_planning.md and .claude/commands/prd_change.md
 9. .claude/commands/maintenance.md and .claude/commands/audit.md
-10. List folders in docs/modules/skills/
+10. List folders in docs/modules/skills/, and READ `.claude/skills/cross-cutting-analysis/SKILL.md`
+    — the second half of D10.4's byte-identity comparison
 11. List files in docs/modules/agents/, and READ docs/modules/agents/code_reviewer.md (D8.8)
 12. .claude/rules/component-design.md AND docs/modules/rules/component_design.md (D10.5 §5/§6/§8/§9)
 13. docs/modules/rules/session_rules.md (D10.5 → "Execution proof")
 14. CLAUDE.md (D10.5 trigger letters (a)-(d); D10.6 parity)
 
-**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
-while the list omits it is how the working check ends up living in the invoking prompt instead of
-in this file (`/audit` 2026-09-02 K-15).
+**Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
+while the list omits it is how a working check ends up living in the invoking prompt instead of in
+this file (`/audit` 2026-09-02 K-15, L-3).
 
 CHECKS:
 
@@ -572,9 +587,11 @@ FILES TO READ:
    docs/modules/skills/validation-orchestrator/SKILL.md
 10. 2 agent files: docs/modules/agents/code_reviewer.md,
     docs/modules/agents/validator.md
-11. Sample from examples/: 3 agents, 2 skills, 2 rules (pick representative files)
+11. From `examples/`: **LIST ALL** files in `agents/`, `skills/`, `rules/` and COUNT them (D15.7),
+    then READ a representative sample of 3 agents, 2 skills and 2 rules for the convention checks
+    (D12.2). D12.6's truth-tests measure across the FULL set, never the sample.
 
-**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+**Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
 this file (`/audit` 2026-09-02 K-15, L-3).
 
@@ -695,9 +712,11 @@ INPUTS:
 4. README.md (workflow sections)
 5. docs/modules/ templates that reference MOTHER-REPO behaviors — grep for
    "mother framework", "framework repo", "/maintenance", "upstream", "lineage"
-6. assets/docs/ lineage records (what past absorption sessions actually did)
+6. assets/docs/ — the lineage records (what past absorption sessions did) AND every
+   `assets/docs/audit-*.md` report, including `assets/docs/audit-YYYY-MM-DD.md` for this run:
+   D17.1 classifies the flows they record and D17.5 re-measures the persisted receipts inside them
 
-**Every file a CHECK below names MUST appear in this list.** Reading it "because the check says so"
+**Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
 this file (`/audit` 2026-09-02 K-15, L-3).
 

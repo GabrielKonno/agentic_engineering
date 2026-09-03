@@ -90,20 +90,40 @@ still said "three". This checklist is itself an inventory surface; see item 1.)
 reporting it.** Each numbered item below ends in an `ALWAYS REPORT` mandate, and a line that lives
 only in a transcript cannot be re-read by the `/audit` that verifies this batch, by the next
 maintenance session, or by you. Write them ALL, verbatim, into:
-- **the audit report file**, under a `### Post-change checklist receipts (sHASH)` heading, when
-  this session applied an audit batch (Audit intake step 4 already writes to that file); OR
+- **the audit report file**, under a `## Post-change checklist receipts (sHASH)` heading, when
+  this session applied an audit batch (Audit intake's write-back step already writes to that
+  file); OR
 - **the commit message body**, when there is no report file.
 
-Mechanical self-check (expected result stated): after committing, grep **THIS run's receipts
-section only** — the text under `## Post-change checklist receipts (sHASH)` for this session's
-hash, never the whole file — for each item's report key: `inventory sweep:`, `instruction style:`,
-`references:`, `class sweep:`, `back-sweep:`, `liveness:`, `negation proof:`, `version:`,
-`classification:`, `new component:` — **expected: every key present exactly once.** A missing key
-is RED; a duplicate WITHIN the section is RED.
-**SCOPE IS LOAD-BEARING:** an audit report accumulates one receipts section per run, so a
-whole-file grep counts prior runs' keys and goes red on a healthy state — the same miscalibration
-that shipped as K-8 and L-7. This check went red on itself for exactly that reason the first time
-it ran, which is how the scoping clause got here.
+**The receipts section heading is `## Post-change checklist receipts (sHASH)` — an H2, exactly
+that string.** The self-check greps for it; writing it at any other level makes the check vacuous.
+
+Mechanical self-check (expected result stated): after committing, over **THIS run's receipts
+section only** — the text between that H2 and the next H1/H2, never the whole file — run
+
+```bash
+for k in "inventory sweep" "instruction style" "references" "fences" "isolation"          "class sweep" "back-sweep" "liveness" "negation proof" "version"          "classification" "new component"; do
+  printf '%s -> %s
+' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
+done
+```
+
+**Expected: every key exactly 1.** A missing key is RED; a duplicate is RED.
+
+**TWO calibration rules, both learned by this check failing on itself:**
+1. **ANCHOR ON THE LINE START (`^\*\*key:`), never the bare token.** The receipts legitimately
+   QUOTE these key names — inside the per-fix table, inside the negation-proof prose — so a bare
+   `grep -c "new component:"` counts the quotations and goes RED on a healthy discharge. That is
+   exactly what happened on this check's first execution (`/audit` 2026-09-02 M-31).
+2. **SCOPE TO THIS RUN'S SECTION.** An audit report accumulates one receipts section per run, so a
+   whole-file grep counts prior runs' keys — the same miscalibration that shipped as K-8 and L-7,
+   and the reason this clause exists.
+
+Evidence this is not hypothetical: for `afccff3`, eight of the nine receipts existed nowhere on
+disk, which is why that batch's `negation proof:` claim is unverifiable to this day
+(`/audit` 2026-09-02 L-16). A control nobody can re-read afterwards is indistinguishable from one
+that never ran — the same proposition `session_rules.md` → "Execution proof" makes about test
+suites, which this checklist had never applied to itself.
 Evidence this is not hypothetical: for `afccff3`, eight of the nine receipts existed nowhere on
 disk, which is why that batch's `negation proof:` claim is unverifiable to this day
 (`/audit` 2026-09-02 L-16). A control nobody can re-read afterwards is indistinguishable from one
@@ -314,9 +334,12 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    skill, agent template, rule, command, or script**, and **ALWAYS EMIT its report line here** —
    the format is defined ONCE, in that section's obligation 5; this item does not restate it
    (component-design §9: one home per mandate).
-   Mechanical self-check (expected result stated): `grep -c "new component:" ` over the persisted
-   receipts → **expected: exactly 1**. Zero means the line was never emitted; two means the format
-   was restated somewhere and the two homes can now diverge.
+   Mechanical self-check (expected result stated): over **THIS run's receipts section only**, run
+   `grep -cE "^\*\*new component:"` → **expected: exactly 1**. Zero means the line was never
+   emitted. **ANCHOR ON THE LINE START and SCOPE TO THE SECTION** — an unanchored
+   `grep -c "new component:"` counts every quotation of the key inside the per-fix table and
+   returns 3, which is how this check went RED on a healthy discharge on its first run
+   (`/audit` 2026-09-02 M-27).
 
 ## Version bumps — the framework version is a CLAIM, and it decays silently
 
@@ -394,7 +417,7 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    or `rejected — [reason]` per ID. The applying session owns this, not the next audit: a status
    that waits for the next run is a status nobody wrote.
    **ALWAYS WRITE THE POST-CHANGE CHECKLIST RECEIPTS into that same file**, under
-   `### Post-change checklist receipts (sHASH)` — all of them, verbatim, including the per-fix
+   `## Post-change checklist receipts (sHASH)` — all of them, verbatim, including the per-fix
    receipt table. This step is the RECEIVER of the checklist's persistence mandate (see the
    checklist header); without it those receipts exist only in a transcript and the verification
    audit cannot check any of them.
