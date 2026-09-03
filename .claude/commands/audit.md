@@ -172,8 +172,15 @@ CHECKS:
          domains), repo URLs, infra refs (e.g. Supabase project ids).
   D16.2c. **THIRD SOURCE — source-project CODE identifiers. ALWAYS derive it; never stop at two.**
          Harvest every camelCase / snake_case identifier appearing in CODE EXAMPLES inside
-         `docs/modules/**`, `examples/**` and `.claude/**`, then cross-grep each against the
-         projects' own `*.ts/*.tsx/*.js/*.sql/*.py` sources. A hit means a source-project
+         **EVERY framework-layer surface — `docs/**` (not only `docs/modules/`), `examples/**`,
+         `.claude/**`, `assets/docs/**` and the root `*.md` files** — then cross-grep each against
+         the projects' own `*.ts/*.tsx/*.js/*.sql/*.py` sources. **`assets/docs/` is NOT exempt**
+         (D16.5 says so explicitly) and it is where the first full run's worst hits actually lived:
+         scoping this harvest to templates alone missed a lineage doc carrying a source-project
+         function name, two table/column names, a source file name and three source-project
+         session numbers (`/audit` 2026-09-03 N-13, N-16, N-17).
+         **ALSO harvest source-project SESSION NUMBERS** (`S12`, `Sessão 90`) — they identify a
+         single project's history as surely as a function name does. A hit means a source-project
          function, table, column or route name is shipping inside a framework template.
          **Standard industry names are LEGITIMATE** (`order_items`, `organization_members`,
          `organizationId` — canonical schema vocabulary that identifies nobody); a HAND-ROLLED
@@ -245,7 +252,7 @@ REPORT FORMAT:
 
 ### [D16] Project-Information Isolation
 - Status: PASS / PARTIAL / FAIL
-- Blocklist derived: [N project names + M harvested identifiers]
+- Blocklist derived — **ALL THREE sources, each counted separately**: [N project folder names] + [M identifiers harvested from project DOCS] + [K source-project CODE identifiers and session numbers (D16.2c)]. **A two-number report means the third source was not run** (`/audit` 2026-09-03 N-12).
 - Surfaces scanned: tracked files | .claude/docs/ | agent memory ([path] or SKIPPED — reason) | git history ([N] commits: contents + messages)
 - Hits: [surface — file:line or commit hash — identifier/value (class), or "none"]
 - Unpushed-vs-pushed: [for history hits — which are still locally fixable]

@@ -1286,10 +1286,10 @@ Source: design system defines `transform: scale(1.1) translateY(-10px)`
   drop-shadow with rgba(249,115,22,0.2) visible. FAILURE: any deviation
   from spec values (scale ≠ 1.1, no translateY, wrong shadow color).
 
-Source: financial-rules.md defines earmark = sum of is_paid=false direct_cost
-❌ WEAK: VERIFY: after paying → earmark updates
-✅ STRONG: QUERY: with 1 unpaid direct_cost of R$320 → earmark = 320.
-  After paying → earmark = 0. SUCCESS: both values exact. FAILURE: any difference.
+Source: [domain]-rules.md defines the reserved-amount rule = sum of unpaid direct costs
+❌ WEAK: VERIFY: after paying → the reserved amount updates
+✅ STRONG: QUERY: with 1 unpaid direct cost of 320 → reserved amount = 320.
+  After paying → reserved amount = 0. SUCCESS: both values exact. FAILURE: any difference.
 
 Source: PRD defines "paginated list, max 20 items per page"
 ❌ WEAK: VERIFY: API returns paginated list
@@ -1310,7 +1310,7 @@ After writing or upgrading a criterion, run this checklist before saving:
 
 1. **Sabotage test:** "If I were to implement this feature incorrectly in a way that this criterion still passes, how would I do it?" If the answer is easy (e.g., hardcode values, return mock data, skip a step), the criterion is weak — add a complementary check that closes the loophole.
 
-2. **Transformation test:** "Does this criterion verify a STATE or a TRANSFORMATION?" If it only checks a snapshot (value = X at one point in time), ask: should it verify before AND after? A criterion that checks `earmark = 500` without checking that it changes to `0` after an action is a snapshot, not a transformation test.
+2. **Transformation test:** "Does this criterion verify a STATE or a TRANSFORMATION?" If it only checks a snapshot (value = X at one point in time), ask: should it verify before AND after? A criterion that checks `reserved amount = 500` without checking that it changes to `0` after an action is a snapshot, not a transformation test.
 
 3. **Empty/zero/boundary test:** "What happens if there are 0 items? 1 item? The maximum? A negative value?" If the criterion assumes data exists without stating it, add an explicit edge case criterion or sub-check.
 

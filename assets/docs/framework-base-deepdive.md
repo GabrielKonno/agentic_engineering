@@ -2,7 +2,7 @@
 
 **Companheiro de** `framework-base-upgrade.md`. Enquanto aquele ABSTRAI (os eixos, os 6 loops, as 2 dimensões), este DESENHA as duas peças que o §11 do upgrade marcou como faltando/aspiracionais, em nível de implementação: o **harness de eval real** (§A1), a skill **`framework-audit` agendada** (§A2) e as **meta-métricas** que dão sensores ao loop (§B). Foco do dono (2026-06-23): fechar as 2 lacunas + medir o framework.
 
-> **Nota honesta sobre cross-projeto (descartado pelo dono, com razão):** o aprendizado cross-projeto automático (lições do projeto A semearem o gerador → projeto B) **não é viável** porque os repos dos projetos não se comunicam com o repo do framework-base. A versão REALISTA é um **ritual manual de colheita** (`graduation harvest`): periodicamente — ou ao concluir um projeto — um humano (com Claude) revê os rules/KBP/logs do projeto, identifica o que é GENERALIZÁVEL (não-de-domínio), e copia manualmente para o gerador. **Esta própria sessão (S146/S147) é o template literal desse ritual** — foi exatamente "colher lições do projeto-fonte para o framework-base". Não automatizável sem um canal entre repos; mas o ritual é barato e repetível. Registrado, não desenhado em profundidade (decisão do dono).
+> **Nota honesta sobre cross-projeto (descartado pelo dono, com razão):** o aprendizado cross-projeto automático (lições do projeto A semearem o gerador → projeto B) **não é viável** porque os repos dos projetos não se comunicam com o repo do framework-base. A versão REALISTA é um **ritual manual de colheita** (`graduation harvest`): periodicamente — ou ao concluir um projeto — um humano (com Claude) revê os rules/KBP/logs do projeto, identifica o que é GENERALIZÁVEL (não-de-domínio), e copia manualmente para o gerador. **Esta própria sessão (fase tardia/fase tardia) é o template literal desse ritual** — foi exatamente "colher lições do projeto-fonte para o framework-base". Não automatizável sem um canal entre repos; mas o ritual é barato e repetível. Registrado, não desenhado em profundidade (decisão do dono).
 
 ---
 
@@ -35,11 +35,11 @@
   fixtures/
     code-reviewer/
       F001_planted-toISOString-bug.md      # input (diff) + rubrica (must flag timezone)
-      F002_escape-s116-card-day1.md         # colhido do Post-Mortem S116
+      F002_escape-s116-card-day1.md         # colhido do Post-Mortem fase tardia
     criteria-enforcer/
       F010_weak-criterion-no-failure-signal.md
     red-team/
-      F020_guard-wrong-entity-joint-close.md  # colhido do PARK-CLOCK-01 S111
+      F020_guard-wrong-entity-joint-close.md  # colhido do PARK-CLOCK-01 fase tardia
   framework-eval/SKILL.md                   # o runner
 ```
 Cada fixture = `input` (o diff/task/RPC) + `rubric` (o que o agente DEVE produzir) + `provenance` (creation | escape sN).
@@ -64,7 +64,7 @@ Cada fixture = `input` (o diff/task/RPC) + `rubric` (o que o agente DEVE produzi
 
 ### A2. A skill `framework-audit` AGENDADA (o meta-loop que gerou tudo isto)
 
-**O problema honesto (do upgrade §11.2):** a `codebase-audit` tem skill + cadência. O `framework-audit` — o GERADOR das 6 melhorias da S146 — só rodou porque o dono perguntou. Não é agendado. Logo, todo projeto depende de um humano lembrar de fazer a pergunta-meta.
+**O problema honesto (do upgrade §11.2):** a `codebase-audit` tem skill + cadência. O `framework-audit` — o GERADOR das 6 melhorias da fase tardia — só rodou porque o dono perguntou. Não é agendado. Logo, todo projeto depende de um humano lembrar de fazer a pergunta-meta.
 
 **Spec da skill (espelha `codebase-audit`, um nível acima):**
 
@@ -80,17 +80,17 @@ description: >
   recorrentes e mecanismos aspiracionais. Produz um batch de melhorias de framework
   (classe BEHAVIOR) para o dono aprovar. É o gerador recursivo das outras melhorias.
 created: <gerado pelo bootstrap>
-derived_from: framework-base-upgrade.md §3.7 (Pattern 7) + a sessão S146 que o provou manualmente
+derived_from: framework-base-upgrade.md §3.7 (Pattern 7) + a sessão fase tardia que o provou manualmente
 ---
 ```
 
 **Cadência (mais ESPARSA que a codebase-audit — pontos cegos de processo acretam mais devagar):** o `sprint-proposer` Passo 0 ganha um SEGUNDO check: propor `framework-audit` em **fronteira de fase** OU a cada `FRAMEWORK_AUDIT_CADENCE` (default ~30–40 sessões) desde a última. O dono aceita/adia.
 
-**As perguntas que ele faz (este É o template literal da S146 — formalizado):**
-1. **Cobertura de DIMENSÃO:** toda dimensão tem dono? (review/aprendizado, continuidade/memória, ops, segurança, eval). Qual está órfã? *(S146 achou: ops órfã.)*
-2. **Cobertura de EIXO:** o eixo macro existe? a ponte temporal (back-sweep)? *(S146 achou: ambos faltando.)*
+**As perguntas que ele faz (este É o template literal da fase tardia — formalizado):**
+1. **Cobertura de DIMENSÃO:** toda dimensão tem dono? (review/aprendizado, continuidade/memória, ops, segurança, eval). Qual está órfã? *(fase tardia achou: ops órfã.)*
+2. **Cobertura de EIXO:** o eixo macro existe? a ponte temporal (back-sweep)? *(fase tardia achou: ambos faltando.)*
 3. **Scan de emergência-tardia:** lê as entradas recentes do **Post-Mortem table** + o ledger de promoção de KBP — há uma CLASSE de escape recorrendo que nenhum mecanismo pega? *(o sinal de falha-recorrente.)*
-4. **Auditoria aspiracional-vs-real:** há campos/mecanismos alegados mas não rodando? *(estilo-S146: `last_eval: none`; o framework-audit antes da implementação deste doc teria se auto-flagado.)*
+4. **Auditoria aspiracional-vs-real:** há campos/mecanismos alegados mas não rodando? *(estilo-fase tardia: `last_eval: none`; o framework-audit antes da implementação deste doc teria se auto-flagado.)*
 5. **Revisão de meta-métricas (consome a Parte B):** a taxa de escape está subindo? algum reviewer com falso-positivo alto? algum KBP nunca disparando (morto)?
 6. **Auto-aplicação do back-sweep:** uma regra de processo promovida recentemente condena artefatos ANTIGOS do framework?
 
@@ -100,7 +100,7 @@ derived_from: framework-base-upgrade.md §3.7 (Pattern 7) + a sessão S146 que o
 
 **Segurança:** é o único loop que propõe mudanças de BEHAVIOR em lote → o portão humano é obrigatório (upgrade §10.7). Read-only; dry-run-friendly.
 
-**O payoff de bootstrapping:** esta skill, rodando desde a sessão 1, teria achado os 6 buracos da S146 por volta da **sessão 30, não da 145** — e os "MUITO TARDE" da tabela §8.3 (criteria-enforcer AUTHORING, back-sweep, codebase-audit) teriam nascido cedo. **É a peça que converte "o framework melhora quando o dono pergunta" em "o framework pergunta a si mesmo na cadência".**
+**O payoff de bootstrapping:** esta skill, rodando desde a sessão 1, teria achado os 6 buracos da fase tardia por volta da **sessão 30, não da 145** — e os "MUITO TARDE" da tabela §8.3 (criteria-enforcer AUTHORING, back-sweep, codebase-audit) teriam nascido cedo. **É a peça que converte "o framework melhora quando o dono pergunta" em "o framework pergunta a si mesmo na cadência".**
 
 ---
 
