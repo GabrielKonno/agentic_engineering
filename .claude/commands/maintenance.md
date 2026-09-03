@@ -213,8 +213,14 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **Expected: every template non-zero.** A `0` is RED — either the fence broke or the command
    does not match it, and BOTH are failures, and the D16 isolation grep runs over every touched file (no project names,
    no source-project session numbers, no single-project vocabulary).
-   **ALWAYS REPORT all three results — `references: N cited sections resolved | fences: N of M
-   templates extract non-empty | isolation: N files scanned, 0 hits`. NEVER emit nothing, and
+   **ALWAYS REPORT all three results — `references: N of M cited sections resolved | fences: N of M
+   templates extract non-empty | isolation: N files scanned, 0 hits`.
+   **ALWAYS STATE THE UNIT for `references:` and ALWAYS give it a DENOMINATOR** — the unit is
+   *a distinct section or file path cited by text this session WROTE*, and M is every such citation
+   in the diff, counted by a command. Without a denominator the number drifts free of the batch: a
+   receipt reported `references: 4` for a batch whose diff carried ≥35 distinct citation targets,
+   and the figure went DOWN as the batch grew (`/audit` 2026-09-03 N-3). The M-54 unit-stating fix
+   reached items 1 and 2 and skipped this one. NEVER emit nothing, and
    NEVER collapse the three into one verdict** — a fence check that silently returned 0 lines is
    the failure this item exists to catch, and a merged "verified" hides it.
 
@@ -350,20 +356,33 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    ```bash
    sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > /tmp/guard.mjs && node /tmp/guard.mjs
    ```
-   **ALWAYS ALSO validate the RAW agent templates** — the ones bootstrap copies VERBATIM with
-   `cp` (no fence extraction), which the command above never sees because they live outside
-   `.claude/`:
+   **ALWAYS ALSO validate EVERY RAW template bootstrap copies VERBATIM with `cp`** — the ones
+   the command above never sees because they live outside `.claude/`. **GLOB them; NEVER list
+   them.** A hard-coded list named 4 agent files and silently excluded all 15 `docs/modules/skills/*/SKILL.md`
+   templates, which `bootstrap.md:350` copies with `cp -r` and whose frontmatter must therefore be
+   valid AT REST in this repo — the largest verbatim-copied surface in the framework, machine-
+   validated by nothing (`/audit` 2026-09-03 N-51). A list also goes stale the moment a component
+   is added, which is the same defect as an enumerated set anywhere else.
    ```bash
-   python -c "import io,yaml,glob,sys
-   bad=0
-   for p in ['docs/modules/agents/criteria_enforcer.md','docs/modules/agents/prd_sync_checker.md','docs/modules/agents/diff_pattern_extractor.md','docs/modules/agents/skill_reviewer.md']:
+   python -c "import io,yaml,glob,os,sys
+   bad=0; n=0
+   for p in sorted(glob.glob('docs/modules/skills/*/SKILL.md'))+sorted(glob.glob('docs/modules/agents/*.md')):
        s=io.open(p,encoding='utf-8').read().replace(chr(13)+chr(10),chr(10))
        if not s.startswith('---'): continue
-       try: yaml.safe_load(s[4:s.index(chr(10)+'---',4)+1])
+       n+=1
+       try:
+           d=yaml.safe_load(s[4:s.index(chr(10)+'---',4)+1])
+           exp=os.path.basename(os.path.dirname(p)) if p.endswith('SKILL.md') else os.path.basename(p)[:-3].replace('_','-')
+           if d.get('name')!=exp: bad+=1; print('FAIL',p,'name=',d.get('name'),'expected',exp)
        except Exception as e: bad+=1; print('FAIL',p,type(e).__name__)
-   print('raw agent templates:', 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)"
+   print('raw templates:', str(n)+' validated,', 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)"
    ```
-   Expected result: **`raw agent templates: OK`**. A FAIL here ships a component that is PRESENT
+   Expected result: **`raw templates: N validated, OK`** — and **ALWAYS REPORT N**, because a
+   silent drop in the denominator is how a whole directory left the check's scope unnoticed.
+   It also asserts `name:` matches the file/dir, which the previous form never did outside
+   `.claude/`. **`os.path` — never `p.split('/')`**: on Windows the glob returns backslash
+   separators and a `/`-split makes every file report a bogus name mismatch.
+   A FAIL here ships a component that is PRESENT
    in every bootstrapped project and ABSENT from its registry. (Fenced templates — the ones
    extracted with `sed` — are correctly skipped: their source does not start with `---`.)
    Evidence this is not hypothetical: run on 2026-09-01, this check found `criteria_enforcer.md`

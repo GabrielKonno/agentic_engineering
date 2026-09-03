@@ -150,7 +150,8 @@ Each figure counts applied findings whose Part 1 verdict was anything other than
 CONFIRMED-FIXED, **counted over the FINDINGS and RECOMPUTED from the ledger** — never over the
 row total (which also carries `VERSION` and carried-forward IDs), and **never copied from a prior
 report's summary prose**: a summary is a claim, not data, and copying one is how `2 of 15` reached
-three surfaces when the ledger says four (`/audit` 2026-09-02 L-4, M-46). The `/maintenance` post-change checklist is the PRIMARY control and runs every
+three surfaces when the ledger says four (`/audit` 2026-09-02 L-4, M-46).
+The `/maintenance` post-change checklist is the PRIMARY control and runs every
 session; `/audit` is the periodic NET behind it, and this trigger list is what makes "periodic" a
 fact rather than an aspiration.
 

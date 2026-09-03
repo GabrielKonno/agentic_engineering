@@ -127,8 +127,10 @@ FILES TO READ:
 7. `.claude/docs/` (D16.3) and `docs/modules/**` + `examples/**` (D16.4, double scrutiny)
 8. Each project's own `CLAUDE.md` / `.claude/phases/project.md` / `assets/docs/prd.md` (D16.2),
    and each project's CODE and SCHEMA files — needed by the third blocklist source `CLAUDE.md`
-   declares. **That source is NOT yet a numbered check in D16 below** (`/audit` 2026-09-02 M-36);
-   the files are listed here so installing it does not require touching this list again.
+   declares, **which IS now a numbered check: `D16.2c` below.** (This line read "NOT yet a numbered
+   check" for one full batch after `D16.2c` was installed forty lines below it — a forward
+   reference whose receiver arrived and was never told. When you install the receiver of a stated
+   gap, ALWAYS grep the file for the sentence that states the gap — `/audit` 2026-09-03 N-11.)
 9. The agent's persistent memory directory, every file incl. `MEMORY.md` (D16.3b) — path resolved
    from the session context
 10. Git history: `git rev-list --all` contents AND `git log --all` messages (D16.3c)
@@ -170,6 +172,13 @@ CHECKS:
   D16.2. From each project's own CLAUDE.md / project.md (read-only), harvest additional
          identifiers: client/person names, deployment domains (*.vercel.app, custom
          domains), repo URLs, infra refs (e.g. Supabase project ids).
+  D16.2b. ALSO scan for VALUE-shaped leaks (data, not just identifiers), by format:
+         secret shapes (JWT `eyJ...`, key prefixes sk-/ghp_/AKIA/xox, `user:pass@`
+         connection strings, long Bearer tokens), PII shapes (BR phone `+55...`,
+         CPF `NNN.NNN.NNN-NN`, CNPJ, real-looking e-mails), and `.env`/dump files.
+         Mentions of the CONCEPTS (security rules teaching about secrets) and
+         detection regexes inside scanner examples are legitimate — only actual
+         VALUES and synthetic-fixture violations (non-obviously-fake PII) fail.
   D16.2c. **THIRD SOURCE — source-project CODE identifiers. ALWAYS derive it; never stop at two.**
          Harvest every camelCase / snake_case identifier appearing in CODE EXAMPLES inside
          **EVERY framework-layer surface — `docs/**` (not only `docs/modules/`), `examples/**`,
@@ -187,13 +196,6 @@ CHECKS:
          name is not. `CLAUDE.md` declares this source; it was documented there and absent here
          for one full batch, which is why a source-project function name in a shipped template
          survived four consecutive runs (`/audit` 2026-09-02 L-19, M-36).
-  D16.2b. ALSO scan for VALUE-shaped leaks (data, not just identifiers), by format:
-         secret shapes (JWT `eyJ...`, key prefixes sk-/ghp_/AKIA/xox, `user:pass@`
-         connection strings, long Bearer tokens), PII shapes (BR phone `+55...`,
-         CPF `NNN.NNN.NNN-NN`, CNPJ, real-looking e-mails), and `.env`/dump files.
-         Mentions of the CONCEPTS (security rules teaching about secrets) and
-         detection regexes inside scanner examples are legitimate — only actual
-         VALUES and synthetic-fixture violations (non-obviously-fake PII) fail.
   D16.3. **`.claude/settings.local.json` is EXEMPT** — gitignored, machine-local, and auto-written
          by the permission prompt with absolute paths that necessarily contain project folder
          names. NEVER report it as a hit (`CLAUDE.md` declares the exemption; `/audit` K-37, M-36).
@@ -392,6 +394,13 @@ CHECKS:
   D6.2. Read security_reviewer.md — same extraction (e.g., "static analysis gap",
         "secrets coverage gap", "federation protocol gap", "compliance gap",
         "infrastructure security gap")
+  D6.2b. **READ `validator.md` AND EXTRACT ITS GAP PHRASES TOO — it is the THIRD DECLARING
+        COMPONENT** (`component-design.md` §1 names three: `code-reviewer`, `security-reviewer`,
+        `validator`, which declares the visual-regression gap from inside its own Validation
+        Report). Without this step the extraction set is two of three and D6.3 searches for phrases
+        it never collected; D6.7 patched over the hole by phrase while D6.3 still could not see it
+        (`/audit` 2026-09-03 N-33). **ALWAYS report the declarer count — `declarers extracted: 3
+        of 3`. A `2 of 3` is RED.**
   D6.3. For each gap phrase: search ALL agent descriptions in docs/modules/agents/ AND
         examples/agents/ for matching vocabulary in the description: field
   D6.4. The match must be exact or near-exact (per component-design.md §3 vocabulary alignment)
@@ -428,12 +437,28 @@ CHECKS:
   D7.3. For each agent in examples/agents/ with invocation: subagent: same check
   D7.4. Flag the anti-pattern: descriptions that are ONLY triggers ("USE PROACTIVELY when X.
         NOT needed for Y. Without this Z.") with NO core function statement
-  D7.5. Note: process agents (prd-sync-checker, criteria-enforcer, diff-pattern-extractor)
-        use "MUST run" style — acceptable per their protocol role. **Validator, arbitrator,
-        red-team and blue-team are spawned by PROTOCOL, not by gap declaration**, so a PARTIAL
-        verdict on them is sanctioned and not a finding (red-team and blue-team were missing from
-        this list, which made both read as unexplained PARTIALs — `/audit` 2026-09-02 M-22). The Pushy Description pattern is most
-        critical for specialist agents in examples/agents/.
+  D7.5. **DO NOT ENUMERATE the protocol-spawned set — DERIVE it.** The rule is structural, and
+        stating it as a list has now failed three times, going 5 → 7 → 9 while the true figure moved
+        with the directory (`/audit` 2026-09-02 M-22, then 2026-09-03 N-31, whose own count of
+        nine was itself short by one).
+        **The invariant: EVERY agent in `docs/modules/agents/` is spawned by PROTOCOL, and the
+        gap-activated specialists live in `examples/agents/`.** The declaring components
+        (`code-reviewer`, `security-reviewer`, `validator`) are protocol-spawned too — they DECLARE
+        gaps, so they are never themselves activated by one. Process agents additionally use
+        "MUST run" style, acceptable per that role.
+        **ALWAYS PROVE the invariant instead of trusting it** — mechanical check, expected result
+        stated:
+        ```bash
+        for a in docs/modules/agents/*.md; do
+          sed -n '/^description:/,/^[a-z_]*:/p' "$a" | grep -c "declares a"
+        done | sort -u
+        ```
+        **Expected: `0` and nothing else.** A non-zero means a gap-activated agent has appeared in
+        `docs/modules/agents/` and the invariant no longer holds — THAT is the finding, not the
+        agent's PARTIAL verdict.
+        **A PARTIAL verdict on any agent in `docs/modules/agents/` is SANCTIONED and NEVER a
+        finding.** The Pushy Description pattern is most critical for the specialist agents in
+        `examples/agents/`, which ARE gap-activated and where a PARTIAL IS a finding.
 
 REPORT FORMAT:
 
@@ -900,6 +925,14 @@ no others** (`/audit` 2026-09-03 N-45, N-47):
   directly ABOVE the text it corrects, numbered in the order the errata were added, naming the RUN
   that authored it and the finding that required it. **NEVER label an erratum with the run that
   has not happened yet** — two were mislabelled that way in one batch.
+  **ALWAYS GREP FOR THE NUMBER BEFORE WRITING IT** — `grep -c '^> [*][*]Errata N '`,
+  **expected 0** — and take the next free integer ABOVE THE HIGHEST PRESENT, never the one
+  after whichever erratum you happen to be
+  reading. The series is numbered per FILE and the blocks do NOT appear in numeric order inside
+  it, so reading gives the wrong answer. This rule shipped without the check and the very next
+  batch to use it wrote a second `Errata 2` AND a second `Errata 3` (`/audit` 2026-09-03 N-52).
+  Same class as the collision check in "ID allocation" below, which this section should have
+  inherited on the day both were written.
 - **`*(superseded)* [the old text]`** — for a status line replaced by a later disposition. The old
   line stays, marked, so a reader can see the sequence.
 

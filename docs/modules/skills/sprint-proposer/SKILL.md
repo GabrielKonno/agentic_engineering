@@ -34,9 +34,14 @@ Claude Code automatically handles: CLAUDE.md reading, rules loading (via `applie
 
 ### 0. Audit cadence check (gated by skill presence)
 
-Before anything else, check whether a periodic audit is due. Each check is silently skipped if
-the corresponding skill folder was not copied at bootstrap (its absence = the tier doesn't want
-it — no tier lookup needed).
+Before anything else, check whether a periodic audit is due. A check whose skill folder was not
+copied at bootstrap does not apply — its absence means the tier does not want it, and no tier
+lookup is needed. **NEVER skip one SILENTLY: ALWAYS REPORT one line per check** —
+`audit cadence: codebase-audit [due at N — proposed | not due, N of M | n/a — skill not installed]`
+— and the same for `framework-audit`. A silent skip and a forgotten check are indistinguishable to
+the next session, which is the whole proposition of `component-design` § 9 item 3
+(`/audit` 2026-09-02 M-49, re-filed 2026-09-03 N-34 after the first fix was receipted but never
+made).
 
 - **codebase-audit:** IF `.claude/skills/codebase-audit/` exists — compute sessions since the last
   codebase-audit (scan the Progress Log). If ≥ `AUDIT_CADENCE` (default 12; 20 for internal-tool)

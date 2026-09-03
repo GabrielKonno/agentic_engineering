@@ -279,9 +279,9 @@ Declare in report:
 > before validator if found.
 
 **If none of the above apply:** keep the section and set the field to `None` — **NEVER omit the
-heading.** An absent section and an unwritten one are indistinguishable to the reader, and the report schema at the top of this file
-already declares the field as `[None | list of gaps]` in the report schema at the top of this file. (`code_reviewer.md` resolves this the same
-way; the two are deliberately identical.)
+heading.** An absent section and an unwritten one are indistinguishable to the reader, and the
+report schema at the top of this file already declares the field as `[None | list of gaps]`.
+(`code_reviewer.md` resolves this the same way; the two are deliberately identical.)
 ```
 
 ## Creation eval

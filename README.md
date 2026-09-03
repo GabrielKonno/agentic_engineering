@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.15.1
+# Agentic Engineering Framework v2.16.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -32,7 +32,9 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
 > The **Reads** column is the full framework set. The **Output** column is a RANGE because of
 > **tier-gating by risk profile** (`prototype` → `production-financial`): the low number is the
 > baseline every project gets (12 lifecycle skills, 3 core rules files), the high number is the
-> `production-financial` maximum. A `prototype` gets the lean core (no audits/ops/budgets/CI),
+> FULL set, which a `production` project already receives — `bootstrap.md` gates
+> codebase-audit/skill-gate at internal-tool+ and framework-audit/ops-rules/quality-budgets at
+> **production+**, so nothing is reserved for `production-financial` alone. A `prototype` gets the lean core (no audits/ops/budgets/CI),
 > while `production`+ gets everything. See `docs/modules/rules/session_rules.md` → *Risk profile & ceremony tiers*.
 
 ### Session modes
@@ -138,7 +140,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.15.1)
+│   ├── modules/                            ← Single source of truth (v2.16.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)

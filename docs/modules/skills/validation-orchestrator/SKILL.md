@@ -184,10 +184,13 @@ Each subagent is a fresh Agent tool instance — isolated context.
 - Security:   ✅/❌/⏭️
 - Mutation Tests:   ✅/⏭️  (N mutants, N NEUTER)
 - DB:         ✅/❌/⏭️
-- UI:         ✅/❌/⏭️
+- UI:         ✅/❌/⏭️/BASELINE-CREATED  (BASELINE-CREATED is reachable only when the CODE-REVIEWER declared the gap, since a specialist spawned from THIS report's own declaration runs after this row is written)
 - Migration:  ✅/❌/⏭️
 - Regression: ✅/❌  (N executed)
 - Validation: ✅/❌/⏭️
+### Coverage Gap Declaration:
+- [pass 1: N declared, M spawned | pass 2: N declared, M spawned | none declared]
+- [each declared gap with no specialist report, flagged ⚠️ — NEVER ❌]
 ### Items for human verification:
 - [MANUAL criteria]
 ### Next from pendencias.md:

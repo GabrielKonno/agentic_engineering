@@ -13,7 +13,7 @@ description: >
   debt) accumulates silently until ~100 sessions in. Produces a Codebase Audit Report →
   archives findings as tracked tasks; NEVER auto-fixes.
 created: framework-v2.3.0 (pre-validated)
-derived_from: framework-base-upgrade.md §2.1 (dual-axis review) — the MACRO axis
+derived_from: "the dual-axis review model — this skill is the MACRO axis (whole-system health); the per-diff reviewers are the MICRO axis. Framework-layer lineage records stay in the framework repo and are NOT copied to projects, so this field names the CONCEPT, never a path a project cannot open (/audit 2026-09-03 N-9)."
 ---
 
 # Codebase Audit

@@ -949,7 +949,7 @@ Report template categories:
 - Security: ✅/⚠️/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes" — ⚠️, NEVER ❌, for a declared coverage gap with no specialist report]
 - Mutation Tests: ✅/⏭️ [N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
-- UI: ✅/❌/⏭️/BASELINE-CREATED [screenshot evidence or "no UI changes in this task" — BASELINE-CREATED when the visual-regression specialist captured first baselines]
+- UI: ✅/❌/⏭️/BASELINE-CREATED [screenshot evidence or "no UI changes in this task" — BASELINE-CREATED when the visual-regression specialist captured first baselines — reachable only when the CODE-REVIEWER declared the gap, since a specialist spawned from THIS report's own declaration runs after this row is written (`/audit` 2026-09-02 M-20)]
 - Migration: ✅/❌/⏭️ [migration ran + rollback verified — or "no migration files" — or "destructive without rollback: ❌"]
 - Regression: ✅/❌ [N executed]
 - Validation: ✅/❌/⏭️ [validator subagent result — or "routine task, inline"] — **ORCHESTRATOR-ONLY.** This row records whether the validator RAN; the validator's own report cannot contain it (the validator IS the validation). It is deliberately absent from `validator.md` and from its `produces:`.
@@ -967,8 +967,14 @@ surfaces, not two:** this list, `docs/modules/agents/validator.md`'s Output temp
 `docs/modules/skills/validation-orchestrator/SKILL.md`'s own abbreviated report list — which was
 an undeclared third copy no sync rule reached (`/audit` 2026-09-02 M-14). This list and
 `docs/modules/agents/validator.md`'s Output template are TWINS **except for the one row marked
-ORCHESTRATOR-ONLY above**. ALWAYS, when adding or renaming a category: add it to BOTH lists AND to
-`validator.md`'s `produces:` field, using the SAME verdict vocabulary in all three. `validator.md`
+ORCHESTRATOR-ONLY above**. **ALWAYS, when adding or renaming a category, update ALL THREE
+SURFACES** — this list, `validator.md`'s Output template, AND
+`validation-orchestrator/SKILL.md`'s own report list — **AND** `validator.md`'s `produces:` field,
+using the SAME verdict vocabulary throughout. The clause said "BOTH lists" for one full batch after
+the paragraph above it declared three surfaces, which left the third un-bound by the very rule that
+named it (`/audit` 2026-09-03 N-29). Mechanical check, expected result stated:
+`grep -c "BASELINE-CREATED" docs/agentic_engineering_framework.md docs/modules/agents/validator.md
+docs/modules/skills/validation-orchestrator/SKILL.md` — **expected: every file non-zero.** `validator.md`
 is the AUTHORITY on the vocabulary — it is the executed surface every project receives; this list
 follows it. Verify by reading all three, never by assuming: the three-way sync has already drifted
 once (`/audit` 2026-09-02 Run 3, K-3).

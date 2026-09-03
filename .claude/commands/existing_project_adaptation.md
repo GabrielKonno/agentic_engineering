@@ -227,7 +227,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.15.1 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.16.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -275,16 +275,20 @@ Added to CLAUDE.md: [section name] — [reason: missing from current version]
 
 **Step 2.2 — Upgrade project.md:**
 
-**This step is the RECEIVER of Step 4.1b's ARCHITECTURE concerns.** ALWAYS write in every concern
-Step 4.1b routed here, and REPORT `cross-cutting received: A/A architecture concerns written` — a mismatch
-with Step 4.1b's count is RED. (Bootstrap's Steps 3/4/13 carry the identical declaration; EPA's
-three had none, so the routing table pointed at steps that did not know they received —
-`/audit` 2026-09-02 M-2.)
+**This step OWNS the artifact that Step 4.1b's ARCHITECTURE concerns land in — it does NOT write
+them.** Step 4.1b runs in Phase 4, after the PRD exists; this step runs in Phase 2, before it, so
+it cannot receive anything and MUST NOT be told to. **Step 4.1b performs that write itself, by
+reopening this artifact**, and reports the count. Do not add an architecture row here on the PRD's
+behalf: two steps mandated to perform one write is how the count gets doubled or dropped
+(`/audit` 2026-09-02 M-2, corrected 2026-09-03 N-21 — the receiver declarations contradicted Step
+4.1b's own explicit statement that it performs the write).
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/project_md.md` and create `.claude/phases/project.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
-Steps 4.6.5 and 5.1 read it unconditionally, and this command's own Reading Report has an
-`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11).
+**Steps 2.9, 4.1, 4.1b and 5.2 read or write it**, and this command's own Reading Report has an
+`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected 2026-09-03 N-24 —
+the justification had named Steps 4.6.5 and 5.1, and **neither reads this file**: 5.1 reads
+`.claude/agents/`, `.claude/rules/` and `CLAUDE.md`, and 4.6.5 reads only `pendencias.md`).
 
 Check for required sections:
 ```
@@ -329,16 +333,23 @@ Upgraded project documentation to Agentic Engineering Framework v[current].
 
 **Step 2.3 — Upgrade pendencias.md (or equivalent):**
 
-**This step is the RECEIVER of Step 4.1b's WORK concerns.** ALWAYS write in every concern
-Step 4.1b routed here, and REPORT `cross-cutting received: T/T work concerns written` — a mismatch
-with Step 4.1b's count is RED. (Bootstrap's Steps 3/4/13 carry the identical declaration; EPA's
-three had none, so the routing table pointed at steps that did not know they received —
-`/audit` 2026-09-02 M-2.)
+**This step OWNS the artifact that Step 4.1b's WORK concerns land in — it does NOT write them.**
+Step 4.1b runs in Phase 4, after the PRD exists; this step runs in Phase 2, before it, so it cannot
+receive anything and MUST NOT be told to. **Step 4.1b performs that write itself, by reopening this
+artifact**, and reports the count (`/audit` 2026-09-02 M-2, corrected 2026-09-03 N-21).
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/pendencias_md.md` and create `.claude/phases/pendencias.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
-Steps 4.6.5 and 5.1 read it unconditionally, and this command's own Reading Report has an
-`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11).
+**Steps 2.9, 4.1, 4.1b, 4.6, 4.6.5 and 5.2 read or write it**, and this command's own Reading
+Report has an `[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected
+2026-09-03 N-24 — Step 5.1 does not read this file).
+
+**`done_tasks.md` — CREATE IT HERE TOO IF MISSING.** `pendencias-updater` moves completed tasks
+into `.claude/phases/done_tasks.md`; bootstrap creates it unconditionally and calls it
+load-bearing ("without it, the task lifecycle breaks silently"), while this command only CHECKED
+for it in a Step 2.3 checklist item, leaving an adapted project with a skill pointing at nothing.
+**ALWAYS create it when absent, with the same header bootstrap Step 4 writes, and ALWAYS REPORT
+`done_tasks.md: [created | already present]`. NEVER emit nothing** (`/audit` 2026-09-03 N-48).
 
 The file may have a non-standard name (e.g., `[nome-fora-do-padrao].md`). **Do NOT rename it** — update the reference in CLAUDE.md to point to the actual filename.
 
@@ -500,7 +511,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.15.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.16.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -700,18 +711,24 @@ same structure:
 | ARCHITECTURE | a row in `project.md`'s Architectural Decisions table | **Step 2.2** |
 | WORK still to do | a task in `pendencias.md` | **Step 2.3** |
 
-**THIS step writes the concerns in** — the "Receiver step" column names where each concern LANDS,
-not who performs the write. Steps 2.2 and 2.3 ran in Phase 2, before the PRD existed, so they
-cannot have received anything; Step 4.6 runs after this one and consumes the CODE rows.
+**THIS step writes the ARCHITECTURE and WORK concerns in itself** — the "Receiver step" column
+names the artifact each concern LANDS in, not who performs the write. Steps 2.2 and 2.3 ran in
+Phase 2, before the PRD existed, so they cannot have received anything and carry no write mandate;
+**reopen their artifacts from here.** Step 4.6 is the one true receiver: it runs AFTER this step
+and consumes the CODE rows itself.
 Reopening a Phase-2 artifact from Phase 4 is normal in this command, not exceptional — Phase 3's
 closing line reopens Step 2.1's CLAUDE.md and Step 4.6 reopens Step 2.7.1's rules files.
 
 **ALWAYS CLASSIFY each concern as CODE / ARCHITECTURE / WORK before routing** — Phase 3 emits the
 COUNT (`N concerns identified`) and does not split it, so the R/A/T breakdown is produced HERE.
 
-**ALWAYS REPORT — `cross-cutting routed: R rules, A decisions, T tasks (of N identified)` or
-`cross-cutting: none identified`. R+A+T below N is RED — name the dropped concern. NEVER emit
-nothing.**
+**ALWAYS REPORT BOTH LINES — routing AND writing:**
+- `cross-cutting routed: R rules, A decisions, T tasks (of N identified)`, or
+  `cross-cutting: none identified`. R+A+T below N is RED — name the dropped concern.
+- `cross-cutting written: A/A decisions into project.md, T/T tasks into pendencias.md` — the writes
+  THIS step performs. `R/R` is reported by Step 4.6, which performs its own.
+**NEVER emit nothing.** Both lines have a slot in this command's final report; a mandated verdict
+with no slot is owed by nobody (`/audit` 2026-09-03 N-21, N-27).
 
 **Step 4.2 — Create settings.json and initialize logs (if missing):**
 
@@ -828,11 +845,22 @@ Register in CLAUDE.md "Skills & Agents" section.
 
 **Step 4.6 — Pre-create domain rules from retroactive PRD:**
 
-**This step is the RECEIVER of Step 4.1b's CODE concerns.** ALWAYS write in every concern
-Step 4.1b routed here, and REPORT `cross-cutting received: R/R code concerns written` — a mismatch
-with Step 4.1b's count is RED. (Bootstrap's Steps 3/4/13 carry the identical declaration; EPA's
-three had none, so the routing table pointed at steps that did not know they received —
-`/audit` 2026-09-02 M-2.)
+**This step is the RECEIVER of Step 4.1b's CODE concerns — and, unlike Steps 2.2 and 2.3, it
+genuinely is one: it runs AFTER Step 4.1b.** ALWAYS write in every concern Step 4.1b routed here,
+and REPORT `cross-cutting received: R/R code concerns written` — a mismatch with Step 4.1b's count
+is RED.
+**This step is ALSO the RECEIVER of Step 2.7.1's DEFERRED domain-rule matches.** Step 2.7.1 runs
+before Step 4.1 has copied `assets/examples/rules/`, so on a never-bootstrapped project it defers
+its matches HERE by name. **ALWAYS consume that deferred list and ALWAYS REPORT
+`deferred domain rules: N/N created` or `deferred domain rules: none — Step 2.7.1 deferred nothing`
+— a mismatch with Step 2.7.1's deferred count is RED, and it is the line that CLOSES 2.7.1's own
+report. NEVER emit nothing.** Step 2.7.1 pointed here from the moment M-9 re-pointed it, and this
+step never mentioned the deferral (`/audit` 2026-09-03 N-22).
+(Bootstrap's Steps 3/4/13 each carry a receiver declaration because each genuinely runs after
+its router. **EPA has exactly ONE true receiver — this step.** Steps 2.2 and 2.3 run in Phase 2,
+before the PRD exists, so Step 4.1b reopens their artifacts and performs those writes itself.
+An earlier fix gave all three a write mandate, which put two steps on one write —
+`/audit` 2026-09-02 M-2, corrected 2026-09-03 N-21.)
 
 Analyze the retroactive PRD (created in Phase 3) for domain signals matching example templates (same mapping table as Step 2.7.1). For each domain that is a core feature or architectural pattern:
 
@@ -1013,6 +1041,19 @@ done
 - .claude/rules/session-rules.md [CREATED / SKIPPED]
 - .claude/rules/evolution-policy.md [CREATED / SKIPPED]
 - .claude/rules/component-design.md [CREATED / SKIPPED]
+
+### Cross-cutting concerns (Step 4.1b → Steps 2.2 / 2.3 / 4.6) — ALWAYS report, never omit:
+- Routed at Step 4.1b: [N] identified (R → rules, A → decisions, T → tasks)
+- Written by Step 4.1b: A/A decisions into `project.md` · T/T tasks into `pendencias.md`
+- Received by Step 4.6: R/R code concerns written
+- [or `none — retroactive PRD has no Cross-cutting Concerns section`]
+- **Any count below Step 4.1b's is RED** — name the dropped concern.
+  (Bootstrap's twin has carried "Delivered by receivers" since M-2; EPA's three verdicts were
+  mandated with no slot to land in — `/audit` 2026-09-03 N-27.)
+
+### Deferred domain rules (Step 2.7.1 → Step 4.6) — ALWAYS report, never omit:
+- `N/N created` · `none — Step 2.7.1 deferred nothing`
+- **A mismatch with Step 2.7.1's deferred count is RED** (`/audit` 2026-09-03 N-22).
 
 ### Domain rules pre-created (from example templates — Step 2.7.1/4.6):
 - .claude/rules/[domain]-rules.md ← seeded, refined by rules-agents-updater
