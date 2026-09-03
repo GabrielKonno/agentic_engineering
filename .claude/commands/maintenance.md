@@ -129,11 +129,6 @@ disk, which is why that batch's `negation proof:` claim is unverifiable to this 
 (`/audit` 2026-09-02 L-16). A control nobody can re-read afterwards is indistinguishable from one
 that never ran — the same proposition `session_rules.md` → "Execution proof" makes about test
 suites, which this checklist had never applied to itself.
-Evidence this is not hypothetical: for `afccff3`, eight of the nine receipts existed nowhere on
-disk, which is why that batch's `negation proof:` claim is unverifiable to this day
-(`/audit` 2026-09-02 L-16). A control nobody can re-read afterwards is indistinguishable from one
-that never ran — the same proposition `session_rules.md` → "Execution proof" makes about test
-suites, which this checklist had never applied to itself.
 
 Each item encodes a real miss that survived a first pass and was only caught by a later lens
 (owner question / audit):
@@ -213,9 +208,9 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    precisely why three consecutive sessions emitted an honest aggregate while missing a direction
    on individual fixes. The table is the control; the total is not.
 
-   | Fix ID | LATERAL | PARALLEL | ADJACENT | DESCENDING | Extra instances found |
-   |--------|---------|----------|----------|------------|----------------------|
-   | [K-3]  | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
+   | Fix ID | File touched | LATERAL | PARALLEL | ADJACENT | DESCENDING | Extra instances found |
+   |--------|--------------|---------|----------|----------|------------|----------------------|
+   | [K-3]  | [path, or `none — deferred`] | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
 
    Use `✓` (ran — and **ALWAYS QUOTE the actual grep pattern or command in the cell**, never a
    bare glyph: an unquoted `✓` is unverifiable by anyone but its author), `✗` (NOT run —
@@ -227,10 +222,48 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    two findings into one row is how a fix whose sweep was skipped disappears into a neighbour
    (`/audit` 2026-09-02 L-23: 17 findings reported in 14 rows). If two findings genuinely share
    one fix, give them one row each and write "same edit as [ID]" in the last column.
+   **ALWAYS NAME, IN EACH ROW, THE FILE THAT ROW EDITED** (a `File touched` column). A row that
+   names no file cannot be checked against the commit, and that is what gate 2 below checks.
    Close with the total:
    `class sweep: N fixes × 4 directions, M extra instances found and fixed`, or
    `class sweep: N/A — no point fixes this session`. **NEVER emit nothing, and NEVER emit the
    total without the table.**
+
+   ### The three PRE-COMMIT GATES — run all three, in this order, before `git commit`
+
+   These are not sweeps and not judgement. Each is one command with one expected result, and each
+   was written because a HIGH finding got past every other control in this checklist. **A RED gate
+   BLOCKS the commit** — fix, re-run, then commit.
+
+   **Gate 1 — TWIN PARITY.** For every `docs/modules/` ↔ `.claude/` twin pair:
+   ```bash
+   diff -r .claude/skills/cross-cutting-analysis docs/modules/skills/cross-cutting-analysis
+   ```
+   **Expected: no output (exit 0).** Editing one placement and not the other breaks
+   CLAUDE.md's dual-placement rule, dimension A and D10.4 in a single edit — and it is invisible
+   to every sweep that greps by pattern, because the pattern is present in one copy
+   (`/audit` 2026-09-03 N-6).
+
+   **Gate 2 — EVERY RECEIPT ROW NAMES A FILE THE COMMIT TOUCHED.**
+   ```bash
+   git show --name-only --format="" HEAD    # or the staged set, pre-commit
+   ```
+   **Expected: every `File touched` cell in the per-fix receipt appears in that list.** A row
+   naming a file absent from the diff is RED and means the fix was not made. This is the ONLY gate
+   that catches a fix that was declared, receipted, counted in a passing self-check and never
+   applied — which happened, undetected, in a batch whose row-count check read `43 = 43`
+   (`/audit` 2026-09-03 N-34).
+
+   **Gate 3 — ROW COUNT EQUALS DISPOSED COUNT.**
+   ```bash
+   grep -c "applied sHASH" <the report file>     # plus any accepted-risk / rejected rows
+   ```
+   **Expected: equal to the receipt table's row count.** Report BOTH numbers. A table with fewer
+   rows than dispositions hides the fixes whose sweep was skipped — 8 rows for 14 findings shipped
+   while asserting "8 = 8, the self-check passes" (`/audit` 2026-09-03 N-5).
+
+   **ALWAYS REPORT — `gates: twin parity [PASS/RED] | receipt-rows-vs-diff [N/N] | row-count
+   [N vs N]`. NEVER emit nothing, and NEVER commit on a RED.**
 
    > Evidence this is not hypothetical: applying the 2026-09-02 batch, the session reported
    > `4 directions, 15 extra instances` in good faith while running DESCENDING on one file
@@ -381,9 +414,9 @@ this section is its invoker. A bump publishes the current state as a contract; t
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 
-- **MINOR** (`v2.12.1` → `v2.13.0`): a new rule/section/template, an upstream absorption, or a
+- **MINOR** (`v2.13.0` → `v2.14.0`): a new rule/section/template, an upstream absorption, or a
   schema change to a document projects receive.
-- **PATCH** (`v2.13.0` → `v2.13.1`): corrections that add no new contract — broken references,
+- **PATCH** (`v2.14.0` → `v2.14.1`): corrections that add no new contract — broken references,
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
