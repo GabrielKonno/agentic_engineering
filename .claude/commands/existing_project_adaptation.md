@@ -313,7 +313,7 @@ Upgraded project documentation to Agentic Engineering Framework v[current].
 
 **Step 2.3 — Upgrade pendencias.md (or equivalent):**
 
-The file may have a non-standard name (e.g., `pendencias_e_melhorias.md`). **Do NOT rename it** — update the reference in CLAUDE.md to point to the actual filename.
+The file may have a non-standard name (e.g., `[nome-fora-do-padrao].md`). **Do NOT rename it** — update the reference in CLAUDE.md to point to the actual filename.
 
 Check and upgrade:
 ```
@@ -928,7 +928,7 @@ done
 ### Hooks: smart-formatting [ACTIVE / SKIPPED: no Prettier]
 
 ### Non-standard naming:
-- [e.g., pendencias_e_melhorias.md — reference updated in CLAUDE.md]
+- [e.g., `[nome-fora-do-padrao].md` — reference updated in CLAUDE.md]
 
 ### PRD version: v1.0.0 (retroactive)
 

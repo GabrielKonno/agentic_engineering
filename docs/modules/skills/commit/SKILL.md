@@ -35,7 +35,7 @@ Ask user to confirm the grouping before committing.
 Write a conventional commit message following the project's existing style:
 - Format: `type(scope): short description`
 - Types: feat, fix, chore, docs, refactor, style, test
-- Be specific: "Fix reopenMonth deleting only unpaid" NOT "Fix a bug"
+- Be specific: "Fix checkout total ignoring applied discounts" NOT "Fix a bug"
 - Include WHY when non-obvious
 
 ### Step 5 — Commit
