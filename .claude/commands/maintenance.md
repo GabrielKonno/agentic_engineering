@@ -15,6 +15,10 @@ This is a framework maintenance session, not a project bootstrap.
   `.claude/commands/existing_project_adaptation.md`. So does the "New component creation"
   section, which places new components under this repo's own `.claude/` when the framework needs
   them at runtime.
+- **`git commit` — always. `git push` — ONLY when the owner has asked for it in this session, and
+  ONLY after D16 over the unpushed commits comes back GREEN.** NEVER push on your own initiative:
+  the unpushed/pushed boundary is what makes a privacy hit cheap or expensive to fix
+  (`CLAUDE.md` → Repository Lifecycle; `/audit` 2026-09-02 M-56).
 - Write lineage and audit records under `assets/docs/` — Upstream intake step 4 MANDATES the
   lineage doc, and `/audit` Phase 3 writes the dated report a later session applies.
 

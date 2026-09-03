@@ -100,6 +100,14 @@ agentic_engineering/                        ← Cloned once, kept permanently
   `/existing_project_adaptation` **Step 0.5** own the check (both fail CLOSED on an unreadable
   comparison) — the symmetric twin of the freshness check the adaptation command already runs on
   the PROJECT copy in its Step 1.0.
+- **Pushing is the OWNER's call, and it is a privacy boundary, not a convenience.**
+  A maintenance or audit session **NEVER runs `git push` on its own initiative** — it commits,
+  reports, and ASKS. Two reasons, and the second is the load-bearing one: (1) pushing publishes a
+  contract other clones will trust; (2) D16's triage keys on it — an identifier in an UNPUSHED
+  commit is fixable locally, the same identifier once PUSHED requires history rewrite and becomes
+  an owner escalation. **ALWAYS run D16 over the unpushed commits and get a GREEN before asking to
+  push**; pushing a red one converts a cheap fix into an expensive one by hand
+  (`/audit` 2026-09-02 M-56 — this operation had no written owner while five pushes had happened).
 - **`projects/` is in `.gitignore`** — framework git never sees project files
 - **Never modified during bootstrap** — docs/ and examples/ are read-only references
 

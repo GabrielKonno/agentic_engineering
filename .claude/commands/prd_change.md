@@ -46,7 +46,7 @@ Analyze my proposal and classify it into ONE of these categories:
 | **Stack changed** | ✅ Yes | ✅ Yes (architectural decision) | "Switching from Supabase to Firebase" |
 | **Product pivot** | ✅ PRD v2.0 | ✅ Yes (new phase) | "Becoming marketplace instead of SaaS" |
 | **Bug fixed** | ❌ No | ✅ Yes | "The date filter was wrong" |
-| **Technical decision** | ❌ No | ✅ Yes | "Using parseLocal() instead of toISOString()" |
+| **Technical decision** | ❌ No | ✅ Yes | "Using parseDateOnly() instead of toISOString()" |
 | **Module implemented** | ❌ No | ✅ Yes | "Login + Auth completed" |
 | **UX/UI improvement** | Depends | Depends | See below |
 | **Performance optimization** | ❌ No | ✅ Yes | "Lazy loading charts" |

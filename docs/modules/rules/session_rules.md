@@ -159,7 +159,7 @@ Mechanisms stack: a standard-effort session uses high effort when security agent
 ## Documentation quality
 
 - Be specific: "Fixed reopenMonth deleting only unpaid" NOT "Fixed a bug"
-- Include WHY: "Added parseLocal() because toISOString() shifts dates in UTC-3 timezone"
+- Include WHY: "Added parseDateOnly() because toISOString() shifts dates across timezones"
 - Constraints go in rules files, not just session logs
 
 ## Session archetypes (all profiles)
