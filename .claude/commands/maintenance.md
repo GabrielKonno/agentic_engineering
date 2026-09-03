@@ -258,7 +258,12 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    ```bash
    grep -c "applied sHASH" <the report file>     # plus any accepted-risk / rejected rows
    ```
-   **Expected: equal to the receipt table's row count.** Report BOTH numbers. A table with fewer
+   **Expected: equal to the receipt table's row count.** Report BOTH numbers.
+   **SCOPE BOTH COUNTS — the findings ledger and the per-fix receipt share the `| ID |` row shape,
+   so a whole-file count conflates them.** Count dispositions in the FINDINGS ledger and rows
+   inside THIS run's receipts section, never with one grep over the file. (Learned by running this
+   gate: a naive whole-file count read 50 rows where the ledger has 48 and the receipt has 2 — the
+   same "scope is load-bearing" failure that shipped as M-31.) A table with fewer
    rows than dispositions hides the fixes whose sweep was skipped — 8 rows for 14 findings shipped
    while asserting "8 = 8, the self-check passes" (`/audit` 2026-09-03 N-5).
 
