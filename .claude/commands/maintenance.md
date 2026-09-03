@@ -94,10 +94,16 @@ maintenance session, or by you. Write them ALL, verbatim, into:
   this session applied an audit batch (Audit intake step 4 already writes to that file); OR
 - **the commit message body**, when there is no report file.
 
-Mechanical self-check (expected result stated): after committing, grep the persisted surface for
-each item's report key — `inventory sweep:`, `instruction style:`, `references:`, `class sweep:`,
-`back-sweep:`, `liveness:`, `negation proof:`, `version:`, `classification:`, `new component:` —
-**expected: every key present exactly once.** A missing key is RED.
+Mechanical self-check (expected result stated): after committing, grep **THIS run's receipts
+section only** — the text under `## Post-change checklist receipts (sHASH)` for this session's
+hash, never the whole file — for each item's report key: `inventory sweep:`, `instruction style:`,
+`references:`, `class sweep:`, `back-sweep:`, `liveness:`, `negation proof:`, `version:`,
+`classification:`, `new component:` — **expected: every key present exactly once.** A missing key
+is RED; a duplicate WITHIN the section is RED.
+**SCOPE IS LOAD-BEARING:** an audit report accumulates one receipts section per run, so a
+whole-file grep counts prior runs' keys and goes red on a healthy state — the same miscalibration
+that shipped as K-8 and L-7. This check went red on itself for exactly that reason the first time
+it ran, which is how the scoping clause got here.
 Evidence this is not hypothetical: for `afccff3`, eight of the nine receipts existed nowhere on
 disk, which is why that batch's `negation proof:` claim is unverifiable to this day
 (`/audit` 2026-09-02 L-16). A control nobody can re-read afterwards is indistinguishable from one
