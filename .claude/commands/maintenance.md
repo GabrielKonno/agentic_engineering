@@ -553,7 +553,10 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
      record; NEVER as `open`, NEVER as grounds to propose a history rewrite.
    - **What WOULD re-open it** — stated explicitly, or the record closes more than it should.
    **ALWAYS set that finding's status to `accepted-risk — see [record]`**, never to `applied`.
-   Mechanical self-check (expected result stated): for every accepted-risk record in the report,
+   Mechanical self-check (expected result stated): for every block whose heading MATCHES
+   `^#{2,3} Accepted-risk record ` — **that exact prefix, never a bare `Accepted-risk`** — a
+   report may also carry an `Accepted-risk OBSERVATIONS` section, which is not a record and goes
+   RED at 0 fields under a loose anchor (`/audit` 2026-09-03 N-54),
    `grep -cE "^- \*\*(Decision|Working tree|Residue|Standing instruction|What WOULD re-open it)"`
    within that record → **expected: exactly 5**. Fewer means it is not a closure. The rule shipped
    without this check and was never applied backward to the one record that pre-dated it, which
