@@ -197,10 +197,23 @@ Each item encodes a real miss that survived a first pass and was only caught by 
 3. **Reference & isolation verification** (as already required by Upstream intake step 6,
    but for EVERY maintenance change, not only upstreams): cross-references resolve (grep
    each named section/file you cited), template fence extraction still works
-   (`sed -n '/^````markdown$/,/^````$/p'` — and the `js` variant — over every edited
-   template), and the D16 isolation grep runs over every touched file (no project names,
+   — **MATCH THE FENCE WIDTH THE TEMPLATE ACTUALLY USES, and ALWAYS STATE THE DENOMINATOR
+   (`N of M templates`).** Templates carry 3-BACKTICK fences unless their content nests a code
+   block, in which case they carry 4; a command hard-coded to one width returns 0 on the other
+   and reports a silent pass on a surface it never read — the very failure this item's own
+   closing sentence warns about, found live in this item's own command, where it returned 0 on
+   4 of the 7 templates (`/audit` 2026-09-03 N-50). The 8 files bootstrap actually extracts by `sed` all carry 4 backticks, so nothing ships broken — the defect is in the CHECK, which reports a pass on templates it never read. Width-agnostic form — it reads each
+   template's OWN opening fence instead of assuming one:
+   ```bash
+   for t in docs/modules/templates/*.md docs/modules/rules/*.md; do   # BOTH — rules are extracted too
+     f=$(grep -m1 -oE '^`{3,5}[a-z]*' "$t"); c=${f%%[a-z]*}
+     echo "$t -> $(sed -n "/^$f$/,/^$c$/p" "$t" | wc -l) lines"
+   done
+   ```
+   **Expected: every template non-zero.** A `0` is RED — either the fence broke or the command
+   does not match it, and BOTH are failures, and the D16 isolation grep runs over every touched file (no project names,
    no source-project session numbers, no single-project vocabulary).
-   **ALWAYS REPORT all three results — `references: N cited sections resolved | fences: N
+   **ALWAYS REPORT all three results — `references: N cited sections resolved | fences: N of M
    templates extract non-empty | isolation: N files scanned, 0 hits`. NEVER emit nothing, and
    NEVER collapse the three into one verdict** — a fence check that silently returned 0 lines is
    the failure this item exists to catch, and a merged "verified" hides it.
