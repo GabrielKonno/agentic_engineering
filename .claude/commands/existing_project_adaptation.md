@@ -44,7 +44,7 @@ git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch trac
 git fetch && git status -sb | head -1                # (c) ahead/behind
 ```
 
-**Classify into exactly one of FOUR outcomes — the check FAILS CLOSED, never open:**
+**Classify into exactly one of the SEVEN outcomes below — the table is exhaustive and its last row is the CATCH-ALL — the check FAILS CLOSED, never open:**
 
 | Observation | Verdict |
 |-------------|---------|
@@ -69,7 +69,7 @@ contract. Update or attach the upstream first (`git pull`,
 `git fetch upstream && git merge upstream/main` on a fork, or
 `git branch --set-upstream-to=origin/main`), then restart.
 
-**ALWAYS REPORT one of the four verdict strings above — `up to date` / `behind by N commits —
+**ALWAYS REPORT one of the SEVEN verdict strings above — `up to date` / `behind by N commits —
 STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped` / `fetch failed — UNVERIFIABLE,
 STOPPED` / `behind upstream by N — STOPPED` / `unverifiable — STOPPED`. NEVER emit nothing.** Phase 1's Step 1.0 below checks the PROJECT copy; this checks the FRAMEWORK copy.
 Both, or neither is worth much.
@@ -190,6 +190,8 @@ Before proceeding, present a summary of everything you read:
 
 ### Existing framework docs:
 - CLAUDE.md: [exists/missing] — [summary of content]
+- Project-copy freshness (Step 1.0): `up to date` / `behind by N — reconciled before analysis` /
+  `no remote — skipped` — ALWAYS report; the verdict had no slot anywhere (`/audit` M-53)
 - project.md: [exists/missing] — [N rows in Progress Log index, last session date]
 - pendencias/backlog: [filename] — [N items in progress, N items done]
 - Agents: [list with names]
@@ -225,7 +227,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.12.1 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.13.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -273,8 +275,14 @@ Added to CLAUDE.md: [section name] — [reason: missing from current version]
 
 **Step 2.2 — Upgrade project.md:**
 
+**This step is the RECEIVER of Step 4.1b's ARCHITECTURE concerns.** ALWAYS write in every concern
+Step 4.1b routed here, and REPORT `cross-cutting received: A/A architecture concerns written` — a mismatch
+with Step 4.1b's count is RED. (Bootstrap's Steps 3/4/13 carry the identical declaration; EPA's
+three had none, so the routing table pointed at steps that did not know they received —
+`/audit` 2026-09-02 M-2.)
+
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/project_md.md` and create `.claude/phases/project.md` exactly as
-`/bootstrap` would, then continue with the upgrade checks above. **NEVER assume the file exists** —
+`/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
 Steps 4.6.5 and 5.1 read it unconditionally, and this command's own Reading Report has an
 `[exists/missing]` slot for it (`/audit` 2026-09-02 K-11).
 
@@ -321,8 +329,14 @@ Upgraded project documentation to Agentic Engineering Framework v[current].
 
 **Step 2.3 — Upgrade pendencias.md (or equivalent):**
 
+**This step is the RECEIVER of Step 4.1b's WORK concerns.** ALWAYS write in every concern
+Step 4.1b routed here, and REPORT `cross-cutting received: T/T work concerns written` — a mismatch
+with Step 4.1b's count is RED. (Bootstrap's Steps 3/4/13 carry the identical declaration; EPA's
+three had none, so the routing table pointed at steps that did not know they received —
+`/audit` 2026-09-02 M-2.)
+
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/pendencias_md.md` and create `.claude/phases/pendencias.md` exactly as
-`/bootstrap` would, then continue with the upgrade checks above. **NEVER assume the file exists** —
+`/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
 Steps 4.6.5 and 5.1 read it unconditionally, and this command's own Reading Report has an
 `[exists/missing]` slot for it (`/audit` 2026-09-02 K-11).
 
@@ -347,10 +361,9 @@ Check and upgrade:
 **Step 2.4 — Upgrade code-reviewer agent/skill:**
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/agents/code_reviewer.md` and create `.claude/agents/code-reviewer.md` exactly as
-`/bootstrap` Step 7 would, then continue with the upgrade checks above. **NEVER assume the
-file exists** — Steps 4.6.5 and 5.1 read `.claude/agents/code-reviewer.md` unconditionally, and
-this command's own Reading Report has an `[exists/missing]` slot for it
-(`/audit` 2026-09-02 K-11).
+`/bootstrap` Step 7 would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** — this command's own Reading Report carries an
+`[exists/missing]` slot for it, and later steps read it without re-checking
+(`/audit` 2026-09-02 K-11, M-10).
 
 Check for:
 ```
@@ -383,10 +396,9 @@ For each fix: ask "could this recur?" If yes, add the CORRECT pattern (not the m
 **Step 2.5 — Upgrade security-reviewer:**
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/agents/security_reviewer.md` and create `.claude/agents/security-reviewer.md` exactly as
-`/bootstrap` Step 8 would, then continue with the upgrade checks above. **NEVER assume the
-file exists** — Steps 4.6.5 and 5.1 read `.claude/agents/code-reviewer.md` unconditionally, and
-this command's own Reading Report has an `[exists/missing]` slot for it
-(`/audit` 2026-09-02 K-11).
+`/bootstrap` Step 8 would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** — this command's own Reading Report carries an
+`[exists/missing]` slot for it, and later steps read it without re-checking
+(`/audit` 2026-09-02 K-11, M-10).
 
 Check frontmatter:
 ```
@@ -444,7 +456,7 @@ Read each rules file. No structural changes needed — rules files are project-s
 
 **Step 2.7.1 — Pre-create missing domain rules from codebase analysis:**
 
-**PRECONDITION — `assets/examples/rules/` may not exist yet.** Phase 4 Step 4.1 is what copies it into the project; on a never-bootstrapped project this step runs BEFORE that. **ALWAYS CHECK first** (`ls projects/$ARGUMENTS/assets/examples/rules/ 2>/dev/null`): if it is missing, do NOT silently no-op — record the domain matches you found and **DEFER the copying to Step 4.1b**, which runs after the examples land. **ALWAYS REPORT — `domain rules: N created` or `N matches deferred to Step 4.1b — examples not yet present`. NEVER emit nothing.**
+**PRECONDITION — `assets/examples/rules/` may not exist yet.** Phase 4 Step 4.1 is what copies it into the project; on a never-bootstrapped project this step runs BEFORE that. **ALWAYS CHECK first** (`ls projects/$ARGUMENTS/assets/examples/rules/ 2>/dev/null`): if it is missing, do NOT silently no-op — record the domain matches you found and **DEFER the copying to Step 4.6**, which runs after Step 4.1 has copied the examples and is this command's PRD-derived rules step (`/audit` 2026-09-02 M-9 — the deferral had named Step 4.1b, which handles cross-cutting concerns and never receives domain rules). **ALWAYS REPORT — `domain rules: N created` or `N matches deferred to Step 4.6 — examples not yet present`. NEVER emit nothing.**
 
 Based on the codebase analysis from Step 1 and the existing/retroactive PRD, identify domain signals that match example templates. For each domain that is a core feature or architectural pattern in the project, check if the corresponding rules file ALREADY EXISTS in `.claude/rules/`. If it does NOT exist and a matching example template is available in `assets/examples/rules/`, pre-create it:
 
@@ -488,7 +500,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.12.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.13.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -631,6 +643,13 @@ NEVER emit nothing.**
 - 3.x Functional Requirements — for each implemented module: document the business rules you can infer from the code (database schema, API routes, UI flows). Mark each as `[Inferred from code — verify with owner]`
 - 5.1 Stack — extracted from package.json / config files (this is factual)
 - 5.3 Data Model — extracted from schema/models
+
+**Sections the template defines that this list previously OMITTED — ALWAYS populate them too**
+(`/audit` 2026-09-02 M-55; a retroactive PRD that skips them fails its own template):
+- 2.3 Constraints — deadlines, compliance, platform limits visible in the codebase or from the owner
+- 5.2 External Integrations — every third-party service the code actually calls
+- 5.4 Build Order — derive it from `pendencias.md`'s dependency order; bootstrap reads this section
+- 9. Risks and Dependencies — the watch-items `pendencias.md`'s Future Improvements already imply
 
 **Sections to populate from pendencias.md (what is PLANNED):**
 - 2.1 In Scope — add pending features marked as ⏳
@@ -809,6 +828,12 @@ Register in CLAUDE.md "Skills & Agents" section.
 
 **Step 4.6 — Pre-create domain rules from retroactive PRD:**
 
+**This step is the RECEIVER of Step 4.1b's CODE concerns.** ALWAYS write in every concern
+Step 4.1b routed here, and REPORT `cross-cutting received: R/R code concerns written` — a mismatch
+with Step 4.1b's count is RED. (Bootstrap's Steps 3/4/13 carry the identical declaration; EPA's
+three had none, so the routing table pointed at steps that did not know they received —
+`/audit` 2026-09-02 M-2.)
+
 Analyze the retroactive PRD (created in Phase 3) for domain signals matching example templates (same mapping table as Step 2.7.1). For each domain that is a core feature or architectural pattern:
 
 - If the rules file was already pre-created in Step 2.7.1: skip (already exists)
@@ -845,7 +870,7 @@ gap that installs nothing and registers nothing is a gap the project can never a
 
 After installation, validate activation chains for every pre-installed specialist:
 1. Verify it has a matching Coverage Gap Declaration in the reviewer whose domain vocabulary echoes the agent's Pushy Description
-2. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md`
+2. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
 
 ---
 
@@ -941,11 +966,24 @@ done
 ## Adaptation Complete — Framework Upgrade Report
 
 ### Framework + project freshness (Steps 0.5 and 1.0) — ALWAYS report, never omit:
-- Framework clone: `up to date` / `behind by N — STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped`
+- Framework clone — one of Step 0.5's SEVEN verdicts:
+- `up to date` · `no remote — skipped` · `behind by N commits — STOPPED` ·
+  `behind upstream by N — STOPPED` · `no upstream tracking — UNVERIFIABLE, STOPPED` ·
+  `fetch failed — UNVERIFIABLE, STOPPED` · `unverifiable — STOPPED`
 - Project copy: `up to date` / `behind by N — reconciled before analysis` / `no remote — skipped`
 
 ### Cross-cutting concerns (Phase 3 → Step 4.1b) — ALWAYS report, never omit:
 - Identified: [N] · Routed: R rules · A decisions · T tasks — [or `none identified`]
+
+### Risk profile and tier-gated install (Steps 2.9b / 2.9) — ALWAYS report, never omit:
+- Risk profile: [prototype | internal-tool | production | production-financial], derived from [signals]
+- MACRO skeletons: codebase-audit / metrics.md / skill-gate + skill-reviewer + `.claude/drafts/` /
+  framework-audit / framework-metrics.md / ops-rules.md / quality-budgets.md —
+  [copied (tier) / skipped (tier)] each
+- CI floor: [created / skipped / deferred — task added]
+- `scripts/check-agent-frontmatter.mjs`: [copied / already present]
+- `assets/examples/` (Step 4.1): [copied / already present]
+- Plugin enablement (Step 4.4): [key merged / none — unavailable]
 
 ### Documents upgraded:
 - CLAUDE.md: [sections added/modified]

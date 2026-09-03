@@ -44,7 +44,7 @@ git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch trac
 git fetch && git status -sb | head -1                # (c) ahead/behind
 ```
 
-**Classify into exactly one of FOUR outcomes — the check FAILS CLOSED, never open:**
+**Classify into exactly one of the SEVEN outcomes below — the table is exhaustive and its last row is the CATCH-ALL — the check FAILS CLOSED, never open:**
 
 | Observation | Verdict |
 |-------------|---------|
@@ -69,7 +69,7 @@ project under a version label (`framework-vX.Y.Z`) the project will then trust, 
 the upstream first (`git pull`, `git fetch upstream && git merge upstream/main` on a fork, or
 `git branch --set-upstream-to=origin/main`), then restart.
 
-**ALWAYS REPORT one of the four verdict strings above — `up to date` / `behind by N commits —
+**ALWAYS REPORT one of the SEVEN verdict strings above — `up to date` / `behind by N commits —
 STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` / `no remote — skipped` / `fetch failed — UNVERIFIABLE,
 STOPPED` / `behind upstream by N — STOPPED` / `unverifiable — STOPPED`. NEVER emit nothing.** This is the symmetric twin of `existing_project_adaptation.md` Step 0.5, which runs the
 same check there, and of its Step 1.0, which checks the PROJECT copy.
@@ -89,7 +89,7 @@ If `projects/$ARGUMENTS/assets/docs/prd.md` exists, read it completely. Extract:
 - External integrations
 - Business model
 
-If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. **ALWAYS REWRITE the generated CLAUDE.md's `**PRD:**` line to the no-PRD variant** the template carries — never leave a pointer to a file no step creates (`/audit` 2026-09-02 L-30). Use information from the user or CLAUDE.md to populate documents. Mark unknown sections as "to be defined".
+If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, skip this step. Record that there is no PRD; **Step 2 selects the `**PRD:**` line accordingly.** Use information from the user or CLAUDE.md to populate documents. Mark unknown sections as "to be defined".
 
 ---
 
@@ -174,6 +174,15 @@ These examples serve as quality reference for creating agents, skills, and rules
 ---
 
 ### Step 2 — Create CLAUDE.md
+
+**ALWAYS SELECT the `**PRD:**` line for the case at hand — this step OWNS it, because this is where
+CLAUDE.md comes into existence** (`/audit` 2026-09-02 M-6: the instruction previously sat in Step 1,
+before there was anything to rewrite):
+- PRD present → keep `See assets/docs/prd.md` and **DELETE the `[or, when bootstrapped WITHOUT…]`
+  bracket** the template carries. Leaving it ships the annotation verbatim.
+- No PRD → replace the whole line with the no-PRD variant.
+**ALWAYS REPORT — `PRD pointer: assets/docs/prd.md` or `PRD pointer: none — bootstrapped without a
+PRD`. NEVER emit nothing.**
 
 **All files from Step 2 onwards are created inside `projects/$ARGUMENTS/`.** Paths in this prompt (e.g., `CLAUDE.md`, `.claude/phases/`) are relative to the project root. Exception: shell command blocks (cp/mkdir/sed) run from the FRAMEWORK root — their targets keep the explicit `projects/$ARGUMENTS/` prefix because their sources (`docs/modules/...`, `examples/`) are framework-relative.
 
@@ -590,13 +599,13 @@ If a gap was KEPT but no matching example exists in `assets/examples/agents/`: r
 
 #### Step 12.5b — Validate activation chains
 
-For every specialist agent created or pre-installed in Steps 7-12.5a that uses gap-declaration activation, verify the chain is complete. Note: code-reviewer and security-reviewer are SOURCES of gaps (not targets) — skip them. Validator, arbitrator, red-team, and blue-team are spawned by protocol, not by gap declaration — skip them too.
+For every specialist agent created or pre-installed in Steps 7-12.5a that uses gap-declaration activation, verify the chain is complete. Note: code-reviewer and security-reviewer are SOURCES of gaps (not targets) — skip them. Arbitrator, red-team and blue-team are spawned by protocol, not by gap declaration — skip them. **The VALIDATOR is BOTH**: protocol-spawned AND a gap DECLARER (it declares the visual regression gap), so include it as a gap source (component-design §1; `/audit` 2026-09-02 M-57).
 
 For each remaining specialist agent:
 
 1. Verify it has a matching Coverage Gap Declaration in code-reviewer.md or security-reviewer.md whose domain vocabulary echoes the agent's Pushy Description
 2. If no match: add the gap declaration to the appropriate reviewer following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
-3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md` — the domain must appear in at least one reviewer
+3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md` — the domain must appear in at least one reviewer
 
 This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the reviewer-to-orchestrator-to-specialist activation chain is broken.
 
@@ -723,8 +732,11 @@ git commit -m "chore: bootstrap from agentic framework"
 ## Session 0 — Bootstrap Complete
 
 ### Framework freshness (Step 0.5) — ALWAYS report, never omit:
-- `up to date` / `behind by N commits — STOPPED` / `no upstream tracking — UNVERIFIABLE, STOPPED` /
-  `no remote — skipped`
+- `up to date` · `no remote — skipped` · `behind by N commits — STOPPED` ·
+  `behind upstream by N — STOPPED` · `no upstream tracking — UNVERIFIABLE, STOPPED` ·
+  `fetch failed — UNVERIFIABLE, STOPPED` · `unverifiable — STOPPED`
+  (all seven of Step 0.5's outcomes — a slot missing a verdict the step can produce is the
+  DESCENDING gap `/audit` 2026-09-02 M-8 names)
 
 ### Cross-cutting concerns (Step 1.1 → Steps 3/4/13) — ALWAYS report, never omit:
 - Classified at Step 1.1: [N] (R → rules, A → decisions, T → tasks)

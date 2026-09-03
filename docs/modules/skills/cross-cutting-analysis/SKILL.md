@@ -16,6 +16,9 @@ derived_from: null
 
 # Cross-cutting Analysis
 
+**ALWAYS PRESENT the detected themes for human curation, and NEVER write a Cross-cutting Concerns section from heuristics alone** — the heuristics propose; the owner decides.
+**ALWAYS REPORT — `cross-cutting: N themes proposed, M kept` or `none — no theme spans 2+ sections`. NEVER emit nothing.**
+
 ## When to run
 
 This skill operates in two modes depending on the caller:

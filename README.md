@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.12.1
+# Agentic Engineering Framework v2.13.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -138,7 +138,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.12.1)
+│   ├── modules/                            ← Single source of truth (v2.13.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -154,7 +154,7 @@ agentic_engineering/
     └── [project-name]/                 ← Each project gets its own git repo
 ```
 
-**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes + 1 utility. The 15 process skills, 10 agent templates and 5 rules templates live under `docs/modules/` as **templates**, and each project receives a TIER-GATED SUBSET of them — 12 skills + 3 rules at the baseline, the full set only at `production-financial` — copied into that project's `.claude/`, never into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
+**Note on `.claude/` vs `docs/modules/`:** the framework repo's own `.claude/` is minimal — only what it needs to run its own 5 session modes + 1 utility. The 15 process skills, 10 agent templates and 5 rules templates live under `docs/modules/` as **templates**, and each project receives a TIER-GATED SUBSET of them — 12 skills + 3 rules at the baseline, the full set from `production` upward (`bootstrap.md` gates codebase-audit/skill-gate at internal-tool+ and framework-audit/ops-rules/quality-budgets at production+) — copied into that project's `.claude/`, never into the framework's own. This asymmetry is intentional: the framework repo has no code to review, so it doesn't need `.claude/agents/` itself.
 
 ---
 

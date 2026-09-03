@@ -12,6 +12,9 @@ derived_from: 'session_protocol "Mid-session context recovery" — section of do
 
 # Context Recovery
 
+**ALWAYS RE-READ the phase documents before resuming work, and NEVER resume from memory of an earlier turn.**
+**ALWAYS REPORT — `context recovered: [documents re-read]` or `recovery skipped — [reason]`. NEVER emit nothing.**
+
 ## When to run
 
 When context quality is degrading mid-session (contradicting decisions, forgetting patterns, inconsistent results). The user can also trigger this by saying "save state and start fresh".

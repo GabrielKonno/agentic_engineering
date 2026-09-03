@@ -6,7 +6,7 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
 > This directory contains 15 skills: 12 **lifecycle** — ALWAYS copied, broken down as
-> 6 implementation + 3 session lifecycle + 1 whole-segment orchestration + 1 PRD process +
+> 1 during-implementation + 5 session-end + 3 session lifecycle + 1 whole-segment orchestration + 1 PRD process +
 > 1 commit workflow; their `invocation:` field varies independently of that (`user` for the ones
 > the owner calls, `inline` for the ones other components read) — plus 3 **tier-gated** skills
 > (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the

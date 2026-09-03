@@ -160,6 +160,8 @@ session — never silently give up on the proposal.
 only: 2 test scenarios per rules-agents-updater Step 4. The gate replaces self-approval, not the
 behavioral eval. This is owed by every promotion, in observation mode and out of it, in a
 sprint-approved session and outside one.
+**ALWAYS REPORT — `creation eval: [component] N/2 scenarios passed` or `N/A — not an
+`invocation: subagent` agent`. NEVER emit nothing** (`/audit` 2026-09-02 M-50).
 
 ## Consuming components with `verified: false`
 

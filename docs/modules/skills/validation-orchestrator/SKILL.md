@@ -126,15 +126,15 @@ so a single pass structurally cannot reach the third.
 
 **Pass 2 — ALWAYS, after the VALIDATOR's report comes back, before processing its verdict:**
 4. READ the Coverage Gap Declaration section of the **validator's own report** and repeat steps
-   2-3 for every gap it declares. The validator is the only declarer of the `visual regression
-   gap` on the UI path, and without this pass that declaration is written into a report nobody
-   re-reads (`/audit` 2026-09-02 K-4).
+   2-3 for every gap it declares. The validator declares the `visual regression gap` from INSIDE its own report; code-reviewer declares the same gap earlier on the same trigger, so pass 1 may already have closed it — pass 2 exists because the validator's declaration arrives after pass 1 has run.
 5. A specialist spawned in pass 2 returns AFTER the validator, so its report cannot be evidence
    FOR the validator: attach it to the validation report as a post-hoc finding, and if it
    contradicts a ✅ the validator gave, treat that as a ❌ and re-enter the fix loop.
 
 **ALWAYS REPORT — `coverage gaps: pass 1 [N declared, M spawned] | pass 2 [N declared, M spawned]`,
-or `none declared` for either pass. NEVER emit nothing.**
+or `none declared` for either pass — IN THE VALIDATION REPORT's `Coverage Gap Declaration` section
+AND in the session's own output. NEVER emit nothing.** (The line had no destination; a report
+mandate without one is owed by nobody — `/audit` 2026-09-02 M-18.)
 This instruction is generic — it names no specific agents and adds zero cost when
 no coverage gaps are declared.
 
@@ -165,7 +165,7 @@ no coverage gaps are declared.
 
 Each subagent is a fresh Agent tool instance — isolated context.
 
-**Ordering — ALWAYS:** spawn code-reviewer FIRST; spawn validator LAST, passing it all prior reports.
+**Ordering — ALWAYS:** spawn code-reviewer FIRST; spawn validator LAST of the JUDGING chain (a pass-2 specialist may run after it — see the coverage-gap passes; `/audit` M-21), passing it all prior reports.
 
 ---
 
@@ -182,7 +182,7 @@ Each subagent is a fresh Agent tool instance — isolated context.
 - Tests:      ✅/❌/⏭️  (N executed / N failed — ALWAYS the count, never just the verdict)
 - Review:     ✅/❌
 - Security:   ✅/❌/⏭️
-- Mutation:   ✅/⏭️  (N mutants, N NEUTER)
+- Mutation Tests:   ✅/⏭️  (N mutants, N NEUTER)
 - DB:         ✅/❌/⏭️
 - UI:         ✅/❌/⏭️
 - Migration:  ✅/❌/⏭️

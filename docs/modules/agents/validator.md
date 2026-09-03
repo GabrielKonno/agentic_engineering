@@ -89,7 +89,7 @@ with ZERO executed, or a summary you could not parse, is ❌ with the reason —
 [Browser-automation result: pages visited, snapshot findings, responsive (≤430px) and
  cross-browser coverage actually exercised. ❌ with the reason if the browser-automation MCP was
  unavailable — inference is NEVER a substitute. ⏭️ if no UI files were modified.
- BASELINE-CREATED when the visual-regression specialist ran and captured first baselines.]
+ BASELINE-CREATED when the visual-regression specialist ran and captured first baselines — reachable only when the CODE-REVIEWER declared the gap, since a specialist spawned from THIS report's own declaration runs after this row is written (`/audit` 2026-09-02 M-20).]
 
 ### Migration: ✅/❌/⏭️
 [migration ran + rollback verified — or "no migration files in diff" — or "destructive without rollback: ❌"]

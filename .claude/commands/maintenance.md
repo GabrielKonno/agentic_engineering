@@ -8,10 +8,11 @@ This is a framework maintenance session, not a project bootstrap.
 - Edit `CLAUDE.md` (framework contract)
 - Edit `README.md`
 - Edit this repo's OWN runtime under `.claude/` — `commands/`, `rules/`, `skills/`. The framework
-  evolves its own session modes here, and four numbered items below MANDATE it (item 4's class
-  sweep, item 5's back-sweep of this repo's `.claude/`, item 6's liveness guard over
-  `.claude/skills/`, and item 7's version bump, whose canonical set includes
-  `.claude/commands/existing_project_adaptation.md`) — as does the "New component creation"
+  evolves its own session modes here, and several checklist items MANDATE it **by NAME, never by
+  ordinal** (`/audit` 2026-09-02 M-52 — an ordinal list here is an inventory surface that goes
+  stale on the next insertion): the class sweep, the back-sweep of this repo's own `.claude/`, the
+  liveness guard over `.claude/skills/`, and the version bump, whose canonical set includes
+  `.claude/commands/existing_project_adaptation.md`. So does the "New component creation"
   section, which places new components under this repo's own `.claude/` when the framework needs
   them at runtime.
 - Write lineage and audit records under `assets/docs/` — Upstream intake step 4 MANDATES the
@@ -152,7 +153,9 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    correcting ALL live copies in the SAME session — executed surfaces first (commands,
    templates the AI obeys), descriptive surfaces second. Grep, never memory.
    **ALWAYS REPORT the result — `inventory sweep: N surfaces checked, M stale claims fixed` or
-   `inventory sweep: N/A — no artifact added, removed, renamed or split`. NEVER emit nothing.**
+   `inventory sweep: N/A — no artifact added, removed, renamed or split`. NEVER emit nothing, and
+   ALWAYS NAME THE SURFACES** — a bare count cannot be re-measured by the audit that reads it, and
+   an unfalsifiable receipt is not a receipt (`/audit` 2026-09-02 M-54).
    A count that lives in PROSE (a NOTE paragraph, an intro sentence) is the one that survives a
    sweep of the diagram — grep the NUMBER across the file, never only the structure.
    **ORDINAL SWEEP — ALWAYS run it when you INSERT or REORDER a numbered item in any list.**
@@ -172,7 +175,10 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    session and flag any whose verb is descriptive present tense ("keeps", "verifies",
    "declares") — that is the exact form the audit's dimension C fails.
    **ALWAYS REPORT the result — `instruction style: N new behavioral instructions checked, M
-   rewritten` or `instruction style: N/A — no normative text written`. NEVER emit nothing.**
+   rewritten` or `instruction style: N/A — no normative text written`. NEVER emit nothing, and
+   ALWAYS STATE THE UNIT you counted** (e.g. "a line carrying a CAPS imperative a session must
+   execute") — without it the number is not reproducible and the receipt is unauditable
+   (`/audit` 2026-09-02 M-54).
 
 3. **Reference & isolation verification** (as already required by Upstream intake step 6,
    but for EVERY maintenance change, not only upstreams): cross-references resolve (grep
@@ -238,10 +244,25 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    invoker of the same shape; a rule applied to one of N twins is a back-sweep MISS, not a fix.
    `evolution-policy.md` already mandates back-sweep for PROJECTS — this item is the mother repo
    applying that discipline to itself.
-   **ALWAYS REPORT the result — `back-sweep: [rule] applied to N artifacts` or
-   `back-sweep: N/A — no process rule promoted`. NEVER emit nothing.** Per component-design §6, a
-   self-check must be executed AND REPORTED; a silent back-sweep is indistinguishable from a
-   skipped one.
+   **MECHANICAL FORM — ALWAYS produce this table, one row per rule promoted.** Prose is what let
+   this item pass while a rule it named was applied to 1 of 6 artifacts (`/audit` 2026-09-02 M-39).
+   A back-sweep without a DENOMINATOR is not a control:
+
+   | Rule promoted | Shape it governs | Grep that ENUMERATES the shape | N found | N fixed | Re-run |
+   |---|---|---|---|---|---|
+   | [one line] | [what kind of artifact it retroactively condemns] | [the actual command] | [count] | [count] | [0 remaining] |
+
+   **ALWAYS STATE the denominator, and ALWAYS make `N fixed` equal `N found`** or name the
+   exception on that row. **`N found` comes from RUNNING the grep, never from reading.** On the run
+   that catalogued this item, reading said 4 of 6 agent blocks failed a newly promoted rule, the
+   grep agreed — and after fixing those 4 it found **two more the reading had passed**.
+   **ALWAYS RE-RUN the grep after fixing and report the second result — expected: 0 remaining.**
+
+   **ALWAYS REPORT — `back-sweep: N rules, M artifacts fixed of M found, re-run clean` or
+   `back-sweep: N/A — no process rule promoted`. NEVER emit the total without the table.** Per
+   component-design §6 a self-check must be executed AND REPORTED; a silent back-sweep is
+   indistinguishable from a skipped one, and an UNMEASURED one is indistinguishable from a
+   partial one.
 
 6. **Component liveness — re-check the frontmatter of every component edited this session.**
    ALWAYS run the guard over this repo's OWN `.claude/skills/` and `.claude/agents/` after touching
@@ -356,9 +377,9 @@ this section is its invoker. A bump publishes the current state as a contract; t
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 
-- **MINOR** (`v2.11.0` → `v2.12.0`): a new rule/section/template, an upstream absorption, or a
+- **MINOR** (`v2.12.1` → `v2.13.0`): a new rule/section/template, an upstream absorption, or a
   schema change to a document projects receive.
-- **PATCH** (`v2.12.0` → `v2.12.1`): corrections that add no new contract — broken references,
+- **PATCH** (`v2.13.0` → `v2.13.1`): corrections that add no new contract — broken references,
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
@@ -423,10 +444,21 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    audit cannot check any of them.
 5. **State explicitly which findings were NOT applied and why.** Deferring is legitimate;
    silently dropping is not — they must still read `open` for the next carry-forward.
+   **When the owner decides NOT to fix an ESCALATED finding, ALWAYS WRITE AN ACCEPTED-RISK RECORD
+   into the report file.** `/audit` Phase 3 CONSUMES such records (`accepted-risk — see [record]`)
+   and nothing said who authors them (`/audit` 2026-09-02 M-37). The record ALWAYS carries five
+   fields; one missing field means it is not a closure:
+   - **Decision** — one line, in the owner's terms.
+   - **Working tree** — what changed, plus the MEASURED residual count (expected 0).
+   - **Residue** — what remains, where, and why it is accepted.
+   - **Standing instruction to future `/audit` runs** — report it as an OBSERVATION citing this
+     record; NEVER as `open`, NEVER as grounds to propose a history rewrite.
+   - **What WOULD re-open it** — stated explicitly, or the record closes more than it should.
+   **ALWAYS set that finding's status to `accepted-risk — see [record]`**, never to `applied`.
 6. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
-   moment where the fixes themselves are the least-verified thing in the repo: the four documented executions of
-   this pass found defects in **4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) and **8 of 17** (Run 4)
+   moment where the fixes themselves are the least-verified thing in the repo: the five documented executions of
+   this pass found defects in **4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5)
    applied findings, and step 2's
    re-verification runs BEFORE applying, never after. Report
    `verification audit: proposed / ran / skipped — [owner deferred]`; NEVER nothing.

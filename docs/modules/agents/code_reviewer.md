@@ -236,10 +236,13 @@ or booking/reservation logic:**
 > Visual regression gap: this review reads the diff, not rendered pixels — a shared component or
 > CSS-variable change can be correct in code and still shift every screen that consumes it.
 > Recommend: search `.claude/agents/` for a visual regression agent (baseline capture and
-> screenshot diffing across the affected screens). NOTE — this block deliberately OMITS the
-> "and invoke before validator if found" closer the other four gaps carry: the validator ALSO
-> declares this gap (`validator.md`), so the specialist may legitimately be spawned after the
-> validator's report. The divergence is intentional and stated rather than silent (`/audit` K-31).
+> screenshot diffing across the affected screens).
+
+*(Authoring note, NOT part of the report text: this block deliberately omits the "and invoke before
+validator if found" closer the other four gaps carry, because the validator ALSO declares this gap
+and the specialist may legitimately be spawned after the validator's report. Everything inside the
+`>` blocks above is the literal text this agent emits — framework meta-commentary must never sit
+there; `/audit` 2026-09-02 M-17.)*
 
 **If diff modifies multi-table operations, cascading deletes, or denormalized data:**
 > Data integrity gap: inline review checks referential integrity patterns.

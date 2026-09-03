@@ -24,12 +24,16 @@ Before any non-trivial commit, or whenever `git status` might have surprises.
 Run `git status` and show the user exactly which files are staged, unstaged, and untracked.
 
 ### Step 2 — Verify intent
+
+**ALWAYS CONFIRM every staged file belongs to this commit's stated purpose, and UNSTAGE what does not.**
 For each staged file, confirm it belongs to the current commit's intent.
 - If ALL staged files match → proceed to Step 3
 - If ANY staged file does NOT match → STOP. List the mismatched files, unstage them with
   `git restore --staged <file>`, and ask user to confirm before proceeding.
 
 ### Step 3 — Group logical commits
+
+**ALWAYS PROPOSE a split when the staged set spans more than one logical change** — NEVER commit a mixed set silently.
 If staged files span multiple unrelated concerns, propose splitting into separate commits.
 Ask user to confirm the grouping before committing.
 
@@ -41,6 +45,8 @@ Write a conventional commit message following the project's existing style:
 - Include WHY when non-obvious
 
 ### Step 5 — Commit
+
+**ALWAYS RUN the commit with the message composed above, and NEVER amend a commit that is already pushed.**
 Run `git commit` with the drafted message, ending with:
   Co-Authored-By: Claude <noreply@anthropic.com>
 

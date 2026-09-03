@@ -23,11 +23,11 @@ fully cover → main Claude reads the gap declaration in the report → searches
 `.claude/agents/` descriptions for a matching specialist → spawns if found.
 
 **Why this exists:** Subagents cannot spawn other subagents (Claude Code hard limit).
-The reviewer cannot call the specialist directly. Gap declarations bridge this by
+A declaring component cannot call the specialist directly. Gap declarations bridge this by
 routing activation through main Claude.
 
 **When adding a new specialist domain:**
-1. Add a gap declaration to the appropriate reviewer using the specialist's key vocabulary
+1. Add a gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the validator) using the specialist's key vocabulary
 2. Create the agent with a Pushy Description that echoes that vocabulary
 3. Add a "When spawned" section explaining context needs and report outcomes
 4. Zero changes to orchestration (validation-orchestrator) needed
@@ -39,7 +39,7 @@ Agent descriptions must communicate both PURPOSE and ACTIVATION. Structure:
 ```
 [Core function — what the agent does, how it does it, what value it adds].
 USE PROACTIVELY when [trigger conditions]
-  or when [reviewer] declares a [domain] gap.
+  or when [declaring component] declares a [domain] gap.
 NOT needed for [exclusions].
 Without this, [consequence of skipping].
 Produces [Report Name] → [OUTCOME_A / OUTCOME_B].
@@ -54,7 +54,7 @@ transaction isolation analysis, lock pattern verification, and controlled
 parallel request probes."
 
 **Activation lines:**
-- The gap phrase MUST echo the reviewer's gap declaration verbatim
+- The gap phrase MUST echo the DECLARING COMPONENT's gap declaration verbatim — and when two components declare the same gap, name both (`code-reviewer or validator`)
 - Trigger conditions should name specific file types or code patterns
 - Exclusions prevent false activation on unrelated diffs
 
@@ -70,7 +70,7 @@ The activation chain has three layers that must use matching vocabulary:
 |-------|----------|------------|
 | validation-orchestrator | Reads gap declarations from reports | "Coverage Gap Declaration" |
 | Declaring component (code-reviewer, security-reviewer, **validator**) | Gap declaration in report | "X gap: ... Recommend: search .claude/agents/" |
-| Specialist agent | Pushy Description | "when [reviewer] declares a X gap" |
+| Specialist agent | Pushy Description | "when [declaring component] declares a X gap" |
 
 If vocabulary breaks at ANY link, the specialist exists but is never spawned.
 

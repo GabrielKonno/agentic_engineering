@@ -35,8 +35,8 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 ## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
 
 An audit run has two modes. They differ in what each agent is told to look at, and the difference
-is not cosmetic: across its four documented executions the verification mode found defects in
-**4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) and **8 of 17** (Run 4) already-`applied` findings. The mode was practice
+is not cosmetic: across its five documented executions the verification mode found defects in
+**4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5) already-`applied` findings. The mode was practice
 before it was instruction — executed twice with its verdict vocabulary supplied by the invoking
 prompt rather than by this file. That gap is what this phase closes.
 
@@ -48,7 +48,7 @@ in its prose, `12 clean` in its score line, over 26 rows for 24 findings). State
 **ALWAYS DECIDE the mode from the trigger, and ALWAYS STATE it in the report header —
 `mode: baseline` or `mode: verification (over sHASH)`. NEVER emit nothing.**
 
-**The rows below are the FOUR events in `CLAUDE.md` → "When it runs", and nothing else.** That
+**The rows below are the FOUR events in `CLAUDE.md` → the `**When it runs**` paragraph under **Utilities**, and nothing else.** That
 list is the authority; this table only maps each event to a mode. **NEVER add a trigger here that
 `CLAUDE.md` does not carry** — in particular never a time-based one: `CLAUDE.md` says "ALWAYS one
 of these events, **never a remembered interval**", and a scheduled row here would be a trigger with
@@ -169,6 +169,16 @@ CHECKS:
   D16.2. From each project's own CLAUDE.md / project.md (read-only), harvest additional
          identifiers: client/person names, deployment domains (*.vercel.app, custom
          domains), repo URLs, infra refs (e.g. Supabase project ids).
+  D16.2c. **THIRD SOURCE — source-project CODE identifiers. ALWAYS derive it; never stop at two.**
+         Harvest every camelCase / snake_case identifier appearing in CODE EXAMPLES inside
+         `docs/modules/**`, `examples/**` and `.claude/**`, then cross-grep each against the
+         projects' own `*.ts/*.tsx/*.js/*.sql/*.py` sources. A hit means a source-project
+         function, table, column or route name is shipping inside a framework template.
+         **Standard industry names are LEGITIMATE** (`order_items`, `organization_members`,
+         `organizationId` — canonical schema vocabulary that identifies nobody); a HAND-ROLLED
+         name is not. `CLAUDE.md` declares this source; it was documented there and absent here
+         for one full batch, which is why a source-project function name in a shipped template
+         survived four consecutive runs (`/audit` 2026-09-02 L-19, M-36).
   D16.2b. ALSO scan for VALUE-shaped leaks (data, not just identifiers), by format:
          secret shapes (JWT `eyJ...`, key prefixes sk-/ghp_/AKIA/xox, `user:pass@`
          connection strings, long Bearer tokens), PII shapes (BR phone `+55...`,
@@ -176,7 +186,10 @@ CHECKS:
          Mentions of the CONCEPTS (security rules teaching about secrets) and
          detection regexes inside scanner examples are legitimate — only actual
          VALUES and synthetic-fixture violations (non-obviously-fake PII) fail.
-  D16.3. Grep every framework-layer file for every blocklist entry, case-insensitive:
+  D16.3. **`.claude/settings.local.json` is EXEMPT** — gitignored, machine-local, and auto-written
+         by the permission prompt with absolute paths that necessarily contain project folder
+         names. NEVER report it as a hit (`CLAUDE.md` declares the exemption; `/audit` K-37, M-36).
+         Grep every OTHER framework-layer file for every blocklist entry, case-insensitive:
          all TRACKED files AND `.claude/docs/` (gitignored agent notes — the isolation
          principle covers the agent's own documents too). Exclude only projects/ and .git/.
   D16.3b. Agent-layer scan (MANDATORY when resolvable): the agent's persistent memory
@@ -374,10 +387,12 @@ CHECKS:
   D6.3. For each gap phrase: search ALL agent descriptions in docs/modules/agents/ AND
         examples/agents/ for matching vocabulary in the description: field
   D6.4. The match must be exact or near-exact (per component-design.md §3 vocabulary alignment)
-  D6.5. Report broken links: gap declared by reviewer but NO specialist agent has matching
-        description (= specialist will never be activated)
-  D6.6. Report orphaned specialists: agent description references a gap phrase that no
-        reviewer declares (= agent exists but can never be triggered)
+  D6.5. Report broken links: gap declared by ANY declaring component (see D6.8 — there are three,
+        not two) but NO specialist agent has matching description (= specialist never activated)
+  D6.6. Report orphaned specialists: agent description references a gap phrase that **no declaring
+        component** declares (= agent exists but can never be triggered). **Scope this to the
+        D6.8 set, never to the two reviewers** — a validator-declared gap would otherwise read as
+        an orphaned specialist (`/audit` 2026-09-02 M-13).
   D6.7. **INSTALL-LINK PARITY — the link that has broken TWICE.** For every gap from D6.1/D6.2
         AND every gap D6.8 attributes to any OTHER declaring component (run D6.8 first),
         verify a matching row exists in the specialist install table of BOTH
@@ -406,8 +421,10 @@ CHECKS:
   D7.4. Flag the anti-pattern: descriptions that are ONLY triggers ("USE PROACTIVELY when X.
         NOT needed for Y. Without this Z.") with NO core function statement
   D7.5. Note: process agents (prd-sync-checker, criteria-enforcer, diff-pattern-extractor)
-        use "MUST run" style — acceptable per their protocol role. Validator and arbitrator
-        are spawned by protocol, not gap declaration. The Pushy Description pattern is most
+        use "MUST run" style — acceptable per their protocol role. **Validator, arbitrator,
+        red-team and blue-team are spawned by PROTOCOL, not by gap declaration**, so a PARTIAL
+        verdict on them is sanctioned and not a finding (red-team and blue-team were missing from
+        this list, which made both read as unexplained PARTIALs — `/audit` 2026-09-02 M-22). The Pushy Description pattern is most
         critical for specialist agents in examples/agents/.
 
 REPORT FORMAT:
@@ -421,9 +438,9 @@ REPORT FORMAT:
 
 ### [D6] Vocabulary Alignment
 - Status: PASS / FAIL
-- Gap declarations found:
-  - code-reviewer: [list of gap names]
-  - security-reviewer: [list of gap names]
+- Gap declarations found — **one sub-bullet per DECLARING COMPONENT the D6.8 grep returned, not a
+  fixed pair** (`/audit` 2026-09-02 M-13):
+  - [component]: [list of gap names]
 - Specialist matches:
   | Gap | Declared by | Specialist file | Phrase match | bootstrap install row | EPA install row |
   |-----|-------------|-----------------|--------------|-----------------------|-----------------|
@@ -497,8 +514,11 @@ CHECKS:
         cited text resolves to a REAL markdown heading (`#`/`##`/`###`) in the target file.
         **The FINDING is a citation whose target is not a heading at all** — a bold paragraph
         lead-in is NOT a heading, and that is the recurring defect (H-19a, J-4, J-17, K-14).
-        **SANCTIONED and NOT a finding:** citing the PREFIX of a `## Name — subtitle` heading, or
-        dropping a trailing parenthetical. `## Name — subtitle` is this repo's dominant heading
+        **SANCTIONED and NOT a finding:** citing the PREFIX of a `## Name — subtitle` heading;
+        dropping a trailing parenthetical; or dropping a LEADING ORDINAL
+        (`§"MODEL SWITCH entries"` → `### 4. MODEL SWITCH entries`). The three forms must stay
+        co-extensive with the RED list below — they were not, which left the ordinal case saved
+        only by omission (`/audit` 2026-09-02 M-30). `## Name — subtitle` is this repo's dominant heading
         shape and ~15 citation sites legitimately cite the name half; flagging them would fire the
         check on the healthy state, which is how the RELOCATE check had to be repaired (K-8).
         **RED is:** the target is not a heading; the prefix is ambiguous (matches two headings in
@@ -523,8 +543,10 @@ CHECKS:
          trigger letters (a)-(d), and `session_rules.md` → "Execution proof". Apply D8.7's
          exact-match rule. These two files are EXECUTED every maintenance and audit session; a
          dangling citation here misroutes the session itself.
-  D10.6. **TRIGGER-LIST PARITY.** `audit.md` Phase 0's trigger table and `CLAUDE.md` → "When it
-         runs" MUST name the same set of events. A trigger present in one and absent from the
+  D10.6. **TRIGGER-LIST PARITY.** `audit.md` Phase 0's trigger table and the
+         `**When it runs**` paragraph under **Utilities** in `CLAUDE.md` MUST name the same set of
+         events. (That paragraph is a bold lead-in, not a heading — cite it as such;
+         `/audit` 2026-09-02 M-25.) A trigger present in one and absent from the
          other is a FINDING in whichever direction — an unowned trigger (`/audit` K-18) or an
          undocumented one.
   D10.7. Report any reference that does NOT resolve
@@ -796,8 +818,9 @@ After ALL 6 agents return, consolidate their reports into a single audit report.
 **Dimensions checked:** 17 [+ a Part 1 fix-verification pass, in verification mode]
 **Agents dispatched:** 6
 
-**carried: [N] open from [previous report file]** | `carried: none — first audit` — ALWAYS present
-(Phase 3 item 4)
+**carried: [N] open + [M] escalated from [previous report file]** | `carried: none — first audit`
+— ALWAYS present. **Plus one OBSERVATION line per `accepted-risk` item**, citing its record and
+never re-opening it (Phase 3's carry-forward report item; `/audit` 2026-09-02 M-26).
 
 ## Part 1 — Verification ledger for [sHASH]   ← verification mode ONLY; omit the whole section in baseline
 
@@ -851,6 +874,12 @@ Group FAIL items by priority:
 1. **Quick fixes** — version mismatches, count corrections (single-line edits)
 2. **Structural fixes** — missing references, broken activation chains
 3. **Quality improvements** — instruction style, description compliance
+4. **ESCALATED — owner decision required** — ALWAYS its own group, never folded into the three
+   above. A pushed privacy hit, a history rewrite, or any fix this repo cannot make alone belongs
+   here with the decision stated plainly. Omitting the lane is how an escalated item ends up
+   looking like a deferred quick fix (`/audit` 2026-09-02 M-26).
+5. **ACCEPTED-RISK — no action** — one line per item, citing its record. Present so a reader can
+   see the item was decided, not forgotten.
 
 ### Meta-observation — ALWAYS present (`## Meta-observation`)
 

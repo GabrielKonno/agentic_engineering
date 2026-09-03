@@ -12,6 +12,9 @@ derived_from: 'session_protocol end-of-session item 4 — section of docs/agenti
 
 # Config File Updater (CLAUDE.md)
 
+**ALWAYS UPDATE only the sections whose facts changed this session, and NEVER rewrite CLAUDE.md wholesale** — the file is an orchestrator, not a log.
+**ALWAYS REPORT — `CLAUDE.md: [sections changed]` or `no change — nothing this session altered a documented fact`. NEVER emit nothing.**
+
 ## When to run
 At the END of every session, after pendencias-updater. Only if changes are relevant.
 

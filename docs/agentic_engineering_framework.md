@@ -962,7 +962,10 @@ Report template categories:
   plus every declared coverage gap with no specialist report as evidence, flagged ⚠️ and NEVER ❌
 - Overall: ✅ PASS / ❌ FAIL
 
-**Twin rule — stated precisely, because the loose version was false at birth.** This list and
+**Twin rule — stated precisely, because the loose version was false at birth. There are THREE
+surfaces, not two:** this list, `docs/modules/agents/validator.md`'s Output template, and
+`docs/modules/skills/validation-orchestrator/SKILL.md`'s own abbreviated report list — which was
+an undeclared third copy no sync rule reached (`/audit` 2026-09-02 M-14). This list and
 `docs/modules/agents/validator.md`'s Output template are TWINS **except for the one row marked
 ORCHESTRATOR-ONLY above**. ALWAYS, when adding or renaming a category: add it to BOTH lists AND to
 `validator.md`'s `produces:` field, using the SAME verdict vocabulary in all three. `validator.md`
