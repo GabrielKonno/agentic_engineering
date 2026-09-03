@@ -227,7 +227,7 @@ For every document that already exists: **DO NOT overwrite.** Read it, identify 
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.14.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.14.1 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
 □ Commands section
@@ -500,7 +500,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.14.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.14.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -869,7 +869,7 @@ If a gap was KEPT but no matching example exists in `assets/examples/agents/`: r
 gap that installs nothing and registers nothing is a gap the project can never act on.
 
 After installation, validate activation chains for every pre-installed specialist:
-1. Verify it has a matching Coverage Gap Declaration in the reviewer whose domain vocabulary echoes the agent's Pushy Description
+1. Verify it has a matching Coverage Gap Declaration in the declaring component whose domain vocabulary echoes the agent's Pushy Description
 2. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
 
 ---
@@ -940,14 +940,14 @@ echo "=== Known Bug Patterns have efficacy tracking? ==="
 grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
 
 echo "=== Activation chain integrity? ==="
-# For each specialist agent (not process/core agents), verify a reviewer declares a matching gap
+# For each specialist agent (not process/core agents), verify a declaring component declares a matching gap
 for f in projects/$ARGUMENTS/.claude/agents/*.md; do
   agent_name=$(basename "$f" .md)
   # Skip process agents and core agents (they are gap sources or protocol-spawned, not gap targets)
   case "$agent_name" in
     code-reviewer|security-reviewer|validator|arbitrator|criteria-enforcer|prd-sync-checker|diff-pattern-extractor|red-team|blue-team) continue ;;
   esac
-  # Extract domain from Pushy Description ("when [reviewer] declares a [domain] gap")
+  # Extract domain from Pushy Description ("when [declaring component] declares a [domain] gap")
   domain=$(grep -oP 'declares a \K\S+(?= gap)' "$f" 2>/dev/null | head -1)
   if [ -n "$domain" ]; then
     found=0

@@ -294,6 +294,15 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    |---|---|---|---|---|---|
    | [one line] | [what kind of artifact it retroactively condemns] | [the actual command] | [count] | [count] | [0 remaining] |
 
+   **THE GREP MUST COUNT VIOLATIONS, NEVER PRESENCE.** This is the single property that separates
+   a row that works from a row that cannot: a RESIDUE grep returns 0 when the state is correct, so
+   `0 remaining` is reachable; a PRESENCE grep returns N when the state is correct, so `0` is
+   unproducible and the row reports a number its own command never returns. On this form's first
+   execution, 1 of 3 rows used a residue grep and did real work; the other 2 used presence greps
+   and both claimed a `0 remaining` their commands could not produce
+   (`/audit` 2026-09-03 N-40). **Before writing a row, RUN its grep against the UNFIXED state and
+   confirm it returns non-zero** — a grep that is already 0 before the fix is measuring nothing.
+
    **ALWAYS STATE the denominator, and ALWAYS make `N fixed` equal `N found`** or name the
    exception on that row. **`N found` comes from RUNNING the grep, never from reading.** On the run
    that catalogued this item, reading said 4 of 6 agent blocks failed a newly promoted rule, the
@@ -419,7 +428,7 @@ this section is its invoker. A bump publishes the current state as a contract; t
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 
-- **MINOR** (`v2.13.0` → `v2.14.0`): a new rule/section/template, an upstream absorption, or a
+- **MINOR** (`v2.14.1` → `v2.15.0`): a new rule/section/template, an upstream absorption, or a
   schema change to a document projects receive.
 - **PATCH** (`v2.14.0` → `v2.14.1`): corrections that add no new contract — broken references,
   counts, typos, instruction-style rewrites.

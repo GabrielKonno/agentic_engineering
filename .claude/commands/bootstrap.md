@@ -604,10 +604,10 @@ For every specialist agent created or pre-installed in Steps 7-12.5a that uses g
 For each remaining specialist agent:
 
 1. Verify it has a matching Coverage Gap Declaration in code-reviewer.md or security-reviewer.md whose domain vocabulary echoes the agent's Pushy Description
-2. If no match: add the gap declaration to the appropriate reviewer following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
-3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md` — the domain must appear in at least one reviewer
+2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the validator) following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
+3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md` — the domain must appear in at least one declaring component
 
-This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the reviewer-to-orchestrator-to-specialist activation chain is broken.
+This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the declarer-to-orchestrator-to-specialist activation chain is broken.
 
 ---
 

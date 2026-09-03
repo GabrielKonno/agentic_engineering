@@ -122,16 +122,17 @@ FILES TO READ:
 2. CLAUDE.md (the "Repository Structure" section with ASCII diagram)
 3. List contents of .claude/skills/ (folders only)
 4. List contents of docs/modules/skills/ (folders only, exclude README.md)
-5. ALL tracked files (D16.3) — `git ls-files`
-6. `.claude/docs/` (D16.3) and `docs/modules/**` + `examples/**` (D16.4, double scrutiny)
-7. Each project's own `CLAUDE.md` / `.claude/phases/project.md` / `assets/docs/prd.md` (D16.2),
+5. A LISTING of `projects/` — the folder names themselves (D16.1 builds the blocklist from them)
+6. ALL tracked files (D16.3) — `git ls-files`
+7. `.claude/docs/` (D16.3) and `docs/modules/**` + `examples/**` (D16.4, double scrutiny)
+8. Each project's own `CLAUDE.md` / `.claude/phases/project.md` / `assets/docs/prd.md` (D16.2),
    and each project's CODE and SCHEMA files — needed by the third blocklist source `CLAUDE.md`
    declares. **That source is NOT yet a numbered check in D16 below** (`/audit` 2026-09-02 M-36);
    the files are listed here so installing it does not require touching this list again.
-8. The agent's persistent memory directory, every file incl. `MEMORY.md` (D16.3b) — path resolved
+9. The agent's persistent memory directory, every file incl. `MEMORY.md` (D16.3b) — path resolved
    from the session context
-9. Git history: `git rev-list --all` contents AND `git log --all` messages (D16.3c)
-10. The PREVIOUS audit report in `assets/docs/` — required to emit the `accepted-risk` OBSERVATION
+10. Git history: `git rev-list --all` contents AND `git log --all` messages (D16.3c)
+11. The PREVIOUS audit report in `assets/docs/` — required to emit the `accepted-risk` OBSERVATION
     Phase 3 mandates instead of re-reporting a closed item as a hit
 
 **Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
@@ -612,6 +613,8 @@ FILES TO READ:
 11. From `examples/`: **LIST ALL** files in `agents/`, `skills/`, `rules/` and COUNT them (D15.7),
     then READ a representative sample of 3 agents, 2 skills and 2 rules for the convention checks
     (D12.2). D12.6's truth-tests measure across the FULL set, never the sample.
+12. **LISTINGS of `docs/modules/skills/` and `docs/modules/agents/`** — D15.5 and D15.6 compare the
+    README's claims against the disk and cannot run without them
 
 **Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
@@ -732,7 +735,8 @@ INPUTS:
 2. .claude/commands/*.md (all commands — what IS documented)
 3. CLAUDE.md ("Session Modes", "What You Do Here", "Rules")
 4. README.md (workflow sections)
-5. docs/modules/ templates that reference MOTHER-REPO behaviors — grep for
+5. `docs/` AS A WHOLE for D17.3's aspirational-mechanism grep (`docs/agentic_engineering_framework.md`
+   included), and within it the `docs/modules/` templates that reference MOTHER-REPO behaviors — grep for
    "mother framework", "framework repo", "/maintenance", "upstream", "lineage"
 6. assets/docs/ — the lineage records (what past absorption sessions did) AND every
    `assets/docs/audit-*.md` report, including `assets/docs/audit-YYYY-MM-DD.md` for this run:

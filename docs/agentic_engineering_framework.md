@@ -1737,13 +1737,13 @@ Specialist agents (pre-installed at bootstrap from `examples/agents/` when match
 description: >
   [Core function — what the agent does, how, what value it adds].
   USE PROACTIVELY when [trigger conditions]
-    or when [reviewer] declares a [domain] gap.
+    or when [declaring component] declares a [domain] gap.
   NOT needed for [exclusions].
   Without this, [consequence of skipping].
   Produces [Report Name] → [OUTCOME_A / OUTCOME_B].
 ```
 
-The core function line is mandatory — without it, the description is a trigger with no substance. The gap phrase must echo the reviewer's gap declaration verbatim for reliable semantic matching.
+The core function line is mandatory — without it, the description is a trigger with no substance. The gap phrase must echo the DECLARING COMPONENT's gap declaration verbatim — and when two components declare the same gap, name both (`code-reviewer or validator`) for reliable semantic matching.
 
 See `.claude/rules/component-design.md` (or `modules/rules/component_design.md` template) for the full Component Design Policy covering gap-declaration architecture, vocabulary alignment, and tiered agent-vs-rule decisions.
 
