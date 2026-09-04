@@ -753,6 +753,15 @@ git commit -m "chore: bootstrap from agentic framework"
 - [or `none — PRD has no Cross-cutting Concerns section`]
 - **Any receiver count below its Step 1.1 count is RED** — name the dropped concern.
 
+### MCPs (Step 5) — ALWAYS report, never omit:
+- `N installed: [names]` · `none installed — placeholder replaced`
+  (BOTH verdicts Step 5 can produce. Neither had any slot at all until
+  `/audit` 2026-09-03 P-21 — the mandate existed and had nowhere to land.)
+
+### Hooks (Step 14) — ALWAYS report, never omit:
+- `smart-formatting ACTIVE` · `SKIPPED: no formatter detected` · `none — project has no formatter`
+  (all three verdicts Step 14 can produce)
+
 ### Files created:
 - CLAUDE.md ([lines] lines)
 - .claude/phases/project.md ([lines] lines)

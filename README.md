@@ -34,7 +34,10 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
 > baseline every project gets (12 lifecycle skills, 3 core rules files), the high number is the
 > FULL set, which a `production` project already receives — `bootstrap.md` gates
 > codebase-audit/skill-gate at internal-tool+ and framework-audit/ops-rules/quality-budgets at
-> **production+**, so nothing is reserved for `production-financial` alone. A `prototype` gets the lean core (no audits/ops/budgets/CI),
+> **production+**, so the SKILL and RULES sets are complete from `production` upward. `production-financial` still
+> adds three things of its own — reconciliation queries, mandatory red-team on money paths, and a
+> tighter framework-audit cadence — so it is the ceremony that differs at that tier, not the
+> component set (`/audit` 2026-09-03 P-24). A `prototype` gets the lean core (no audits/ops/budgets/CI),
 > while `production`+ gets everything. See `docs/modules/rules/session_rules.md` → *Risk profile & ceremony tiers*.
 
 ### Session modes

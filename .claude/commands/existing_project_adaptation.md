@@ -222,6 +222,13 @@ Before proceeding, present a summary of everything you read:
 
 For every document that already exists: **DO NOT overwrite.** Read it, identify what's missing compared to the current framework, and add only the missing sections. Preserve all existing content, history, and patterns.
 
+**When Step 2.1 or Step 4.8 writes the `**PRD:**` line from
+`docs/modules/templates/claude_md.md`, ALWAYS DELETE the template's
+`[or, when bootstrapped WITHOUT …]` bracket annotation** — it is authoring guidance, not project
+content, and bootstrap's twin has carried this mandate all along while this command had none, so
+an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21).
+**ALWAYS REPORT — `PRD line: written, bracket removed` or `PRD line: already present, untouched`.**
+
 **Step 2.1 — Upgrade CLAUDE.md:**
 
 Compare the existing config file against this checklist. Add any missing section:
@@ -285,9 +292,13 @@ behalf: two steps mandated to perform one write is how the count gets doubled or
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/project_md.md` and create `.claude/phases/project.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
-**Steps 2.9, 4.1, 4.1b and 5.2 read or write it**, and this command's own Reading Report has an
-`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected 2026-09-03 N-24 —
-the justification had named Steps 4.6.5 and 5.1, and **neither reads this file**: 5.1 reads
+**Steps 1.1, 1.5, 2.2, 2.9b, 4.1b and 5.2 read or write it**, and this command's own Reading Report has an
+`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected twice — `N-24` removed a
+justification naming two steps that read nothing here, and `P-36`'s sibling `P-19` then found the
+REPLACEMENT list equally wrong, naming two more steps that touch neither file while omitting
+`Step 2.9b`, which reads the risk profile from this file and writes back to it. **DERIVE the list
+by parsing each Step's body for the filename; NEVER write it from reading** —
+`/audit` 2026-09-03 P-19: 5.1 reads
 `.claude/agents/`, `.claude/rules/` and `CLAUDE.md`, and 4.6.5 reads only `pendencias.md`).
 
 Check for required sections:
@@ -340,7 +351,7 @@ artifact**, and reports the count (`/audit` 2026-09-02 M-2, corrected 2026-09-03
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/pendencias_md.md` and create `.claude/phases/pendencias.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
-**Steps 2.9, 4.1, 4.1b, 4.6, 4.6.5 and 5.2 read or write it**, and this command's own Reading
+**Steps 2.2, 2.3, 2.9b, 4.1b, 4.6, 4.6.5 and 5.2 read or write it**, and this command's own Reading
 Report has an `[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected
 2026-09-03 N-24 — Step 5.1 does not read this file).
 
@@ -1057,6 +1068,9 @@ done
   (Bootstrap's twin has carried "Delivered by receivers" since M-2; EPA's three verdicts were
   mandated with no slot to land in — `/audit` 2026-09-03 N-27.)
 
+### PRD line (Steps 2.1 / 4.8) — ALWAYS report, never omit:
+- `written, bracket removed` · `already present, untouched`
+
 ### `done_tasks.md` (Step 2.3) — ALWAYS report, never omit:
 - `created` · `already present`
   (`pendencias-updater` moves completed tasks there; without it the task lifecycle breaks
@@ -1086,9 +1100,11 @@ done
 - [ ] 7. Business Model
 - [ ] [other TBD sections]
 
-### MCPs: [list with status]
+### MCPs: [list with status] · `none installed — placeholder replaced`
+  (the second verdict was missing; the enumeration is COPIED FROM the mandating step,
+  never re-derived — `/audit` 2026-09-03 P-21)
 ### Skills: [list with status]
-### Hooks: smart-formatting [ACTIVE / SKIPPED: no Prettier]
+### Hooks: smart-formatting [ACTIVE / SKIPPED: no formatter detected / none — project has no formatter]
 
 ### Non-standard naming:
 - [e.g., `[nome-fora-do-padrao].md` — reference updated in CLAUDE.md]

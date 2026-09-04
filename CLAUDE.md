@@ -142,9 +142,12 @@ upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner 
 (d) **after a `/maintenance` session applies an audit batch** — in `verification` mode
 (`/audit` Phase 0), which re-reads the structure around every `applied` fix instead of only
 checking that the required text is present. Trigger (d) exists because the fixes
-themselves introduce defects. The **verification mode** has run five times and found defects in
-**4 of 15** (2026-08-31), **13 of 24** (Run 2), **11 of 30** (Run 3), **8 of 17** (Run 4) and
-**27 of 51** (Run 5) applied findings. The first TWO ran under trigger (c)/owner request;
+themselves introduce defects. The **verification mode** has run six times and found defects in
+**4 of 15** (2026-08-31), **13 of 24** (Run 2), **11 of 30** (Run 3), **8 of 17** (Run 4),
+**27 of 51** (Run 5) and **21 of 45** (Run 7, over Run 6's batch) applied findings.
+**`/audit` Phase 3 OWNS keeping this series current** — it was stale for a full run because
+nobody did, and the batch that rewrapped a line inside this very paragraph did not notice
+(`/audit` 2026-09-03 P-26). The first TWO ran under trigger (c)/owner request;
 trigger (d) was created in `a28f661` and every run from the third onward cites it.
 Each figure counts applied findings whose Part 1 verdict was anything other than
 CONFIRMED-FIXED, **counted over the FINDINGS and RECOMPUTED from the ledger** — never over the

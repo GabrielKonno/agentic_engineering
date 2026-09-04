@@ -222,8 +222,12 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **Expected: every template non-zero.** A `0` is RED — either the fence broke or the command
    does not match it, and BOTH are failures, and the D16 isolation grep runs over every touched file (no project names,
    no source-project session numbers, no single-project vocabulary).
-   **ALWAYS REPORT all three results — `references: N of M cited sections resolved | fences: N of M
-   templates extract non-empty | isolation: N files scanned, 0 hits`.
+   **ALWAYS REPORT all three results, EACH ON ITS OWN LINE** — the receipts self-check greps
+   `^\*\*<key>:`, so a single pipe-joined line scores 1/0/0 and a format-compliant discharge reads
+   RED (`/audit` 2026-09-03 P-5). Write them as:
+   `**references:** N of M cited sections resolved`
+   `**fences:** N of M templates extract non-empty`
+   `**isolation:** N files scanned, 0 hits`.
    **ALWAYS STATE THE UNIT for `references:` and ALWAYS give it a DENOMINATOR** — the unit is
    *a distinct section or file path cited by text this session WROTE*, and M is every such citation
    in the diff, counted by a command. Without a denominator the number drifts free of the batch: a
@@ -313,8 +317,19 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **Gate 4 — EVERY NEW `ALWAYS REPORT` MANDATE HAS A SLOT.**
    ```bash
    # every report key this session ADDED, in the files it touched
-   git diff --cached -U0 | grep '^+' | grep -oE 'ALWAYS REPORT[^`]*`[a-z ]+:'
-   # then, for each key, grep the SAME file's report/output template for a landing place
+   git diff --cached -U0 | grep '^+' | grep -oE 'ALWAYS REPORT[^`]*`[A-Za-z][A-Za-z ]*:'
+   # [A-Za-z], never [a-z]: report keys are not all lowercase (`PRD pointer:`, `PRD line:`,
+   # `MCP:`), and a lowercase-only class silently skips them. This gate's FIRST execution
+   # missed a key it had just created, exactly as gates 1 and 3 miscalibrated on theirs.
+   # then, for each key, grep the SAME file's REPORT TEMPLATE RANGE — never the whole file.
+   # The mandate itself contains the key, so a whole-file grep always finds it and the gate
+   # passes on the very state it exists to catch. Scope to the report section and confirm the
+   # key appears there SEPARATELY from the line that mandates it.
+   # STRIP THE TRAILING COLON when searching the report range: slot headings follow the
+   # convention `### <key> (Step N) — ALWAYS report, never omit:`, with no colon after the key
+   # itself. Searching for `<key>:` inside the report range returns 0 on a correctly slotted
+   # mandate — which is this gate firing on the healthy state, the inversion that shipped twice
+   # before (K-8, L-7). Verified against the existing `PRD pointer` and `done_tasks.md` slots.
    ```
    **Expected: every added key has a slot in the report format of the file that mandates it,
    and every slot's enumeration is COPIED FROM the mandating step rather than re-derived.**

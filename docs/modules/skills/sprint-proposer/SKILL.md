@@ -159,6 +159,9 @@ sprint for the task named in the marker. Context has changed and the continuatio
 ```
 ## Sprint Proposal: Session N
 ### PRD sync: ran — [outcome] | skipped — [reason]   (ALWAYS present; never blank)
+### Audit cadence: codebase-audit [due at N — proposed | not due, N of M | n/a — not installed]
+                   framework-audit [same three verdicts]   (ALWAYS present; never blank)
+### Loop marker: [present — continuing segment | absent — fresh sprint]   (ALWAYS present)
 ### Tasks selected (N):
 1. Task [N] — [name] (complexity, estimated scope)
 2. Task [N] — [name] (complexity, estimated scope)

@@ -35,8 +35,8 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 ## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
 
 An audit run has two modes. They differ in what each agent is told to look at, and the difference
-is not cosmetic: across its five documented executions the verification mode found defects in
-**4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5) already-`applied` findings. The mode was practice
+is not cosmetic: across its six documented executions the verification mode found defects in
+**4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5) and **21 of 45** (Run 7) already-`applied` findings. The mode was practice
 before it was instruction — executed twice with its verdict vocabulary supplied by the invoking
 prompt rather than by this file. That gap is what this phase closes.
 
@@ -285,8 +285,12 @@ and external references. Do NOT fix anything.
 
 FILES TO READ:
 1. .claude/commands/bootstrap.md (entire file — primary source)
-2. List files in docs/modules/templates/
-3. List files in docs/modules/agents/
+2. .claude/commands/existing_project_adaptation.md — the sibling twin. D11.4's forward-reference
+   check and D13's PRD comparison apply to BOTH commands, and reporting EPA coverage while this
+   list named only bootstrap is how that coverage came to exist in the dispatch prompt and nowhere
+   on disk (`/audit` 2026-09-03 P-20).
+3. List files in docs/modules/templates/
+4. List files in docs/modules/agents/
 4. List files in docs/modules/rules/
 5. List folders in docs/modules/skills/
 6. docs/modules/templates/claude_md.md
@@ -384,7 +388,10 @@ FILES TO READ:
 3. All other files in docs/modules/agents/ (validator, arbitrator, red_team, blue_team,
    criteria_enforcer, prd_sync_checker, diff_pattern_extractor, skill_reviewer) — ALL of them;
    verify the count against `ls docs/modules/agents/` rather than trusting this list
-4. examples/agents/ — list all files, read those that match gap-declaration domains
+4. docs/modules/skills/validation-orchestrator/SKILL.md and
+   docs/modules/skills/rules-agents-updater/SKILL.md — the two shipped components that CARRY the
+   declaring-component vocabulary; D6 findings have landed in both (`/audit` 2026-09-03 P-12)
+5. examples/agents/ — list all files, read those that match gap-declaration domains
    (e.g., concurrency, performance, accessibility, visual regression, data-integrity, secrets,
    compliance, etc. — visual regression is named explicitly because its install link has broken
    twice, on the bootstrap path and then on the EPA path)
@@ -979,6 +986,8 @@ End with: **Suggestion:** Run `/maintenance` to apply fixes, using this report a
 
 - **`Report status:`** — `COMPLETE` (all agents returned, all dimensions evaluated) or
   `INCOMPLETE — [which agents or dimensions did not return]`.
+- **`defect series:`** — `updated in N of 2 surfaces` (verification mode) or `N/A — baseline
+  mode`. Phase 3 owns keeping the series current in `CLAUDE.md` and this file's Phase 0.
 - **`Application status:`** — exactly one of `PENDING` / `PARTIAL — N of M applied in sHASH` /
   `APPLIED — M of M in sHASH` / `SUPERSEDED by [later run]`.
   **A batch split across commits uses the SAME value with EVERY hash named** —
@@ -1027,7 +1036,13 @@ step is the carry-over half.
    original keeps its `applied sHASH` status and gains a pointer to the new ID. **NEVER silently
    reopen an applied finding under its old ID** — the ledger is how a later session tells "this
    was never fixed" from "this was fixed and the fix was wrong".
-6. **ALWAYS COMMIT the report in THIS session — LAST, after every content item above** — writing it to disk is not persisting it.
+6. **In `verification` mode, ALWAYS UPDATE THE DEFECT SERIES in BOTH places that carry it** —
+   `CLAUDE.md`'s **When it runs** paragraph and this file's Phase 0 preamble. Append this run's
+   `N of M` and increment the run count. **The series is a factual claim about this command's own
+   history and it has no other owner**; it went stale for a whole run, and the batch that
+   rewrapped a line inside that very paragraph did not catch it (`/audit` 2026-09-03 P-26).
+   **ALWAYS REPORT — `defect series: updated in N of 2 surfaces` or `N/A — baseline mode`.**
+7. **ALWAYS COMMIT the report in THIS session — LAST, after every content item above** — writing it to disk is not persisting it.
    ```bash
    git add assets/docs/audit-YYYY-MM-DD.md && git commit -m "docs(audit): persist [run] — [N] findings open"
    ```
