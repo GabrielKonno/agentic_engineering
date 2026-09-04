@@ -24,6 +24,16 @@ This is a framework maintenance session, not a project bootstrap.
   sHASH | BLOCKED, reason]`. **NEVER emit nothing.** The gate had a rule and no invoker, no report
   key and no receipt, and it went unhonoured on the very next push 108 seconds after it was
   written (`/audit` 2026-09-03 N-41).
+  **THE `push:` VALUE IS A POINT-IN-TIME CLAIM AND IT DECAYS.**
+  **ALWAYS RE-CHECK `git status -sb`
+  IMMEDIATELY BEFORE WRITING THE CLOSING `push:` LINE.** If `origin/main` advanced during the
+  session — someone else pushed, or another session did — then commits this session described as
+  unpushed are now PUBLISHED, and the mandated GREEN D16 never ran over any of them. **Re-run D16
+  over the newly-pushed range and say so**: `push: not requested; origin/main advanced to sHASH
+  mid-batch — D16 re-run over the newly-published range: [GREEN | RED, findings]`. This is not
+  hypothetical: it is exactly how an identifier crossed the unpushed→pushed boundary and became an
+  accepted-risk record instead of a local fix, while six commits carried receipts reading
+  `push: not requested` (`/audit` 2026-09-03 P-32).
   **A D16 hit that is an AUDIT REPORT naming its own OPEN finding does NOT block the push** — the
   finding is the point, and the identifier is already reachable through the instance the finding
   names. Say so explicitly in the `push:` line rather than reading it as GREEN
@@ -197,9 +207,32 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    output/format where applicable. Mechanical assist: re-read every bullet you WROTE this
    session and flag any whose verb is descriptive present tense ("keeps", "verifies",
    "declares") — that is the exact form the audit's dimension C fails.
-   **ALWAYS REPORT the result — `instruction style: N new behavioral instructions checked, M
-   rewritten` or `instruction style: N/A — no normative text written`. NEVER emit nothing, and
-   ALWAYS STATE THE UNIT you counted** (e.g. "a line carrying a CAPS imperative a session must
+   **ALWAYS REPORT the result — `instruction style: N of M added imperative lines checked, R
+   rewritten, B buried` or `instruction style: N/A — no normative text written`.**
+   **NEVER emit nothing.**
+   **THE NUMBERS COME FROM THIS COMMAND, NEVER FROM READING** — this key was the LAST one in the
+   checklist with neither a command nor a denominator, and it was the only key that failed
+   independent re-measurement, at 11 claimed against 29 measured. Item 3 received both in the same
+   batch and went from roughly ninefold wrong to roughly 1.2-fold wrong; this key received only a
+   unit and stayed exactly as wrong (`/audit` 2026-09-03 P-35, P-22).
+   ```bash
+   D='git diff --cached -U0'
+   M=$($D | grep '^+' | grep -cE '\b(ALWAYS|MUST|NEVER)\b')   # added imperative lines = denominator
+   R=$($D | grep '^-' | grep -cE '\b(ALWAYS|MUST|NEVER)\b')   # removed ones = REWRITTEN, not zero
+   B=$($D | grep '^+' | grep -cE '[^0-9][.:] +\**(ALWAYS|MUST|NEVER)\b')   # buried: opens a
+   # NEW SENTENCE mid-line — a mandate appended to the end of a rationale, which is the exact
+   # §6 anti-pattern. **DO NOT define B as "the imperative is not the first token"**: that form
+   # fires on the healthy state, flagging this command's own source lines and every wrapped
+   # continuation of a mandate that began on the line above. On the batch that installed it the
+   # loose form said 10 of 14; the correct form says 2. Calibrated three ways — 8 on a commit an
+   # independent re-measurement scored at ≥6 buried, 0 on a pure-record commit, 2 here.
+   # `[^0-9]` excludes the ordinal of a numbered list item.
+   echo "instruction style: $M added, $R rewritten, $B buried"
+   ```
+   **`R` is almost never 0** — a batch that edits normative text removes imperative lines, and
+   three consecutive receipts claimed `0 rewritten` against a measured 12, 13 and 19. **`B` is the
+   finding**: an imperative that is not the first thing on its line is buried, which is exactly the
+   §6 anti-pattern this item exists to catch. Report all three, and ALWAYS STATE THE UNIT (e.g. "a line carrying a CAPS imperative a session must
    execute") — without it the number is not reproducible and the receipt is unauditable
    (`/audit` 2026-09-02 M-54).
 
@@ -417,8 +450,14 @@ Each item encodes a real miss that survived a first pass and was only caught by 
        except Exception as e: bad+=1; print('FAIL',p,type(e).__name__)
    print('raw templates:', str(n)+' validated,', 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)"
    ```
-   Expected result: **`raw templates: N validated, OK`** — and **ALWAYS REPORT N**, because a
-   silent drop in the denominator is how a whole directory left the check's scope unnoticed.
+   Expected result: **`raw templates: N validated of M globbed, S skipped (fenced), OK`** —
+   **ALWAYS REPORT ALL THREE NUMBERS.** The globs match 25 files and the parser validates 19: the
+   6 skipped are the FENCED agent templates, whose frontmatter lives inside a ```` fence and so does
+   not start with `---`. That is correct behaviour — their frontmatter is validated in the project
+   after extraction — but a bare `19 validated` is a numerator with no denominator, and the six it
+   silently drops include **all three declaring components** (`/audit` 2026-09-03 P-34). A silent
+   drop in the denominator is how a whole directory left the check's scope unnoticed; naming M and
+   S is what makes the next drop visible.
    It also asserts `name:` matches the file/dir, which the previous form never did outside
    `.claude/`. **`os.path` — never `p.split('/')`**: on Windows the glob returns backslash
    separators and a `/`-split makes every file report a bogus name mismatch.
@@ -609,7 +648,17 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    dispositions span hashes, the `Application status` line names them all —
    `PARTIAL — N of M applied (X in sAAA, Y in sBBB)` — because the enumeration at `/audit` Phase 3
    admits no two-hash form otherwise (`/audit` 2026-09-03 N-44).
-7. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
+7. **A RECEIPT MUST NAME A HASH THAT DOES NOT EXIST YET — resolve it with a PLACEHOLDER and a
+   substitution commit.** Receipts and ledger rows cite the commit they describe, so write a
+   literal placeholder token (`sBATCH`, `sGROUP4`) everywhere the hash belongs, make the fix
+   commit, then make ONE follow-up commit that substitutes the real short hash and states how many
+   places it replaced. **A pure-substitution commit is EXEMPT from the receipts requirement in item
+   6** — it changes identifiers, not content — and **ALWAYS SAY SO in its message** so the exemption
+   is visible rather than assumed. This convention was executed at least four times before it had a
+   written home; `grep -rn "placeholder" .claude/commands/*.md` returned 0
+   (`/audit` 2026-09-03 P-31, P-4).
+   **ALWAYS REPORT — `placeholder: N occurrences substituted in sHASH` or `placeholder: none`.**
+8. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
    moment where the fixes themselves are the least-verified thing in the repo: the five documented executions of
    this pass found defects in **4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5)
