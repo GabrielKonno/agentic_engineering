@@ -129,7 +129,7 @@ section only** — the text between that H2 and the next H1/H2, never the whole 
 for k in "inventory sweep" "instruction style" "references" "fences" "isolation" \
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
          "classification" "new component" "gates" "push" \
-         "audit" "verification audit"; do
+         "audit" "verification audit" "placeholder" "control back-sweep"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
@@ -140,8 +140,22 @@ done
 mandate anywhere in this file, ADD ITS KEY HERE IN THE SAME EDIT. The list stood at 14 while
 two mandated keys (`audit:` and `verification audit:`) had no entry, so the check returned
 14/14 on receipts that omitted or buried both (`/audit` 2026-09-03 P-1). Mechanical
-cross-check, expected result stated: `grep -oE 'ALWAYS REPORT[^—]*`[a-z ]+:' "$FILE"` — every
-key it returns MUST appear in the loop above.
+cross-check, expected result stated:
+`grep -oE 'ALWAYS REPORT[^`]*`[A-Za-z][A-Za-z0-9 ._-]*:' "$FILE"` — **every key it returns MUST
+appear in the loop above.**
+**TWO CHARACTER-CLASS RULES, both learned by this check failing silently:**
+1. **Stop at the BACKTICK (`[^`]*`), never at the em-dash.** Nearly every mandate in this file
+   reads ``ALWAYS REPORT — `<key>:` ``, and a class excluding `—` cannot reach past it. The
+   original form harvested **1 key of 16** and could therefore never fail (`/audit` 2026-09-04
+   Q-10).
+2. **Key names contain `_`, `.` and `-` (`done_tasks.md:`, `back-sweep:`).** A class of
+   `[A-Za-z ]` silently drops them — including the exact key of the finding that created Gate 4
+   (`/audit` 2026-09-04 Q-39). Gate 4 below uses the SAME class for the same reason; **change
+   both together or neither.**
+**Negation-proved when installed:** the corrected form harvests 8 keys where the old one
+harvested 1, and immediately went RED on `placeholder:` — a key mandated in this file and absent
+from the loop. A check whose first execution finds a real defect is a check; the one it replaced
+had never found anything.
 
 **TWO calibration rules, both learned by this check failing on itself:**
 1. **ANCHOR ON THE LINE START (`^\*\*key:`), never the bare token.** The receipts legitimately
@@ -350,10 +364,13 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **Gate 4 — EVERY NEW `ALWAYS REPORT` MANDATE HAS A SLOT.**
    ```bash
    # every report key this session ADDED, in the files it touched
-   git diff --cached -U0 | grep '^+' | grep -oE 'ALWAYS REPORT[^`]*`[A-Za-z][A-Za-z ]*:'
-   # [A-Za-z], never [a-z]: report keys are not all lowercase (`PRD pointer:`, `PRD line:`,
-   # `MCP:`), and a lowercase-only class silently skips them. This gate's FIRST execution
-   # missed a key it had just created, exactly as gates 1 and 3 miscalibrated on theirs.
+   git diff --cached -U0 | grep '^+' | grep -oE 'ALWAYS REPORT[^`]*`[A-Za-z][A-Za-z0-9 ._-]*:'
+   # The class must admit UPPERCASE (`PRD pointer:`, `MCP:`) AND `_ . -` (`done_tasks.md:`,
+   # `back-sweep:`). Both were learned the hard way: the lowercase-only form missed a key this
+   # gate had just created, and the `[A-Za-z ]` form that replaced it could not see
+   # `done_tasks.md:` — the key of the very finding the gate was built for — while the commit
+   # message asserted it had been verified against exactly that key (`/audit` 2026-09-04 Q-39).
+   # The key-list cross-check higher in this file uses the SAME class; change both or neither.
    # then, for each key, grep the SAME file's REPORT TEMPLATE RANGE — never the whole file.
    # The mandate itself contains the key, so a whole-file grep always finds it and the gate
    # passes on the very state it exists to catch. Scope to the report section and confirm the
@@ -415,6 +432,36 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    that catalogued this item, reading said 4 of 6 agent blocks failed a newly promoted rule, the
    grep agreed — and after fixing those 4 it found **two more the reading had passed**.
    **ALWAYS RE-RUN the grep after fixing and report the second result — expected: 0 remaining.**
+
+   ### CONTROL BACK-SWEEP — when this batch installs or amends a CHECK, GATE or REPORT KEY
+
+   The rule above sweeps a newly promoted RULE against the artifacts it retroactively governs.
+   **Nothing swept a newly promoted CONTROL against the shapes this same batch invented — and that
+   is where the defects have been.** Seven verification runs found no correlation with batch size
+   (27%, 54%, 37%, 47%, 53%, 47%, 58% — the worst on the batch with the most controls) and a
+   consistent one with SIMULTANEITY: a control and the shape it must read, authored together and
+   never run against each other (`/audit` 2026-09-04, meta-observation).
+
+   **ALWAYS, before committing a batch that touches any check, gate or report key:**
+   1. **LIST the controls this batch installed or amended** — every check with a stated expected
+      result, every gate, every `ALWAYS REPORT` key.
+   2. **LIST the shapes this batch invented** — a new receipts form, a new commit split, a new
+      slot, a new status vocabulary, a new heading.
+   3. **RUN EVERY OTHER CONTROL IN THIS CHECKLIST against those shapes**, not only the new one.
+      A control written for the old shape and never re-run against the new one is the defect:
+      a row-count gate whose command reaches one commit of six; a key list that predates the key
+      the same batch mandated; a sum rule broken by the first line written under it; a heading rule
+      contradicting the receipts form authorised beside it. All four shipped in one batch.
+   4. **PROVE EACH AMENDED CONTROL BY NEGATION, WITH A COMMAND** — `component-design` §9 rule 4.
+      Run it against a state that MUST make it red. **A check that has never gone red is not
+      evidence of health; it is an unproven claim.** Three checks shipped in one batch could not
+      fail at all: a guard asserting a symptom the command does not produce, a harvest regex whose
+      character class could not cross an em-dash, and a second one blind to the key class of the
+      finding that created it.
+
+   **ALWAYS REPORT — `control back-sweep: N controls × M shapes, K re-run, J defects found` or
+   `control back-sweep: N/A — no control touched`. NEVER emit nothing, and NEVER report it without
+   naming the shapes.**
 
    **ALWAYS REPORT — `back-sweep: N rules, M artifacts fixed of M found, re-run clean` or
    `back-sweep: N/A — no process rule promoted`. NEVER emit the total without the table.** Per

@@ -515,9 +515,14 @@ REPORT FORMAT:
   | Agent | Core function | Triggers | Exclusions | Consequence | Output | Status |
   |-------|--------------|----------|------------|-------------|--------|--------|
   [one row per agent — COMPLIANT / PARTIAL / NON-COMPLIANT]
-- **Invariant proof output (D7.5) — MANDATORY, never blank:** [paste the command's actual
-  output. `0` and nothing else = the invariant holds. Empty output means the command ran from
-  the wrong directory and proves NOTHING — that is RED, not GREEN.]
+- **Invariant proof output (D7.5) — MANDATORY, never blank.**
+  **ALWAYS REPORT THE FILE COUNT BESIDE IT:** `files: N | output: [literal]`. **`output: 0` alone proves NOTHING** — measured, the
+  command emits exactly `0` both when it reads 10 clean agents and when it reads none, so the
+  output cannot distinguish a healthy repo from a wrong working directory. **`files: 0` is RED
+  regardless of the output; `files: N` matching `ls docs/modules/agents/*.md | wc -l` plus
+  `output: 0` is GREEN.** An earlier form of this guard asserted the wrong-directory symptom was
+  EMPTY output; it is not, so the guard fired on a state that cannot occur and was blind to the
+  one it existed to catch (`/audit` 2026-09-04 Q-2).
 - Anti-pattern instances: [list, or "none"]
 ```
 
