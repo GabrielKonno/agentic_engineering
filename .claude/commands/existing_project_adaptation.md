@@ -1029,6 +1029,9 @@ for f in projects/$ARGUMENTS/.claude/agents/*.md; do
 done
 ```
 
+**ALWAYS REPORT — `activation chains: N verified, M broken` or `activation chains: none installed`. NEVER emit nothing.** Twin parity with bootstrap Step 12.5b, which mandates the
+same line — this command ran the loop and reported nothing (`/audit` 2026-09-04 Q-34).
+
 **Step 5.2 — Produce the adaptation report:**
 
 ```
@@ -1089,6 +1092,9 @@ done
 - **Any count below Step 4.1b's is RED** — name the dropped concern.
   (Bootstrap's twin has carried "Delivered by receivers" since M-2; EPA's three verdicts were
   mandated with no slot to land in — `/audit` 2026-09-03 N-27.)
+
+### Activation chains (Step 5.1) — ALWAYS report, never omit:
+- `N verified, M broken` · `none installed`
 
 ### PRD line (Step 2.1) — ALWAYS report, never omit:
 - `written, bracket removed` · `already present, untouched`
