@@ -43,7 +43,7 @@ Universais e stack-agnósticos. O gerador emite cada um como esqueleto.
 
 **7. O framework deve AUDITAR A SI MESMO.** A `codebase-audit` audita o *código*. Mas a SESSÃO que gerou todas estas melhorias foi uma auditoria do *FRAMEWORK* — "o que o meu PROCESSO não está pegando?". Essa pergunta só foi feita porque o dono a fez; nada no framework a gerava. **A abstração mais valiosa de todas: o bootstrap inclui um ritual `framework-audit`** (periódico ou em fronteira de fase) que pergunta pelos pontos cegos do PRÓPRIO processo. É o *gerador* das outras seis melhorias. Sem ele, todo projeto re-descobre esses buracos tarde; com ele, cedo.
 
-> Princípio recursivo: **um framework robusto não é o que tem mais regras — é o que tem um mecanismo para descobrir as regras que lhe FALTAM.** Os 6 buracos sobreviveram 145 sessões não por incompetência, mas porque ninguém *fazia a pergunta* periodicamente. Generalizar isso = generalizar a auto-correção.
+> Princípio recursivo: **um framework robusto não é o que tem mais regras — é o que tem um mecanismo para descobrir as regras que lhe FALTAM.** Os 6 buracos sobreviveram até a fase madura não por incompetência, mas porque ninguém *fazia a pergunta* periodicamente. Generalizar isso = generalizar a auto-correção.
 
 **8. Arquétipos de sessão.** O `session-end` assume sessão de IMPLEMENTAÇÃO (extrair padrões do diff primeiro). Tivemos atrito ≥2× (fase tardia, fase tardia) com sessões sem código (investigação, manutenção de framework) onde passos viraram "N/A". A abstração: o bootstrap define **tipos de sessão** — `implementation` / `investigation` / `framework-maintenance` / `ops` — cada um com um `session-end` adaptado (o que extrair, o que pular). Remove o atrito recorrente do passo inaplicável.
 
@@ -107,12 +107,12 @@ _[Preenchido com a síntese dos mineradores de evolução — ver subseções ab
 
 O framework deste projeto não nasceu pronto — ele **acretou em cinco fases**, e o padrão de quando cada mecanismo apareceu é a evidência central deste doc.
 
-- **Fase 0 — Sem framework (as primeiras sessões).** Build cru. Correções viravam prosa ad-hoc no log; a MESMA classe de bug (timezone `toISOString`→`a date-parsing helper`, dupla-contagem) recorreu em fase inicial/fase inicial/fase inicial sem memória. **O custo de não ter loop de aprendizado está visível no próprio log.**
-- **Fase 1 — Primeiro protocolo (fase inicial).** Migração para "Agentic Engineering": loop de auto-validação, PRD retroativo, critérios de aceite, e os **primeiros 12 Known Bug Patterns minerados retroativamente de as primeiras sessões** + o **cap de 20**. Lição: o artefato de aprendizado foi criado *depois* de 9 sessões de dor já paga.
-- **Fase 2 — Sprint + model-switch (≈03-26 / fase intermediária).** Sprint-approved mode, exception stops, cap de 3 discoveries/sprint, extração de padrões por diff. O **1º MODEL SWITCH → Opus** dispara organicamente em fase intermediária (tarefa de arquitetura: cron auto-close).
-- **Fase 3 — Infra completa de skills/agents (Adapt.1 v1.6.0 ≈ fase intermediária; Adapt.3 v2.1.0 ≈04-07).** Aqui nasce a espinha: `validator`+`arbitrator`; `evolution-policy` (FIX/DERIVED/CAPTURED + fronteira DATA/BEHAVIOR); `component-design` (gap-declaration); `session-end`+`context-recovery`; `auth-rules`+`multi-tenancy-rules`; Coverage Gap Declarations nos reviewers; especialistas (`data-integrity-checker`/`performance-auditor`) pré-instalados via vocabulário de gap. O Progress Log migrou de blocos completos → **tabela-índice** (blocos não sobrevivem a 100+ sessões — um *scaling move*).
+- **Fase 0 — Sem framework (as primeiras sessões).** Build cru. Correções viravam prosa ad-hoc no log; a MESMA classe de bug (timezone `toISOString`→`a date-parsing helper`, dupla-contagem) recorreu em três sessões consecutivas da fase inicial, sem memória. **O custo de não ter loop de aprendizado está visível no próprio log.**
+- **Fase 1 — Primeiro protocolo (fase inicial).** Migração para "Agentic Engineering": loop de auto-validação, PRD retroativo, critérios de aceite, e os **primeiros 12 Known Bug Patterns minerados retroativamente das primeiras sessões** + o **cap de 20**. Lição: o artefato de aprendizado foi criado *depois* de 9 sessões de dor já paga.
+- **Fase 2 — Sprint + model-switch (fase intermediária).** Sprint-approved mode, exception stops, cap de 3 discoveries/sprint, extração de padrões por diff. O **1º MODEL SWITCH → Opus** dispara organicamente em fase intermediária (tarefa de arquitetura: cron auto-close).
+- **Fase 3 — Infra completa de skills/agents (Adapt.1 v1.6.0 ≈ fase intermediária; Adapt.3 v2.1.0 ≈ fase intermediária tardia).** Aqui nasce a espinha: `validator`+`arbitrator`; `evolution-policy` (FIX/DERIVED/CAPTURED + fronteira DATA/BEHAVIOR); `component-design` (gap-declaration); `session-end`+`context-recovery`; `auth-rules`+`multi-tenancy-rules`; Coverage Gap Declarations nos reviewers; especialistas (`data-integrity-checker`/`performance-auditor`) pré-instalados via vocabulário de gap. O Progress Log migrou de blocos completos → **tabela-índice** (blocos não sobrevivem a 100+ sessões — um *scaling move*).
 - **Fase 4 — Estado estacionário + acreção de guardas (fase intermediária→fase tardia).** Cadência estável de `+1/+2 KBP` por sessão; rules de domínio crescem com os módulos (`[dominio-a]-rules` na Fase 7, `[dominio-b]-rules` ≈ fase tardia). **PRD-dois-níveis** aprovado em fase tardia; **criteria-enforcer AUTHORING mode** ≈ fase tardia.
-- **Fase 5 — Camada de sistema-inteiro (fase tardia).** `codebase-audit`, `quality-budgets`, `metrics`, **back-sweep** e o **piso de CI** — TODOS nesta sessão, após 145 sessões de review puramente diff-local e forward-only.
+- **Fase 5 — Camada de sistema-inteiro (fase tardia).** `codebase-audit`, `quality-budgets`, `metrics`, **back-sweep** e o **piso de CI** — TODOS nesta sessão, após toda uma história de review puramente diff-local e forward-only.
 
 **O loop de aprendizado (o mecanismo mais importante):** uma lição nasce como **Known Bug Pattern** no `code-reviewer.md` (cap 20); ao bater o teto, padrões bem-envelhecidos (1 trigger, há muitas sessões) são **promovidos para um rules-file de domínio** (liberando slot), e os que nunca disparam em ~20+ sessões são **removidos**. Os comentários HTML no `code-reviewer.md` são um *ledger de proveniência* completo. É um **loop de aprendizado com custo de contexto LIMITADO** — a abstração nº1 para qualquer gerador.
 
@@ -149,12 +149,12 @@ O sinal mais valioso não é *o que* o framework tem — é **QUANDO cada mecani
 | Mecanismo | 1ª aparição real | Veredito |
 |---|---|---|
 | Known Bug Patterns + cap | fase inicial (retroativo, minerando as primeiras sessões) | **Tarde-ish** — as 9 primeiras sessões pagaram o preço cheio |
-| Sprint mechanics / model-switch | ≈03-26 / fase intermediária | Médio (orgânico, aceitável) |
+| Sprint mechanics / model-switch | fase intermediária | Médio (orgânico, aceitável) |
 | Validation routes A/B/C + validator/arbitrator | Adapt.1/Adapt.3 (≈fase intermediária→fase intermediária) | Médio — só plenamente ligado ~40 sessões adentro |
 | Gap-declaration / FIX-DERIVED-CAPTURED / autonomy boundary | Adapt.3 | Médio |
 | **criteria-enforcer AUTHORING mode** | **≈ fase tardia** | **MUITO TARDE** — ✅-falso-positivo de specs falhos passou 100+ sessões |
 | **PRD-dois-níveis anti-drift** | **fase tardia** | **TARDE** — só quando um spec de fase de fato divergiu |
-| **Back-sweep (cegueira forward-only)** | **uma sessão tardia** | **MUITO TARDE** — 145 sessões de review só-para-frente |
+| **Back-sweep (cegueira forward-only)** | **uma sessão tardia** | **MUITO TARDE** — toda a história de review só-para-frente |
 | **codebase-audit / quality-budgets / metrics** | **uma sessão tardia** | **MUITO TARDE** — um módulo central do projeto-fonte chegou a ~3300 linhas e o PITR ficou OFF sem ninguém medir |
 | **Piso de CI automático** | **uma sessão tardia** | **MUITO TARDE** — gates eram só intra-sessão (humano/IA podiam pular) |
 
@@ -198,11 +198,11 @@ Formato de cada mecanismo: **História · O que acontece · Por que acontece · 
 
 ### 9.4 Gates de DEPLOY de fase (o padrão "critério de saída" / DEPLOY GUARD — MISSED)
 
-- **História:** Visível nos blocos "DEPLOY GUARD" / "critério de saída do sprint" da Fase 10 (ex.: F10-fase inicial só shipava com "1 assinatura completando 2 ciclos no sandbox").
+- **História:** Visível nos blocos "DEPLOY GUARD" / "critério de saída do sprint" de uma fase tardia do projeto-fonte (ex.: [FEATURE-DO-PROJETO-FONTE] só shipava com "1 assinatura completando 2 ciclos no sandbox").
 - **O que acontece:** O framework gateia o deploy de uma FEATURE MULTI-SESSÃO atrás de critérios de saída explícitos do dono, registrados como um bloco DEPLOY GUARD visível em `pendencias`, com um hard "NÃO abrir PR `dev→main` até o gate ser cumprido" + racional ("35 commits à frente → um PR deploya a FASE INTEIRA; ASS-07 não pode ser cherry-picked"). Quando cumprido, o bloco vira "✅ CUMPRIDO (Sn)" com o hash do PR, preservando o original como histórico.
 - **Por que acontece:** O modo de falha "feature visível mas inerte/quebrada em prod" é exatamente o que um loop ingênuo "todas as tasks ✅ → deploya" causaria. Um trabalho code-complete em várias sessões pode estar quebrado no agregado.
 - **Por que o framework-base deve absorver:** É um TIER de gate distinto — **deploy-de-fase**, acima do gate-de-diff (CI, §2.6) e do gate-de-task (validation). O conceito (critério de saída setado pelo dono como guard-block rastreável e conversível; "isto é cherry-pickável ou é tudo-ou-nada?") é base; os specifics (o gateway de pagamento do projeto-fonte) são módulo.
-- **Cenário:** A Fase 10 acumula 35 commits em `dev`. Sem o DEPLOY GUARD, um PR de "limpeza" mergearia a fase inteira inerte. Com ele, o merge só acontece após o smoke do dono confirmar a config de produção — e o bloco vira o registro permanente do que foi exigido.
+- **Cenário:** Uma fase tardia acumula dezenas de commits em `dev`. Sem o DEPLOY GUARD, um PR de "limpeza" mergearia a fase inteira inerte. Com ele, o merge só acontece após o smoke do dono confirmar a config de produção — e o bloco vira o registro permanente do que foi exigido.
 
 ### 9.5 Integridade do loop: a disciplina `⏭️` + a regra "Actionable findings" (UNDER-COVERED)
 
@@ -273,7 +273,7 @@ Formato de cada loop: **História · O que Claude faz · Lê/Escreve · Fronteir
 
 ### 10.2 Loop de AUTHORING — `criteria-enforcer` (criação de task; endurece o SPEC antes do código)
 
-- **História:** Pré-implementação desde cedo; o **AUTHORING mode entrou ≈ fase tardia** (tarde) após WB-PARK-01 ser autorado com um bug de SPEC (mandava reusar cópia de estágio-2 "desde o seu último serviço" para clientes que nunca fizeram serviço).
+- **História:** Pré-implementação desde cedo; o **AUTHORING mode entrou ≈ fase tardia** (tarde) após [ITEM-DE-TRABALHO-DO-PROJETO-FONTE] ser autorado com um bug de SPEC (mandava reusar cópia de estágio-2 "desde o seu último serviço" para clientes que nunca fizeram serviço).
 - **O que Claude faz:** Em dois modos — (a) pré-código (lê a task de pendencias) e (b) **AUTHORING** (quando uma task full-template NOVA é escrita). Aplica o padrão 3-partes (ação + resultado esperado + **sinal de falha**), review adversarial por-critério (teste de sabotagem "como uma impl errada ainda passa?"), o **class-checklist** não-happy-path (§9.7), e — só no AUTHORING — os testes de nível-spec **reuse-fit** (uma instrução "reusar X" arrasta cópia/placeholders/assunções ausentes no novo contexto?) e **variant-threading** (quais campos viram NULL quando um caminho ganha um branch novo?).
 - **Lê/Escreve:** lê o bloco da task (+ arquivos do reuse no AUTHORING); escreve o bloco de critérios reescrito.
 - **Fronteira de segurança:** Edita CRITÉRIOS de task, não código nem rules — e `session-rules.md` torna isto um gate obrigatório co-assinado pelo humano que autorou a task.
@@ -287,7 +287,7 @@ Formato de cada loop: **História · O que Claude faz · Lê/Escreve · Fronteir
 - **Lê/Escreve:** lê prd.md, specs de fase, project.md, pendencias, CLAUDE.md; propaga para os derivados; adiciona changelog.
 - **Fronteira de segurança:** claro/não-contraditório → propaga; **ambíguo ou contradiz decisão de arquitetura → ASK**; §3.x (regra de negócio do dono) → sempre ASK. O PRD é classe-humana; Claude reconcilia os DERIVADOS a ele, nunca reescreve a decisão de produto do dono.
 - **Princípio generalizável:** *Um doc de requisitos em dois níveis deriva em silêncio a menos que um agente de início-de-sessão reconcilie o resumo ao spec normativo e force o bump quando o spec se moveu sem um.*
-- **Cenário:** Sessão de continuação após compactação. O sync-checker roda mesmo assim (a compactação não isenta), pega que o spec da Fase 10 ganhou a regra D-ASS20-4 sem bump, e corrige — a sessão não constrói sobre requisito stale.
+- **Cenário:** Sessão de continuação após compactação. O sync-checker roda mesmo assim (a compactação não isenta), pega que o spec dessa fase ganhou a regra [REGRA-DE-SPEC-DO-PROJETO-FONTE] sem bump, e corrige — a sessão não constrói sobre requisito stale.
 
 ### 10.4 Loop de AUDITORIA — `codebase-audit` (periódico; o SISTEMA, não a mudança)
 
@@ -343,7 +343,7 @@ A verificação de completude fez duas correções de honestidade que o gerador 
 ### 11.2 O meta-loop `framework-audit` está ESPECIFICADO mas não AGENDADO — a peça que falta
 
 - **O fato:** A codebase-audit tem skill + gatilho de cadência no sprint-proposer. O `framework-audit` — o GERADOR de todas as 6 melhorias — só rodou porque o dono perguntou. **Ele ainda não é uma skill agendada.**
-- **A regra para o gerador:** ship o `framework-audit` como skill first-class COM cadência (em fronteira de fase, mais esparsa que a codebase-audit), espelhando a codebase-audit. Sem isso, todo projeto depende de um humano lembrar de fazer a pergunta-meta — e a evidência de §8.3 mostra que essa pergunta só é feita ~145 sessões tarde demais.
+- **A regra para o gerador:** ship o `framework-audit` como skill first-class COM cadência (em fronteira de fase, mais esparsa que a codebase-audit), espelhando a codebase-audit. Sem isso, todo projeto depende de um humano lembrar de fazer a pergunta-meta — e a evidência de §8.3 mostra que essa pergunta só é feita tarde demais, já na fase madura.
 
 ### 11.3 Existência vs aspiração — o estado real dos 6 loops
 

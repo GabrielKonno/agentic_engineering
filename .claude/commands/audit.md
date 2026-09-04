@@ -184,8 +184,12 @@ CHECKS:
          **EVERY framework-layer surface — `docs/**` (not only `docs/modules/`), `examples/**`,
          `.claude/**`, `assets/docs/**` and the root `*.md` files** — then cross-grep each against
          the projects' own `*.ts/*.tsx/*.js/*.sql/*.py` sources.
-         **ALWAYS EXCLUDE `projects/*/assets/examples/` FROM THE COMPARISON SET.** Bootstrap
-         Step 1.5 copies this repo's own `examples/` into every project under that path, so a
+         **ALWAYS EXCLUDE EVERY VERBATIM FRAMEWORK→PROJECT COPY PATH FROM THE COMPARISON SET —
+         `projects/*/assets/examples/` AND `projects/*/.claude/skills/` AND
+         `projects/*/.claude/agents/` AND `projects/*/.claude/rules/`.** Bootstrap
+         Step 1.5 copies `examples/` there, and Steps 5.7/5.8 copy `docs/modules/skills/`,
+         `docs/modules/agents/` and `docs/modules/rules/` into the other three; naming only the
+         first left three equally verbatim copy targets unexcluded (`/audit` 2026-09-04 Q-30), so a
          match there means the identifier travelled framework → project — the OPPOSITE
          direction from a leak. Without the exclusion the check errs BOTH ways: it files a
          false hit, or it teaches the auditor to wave real hits off as "probably our own
@@ -214,6 +218,14 @@ CHECKS:
          context (the "# Memory" section of the system prompt, or the additional working
          directory whose path ends in `memory`). Run BOTH the blocklist grep (D16.3) and
          the value-shape scan (D16.2b) over EVERY file in it, including MEMORY.md.
+         **EXCLUDE UUID FRAGMENTS AND URLs BEFORE APPLYING THE HASH RULE.** The harness writes
+         `originSessionId:` UUIDs and artifact URLs into memory frontmatter, and their 7-hex
+         runs look exactly like commit hashes. Applied literally without this exclusion the
+         rule below produced **12 false positives** on a clean memory directory — which is
+         `Q-36`'s own defect (a cross-grep prone to false positives whose text does not say
+         so), filed one finding earlier in the same run and not applied to this sibling
+         (`/audit` 2026-09-04 Q-29). Scope the scan to tokens NOT inside a UUID and NOT inside
+         a URL, then apply:
          **COMMIT HASHES IN MEMORY ARE DERIVABLE, NEVER JUDGED BY EYE** — a 7-hex token is
          LEGITIMATE if and only if `git cat-file -e <hash>^{commit}` resolves it in THIS repo;
          anything that does not resolve belongs to another repository and is a HIT. Run it per
