@@ -961,7 +961,7 @@ Report template categories:
 - Criteria Results: a row per acceptance criterion (#, criterion, type, result, evidence)
 - Prior Review Findings: code review / security review / red team summaries
 - Coverage Gap Declaration: ALWAYS present — "none" is a valid entry. Every gap this validation
-  could not close, in the reviewer gap vocabulary. NEVER spawn the specialist from inside the
+  could not close, in the declaring-component gap vocabulary (the validator IS one of the three). NEVER spawn the specialist from inside the
   validator (component-design §7: subagent depth limit) — main Claude reads this and spawns it
 - Items for human verification: ALWAYS present — "none" is a valid entry. Every MANUAL: criterion,
   plus every declared coverage gap with no specialist report as evidence, flagged ⚠️ and NEVER ❌
