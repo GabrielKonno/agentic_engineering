@@ -890,7 +890,7 @@ Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/securit
 
 For each match: copy from `assets/examples/agents/` to `.claude/agents/`, adapting only:
 - `created:` lineage: change from `example` to `adaptation (pre-installed from example template)`
-- Verify the `description:` gap phrase matches the reviewer's gap declaration vocabulary
+- Verify the `description:` gap phrase matches the declaring component's gap declaration vocabulary
 
 If a gap was KEPT but no matching example exists in `assets/examples/agents/`: register in
 `pendencias.md` — "Create specialist agent for [gap] when domain implementation begins." A kept
@@ -976,12 +976,20 @@ for f in projects/$ARGUMENTS/.claude/agents/*.md; do
     code-reviewer|security-reviewer|validator|arbitrator|criteria-enforcer|prd-sync-checker|diff-pattern-extractor|red-team|blue-team) continue ;;
   esac
   # Extract domain from Pushy Description ("when [declaring component] declares a [domain] gap")
-  domain=$(grep -oP 'declares a \K\S+(?= gap)' "$f" 2>/dev/null | head -1)
+  # `an?` and a NON-GREEDY `.+?`: domains are multi-word ("visual regression",
+  # "infrastructure security") and half take "an". A `\S+` after a literal "declares a "
+  # extracted 3 of the 10 real phrases and reported the other 7 as broken chains
+  # (`/audit` 2026-09-03 P-10).
+  domain=$(grep -oP 'declares an? \K.+?(?= gap)' "$f" 2>/dev/null | head -1)
   if [ -n "$domain" ]; then
     found=0
-    grep -qi "$domain gap" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/null && found=1
-    grep -qi "$domain gap" projects/$ARGUMENTS/.claude/agents/security-reviewer.md 2>/dev/null && found=1
-    [ "$found" -eq 0 ] && echo "BROKEN CHAIN: $agent_name declares '$domain gap' but no reviewer has a matching gap declaration"
+    # ALL THREE declaring components — `validator` declares the visual-regression gap from
+    # inside its own Validation Report (component-design §1). Grepping only the two reviewers
+    # made a validator-only declaration read as a broken chain (`/audit` 2026-09-03 P-9).
+    for dc in code-reviewer security-reviewer validator; do
+      grep -qi "$domain gap" "projects/$ARGUMENTS/.claude/agents/$dc.md" 2>/dev/null && found=1
+    done
+    [ "$found" -eq 0 ] && echo "BROKEN CHAIN: $agent_name declares '$domain gap' but no declaring component has a matching gap declaration"
   else
     echo "WARNING: $agent_name has no Pushy Description gap phrase — may be unreachable via gap-declaration activation"
   fi

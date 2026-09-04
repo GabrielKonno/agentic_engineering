@@ -593,7 +593,7 @@ Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/securit
 
 For each match found: copy from `assets/examples/agents/` to `.claude/agents/`, adapting only:
 - `created:` lineage: change from `example` to `s0 (bootstrap — pre-installed from example template)`
-- Verify the `description:` gap phrase matches the reviewer's gap declaration vocabulary
+- Verify the `description:` gap phrase matches the declaring component's gap declaration vocabulary
 
 If a gap was KEPT but no matching example exists in `assets/examples/agents/`: register in `pendencias.md` — "Create specialist agent for [gap] when domain implementation begins."
 
@@ -603,7 +603,7 @@ For every specialist agent created or pre-installed in Steps 7-12.5a that uses g
 
 For each remaining specialist agent:
 
-1. Verify it has a matching Coverage Gap Declaration in code-reviewer.md or security-reviewer.md whose domain vocabulary echoes the agent's Pushy Description
+1. Verify it has a matching Coverage Gap Declaration in the declaring component (code-reviewer.md, security-reviewer.md or validator.md) whose domain vocabulary echoes the agent's Pushy Description
 2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the validator) following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
 3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md` — the domain must appear in at least one declaring component
 

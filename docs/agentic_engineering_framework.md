@@ -930,7 +930,12 @@ Output: Vulnerability Report. Tier 3 flagged as MANUAL:.
 Input: Vulnerability Report + final code (post-fixes).
 Output: Defense Assessment — verifies defenses exist for each finding.
 
-**Coverage gap handling** (after receiving code-reviewer and security-reviewer reports):
+**Coverage gap handling** — **TWO passes over THREE declaring components**
+(`code-reviewer`, `security-reviewer` and `validator`). **Pass 1** after the two reviewers'
+reports; **pass 2** after the Validation Report, because the validator's own declaration cannot
+exist until the validator has run. **A single pass structurally cannot reach the third declarer**
+(`/audit` 2026-09-03 P-14 — this surface still described two declarers and one pass while the
+orchestrator it documents had already moved to three and two).
 Read the Coverage Gap Declaration section in each report. For each declared gap, search `.claude/agents/` descriptions for a specialist agent matching the gap's domain. If found: spawn it and include its report as evidence for the validator. If not found: note the gap in "Items for human verification." This is generic — zero cost when no gaps are declared.
 
 **Step 6 — Process Validation Report:**

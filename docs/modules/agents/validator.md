@@ -104,7 +104,7 @@ with ZERO executed, or a summary you could not parse, is ❌ with the reason —
 
 ### Coverage Gap Declaration:
 [ALWAYS present — "none" is a valid entry. Every gap THIS validation could not close, in the
- reviewer gap vocabulary (e.g. "visual regression gap: shared component changed, no baseline
+ declaring-component gap vocabulary (this agent IS one of the three) (e.g. "visual regression gap: shared component changed, no baseline
  comparison run"). NEVER attempt to spawn the specialist from here — this agent runs AS a
  subagent and only main Claude can use the Agent tool (component-design §7). Main Claude reads
  this section and spawns the specialist.]
