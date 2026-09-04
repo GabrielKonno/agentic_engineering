@@ -118,13 +118,20 @@ section only** — the text between that H2 and the next H1/H2, never the whole 
 ```bash
 for k in "inventory sweep" "instruction style" "references" "fences" "isolation" \
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
-         "classification" "new component" "gates" "push"; do
+         "classification" "new component" "gates" "push" \
+         "audit" "verification audit"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
 ```
 
 **Expected: every key exactly 1.** A missing key is RED; a duplicate is RED.
+**THE KEY LIST IS ITSELF A SURFACE THAT GOES STALE.** Whenever you add an `ALWAYS REPORT`
+mandate anywhere in this file, ADD ITS KEY HERE IN THE SAME EDIT. The list stood at 14 while
+two mandated keys (`audit:` and `verification audit:`) had no entry, so the check returned
+14/14 on receipts that omitted or buried both (`/audit` 2026-09-03 P-1). Mechanical
+cross-check, expected result stated: `grep -oE 'ALWAYS REPORT[^—]*`[a-z ]+:' "$FILE"` — every
+key it returns MUST appear in the loop above.
 
 **TWO calibration rules, both learned by this check failing on itself:**
 1. **ANCHOR ON THE LINE START (`^\*\*key:`), never the bare token.** The receipts legitimately
@@ -175,8 +182,10 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    repo for `step N`, `item N`, `Phase \d item N` for every ordinal at or after the insertion
    point. **SWEEP `assets/docs/` TOO** — the audit reports cite ordinals ("per Phase 3 item 5") and
    one of the two instances this rule was written for lived there; a path list that omits them
-   reports GREEN on a state it never measured. **MATCH ALL THREE FORMS**: `item N`, `item N's`, and
-   `Phase N item M` — a pattern requiring the possessive misses roughly 60% of real citations.
+   reports GREEN on a state it never measured. **MATCH ALL FIVE FORMS**: `step N`, `step N's`, `item N`, `item N's` and
+   `Phase N item M`. **`step N` is not optional — it is the form that actually broke.** The widened
+   sweep named three forms, omitted both `step` forms, and the one live casualty of the batch that
+   widened it was an `Audit intake step 6` citation (`/audit` 2026-09-03 P-3) — a pattern requiring the possessive misses roughly 60% of real citations.
    **Expected: every hit still names the content it meant.** Two live instances were
    created this way before this rule existed (`/audit` 2026-09-02 L-9, L-15). Where a citation
    would be fragile, cite the item's NAME instead of its number.
@@ -263,7 +272,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    `class sweep: N/A — no point fixes this session`. **NEVER emit nothing, and NEVER emit the
    total without the table.**
 
-   ### The three PRE-COMMIT GATES — run all three, in this order, before `git commit`
+   ### The four PRE-COMMIT GATES — run all four, in this order, before `git commit`
 
    These are not sweeps and not judgement. Each is one command with one expected result, and each
    was written because a HIGH finding got past every other control in this checklist. **A RED gate
@@ -301,8 +310,24 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    rows than dispositions hides the fixes whose sweep was skipped — 8 rows for 14 findings shipped
    while asserting "8 = 8, the self-check passes" (`/audit` 2026-09-03 N-5).
 
+   **Gate 4 — EVERY NEW `ALWAYS REPORT` MANDATE HAS A SLOT.**
+   ```bash
+   # every report key this session ADDED, in the files it touched
+   git diff --cached -U0 | grep '^+' | grep -oE 'ALWAYS REPORT[^`]*`[a-z ]+:'
+   # then, for each key, grep the SAME file's report/output template for a landing place
+   ```
+   **Expected: every added key has a slot in the report format of the file that mandates it,
+   and every slot's enumeration is COPIED FROM the mandating step rather than re-derived.**
+   Both directions are RED: a mandate with no slot is owed by nobody, and a slot offering a
+   verdict its step cannot emit is the same defect mirrored.
+   This gate exists because the class outlived three consecutive batches and is the dominant
+   ungated defect: one commit fixed SIX instances of it correctly (`N-1`, `N-22`, `N-23`,
+   `N-27`, `N-29`, `N-32`) and committed FOUR new ones in the same diff (`/audit` 2026-09-03
+   P-11, P-16, P-17, P-6, P-21). Gates 1-3 cover artifacts, diffs and counts; nothing covered
+   **the descending direction of a new mandate** until this line.
+
    **ALWAYS REPORT — `gates: twin parity [PASS/RED] | receipt-rows-vs-diff [N/N] | row-count
-   [N vs N]`. NEVER emit nothing, and NEVER commit on a RED.**
+   [N vs N] | slots [N/N]`. NEVER emit nothing, and NEVER commit on a RED.**
 
    > Evidence this is not hypothetical: applying the 2026-09-02 batch, the session reported
    > `4 directions, 15 extra instances` in good faith while running DESCENDING on one file

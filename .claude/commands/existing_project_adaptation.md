@@ -1008,9 +1008,6 @@ done
   `fetch failed — UNVERIFIABLE, STOPPED` · `unverifiable — STOPPED`
 - Project copy: `up to date` / `behind by N — reconciled before analysis` / `no remote — skipped`
 
-### Cross-cutting concerns (Phase 3 → Step 4.1b) — ALWAYS report, never omit:
-- Identified: [N] · Routed: R rules · A decisions · T tasks — [or `none identified`]
-
 ### Risk profile and tier-gated install (Steps 2.9b / 2.9) — ALWAYS report, never omit:
 - Risk profile: [prototype | internal-tool | production | production-financial], derived from [signals]
 - MACRO skeletons: codebase-audit / metrics.md / skill-gate + skill-reviewer + `.claude/drafts/` /
@@ -1050,7 +1047,8 @@ done
 - .claude/rules/evolution-policy.md [CREATED / SKIPPED]
 - .claude/rules/component-design.md [CREATED / SKIPPED]
 
-### Cross-cutting concerns (Step 4.1b → Steps 2.2 / 2.3 / 4.6) — ALWAYS report, never omit:
+### Cross-cutting concerns (Phase 3 → Step 4.1b → Steps 2.2 / 2.3 / 4.6) — ALWAYS report, never omit:
+- Identified in Phase 3: [N] — [or `none identified`]
 - Routed at Step 4.1b: [N] identified (R → rules, A → decisions, T → tasks)
 - Written by Step 4.1b: A/A decisions into `project.md` · T/T tasks into `pendencias.md`
 - Received by Step 4.6: R/R code concerns written
@@ -1058,6 +1056,11 @@ done
 - **Any count below Step 4.1b's is RED** — name the dropped concern.
   (Bootstrap's twin has carried "Delivered by receivers" since M-2; EPA's three verdicts were
   mandated with no slot to land in — `/audit` 2026-09-03 N-27.)
+
+### `done_tasks.md` (Step 2.3) — ALWAYS report, never omit:
+- `created` · `already present`
+  (`pendencias-updater` moves completed tasks there; without it the task lifecycle breaks
+  silently. Bootstrap's twin has carried this slot all along — `/audit` 2026-09-03 P-17.)
 
 ### Deferred domain rules (Step 2.7.1 → Step 4.6) — ALWAYS report, never omit:
 - `N/N created` · `none — Step 2.7.1 deferred nothing`

@@ -739,8 +739,11 @@ git commit -m "chore: bootstrap from agentic framework"
   DESCENDING gap `/audit` 2026-09-02 M-8 names)
 
 ### PRD pointer (Step 2) — ALWAYS report, never omit:
-- `assets/docs/prd.md` · `none — bootstrapped without a PRD` · `none — no such section`
-  (every verdict Step 2 can produce. A mandated report line with no slot in the final report is
+- `assets/docs/prd.md` · `none — bootstrapped without a PRD`
+  (BOTH verdicts Step 2 can produce, and ONLY those two — a third, `none — no such section`, bled
+  in from Step 1.1's cross-cutting verdict and was corrected by `/audit` 2026-09-03 P-16. A slot
+  offering a verdict its owning step cannot emit is the same defect as a mandate with no slot,
+  mirrored: **ALWAYS copy the enumeration FROM the mandating step, never re-derive it.** A mandated report line with no slot in the final report is
   owed by nobody — the same DESCENDING class M-8 was raised on, introduced by M-8's own commit
   and caught by `/audit` 2026-09-03 N-23.)
 

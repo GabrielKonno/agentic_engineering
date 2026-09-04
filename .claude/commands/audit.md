@@ -399,8 +399,11 @@ CHECKS:
         `validator`, which declares the visual-regression gap from inside its own Validation
         Report). Without this step the extraction set is two of three and D6.3 searches for phrases
         it never collected; D6.7 patched over the hole by phrase while D6.3 still could not see it
-        (`/audit` 2026-09-03 N-33). **ALWAYS report the declarer count — `declarers extracted: 3
-        of 3`. A `2 of 3` is RED.**
+        (`/audit` 2026-09-03 N-33). **ALWAYS report the declarer count — `declarers extracted: N of M`, where **M is DERIVED,
+        never typed**: `grep -rlc "gap:" docs/modules/agents/ | wc -l`. A hard-coded `3` in the
+        file whose D6.8 says "count them, do not assume two" is the same defect one level down,
+        and it cannot detect a FOURTH declarer — which is the risk D6.8 exists to catch
+        (`/audit` 2026-09-03 P-11). `N < M` is RED.**
   D6.3. For each gap phrase: search ALL agent descriptions in docs/modules/agents/ AND
         examples/agents/ for matching vocabulary in the description: field
   D6.4. The match must be exact or near-exact (per component-design.md §3 vocabulary alignment)
@@ -479,6 +482,7 @@ REPORT FORMAT:
   |-----|-------------|-----------------|--------------|-----------------------|-----------------|
   [one row per gap — the last two columns are D6.7 and are MANDATORY, never blank]
 - Install-table diff (D6.7): [`diff` of the two tables — expected empty; paste any difference]
+- `declarers extracted: N of M` — **MANDATORY, never blank** (D6.2b; M derived, never typed)
 - Gap SOURCES found (D6.8): [every component that declares a gap] — policy §1/§3 lists: [set];
   match: [yes / NO — which twin is stale]
 - Broken links (gap → no specialist): [list, or "none"]
@@ -490,6 +494,9 @@ REPORT FORMAT:
   | Agent | Core function | Triggers | Exclusions | Consequence | Output | Status |
   |-------|--------------|----------|------------|-------------|--------|--------|
   [one row per agent — COMPLIANT / PARTIAL / NON-COMPLIANT]
+- **Invariant proof output (D7.5) — MANDATORY, never blank:** [paste the command's actual
+  output. `0` and nothing else = the invariant holds. Empty output means the command ran from
+  the wrong directory and proves NOTHING — that is RED, not GREEN.]
 - Anti-pattern instances: [list, or "none"]
 ```
 
@@ -960,6 +967,12 @@ End with: **Suggestion:** Run `/maintenance` to apply fixes, using this report a
   `INCOMPLETE — [which agents or dimensions did not return]`.
 - **`Application status:`** — exactly one of `PENDING` / `PARTIAL — N of M applied in sHASH` /
   `APPLIED — M of M in sHASH` / `SUPERSEDED by [later run]`.
+  **A batch split across commits uses the SAME value with EVERY hash named** —
+  `APPLIED — M of M (X in sAAA, Y in sBBB, Z in sCCC)` — and **the parenthesised counts MUST sum
+  to M**. This is not a new value; it is the multi-hash form of the same two. It was mandated in
+  `maintenance.md` while this enumeration still forbade it, and the first status line written under
+  the new rule named 4 of 7 hashes and 20 of 54 dispositions without failing anything
+  (`/audit` 2026-09-03 P-2, P-33).
   **NEVER invent a value outside this set** — three runs produced three different vocabularies
   before this enumeration existed (`/audit` 2026-09-02 L-13).
 
