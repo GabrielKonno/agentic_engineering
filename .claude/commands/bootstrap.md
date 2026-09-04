@@ -576,7 +576,7 @@ mkdir -p projects/$ARGUMENTS/.claude/skills/[stack-name]
 
 #### Step 12.5a — Pre-install specialist agents matching kept gap declarations
 
-Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/security-reviewer.md` (created in Steps 7-8). Identify which Coverage Gap Declaration sections were KEPT (not removed during pre-selection). For each kept gap, check if a matching specialist example exists in `assets/examples/agents/`:
+Read the project's `.claude/agents/code-reviewer.md`, `.claude/agents/security-reviewer.md` **and `.claude/agents/validator.md` — ALL THREE declaring components** (`component-design` §1; the validator declares the visual-regression gap from inside its own Validation Report, and the table below attributes that gap to it. Reading two of three meant this step could not produce its own table's row — `/audit` 2026-09-04 Q-1) (created in Steps 7-8). Identify which Coverage Gap Declaration sections were KEPT (not removed during pre-selection). For each kept gap, check if a matching specialist example exists in `assets/examples/agents/`:
 
 | Gap declaration (in reviewer) | Specialist example to install |
 |-------------------------------|-------------------------------|

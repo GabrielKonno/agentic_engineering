@@ -884,7 +884,7 @@ Analyze the retroactive PRD (created in Phase 3) for domain signals matching exa
 
 **Step 4.6.5 — Pre-install specialist agents and validate activation chains:**
 
-Read the project's `.claude/agents/code-reviewer.md` and `.claude/agents/security-reviewer.md`. Identify which Coverage Gap Declaration sections are present. For each gap declaration, check if a matching specialist agent ALREADY EXISTS in `.claude/agents/`. If it does NOT exist and a matching example is available in `assets/examples/agents/`, pre-install it:
+Read the project's `.claude/agents/code-reviewer.md`, `.claude/agents/security-reviewer.md` **and `.claude/agents/validator.md` — ALL THREE declaring components** (`component-design` §1; the validator declares the visual-regression gap from inside its own Validation Report, and the table below attributes that gap to it. Reading two of three meant this step could not produce its own table's row — `/audit` 2026-09-04 Q-1). Identify which Coverage Gap Declaration sections are present. For each gap declaration, check if a matching specialist agent ALREADY EXISTS in `.claude/agents/`. If it does NOT exist and a matching example is available in `assets/examples/agents/`, pre-install it:
 
 | Gap declaration (in reviewer) | Specialist example to install |
 |-------------------------------|-------------------------------|
@@ -982,27 +982,40 @@ echo "=== Activation chain integrity? ==="
 # For each specialist agent (not process/core agents), verify a declaring component declares a matching gap
 for f in projects/$ARGUMENTS/.claude/agents/*.md; do
   agent_name=$(basename "$f" .md)
-  # Skip process agents and core agents (they are gap sources or protocol-spawned, not gap targets)
-  case "$agent_name" in
-    code-reviewer|security-reviewer|validator|arbitrator|criteria-enforcer|prd-sync-checker|diff-pattern-extractor|red-team|blue-team) continue ;;
-  esac
+  # DERIVE the specialist set; NEVER type it. A specialist is an agent this project installed
+  # FROM `assets/examples/agents/` (bootstrap Step 1.5 copies all of them there); everything else
+  # in `.claude/agents/` is protocol-spawned and legitimately has no gap phrase. The previous form
+  # typed a nine-name skip list that was already short by one — `skill-reviewer` warned on every
+  # internal-tool+ adaptation — which is the same hard-coded-set defect the framework bans one
+  # level up in D7.5 (`/audit` 2026-09-04 Q-32).
+  [ -f "projects/$ARGUMENTS/assets/examples/agents/$agent_name.md" ] || continue
   # Extract domain from Pushy Description ("when [declaring component] declares a [domain] gap")
   # `an?` and a NON-GREEDY `.+?`: domains are multi-word ("visual regression",
   # "infrastructure security") and half take "an". A `\S+` after a literal "declares a "
   # extracted 3 of the 10 real phrases and reported the other 7 as broken chains
   # (`/audit` 2026-09-03 P-10).
-  domain=$(grep -oP 'declares an? \K.+?(?= gap)' "$f" 2>/dev/null | head -1)
+  # `tr` first: descriptions are YAML folded blocks, so the phrase can straddle a line break and
+  # a line-based grep misses it — today's set survives that only by where the wrapping happens.
+  # `-i` and `(an?|the)`: `Declares a`, `declares the X gap` and hyphenated domains all occur in
+  # legitimate phrasings and all returned EMPTY before (`/audit` 2026-09-04 Q-31).
+  # `tr -s ' '` + trim: collapsing newlines puts the wrap's leading indent INSIDE the captured
+  # domain, and a domain of "  secrets coverage" matches nothing. EXECUTING the loop caught this
+  # on a real specialist; reading it did not (`/audit` 2026-09-04 Q-31).
+  domain=$(tr '\n' ' ' < "$f" | tr -s ' ' | grep -oiP 'declares (an?|the) \K.+?(?= gap)' | head -1 | sed 's/^ *//;s/ *$//')
   if [ -n "$domain" ]; then
     found=0
     # ALL THREE declaring components — `validator` declares the visual-regression gap from
     # inside its own Validation Report (component-design §1). Grepping only the two reviewers
     # made a validator-only declaration read as a broken chain (`/audit` 2026-09-03 P-9).
     for dc in code-reviewer security-reviewer validator; do
-      grep -qi "$domain gap" "projects/$ARGUMENTS/.claude/agents/$dc.md" 2>/dev/null && found=1
+      # -F: the domain is DATA, not a pattern. An unquoted `.` or `/` in a domain name
+      # (`Node.js runtime`, `CI/CD pipeline`) makes the cross-check permissive and can pass a
+      # chain that does not exist (`/audit` 2026-09-04 Q-31).
+      grep -qiF "$domain gap" "projects/$ARGUMENTS/.claude/agents/$dc.md" 2>/dev/null && found=1
     done
     [ "$found" -eq 0 ] && echo "BROKEN CHAIN: $agent_name declares '$domain gap' but no declaring component has a matching gap declaration"
   else
-    echo "WARNING: $agent_name has no Pushy Description gap phrase — may be unreachable via gap-declaration activation"
+    echo "INFO: $agent_name has no gap phrase — trigger-activated by design, not gap-activated. Half the shipped specialists are; this is only a finding if the agent WAS meant to be gap-activated."
   fi
 done
 ```
