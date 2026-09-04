@@ -12,7 +12,7 @@ description: >
   the meta-question. Produces a batch of FRAMEWORK improvements (BEHAVIOR class) → explicit owner
   approval → implement. It is the recursive generator of the other improvements.
 created: framework-v2.3.0 (pre-validated)
-derived_from: framework-base-upgrade.md §3.7 + framework-base-deepdive.md §A2
+derived_from: "the meta-loop axis — this skill audits the PROCESS (are the rules being followed, do the controls still fire), where codebase-audit audits the SYSTEM. Framework-layer lineage records stay in the framework repo and are NOT copied to projects, so this field names the CONCEPT, never a path a project cannot open (/audit 2026-09-03 P-23)."
 ---
 
 # Framework Audit (the meta-loop)

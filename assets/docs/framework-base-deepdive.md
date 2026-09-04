@@ -35,11 +35,11 @@
   fixtures/
     code-reviewer/
       F001_planted-toISOString-bug.md      # input (diff) + rubrica (must flag timezone)
-      F002_escape-s116-card-day1.md         # colhido do Post-Mortem fase tardia
+      F002_escape-late-session-card-day1.md         # colhido do Post-Mortem fase tardia
     criteria-enforcer/
       F010_weak-criterion-no-failure-signal.md
     red-team/
-      F020_guard-wrong-entity-joint-close.md  # colhido do PARK-CLOCK-01 fase tardia
+      F020_guard-wrong-entity-joint-close.md  # colhido do [ID-DE-INCIDENTE-DO-PROJETO-FONTE] fase tardia
   framework-eval/SKILL.md                   # o runner
 ```
 Cada fixture = `input` (o diff/task/RPC) + `rubric` (o que o agente DEVE produzir) + `provenance` (creation | escape sN).
@@ -100,7 +100,7 @@ derived_from: framework-base-upgrade.md §3.7 (Pattern 7) + a sessão fase tardi
 
 **Segurança:** é o único loop que propõe mudanças de BEHAVIOR em lote → o portão humano é obrigatório (upgrade §10.7). Read-only; dry-run-friendly.
 
-**O payoff de bootstrapping:** esta skill, rodando desde a sessão 1, teria achado os 6 buracos da fase tardia por volta da **sessão 30, não da 145** — e os "MUITO TARDE" da tabela §8.3 (criteria-enforcer AUTHORING, back-sweep, codebase-audit) teriam nascido cedo. **É a peça que converte "o framework melhora quando o dono pergunta" em "o framework pergunta a si mesmo na cadência".**
+**O payoff de bootstrapping:** esta skill, rodando desde a sessão 1, teria achado os 6 buracos da fase tardia por volta do primeiro quinto do caminho, **e não no fim dele** — e os "MUITO TARDE" da tabela §8.3 (criteria-enforcer AUTHORING, back-sweep, codebase-audit) teriam nascido cedo. **É a peça que converte "o framework melhora quando o dono pergunta" em "o framework pergunta a si mesmo na cadência".**
 
 ---
 

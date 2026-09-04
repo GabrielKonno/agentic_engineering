@@ -183,7 +183,14 @@ CHECKS:
          Harvest every camelCase / snake_case identifier appearing in CODE EXAMPLES inside
          **EVERY framework-layer surface — `docs/**` (not only `docs/modules/`), `examples/**`,
          `.claude/**`, `assets/docs/**` and the root `*.md` files** — then cross-grep each against
-         the projects' own `*.ts/*.tsx/*.js/*.sql/*.py` sources. **`assets/docs/` is NOT exempt**
+         the projects' own `*.ts/*.tsx/*.js/*.sql/*.py` sources.
+         **ALWAYS EXCLUDE `projects/*/assets/examples/` FROM THE COMPARISON SET.** Bootstrap
+         Step 1.5 copies this repo's own `examples/` into every project under that path, so a
+         match there means the identifier travelled framework → project — the OPPOSITE
+         direction from a leak. Without the exclusion the check errs BOTH ways: it files a
+         false hit, or it teaches the auditor to wave real hits off as "probably our own
+         template". Also exclude `node_modules/`, `.next/` and build caches, which carry the
+         same copies and make the grep time out (`/audit` 2026-09-03 P-36). **`assets/docs/` is NOT exempt**
          (D16.5 says so explicitly) and it is where the first full run's worst hits actually lived:
          scoping this harvest to templates alone missed a lineage doc carrying a source-project
          function name, two table/column names, a source file name and three source-project
@@ -207,6 +214,13 @@ CHECKS:
          context (the "# Memory" section of the system prompt, or the additional working
          directory whose path ends in `memory`). Run BOTH the blocklist grep (D16.3) and
          the value-shape scan (D16.2b) over EVERY file in it, including MEMORY.md.
+         **COMMIT HASHES IN MEMORY ARE DERIVABLE, NEVER JUDGED BY EYE** — a 7-hex token is
+         LEGITIMATE if and only if `git cat-file -e <hash>^{commit}` resolves it in THIS repo;
+         anything that does not resolve belongs to another repository and is a HIT. Run it per
+         hash. On the first execution this separated 8 framework hashes from 5 source-project
+         ones in the same files, which no amount of reading could have done
+         (`/audit` 2026-09-03 P-30). Sweep session coordinates and branch names here too — the
+         memory is outside the repo, so no tracked-file sweep ever reaches it.
          If the path cannot be resolved (e.g. audit adapted to run outside Claude Code),
          report the dimension as PARTIAL with "agent memory: SKIPPED — path not
          resolvable" — never silently omit the surface.

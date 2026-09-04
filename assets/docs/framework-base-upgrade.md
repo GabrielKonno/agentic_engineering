@@ -8,7 +8,7 @@
 
 ## 1. A abstração-mãe: de eixo único (MICRO) para eixo duplo (MICRO + MACRO)
 
-O framework-base historicamente otimiza o **MICRO**: a qualidade *local, intra-sessão, pré-deploy* de cada MUDANÇA (code-reviewer, validation-orchestrator, red-team por-diff). Isso é excelente e raro. O ponto cego — descoberto só na sessão 146 — é o eixo ortogonal **MACRO**: a saúde *global, cross-sessão, pós-deploy* do SISTEMA.
+O framework-base historicamente otimiza o **MICRO**: a qualidade *local, intra-sessão, pré-deploy* de cada MUDANÇA (code-reviewer, validation-orchestrator, red-team por-diff). Isso é excelente e raro. O ponto cego — descoberto só já na fase madura — é o eixo ortogonal **MACRO**: a saúde *global, cross-sessão, pós-deploy* do SISTEMA.
 
 > **Todo achado da auditoria foi uma instância dessa cegueira de eixo.** A correção não é "mais regras"; é adicionar o segundo eixo e as PONTES entre os dois. O gerador deve emitir projetos com os DOIS eixos por padrão (escalado por perfil de risco — §5).
 
@@ -111,7 +111,7 @@ O framework deste projeto não nasceu pronto — ele **acretou em cinco fases**,
 - **Fase 1 — Primeiro protocolo (fase inicial).** Migração para "Agentic Engineering": loop de auto-validação, PRD retroativo, critérios de aceite, e os **primeiros 12 Known Bug Patterns minerados retroativamente de as primeiras sessões** + o **cap de 20**. Lição: o artefato de aprendizado foi criado *depois* de 9 sessões de dor já paga.
 - **Fase 2 — Sprint + model-switch (≈03-26 / fase intermediária).** Sprint-approved mode, exception stops, cap de 3 discoveries/sprint, extração de padrões por diff. O **1º MODEL SWITCH → Opus** dispara organicamente em fase intermediária (tarefa de arquitetura: cron auto-close).
 - **Fase 3 — Infra completa de skills/agents (Adapt.1 v1.6.0 ≈ fase intermediária; Adapt.3 v2.1.0 ≈04-07).** Aqui nasce a espinha: `validator`+`arbitrator`; `evolution-policy` (FIX/DERIVED/CAPTURED + fronteira DATA/BEHAVIOR); `component-design` (gap-declaration); `session-end`+`context-recovery`; `auth-rules`+`multi-tenancy-rules`; Coverage Gap Declarations nos reviewers; especialistas (`data-integrity-checker`/`performance-auditor`) pré-instalados via vocabulário de gap. O Progress Log migrou de blocos completos → **tabela-índice** (blocos não sobrevivem a 100+ sessões — um *scaling move*).
-- **Fase 4 — Estado estacionário + acreção de guardas (fase intermediária→fase tardia).** Cadência estável de `+1/+2 KBP` por sessão; rules de domínio crescem com os módulos (`parking-rules` na Fase 7, `cadastro-rules` ≈ fase tardia). **PRD-dois-níveis** aprovado em fase tardia; **criteria-enforcer AUTHORING mode** ≈ fase tardia.
+- **Fase 4 — Estado estacionário + acreção de guardas (fase intermediária→fase tardia).** Cadência estável de `+1/+2 KBP` por sessão; rules de domínio crescem com os módulos (`[dominio-a]-rules` na Fase 7, `[dominio-b]-rules` ≈ fase tardia). **PRD-dois-níveis** aprovado em fase tardia; **criteria-enforcer AUTHORING mode** ≈ fase tardia.
 - **Fase 5 — Camada de sistema-inteiro (fase tardia).** `codebase-audit`, `quality-budgets`, `metrics`, **back-sweep** e o **piso de CI** — TODOS nesta sessão, após 145 sessões de review puramente diff-local e forward-only.
 
 **O loop de aprendizado (o mecanismo mais importante):** uma lição nasce como **Known Bug Pattern** no `code-reviewer.md` (cap 20); ao bater o teto, padrões bem-envelhecidos (1 trigger, há muitas sessões) são **promovidos para um rules-file de domínio** (liberando slot), e os que nunca disparam em ~20+ sessões são **removidos**. Os comentários HTML no `code-reviewer.md` são um *ledger de proveniência* completo. É um **loop de aprendizado com custo de contexto LIMITADO** — a abstração nº1 para qualquer gerador.
@@ -120,10 +120,10 @@ O framework deste projeto não nasceu pronto — ele **acretou em cinco fases**,
 
 O campo `created:` do frontmatter é o registro arqueológico. Os componentes nascem em **5 tiers**, mapeando um ciclo de vida claro:
 
-- **Tier 0 — primitivos pré-framework** (`created: s1 (pre-framework)`): `code-reviewer`, `security-reviewer`, `red-team`, `blue-team`. Os primitivos irredutíveis de review; `derived_from: null` — bedrock confiado.
+- **Tier 0 — primitivos pré-framework** (`created: pré-framework`): `code-reviewer`, `security-reviewer`, `red-team`, `blue-team`. Os primitivos irredutíveis de review; `derived_from: null` — bedrock confiado.
 - **Tier 1 — skills de processo pré-validadas** (`framework-v1.6.0/v2.1.0 (pre-validated)`): toda a maquinaria do ciclo de sessão (`sprint-proposer`, `validation-orchestrator`, `session-end`+5 sub-skills, `context-recovery`). Cada `derived_from:` aponta para um *passo do protocolo*. **Shipadas como bundle versionado, não crescidas.**
 - **Tier 2 — adaptação/template** (`arbitrator`, `validator`, especialistas): vieram de uma biblioteca-exemplo e foram mantidos por encaixarem.
-- **Tier 3 — migrados skill→subagent em s37** (`criteria-enforcer`, `diff-pattern-extractor`, `prd-sync-checker`): *reclassificados* quando o trabalho passou a exigir contexto isolado.
+- **Tier 3 — migrados skill→subagent numa fase intermediária** (`criteria-enforcer`, `diff-pattern-extractor`, `prd-sync-checker`): *reclassificados* quando o trabalho passou a exigir contexto isolado.
 - **Tier 4 — emergentes da auto-auditoria** (`2026-06-22`): `codebase-audit`, `ops-rules`, `quality-budgets` — nasceram de uma meta-auditoria do PRÓPRIO framework.
 
 **Rules-files nascem por acúmulo:** quando os bug-patterns de um domínio estouram o cap do code-reviewer, são promovidos a um rules-file. Evidência quantitativa: `auth-rules.md` carrega **10** anotações "promoted from sN"; rules fundacionais (`multi-tenancy`, `component-design`, `database-rules`) carregam **0** — foram autorados deliberadamente, não crescidos.
@@ -162,7 +162,7 @@ O sinal mais valioso não é *o que* o framework tem — é **QUANDO cada mecani
 
 Um gerador que ship só o loop per-diff produz projetos que **não notam a ausência das camadas de sistema-inteiro e de authoring-time até ~100 sessões de dívida acumularem em silêncio.** Por isso §2 (eixo macro), §3.7 (framework auto-auditável) e a revisão de SPEC em authoring-time não são especulação — são as lições mais caras deste projeto, e devem nascer com o bootstrap.
 
-> **Fechamento:** as abstrações de §2–§7 não foram inventadas no abstrato — cada uma corresponde a um mecanismo que este projeto descobriu que faltava, tarde, ao custo de dívida real. O gerador que as assar de origem entrega projetos que chegam à sessão 146 já com a robustez que o projeto-fonte levou mais de uma centena de sessões para alcançar.
+> **Fechamento:** as abstrações de §2–§7 não foram inventadas no abstrato — cada uma corresponde a um mecanismo que este projeto descobriu que faltava, tarde, ao custo de dívida real. O gerador que as assar de origem entrega projetos que chegam maduros já com a robustez que o projeto-fonte levou mais de uma centena de sessões para alcançar.
 
 ---
 
@@ -177,8 +177,8 @@ Formato de cada mecanismo: **História · O que acontece · Por que acontece · 
 - **História:** Nas Fases 0–1, decisões viravam prosa solta; em Adapt.1 (≈ fase intermediária) o Progress Log foi MIGRADO de blocos completos → **tabela-índice** porque "blocos não sobrevivem a 100+ sessões". O CLAUDE.md foi *enxugado* duas vezes (621→443→~160 linhas de protocolo inline → ponteiros).
 - **O que acontece:** Três camadas distintas. (1) **Logs de sessão append-only** (`.claude/logs/`) — o registro DETALHADO (raciocínio, alternativas, erros), explicitamente **NÃO lido no início da sessão** (é propagado para frente), lido **sob demanda** para arqueologia ("por que isso foi decidido?"). (2) **Progress Log como TABELA-ÍNDICE** em `project.md` — uma linha por sessão, com o nome do log na última coluna; o detalhe vive nos logs, não no índice. (3) **CLAUDE.md como CONTRATO auto-carregado** todo início de sessão (estado atual, padrões-chave, File Map, ledger de migrations), mantido preciso pela skill `config-file-updater` ao fim da sessão.
 - **Por que acontece:** Nenhuma janela de contexto cabe mais de uma centena de sessões. A continuidade exige que o estado durável seja **em-forma-de-índice** (sobrevive) com detalhe **offloaded** para arquivos append-only por-sessão (recuperável sob demanda).
-- **Por que o framework-base deve absorver:** É a dimensão que permite chegar à sessão 146 sem re-derivar tudo. O loop KBP→rules é só memória de *padrão*; a memória de *decisão/estado/handoff* (logs + índice + CLAUDE.md) é um sistema separado e igualmente essencial. Totalmente stack-agnóstico.
-- **Cenário:** uma sessão tardia pergunta "por que uma coluna de autoria está na tabela de itens e não na tabela-pai?". Sem a camada de logs duráveis, o agente re-investiga (caro); aqui ele faz `grep` em `.claude/logs/` pelo log da fase tardia e tem o raciocínio em uma leitura. E sem a migração para índice, o próprio Progress Log teria estourado o orçamento de contexto por volta da sessão 40.
+- **Por que o framework-base deve absorver:** É a dimensão que permite chegar à maturidade sem re-derivar tudo. O loop KBP→rules é só memória de *padrão*; a memória de *decisão/estado/handoff* (logs + índice + CLAUDE.md) é um sistema separado e igualmente essencial. Totalmente stack-agnóstico.
+- **Cenário:** uma sessão tardia pergunta "por que uma coluna de autoria está na tabela de itens e não na tabela-pai?". Sem a camada de logs duráveis, o agente re-investiga (caro); aqui ele faz `grep` em `.claude/logs/` pelo log da fase tardia e tem o raciocínio em uma leitura. E sem a migração para índice, o próprio Progress Log teria estourado o orçamento de contexto por volta de algumas dezenas de sessões.
 
 ### 9.2 Sincronização do contrato: PRD pointer-sync BIDIRECIONAL
 
@@ -238,7 +238,7 @@ Formato de cada mecanismo: **História · O que acontece · Por que acontece · 
 
 ### 9.9 O modelo VERIFY de 3 tiers (red-team / blue-team) + tier-3 exige humano
 
-- **História:** Instalado em Adapt.3; provado repetidamente ("só o red-team pegou" — PARK-CLOCK-01, fase tardia).
+- **História:** Instalado em Adapt.3; provado repetidamente ("só o red-team pegou" — [ID-DE-INCIDENTE-DO-PROJETO-FONTE], fase tardia).
 - **O que acontece:** A cadeia adversarial gradua o rigor: REVIEW (inspeção de código) → QUERY (consultas ao banco) → **VERIFY (probes controlados/invasivos)**, onde o **tier-3 exige aprovação humana** antes de rodar (um probe que muta/estressa estado real). O red-team ataca; o blue-team verifica defesas e mantém um inventário de controles de segurança.
 - **Por que acontece:** Code-reviewer e data-integrity podem AMBOS aprovar um achado de money-path e ainda assim errar (raciocinam do happy-path); só o adversário independente pega o caso onde dois mundos se cruzam.
 - **Por que o framework-base deve absorver:** "Gate-de-probe-invasivo-exige-humano" é um primitivo de segurança generalizável; a cadeia adversarial completa é default para money-paths em projetos `production-financial` (§5).
@@ -296,7 +296,7 @@ Formato de cada loop: **História · O que Claude faz · Lê/Escreve · Fronteir
 - **Lê/Escreve:** lê codebase inteiro, dev DB (MCP), prod (read-only), métricas; escreve metrics.md (append) + pendencias (tasks).
 - **Fronteira de segurança:** investigação-only; read-only em prod; cost-disciplinado (largura barata, profundidade reservada).
 - **Princípio generalizável:** *O review per-diff responde "esta mudança está boa?" para sempre e nunca "o SISTEMA está saudável?".* Precisa de um segundo observador periódico no eixo MACRO, escalado por tier de risco, que arquiva trabalho em vez de corrigir.
-- **Cenário:** Sessão 12. O sprint-proposer propõe a auditoria; ela acha que um arquivo cresceu para 1300 linhas, que o PITR está OFF, e que 6 itens LOW envelheceram — tudo vira backlog priorizado antes de a dívida acumular mais.
+- **Cenário:** uma sessão da fase inicial. O sprint-proposer propõe a auditoria; ela acha que um arquivo cresceu para 1300 linhas, que o PITR está OFF, e que 6 itens LOW envelheceram — tudo vira backlog priorizado antes de a dívida acumular mais.
 
 ### 10.5 Loop de CRIAÇÃO DE SKILL — Skill Creator (draft → test → eval → iterate) — **o mais fraco/aspiracional**
 
@@ -312,7 +312,7 @@ Formato de cada loop: **História · O que Claude faz · Lê/Escreve · Fronteir
 - **História:** É o loop que GEROU o back-sweep e a codebase-audit. Rodou uma vez (fase tardia) **porque o dono perguntou** "o que erramos no framework?". Nada no framework gerava essa pergunta.
 - **O que Claude faz:** Uma sessão-meta que pergunta *"o que o meu PROCESSO não está pegando?"*. Na fase tardia achou 6 pontos cegos de FRAMEWORK (não bugs de código), todos instâncias de cegueira de eixo-único (MICRO-only), e o dono aprovou os 6 (batch classe-BEHAVIOR). Sua tagline: **"um framework robusto não é o que tem mais regras — é o que tem um mecanismo para descobrir as regras que lhe FALTAM."**
 - **Status HONESTO:** o ritual está ESPECIFICADO (este doc) e PROVADO (fase tardia), mas o repo ship só seus OUTPUTS (as 6 pontes). **Não há skill `framework-audit/` nem gatilho de cadência** do jeito que a codebase-audit tem no sprint-proposer. Continua sendo uma sessão-meta iniciada por humano — exatamente a dependência que a especificação quer remover.
-- **Princípio generalizável:** *Auto-correção RECURSIVA.* Os mecanismos que emergiram tarde (§8.3: criteria-enforcer AUTHORING ≈ fase tardia, back-sweep fase tardia, codebase-audit fase tardia) são exatamente os que perguntam algo além de "esta mudança está boa?". Um framework que AGENDA uma meta-auditoria da própria cobertura descobre esses buracos na sessão 10, não na 146.
+- **Princípio generalizável:** *Auto-correção RECURSIVA.* Os mecanismos que emergiram tarde (§8.3: criteria-enforcer AUTHORING ≈ fase tardia, back-sweep fase tardia, codebase-audit fase tardia) são exatamente os que perguntam algo além de "esta mudança está boa?". Um framework que AGENDA uma meta-auditoria da própria cobertura descobre esses buracos ainda na fase inicial, e não já na madura.
 - **Cenário (o que o gerador deve emitir):** uma skill `framework-audit` que o sprint-proposer propõe em fronteira de fase (cadência maior que a codebase-audit), que fan-out de agentes lê os logs/protocolos/componentes e pergunta "qual classe de falha o processo não pega? que dimensão (ops? memória? autoria?) não tem dono? qual eval é aspiracional?" → produz um batch de melhorias de framework para o dono aprovar. **Esta sessão (fase tardia) é o template literal dessa skill.**
 
 ### 10.7 Os portões HUMANOS (a fronteira de autonomia, consolidada)
@@ -392,4 +392,4 @@ Ordenado por alavancagem (cada um justificado por "o buraco será descoberto na 
 9. **O risk-tiering** (`prototype`→`production-financial`) + **arquétipos de sessão** + **"prove-then-codify"** — para que a cerimônia escale ao projeto e não vire burocracia (§5, §3.8, §4).
 10. **As 2 peças que faltam para a auto-evolução ser first-class:** um **harness de eval real** (não só `last_eval`) e a skill **`framework-audit` AGENDADA** (o meta-loop que gera as outras melhorias) (§11).
 
-> **Fechamento do documento:** o gerador que assar a Dimensão A + a Dimensão B + os 6 loops de auto-evolução (com as 2 peças de §11) de ORIGEM entrega projetos que (a) chegam à sessão 146 com a robustez que o projeto-fonte levou mais de uma centena de sessões para alcançar, e (b) — mais importante — **descobrem e fecham os próprios pontos cegos continuamente, usando Claude, sem depender de um humano lembrar de fazer a pergunta certa.** Essa é a diferença entre um framework que tem boas regras e um framework que melhora sozinho.
+> **Fechamento do documento:** o gerador que assar a Dimensão A + a Dimensão B + os 6 loops de auto-evolução (com as 2 peças de §11) de ORIGEM entrega projetos que (a) chegam maduros com a robustez que o projeto-fonte levou mais de uma centena de sessões para alcançar, e (b) — mais importante — **descobrem e fecham os próprios pontos cegos continuamente, usando Claude, sem depender de um humano lembrar de fazer a pergunta certa.** Essa é a diferença entre um framework que tem boas regras e um framework que melhora sozinho.

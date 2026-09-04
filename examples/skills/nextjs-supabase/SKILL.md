@@ -87,7 +87,7 @@ export async function createClient() {
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` never imported in `src/app/` or `src/components/`
 - [ ] Middleware refreshes auth session on every request
 - [ ] RLS enabled on ALL business tables
-- [ ] RLS policies use `get_user_org_id()` function, never `USING(true)`
+- [ ] RLS policies use `get_current_org_id()` function, never `USING(true)`
 - [ ] `next.config.ts` has security headers (CSP, X-Frame-Options, HSTS)
 - [ ] Server actions always call `getUser()` before any operation
 

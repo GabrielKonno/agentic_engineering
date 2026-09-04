@@ -39,7 +39,7 @@ CREATE POLICY new_table_insert ON new_table FOR INSERT
 CREATE POLICY new_table_update ON new_table FOR UPDATE
   USING (organization_id = get_current_org_id());
 CREATE POLICY new_table_delete ON new_table FOR DELETE
-  USING (organization_id = get_current_org_id() AND is_org_manager());
+  USING (organization_id = get_current_org_id() AND has_org_role('manager'));
 
 -- 4. Indexes
 CREATE INDEX new_table_org_idx ON new_table(organization_id);

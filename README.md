@@ -307,9 +307,9 @@ Give the AI context, not just commands. The more you describe the *what* and *wh
 Bad:  "Fix the financial dashboard"
 Good: "The financial dashboard shows wrong profit values when a month
        has both paid and unpaid distributions. Currently it sums all
-       transactions regardless of is_paid status. It should only count
-       is_paid=true for the Caixa card, and show both paid+unpaid in
-       the Gastos Comprometidos card. This is in the Financial module,
+       records regardless of their settled/unsettled status. It should only
+       count settled ones for the first summary card, and show both settled
+       and unsettled in the second. This is in the reporting module,
        Dashboard tab, Monthly Summary section."
 ```
 

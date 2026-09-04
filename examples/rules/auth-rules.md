@@ -21,7 +21,7 @@ applies_to: all modules with user access, protected resources, role-based featur
 |-------|---------------|-------------|
 | Authenticated | User has a valid session | `getUser()` returns non-null |
 | Member | User belongs to the resource's organization | `organization_members` lookup |
-| Manager/Admin | User has elevated role in the organization | `role = 'manager'` or `is_org_manager()` |
+| Manager/Admin | User has elevated role in the organization | `role = 'manager'` or `has_org_role('manager')` |
 | Owner | User created or owns the specific resource | `resource.created_by = user.id` |
 | System | Automated action (cron, webhook, migration) | Service role key or system user |
 
