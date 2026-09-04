@@ -119,8 +119,12 @@ maintenance session, or by you. Write them ALL, verbatim, into:
   file); OR
 - **the commit message body**, when there is no report file.
 
-**The receipts section heading is `## Post-change checklist receipts (sHASH)` — an H2, exactly
-that string.** The self-check greps for it; writing it at any other level makes the check vacuous.
+**The receipts section heading is an H2 beginning `## Post-change checklist receipts (`.** Two
+completions are valid and only two: `(sHASH)` for a single-commit batch, and
+`(<batch name> — sHASH · sHASH · …)` for the consolidated form item 6 authorises. **The self-check
+greps the H2 PREFIX, never the full string** — an exact-string rule contradicted the consolidated
+form authorised in this same file, and only 2 of 6 headings on disk satisfied it
+(`/audit` 2026-09-04 Q-13). The self-check greps for it; writing it at any other level makes the check vacuous.
 
 Mechanical self-check (expected result stated): after committing, over **THIS run's receipts
 section only** — the text between that H2 and the next H1/H2, never the whole file — run
@@ -302,8 +306,8 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    precisely why three consecutive sessions emitted an honest aggregate while missing a direction
    on individual fixes. The table is the control; the total is not.
 
-   | Fix ID | File touched | LATERAL | PARALLEL | ADJACENT | DESCENDING | Extra instances found |
-   |--------|--------------|---------|----------|----------|------------|----------------------|
+   | Fix ID | Commit | File touched | LATERAL | PARALLEL | ADJACENT | DESCENDING | Extra instances found |
+   |--------|--------|--------------|---------|----------|----------|------------|----------------------|
    | [K-3]  | [path, or `none — deferred`] | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
 
    Use `✓` (ran — and **ALWAYS QUOTE the actual grep pattern or command in the cell**, never a
@@ -341,6 +345,9 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **Gate 2 — EVERY RECEIPT ROW NAMES A FILE THE COMMIT TOUCHED.**
    ```bash
    git show --name-only --format="" HEAD    # or the staged set, pre-commit
+   # CONSOLIDATED FORM: a batch table spans several commits, so HEAD reaches only the last one.
+   # Run it PER HASH from the `Commit` column, each row against ITS OWN commit. One HEAD run over
+   # a six-commit table reaches 1 row of 36 and passes vacuously (`/audit` 2026-09-04 Q-12).
    ```
    **Expected: every `File touched` cell in the per-fix receipt appears in that list.** A row
    naming a file absent from the diff is RED and means the fix was not made. This is the ONLY gate
@@ -351,6 +358,8 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **Gate 3 — ROW COUNT EQUALS DISPOSED COUNT.**
    ```bash
    grep -c "applied sHASH" <the report file>     # plus any accepted-risk / rejected rows
+   # CONSOLIDATED FORM: one alternation over every hash in the batch —
+   # `grep -cE "applied .s(AAA|BBB|CCC)"` — compared against the single table's row count.
    ```
    **Expected: equal to the receipt table's row count.** Report BOTH numbers.
    **SCOPE BOTH COUNTS — the findings ledger and the per-fix receipt share the `| ID |` row shape,

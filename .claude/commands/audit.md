@@ -291,13 +291,13 @@ FILES TO READ:
    on disk (`/audit` 2026-09-03 P-20).
 3. List files in docs/modules/templates/
 4. List files in docs/modules/agents/
-4. List files in docs/modules/rules/
-5. List folders in docs/modules/skills/
-6. docs/modules/templates/claude_md.md
-7. .claude/commands/prd_planning.md (the PRD Structure template section near the end)
-8. docs/agentic_engineering_framework.md — the "N-step pipeline" claims and the pipeline ASCII
+5. List files in docs/modules/rules/
+6. List folders in docs/modules/skills/
+7. docs/modules/templates/claude_md.md
+8. .claude/commands/prd_planning.md (the PRD Structure template section near the end)
+9. docs/agentic_engineering_framework.md — the "N-step pipeline" claims and the pipeline ASCII
    diagram (D11.7 compares both against the command file)
-9. CLAUDE.md — cited by the step-numbering and output checks
+10. CLAUDE.md — cited by the step-numbering and output checks
 
 **Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
@@ -395,11 +395,15 @@ FILES TO READ:
    (e.g., concurrency, performance, accessibility, visual regression, data-integrity, secrets,
    compliance, etc. — visual regression is named explicitly because its install link has broken
    twice, on the bootstrap path and then on the EPA path)
-5. .claude/rules/component-design.md (sections 1-3: Gap-Declaration, Pushy Description,
+6. .claude/rules/component-design.md (sections 1-3: Gap-Declaration, Pushy Description,
    Vocabulary Alignment)
-6. docs/modules/rules/component_design.md — the TEMPLATE twin of the same rule (D6.8 checks BOTH)
-7. .claude/commands/bootstrap.md — the specialist install table (D6.7)
-8. .claude/commands/existing_project_adaptation.md — the twin install table (D6.7)
+7. docs/modules/rules/component_design.md — the TEMPLATE twin of the same rule (D6.8 checks BOTH)
+8. .claude/commands/bootstrap.md — the specialist install table, the install PROSE, and the
+   Step 12.5b executable loop (D6.7, D7.6)
+9. .claude/commands/existing_project_adaptation.md — the twin install table, the twin install
+   PROSE, and the Step 5.1 executable loop (D6.7, D7.6)
+10. docs/agentic_engineering_framework.md — the coverage-gap handling paragraph and the validator
+    report format; D6.9's fourth-surface check cannot run without it
 
 **Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
@@ -434,6 +438,10 @@ CHECKS:
         component** declares (= agent exists but can never be triggered). **Scope this to the
         D6.8 set, never to the two reviewers** — a validator-declared gap would otherwise read as
         an orphaned specialist (`/audit` 2026-09-02 M-13).
+  D6.9. **VERIFY NO FOURTH SURFACE CONTRADICTS the declarer set.** `component-design` §1/§3 in both
+        twins is the policy; `docs/agentic_engineering_framework.md`'s coverage-gap handling
+        paragraph is a THIRD description of the same thing and has been stale before. A surface
+        naming two declarers where the policy names three is a FAIL (`/audit` 2026-09-03 P-14).
   D6.7. **INSTALL-LINK PARITY — the link that has broken TWICE.** For every gap from D6.1/D6.2
         AND every gap D6.8 attributes to any OTHER declaring component (run D6.8 first),
         verify a matching row exists in the specialist install table of BOTH
@@ -461,6 +469,26 @@ CHECKS:
   D7.3. For each agent in examples/agents/ with invocation: subagent: same check
   D7.4. Flag the anti-pattern: descriptions that are ONLY triggers ("USE PROACTIVELY when X.
         NOT needed for Y. Without this Z.") with NO core function statement
+  D7.6. **EXTRACT THE EXECUTABLE ACTIVATION-CHAIN CHECK FROM THE COMMAND FILES AND RUN IT.**
+        `bootstrap.md` Step 12.5b and `existing_project_adaptation.md` Step 5.1 each carry a shell
+        loop that resolves every gap-declaring specialist against the three declaring components.
+        **It is the framework's only EXECUTABLE activation check, and for four runs it had no
+        auditor on disk** — the verification lived in whichever prompt happened to be dispatched
+        (`/audit` 2026-09-04 Q-3, Q-33).
+        **ALWAYS:**
+        1. Build a synthetic project: every `docs/modules/agents/*.md` (renamed `_`→`-`) plus every
+           `examples/agents/*.md` into `.claude/agents/`, and every `examples/agents/*.md` into
+           `assets/examples/agents/`.
+        2. Extract the loop VERBATIM from the file and run it against that project.
+        3. **ALWAYS REPORT — `activation chain check: N of M specialists resolved, K broken`.**
+           **Expected: every gap-declaring specialist resolves and K = 0.** A resolved count below
+           the number of gap phrases D6.1/D6.2/D6.2b extracted is RED.
+        4. **TRY TO BREAK IT.** Test the phrasings a future specialist might legitimately use —
+           `declares the X gap`, a sentence-initial `Declares`, a hyphenated or slashed domain, a
+           description whose fold puts a line break inside the phrase. **A check that passes on
+           today's set but dies on a plausible rephrasing is a finding**, and this one has been
+           repaired twice on exactly that ground.
+
   D7.5. **DO NOT ENUMERATE the protocol-spawned set — DERIVE it.** The rule is structural, and
         stating it as a list has now failed three times, going 5 → 7 → 9 while the true figure moved
         with the directory (`/audit` 2026-09-02 M-22, then 2026-09-03 N-31, whose own count of
@@ -515,6 +543,8 @@ REPORT FORMAT:
   | Agent | Core function | Triggers | Exclusions | Consequence | Output | Status |
   |-------|--------------|----------|------------|-------------|--------|--------|
   [one row per agent — COMPLIANT / PARTIAL / NON-COMPLIANT]
+- **`activation chain check: N of M specialists resolved, K broken` (D7.6) — MANDATORY, never
+  blank.** Plus the rephrasings tested and which, if any, the check silently misses.
 - **Invariant proof output (D7.5) — MANDATORY, never blank.**
   **ALWAYS REPORT THE FILE COUNT BESIDE IT:** `files: N | output: [literal]`. **`output: 0` alone proves NOTHING** — measured, the
   command emits exactly `0` both when it reads 10 clean agents and when it reads none, so the
@@ -551,6 +581,8 @@ FILES TO READ:
 11. List files in docs/modules/agents/, and READ docs/modules/agents/code_reviewer.md (D8.8)
 12. .claude/rules/component-design.md AND docs/modules/rules/component_design.md (D10.5 §5/§6/§8/§9)
 13. docs/modules/rules/session_rules.md (D10.5 → "Execution proof")
+13b. docs/modules/skills/project-md-updater/SKILL.md — target of a §heading citation D8.7's own
+    sanctioned example names; the check cannot run without it
 14. CLAUDE.md (D10.5 trigger letters (a)-(d); D10.6 parity)
 
 **Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
@@ -593,6 +625,13 @@ CHECKS:
   D8.8. Read `skill-gate` and `codebase-audit`: `codebase-audit` cites a §heading inside
         `code_reviewer.md` by text — apply D8.7 to it.
 
+[D10.0] **EXTRACT EVERY MECHANICAL SELF-CHECK FROM `maintenance.md` AND `audit.md` AND RUN IT.**
+  These two files are EXECUTED every session and every check in them states an expected result.
+  **A check whose stated expectation does not match its actual output is a FINDING in either
+  direction** — one that cannot go red is decoration; one that fires on the healthy state is worse.
+  Three checks shipped in a single batch that could not fail at all, while this mandate lived only
+  in the invoking prompt (`/audit` 2026-09-04 Q-3, Q-2, Q-10, Q-39).
+
 [D10] Command → skill invocation paths
   D10.1. Read prd_planning.md — extract every reference to a skill
          (e.g., "cross-cutting-analysis", ".claude/skills/cross-cutting-analysis/SKILL.md")
@@ -605,7 +644,7 @@ CHECKS:
   D10.5. **THE COMMAND FILES' OWN CITATIONS.** Read `.claude/commands/maintenance.md` and
          `.claude/commands/audit.md` and verify every section they cite in another file resolves
          to a real heading — component-design §5/§6/§8/§9, "New component creation",
-         "Version bumps", "Audit intake", "Upstream intake", `/audit` Phase 0, CLAUDE.md's
+         "Version bumps", "Audit intake", "Upstream intake", `/audit` Phase 0 AND Phase 3, CLAUDE.md's
          trigger letters (a)-(d), and `session_rules.md` → "Execution proof". Apply D8.7's
          exact-match rule. These two files are EXECUTED every maintenance and audit session; a
          dangling citation here misroutes the session itself.
@@ -644,6 +683,8 @@ REPORT FORMAT:
   | Command file | Referenced skill/section | Expected location | Exists? |
   |-------------|--------------------------|-------------------|---------|
   [one row per reference, INCLUDING the D10.5 citations inside maintenance.md and audit.md]
+- **Self-checks executed verbatim (D10.0) — MANDATORY, never blank:**
+  | Check | file:line | Stated expectation | Actual output | Match? | Can go RED? | Can go GREEN? |
 - Runtime dual copy (D10.4): `cross-cutting-analysis` present in both | byte-identical: [yes/NO]
 - Trigger-list parity (D10.6): CLAUDE.md events [list] vs audit.md Phase 0 rows [list] —
   match: [yes / NO — which side carries the extra trigger]
@@ -783,7 +824,7 @@ REPORT FORMAT:
 
 ### Agent 6: Process Coverage — meta (Dimension D17)
 
-> Unlike D1–D16, this dimension hunts ABSENCES, not mismatches. A flow the repo executes in
+> Unlike the other sixteen (A, C, E and D4–D16 — there is no D1, D2 or D3), this dimension hunts ABSENCES, not mismatches. A flow the repo executes in
 > practice with no written instruction contradicts nothing on disk — a claim-vs-fact check
 > is structurally blind to it (twice in this framework's history such gaps were caught only
 > by the owner asking the meta-question). Evidence gathering here is mechanical (git history,
