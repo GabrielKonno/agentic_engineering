@@ -643,8 +643,15 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    (`/audit` 2026-09-03 N-43).
 6. **A batch MAY be split across several commits — and every commit in it carries the full
    contract.** Splitting is legitimate (process-file repairs alone, then the content fixes), but
-   each commit ALWAYS states its own `bump:` decision and the batch ALWAYS ends with ONE receipts
-   section per commit that changed anything. **NEVER let a closing commit carry neither.** When the
+   each commit ALWAYS states its own `bump:` decision, and the batch ALWAYS ends with receipts that
+   leave NO commit unaccounted for. **Two forms satisfy this, and only these two:** one receipts
+   section per commit, OR **ONE consolidated section for the batch whose per-fix table carries a
+   `Commit` column naming every hash, with each commit's own gates reported in its message.**
+   The consolidated form is preferred for a batch of more than three commits — six sections for
+   one batch is noise, and the obligation is that nothing goes unreceipted and everything stays
+   re-readable, not that the sections be numerous. **A commit that appears in NO receipts table
+   is the violation** (`/audit` 2026-09-03 P-4, which found item 6 broken four times inside the
+   batch that installed it). **NEVER let a closing commit carry neither.** When the
    dispositions span hashes, the `Application status` line names them all —
    `PARTIAL — N of M applied (X in sAAA, Y in sBBB)` — because the enumeration at `/audit` Phase 3
    admits no two-hash form otherwise (`/audit` 2026-09-03 N-44).
