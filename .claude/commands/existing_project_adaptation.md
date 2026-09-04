@@ -351,7 +351,7 @@ artifact**, and reports the count (`/audit` 2026-09-02 M-2, corrected 2026-09-03
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/pendencias_md.md` and create `.claude/phases/pendencias.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
-**Steps 2.2, 2.3, 2.9b, 4.1b, 4.6, 4.6.5 and 5.2 read or write it**, and this command's own Reading
+**Steps 1.5, 2.2, 2.3, 4.1b, 4.6, 4.6.5 and 5.2 read or write it** — and **DERIVE this list, NEVER type it.** It has now been wrong three times by three different methods: once from reading, once from a fixed-line-range `sed` that fell short of a step's body, and once from a heading-split that attributed a PHASE-3 block to the step above it because Phase 3 does not use the `**Step N**` heading form (`/audit` 2026-09-04 Q-5). The derivation that survives both errors: split on the bold `**Step N**` headings, and confirm each hit's line number lies before the next PHASE heading as well. Step 1.1 also reaches this file, but through a glob that never names it, so it is deliberately excluded from a list of NAMED consumers., and this command's own Reading
 Report has an `[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected
 2026-09-03 N-24 — Step 5.1 does not read this file).
 

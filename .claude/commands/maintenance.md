@@ -245,8 +245,22 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # loose form said 10 of 14; the correct form says 2. Calibrated three ways — 8 on a commit an
    # independent re-measurement scored at ≥6 buried, 0 on a pure-record commit, 2 here.
    # `[^0-9]` excludes the ordinal of a numbered list item.
+   # KNOWN FALSE-POSITIVE MODE, and it is the framework's own idiom: a mandate legitimately ends
+   # ``…`key: value`. NEVER emit nothing.`` — a second imperative sentence closing the same line.
+   # That form scores as buried and is NOT a defect; it is the mandated shape. **ALWAYS eyeball the
+   # flagged lines before acting: a `B` composed only of `NEVER emit nothing` tails is GREEN.**
+   # Measured: it flags 7 of 16 imperative lines in one shipped skill on that idiom alone
+   # (`/audit` 2026-09-04 Q-28). Do NOT contort the prose to satisfy it.
    echo "instruction style: $M added, $R rewritten, $B buried"
    ```
+   **SCOPE THE COMMAND TO THE SECTION'S OWN DENOMINATOR.** `git diff --cached` reads ONE staged
+   diff. A consolidated receipts section covering N commits must run this over the WHOLE batch —
+   `git diff <first>~1..<last>` — or its three numbers describe one commit while the section
+   declares N. That mismatch shipped: a receipt claimed `14 added, 5 rewritten, 0 buried` over a
+   seven-commit section whose true figures were 51 / 17 / 5, and `B` — the finding key — was
+   reported as 0 against a measured 5 (`/audit` 2026-09-04 Q-27).
+   **ALWAYS state the range the
+   numbers came from, beside the numbers.**
    **`R` is almost never 0** — a batch that edits normative text removes imperative lines, and
    three consecutive receipts claimed `0 rewritten` against a measured 12, 13 and 19. **`B` is the
    finding**: an imperative that is not the first thing on its line is buried, which is exactly the
@@ -494,17 +508,17 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    is added, which is the same defect as an enumerated set anywhere else.
    ```bash
    python -c "import io,yaml,glob,os,sys
-   bad=0; n=0
+   bad=0; n=0; sk=0
    for p in sorted(glob.glob('docs/modules/skills/*/SKILL.md'))+sorted(glob.glob('docs/modules/agents/*.md')):
        s=io.open(p,encoding='utf-8').read().replace(chr(13)+chr(10),chr(10))
-       if not s.startswith('---'): continue
+       if not s.startswith('---'): sk+=1; continue
        n+=1
        try:
            d=yaml.safe_load(s[4:s.index(chr(10)+'---',4)+1])
            exp=os.path.basename(os.path.dirname(p)) if p.endswith('SKILL.md') else os.path.basename(p)[:-3].replace('_','-')
            if d.get('name')!=exp: bad+=1; print('FAIL',p,'name=',d.get('name'),'expected',exp)
        except Exception as e: bad+=1; print('FAIL',p,type(e).__name__)
-   print('raw templates:', str(n)+' validated,', 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)"
+   print('raw templates: %d validated of %d globbed, %d skipped (fenced),' % (n, n+sk, sk), 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)"
    ```
    Expected result: **`raw templates: N validated of M globbed, S skipped (fenced), OK`** —
    **ALWAYS REPORT ALL THREE NUMBERS.** The globs match 25 files and the parser validates 19: the
@@ -708,7 +722,13 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    re-readable, not that the sections be numerous. **A commit that appears in NO receipts table
    is the violation** (`/audit` 2026-09-03 P-4, which found item 6 broken four times inside the
    batch that installed it). **NEVER let a closing commit carry neither.** When the
-   dispositions span hashes, the `Application status` line names them all —
+   **THE SUBJECT'S COUNT IS THE COUNT OF DISTINCT FINDING IDs IN THE BODY** — not the number of
+   edits, not the number of sites. Two group commits in one batch overstated it ("6 findings"
+   carrying 5 IDs, "9 findings" carrying 7) while both reported `row-count N vs N`, and the
+   identical class already has an erratum from an earlier run (`/audit` 2026-09-04 Q-45).
+   **Name the groups the same way every run** — `group A`, `group B`, … — rather than inventing a
+   scheme per batch; three runs used three schemes.
+   When dispositions span hashes, the `Application status` line names them all —
    `PARTIAL — N of M applied (X in sAAA, Y in sBBB)` — because the enumeration at `/audit` Phase 3
    admits no two-hash form otherwise (`/audit` 2026-09-03 N-44).
 7. **A RECEIPT MUST NAME A HASH THAT DOES NOT EXIST YET — resolve it with a PLACEHOLDER and a
@@ -721,9 +741,17 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    written home; `grep -rn "placeholder" .claude/commands/*.md` returned 0
    (`/audit` 2026-09-03 P-31, P-4).
    **ALWAYS REPORT — `placeholder: N occurrences substituted in sHASH` or `placeholder: none`.**
-8. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
+8. **A FALSE CLAIM IN AN ALREADY-MADE COMMIT MESSAGE IS CORRECTED BY A FOLLOW-UP COMMIT, NEVER BY
+   `--amend`.** A later commit may already depend on the hash, and the record of what was claimed
+   and when is itself evidence — the correction belongs beside the error, not in place of it. The
+   follow-up states what the original claimed, what is true, and how the gap was found.
+   **ALWAYS
+   REPORT — `commit correction: sHASH corrected by sHASH — [what]` or `commit correction: none`.**
+   This was executed once with no written home; the only `amend` string in the repo forbade it for
+   audit sessions only (`/audit` 2026-09-04 Q-44).
+9. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
-   moment where the fixes themselves are the least-verified thing in the repo: the five documented executions of
+   moment where the fixes themselves are the least-verified thing in the repo: the eight documented executions (the series lives in THREE surfaces — this one included — and `/audit` Phase 3 owns keeping all three current; `/audit` 2026-09-04 Q-18)
    this pass found defects in **4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5)
    applied findings, and step 2's
    re-verification runs BEFORE applying, never after. Report

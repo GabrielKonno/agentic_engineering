@@ -2047,10 +2047,10 @@ This framework is tool-agnostic. The concepts apply to any AI coding agent.
 
 | Document | Purpose | Tool-specific? |
 |----------|---------|---------------|
-| `prd_planning_prompt.md` | Prompt to create a PRD from scratch (before session 0) | No — works with any AI |
-| `prd_change_prompt.md` | Prompt to modify an existing PRD (classify → investigate → impact → draft) | No — works with any AI |
+| `.claude/commands/prd_planning.md` | Prompt to create a PRD from scratch (before session 0) | No — works with any AI |
+| `.claude/commands/prd_change.md` | Prompt to modify an existing PRD (classify → investigate → impact → draft) | No — works with any AI |
 | `.claude/commands/bootstrap.md` | Prompt to bootstrap a new project in session 0 (creates all files, installs tools) | Yes — Claude Code specific |
-| `existing_project_adaptation_prompt.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | Yes — Claude Code specific |
+| `.claude/commands/existing_project_adaptation.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | Yes — Claude Code specific |
 
 **Path context:** The PRD prompts reference `assets/docs/prd.md` relative to the project root. When using the framework repository structure (with `projects/` directory), the full path from the framework root is `projects/[project-name]/assets/docs/prd.md`. The session0 prompts handle this mapping — no changes to the PRD prompts are needed.
 

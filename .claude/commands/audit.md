@@ -35,8 +35,11 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 ## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
 
 An audit run has two modes. They differ in what each agent is told to look at, and the difference
-is not cosmetic: across its six documented executions the verification mode found defects in
-**4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5) and **21 of 45** (Run 7) already-`applied` findings. The mode was practice
+is not cosmetic: across its **eight** documented executions — a figure COUNTED from disk, never
+incremented — the verification mode found defects in **4 of 15** (`audit-2026-08-31.md` Run 2), **13 of 24** and **11 of 30** and **8 of 17** and
+**27 of 51** (`audit-2026-09-02.md` Runs 3-5 and its closing pass), **23 of 51**
+(`audit-2026-09-03.md` Run 6), **22 of 45** (Run 7) and **21 of 36** (`audit-2026-09-04.md`
+Run 8) already-`applied` findings. The mode was practice
 before it was instruction — executed twice with its verdict vocabulary supplied by the invoking
 prompt rather than by this file. That gap is what this phase closes.
 
@@ -1044,7 +1047,7 @@ End with: **Suggestion:** Run `/maintenance` to apply fixes, using this report a
 
 - **`Report status:`** — `COMPLETE` (all agents returned, all dimensions evaluated) or
   `INCOMPLETE — [which agents or dimensions did not return]`.
-- **`defect series:`** — `updated in N of 2 surfaces` (verification mode) or `N/A — baseline
+- **`defect series:`** — `updated in N of 3 surfaces` (verification mode) or `N/A — baseline
   mode`. Phase 3 owns keeping the series current in `CLAUDE.md` and this file's Phase 0.
 - **`Application status:`** — exactly one of `PENDING` / `PARTIAL — N of M applied in sHASH` /
   `APPLIED — M of M in sHASH` / `SUPERSEDED by [later run]`.
@@ -1095,11 +1098,18 @@ step is the carry-over half.
    reopen an applied finding under its old ID** — the ledger is how a later session tells "this
    was never fixed" from "this was fixed and the fix was wrong".
 6. **In `verification` mode, ALWAYS UPDATE THE DEFECT SERIES in BOTH places that carry it** —
-   `CLAUDE.md`'s **When it runs** paragraph and this file's Phase 0 preamble. Append this run's
-   `N of M` and increment the run count. **The series is a factual claim about this command's own
+   `CLAUDE.md`'s **When it runs** paragraph, this file's Phase 0 preamble, AND
+   `maintenance.md`'s Version-bumps section — **THREE surfaces, not two.** Append this run's
+   `N of M` and **RE-COUNT the runs from disk** with
+   `grep -lE '(# Run [0-9]+ — verification|Run mode:.*verification)' assets/docs/audit-*.md`.
+   **NEVER increment a stored number** — an increment cannot detect a skipped run, and the
+   previous owner mandated exactly that while a run was already missing (`/audit` 2026-09-04
+   Q-19).
+   **ALWAYS RECOMPUTE `N of M` FROM THE LEDGER, never from a prior report's summary
+   prose** — the last published figure was off by one against its own ledger (Q-20). **The series is a factual claim about this command's own
    history and it has no other owner**; it went stale for a whole run, and the batch that
    rewrapped a line inside that very paragraph did not catch it (`/audit` 2026-09-03 P-26).
-   **ALWAYS REPORT — `defect series: updated in N of 2 surfaces` or `N/A — baseline mode`.**
+   **ALWAYS REPORT — `defect series: updated in N of 3 surfaces` or `N/A — baseline mode`.**
 7. **ALWAYS COMMIT the report in THIS session — LAST, after every content item above** — writing it to disk is not persisting it.
    ```bash
    git add assets/docs/audit-YYYY-MM-DD.md && git commit -m "docs(audit): persist [run] — [N] findings open"

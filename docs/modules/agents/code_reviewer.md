@@ -254,7 +254,9 @@ there; `/audit` 2026-09-02 M-17.)*
 **If none of the above apply:** keep the section and set the field to `None` — NEVER omit the
 heading. An absent section and an unwritten one are indistinguishable to the reader, and the
 report schema at the top of this file already declares the field as `[None | list of gaps]`.
-(`security_reviewer.md` carries the identical resolution — verified, not assumed: both files were
+(`security_reviewer.md` carries an EQUIVALENT resolution, not a byte-identical one — the two
+wordings diverged and the claim of identity was false in both directions (`/audit` 2026-09-04
+Q-16). Verified, not assumed: both files were
 changed in the same session that wrote this sentence.)
 
 ## Known Bug Patterns (check EVERY review)
