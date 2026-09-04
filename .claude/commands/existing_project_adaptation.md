@@ -222,7 +222,7 @@ Before proceeding, present a summary of everything you read:
 
 For every document that already exists: **DO NOT overwrite.** Read it, identify what's missing compared to the current framework, and add only the missing sections. Preserve all existing content, history, and patterns.
 
-**When Step 2.1 or Step 4.8 writes the `**PRD:**` line from
+**When Step 2.1 writes the `**PRD:**` line from
 `docs/modules/templates/claude_md.md`, ALWAYS DELETE the template's
 `[or, when bootstrapped WITHOUT …]` bracket annotation** — it is authoring guidance, not project
 content, and bootstrap's twin has carried this mandate all along while this command had none, so
@@ -907,9 +907,18 @@ If a gap was KEPT but no matching example exists in `assets/examples/agents/`: r
 `pendencias.md` — "Create specialist agent for [gap] when domain implementation begins." A kept
 gap that installs nothing and registers nothing is a gap the project can never act on.
 
-After installation, validate activation chains for every pre-installed specialist:
-1. Verify it has a matching Coverage Gap Declaration in the declaring component whose domain vocabulary echoes the agent's Pushy Description
-2. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
+After installation, validate activation chains for every pre-installed specialist. **This block is
+the TWIN of bootstrap Step 12.5b and must stay word-for-word equivalent — D6.7 diffs the install
+TABLES, which were byte-identical while this prose diverged in six places (`/audit` 2026-09-04
+Q-34):**
+1. Verify it has a matching Coverage Gap Declaration in the declaring component (code-reviewer.md,
+   security-reviewer.md or validator.md) whose domain vocabulary echoes the agent's Pushy Description
+2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the
+   validator) following the existing conditional format — see `component_design.md` sections 1-3
+3. The pass criterion: the domain must appear in **at least one** declaring component
+4. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
+
+This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the declarer-to-orchestrator-to-specialist activation chain is broken (twin parity with bootstrap Step 12.5b — `/audit` 2026-09-04 Q-34).
 
 ---
 
@@ -1081,7 +1090,7 @@ done
   (Bootstrap's twin has carried "Delivered by receivers" since M-2; EPA's three verdicts were
   mandated with no slot to land in — `/audit` 2026-09-03 N-27.)
 
-### PRD line (Steps 2.1 / 4.8) — ALWAYS report, never omit:
+### PRD line (Step 2.1) — ALWAYS report, never omit:
 - `written, bracket removed` · `already present, untouched`
 
 ### `done_tasks.md` (Step 2.3) — ALWAYS report, never omit:

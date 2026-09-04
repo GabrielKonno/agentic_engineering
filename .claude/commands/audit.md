@@ -439,7 +439,7 @@ CHECKS:
         verify a matching row exists in the specialist install table of BOTH
         `.claude/commands/bootstrap.md` AND `.claude/commands/existing_project_adaptation.md`.
         Mechanical: `diff` the two tables — **expected: empty**. A gap that is declared and has a
-        specialist but no install row on ONE path is a FAIL, not a nit: the reviewer will declare
+        specialist but no install row on ONE path is a FAIL, not a nit: the declaring component will declare
         it forever and the specialist will never be installed on that path. This is exactly how
         `visual regression` broke as H-2 (bootstrap) and again as J-5 (EPA), while D6 returned
         PASS both times because it only checked phrase alignment.
@@ -633,8 +633,8 @@ REPORT FORMAT:
   |-------------|----------------|---------------|---------|
   [one row per reference]
 - Cross-section citations (D8.7/D8.8) — MANDATORY, never blank:
-  | Citer | Cited heading | Target file | Real heading? | Exact match? |
-  |-------|---------------|-------------|---------------|--------------|
+  | Citer | Cited heading | Target file | Real heading? | Exact / sanctioned-prefix / RED |
+  |-------|---------------|-------------|---------------|--------------------------------|
   [one row per §heading citation — "a bold lead-in" in the "Real heading?" column is a FINDING]
 - Unresolved: [list, or "none"]
 

@@ -605,7 +605,36 @@ For each remaining specialist agent:
 
 1. Verify it has a matching Coverage Gap Declaration in the declaring component (code-reviewer.md, security-reviewer.md or validator.md) whose domain vocabulary echoes the agent's Pushy Description
 2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the validator) following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
-3. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md` — the domain must appear in at least one declaring component
+3. The pass criterion: the domain must appear in **at least one** declaring component
+4. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
+
+**ALWAYS RUN THIS CHECK — it is the same loop EPA Step 5.1 runs, and bootstrap had none.** The
+install link has broken on BOTH paths (H-2 on bootstrap, J-5 on EPA) while the mechanical net
+existed on one; a prior receipt recorded that absence as a clearance rather than a finding
+(`/audit` 2026-09-04 Q-33).
+
+```bash
+echo "=== Activation chain integrity? ==="
+for f in projects/$ARGUMENTS/.claude/agents/*.md; do
+  agent_name=$(basename "$f" .md)
+  # DERIVE the specialist set; never type it (see EPA Step 5.1 for the reasoning)
+  [ -f "projects/$ARGUMENTS/assets/examples/agents/$agent_name.md" ] || continue
+  domain=$(tr '
+' ' ' < "$f" | tr -s ' ' | grep -oiP 'declares (an?|the) \K.+?(?= gap)' | head -1 | sed 's/^ *//;s/ *$//')
+  if [ -n "$domain" ]; then
+    found=0
+    for dc in code-reviewer security-reviewer validator; do
+      grep -qiF "$domain gap" "projects/$ARGUMENTS/.claude/agents/$dc.md" 2>/dev/null && found=1
+    done
+    [ "$found" -eq 0 ] && echo "BROKEN CHAIN: $agent_name declares '$domain gap' but no declaring component has a matching gap declaration"
+  else
+    echo "INFO: $agent_name has no gap phrase — trigger-activated by design, not gap-activated."
+  fi
+done
+```
+
+**ALWAYS REPORT — `activation chains: N verified, M broken` or `activation chains: none installed`.
+NEVER emit nothing.**
 
 This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the declarer-to-orchestrator-to-specialist activation chain is broken.
 
@@ -747,6 +776,9 @@ git commit -m "chore: bootstrap from agentic framework"
   owed by nobody — the same DESCENDING class M-8 was raised on, introduced by M-8's own commit
   and caught by `/audit` 2026-09-03 N-23.)
 
+### Activation chains (Step 12.5b) — ALWAYS report, never omit:
+- `N verified, M broken` · `none installed`
+
 ### Cross-cutting concerns (Step 1.1 → Steps 3/4/13) — ALWAYS report, never omit:
 - Classified at Step 1.1: [N] (R → rules, A → decisions, T → tasks)
 - Delivered by receivers: R/R rules (Step 13) · A/A decisions (Step 3) · T/T tasks (Step 4)
@@ -759,8 +791,11 @@ git commit -m "chore: bootstrap from agentic framework"
   `/audit` 2026-09-03 P-21 — the mandate existed and had nowhere to land.)
 
 ### Hooks (Step 14) — ALWAYS report, never omit:
-- `smart-formatting ACTIVE` · `SKIPPED: no formatter detected` · `none — project has no formatter`
-  (all three verdicts Step 14 can produce)
+- `smart-formatting ACTIVE` · `none — project has no formatter`
+  (BOTH verdicts Step 14 can produce, and ONLY those two — the enumeration is COPIED FROM the
+  step, never paraphrased. A third, `SKIPPED: no formatter detected`, was a paraphrase of the
+  second and appears nowhere in Step 14; the slot asserted it was one of "all three"
+  (`/audit` 2026-09-04 Q-7).)
 
 ### Files created:
 - CLAUDE.md ([lines] lines)
@@ -822,10 +857,12 @@ git commit -m "chore: bootstrap from agentic framework"
 - CI floor ← [created (internal-tool+) / skipped / deferred — task added]
 - [production-financial] reconciliation queries filled, red-team mandatory on money-paths: [yes/N/A]
 
-### Hooks configured:
-- smart-formatting (PostToolUse → Write/Edit/MultiEdit): Prettier auto-format [ACTIVE / SKIPPED: no Prettier]
+### Hooks configured: [see the `Hooks (Step 14)` slot above — this section lists the CONFIGURED
+HOOK ENTRIES, not the verdict. One verdict, one home (`/audit` 2026-09-04 Q-8).]
+- [hook entries written into settings.json, or `none`]
 
-### MCPs installed:
+### MCPs installed: [see the `MCPs (Step 5)` slot above for the VERDICT — this section lists
+the per-MCP connection status.]
 - [name]: [WORKING / ERROR: detail]
 
 ### Skills installed:
