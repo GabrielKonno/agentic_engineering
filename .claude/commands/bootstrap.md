@@ -599,7 +599,8 @@ If a gap was KEPT but no matching example exists in `assets/examples/agents/`: r
 
 #### Step 12.5b — Validate activation chains
 
-For every specialist agent created or pre-installed in Steps 7-12.5a that uses gap-declaration activation, verify the chain is complete. Note: code-reviewer and security-reviewer are SOURCES of gaps (not targets) — skip them. Arbitrator, red-team and blue-team are spawned by protocol, not by gap declaration — skip them. **The VALIDATOR is BOTH**: protocol-spawned AND a gap DECLARER (it declares the visual regression gap), so include it as a gap source (component-design §1; `/audit` 2026-09-02 M-57).
+> **The declaring components are gap SOURCES, not gap targets, and the loop below DERIVES that set rather than listing it** — it harvests the declared gaps from whichever files declare them and excludes exactly those files.
+> **NEVER type the set here**: a typed five-name copy stood two lines above the loop that derives it, and its twin carried no such paragraph at all (`/audit` 2026-09-04 R-32).
 
 For each remaining specialist agent:
 
@@ -615,22 +616,48 @@ existed on one; a prior receipt recorded that absence as a clearance rather than
 
 ```bash
 echo "=== Activation chain integrity? ==="
+# The DECLARED set is DERIVED from the three declaring components and compared by SET MEMBERSHIP,
+# never by substring: a substring test false-PASSED `coverage gap` against `Secrets coverage gap:`
+# and false-BROKE a hyphenated domain (`/audit` 2026-09-04 R-27, R-28).
+norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/' '   ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
+declared=""; declarers=""
+for dc in code-reviewer security-reviewer validator; do
+  f="projects/$ARGUMENTS/.claude/agents/$dc.md"; [ -f "$f" ] || continue
+  declarers="$declarers|$dc|"
+  while IFS= read -r g; do [ -n "$g" ] && declared="$declared|$(norm "$g")|"; done <<EOF
+$(grep -oiP '^> \K[A-Za-z][A-Za-z ]{2,30}?(?= gap:)' "$f" 2>/dev/null)
+EOF
+done
+# PRECONDITION, not prose: an empty set means the check cannot run, and a silent empty run
+# reads as a green (R-10).
+[ -z "$declared" ] && { echo "RED: no gap declarations found - the check cannot run"; exit 1; }
+verified=0; broken=0; info=0
 for f in projects/$ARGUMENTS/.claude/agents/*.md; do
-  agent_name=$(basename "$f" .md)
-  # DERIVE the specialist set; never type it (see EPA Step 5.1 for the reasoning)
-  [ -f "projects/$ARGUMENTS/assets/examples/agents/$agent_name.md" ] || continue
-  domain=$(tr '
-' ' ' < "$f" | tr -s ' ' | grep -oiP 'declares (an?|the) \K.+?(?= gap)' | head -1 | sed 's/^ *//;s/ *$//')
-  if [ -n "$domain" ]; then
-    found=0
-    for dc in code-reviewer security-reviewer validator; do
-      grep -qiF "$domain gap" "projects/$ARGUMENTS/.claude/agents/$dc.md" 2>/dev/null && found=1
-    done
-    [ "$found" -eq 0 ] && echo "BROKEN CHAIN: $agent_name declares '$domain gap' but no declaring component has a matching gap declaration"
+  an=$(basename "$f" .md)
+  case "$declarers" in *"|$an|"*) continue ;; esac   # a declarer is not a specialist
+  # ALL gaps, never just the first (R-31). `\n\t` and an OPTIONAL article, because a tab-indented
+  # fold and a `declares X gap` phrasing both returned empty and were silently passed (R-29, R-30).
+  domains=$(tr '\n\t' '  ' < "$f" | tr -s ' ' | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z /-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
+  if [ -n "$domains" ]; then
+    while IFS= read -r domain; do
+      [ -z "$domain" ] && continue
+      case "$declared" in
+        *"|$(norm "$domain")|"*) verified=$((verified+1)) ;;
+        *) echo "BROKEN CHAIN: $an declares '$domain gap' but no declaring component declares it"; broken=$((broken+1)) ;;
+      esac
+    done <<EOF
+$domains
+EOF
+  elif [ -f "projects/$ARGUMENTS/assets/examples/agents/$an.md" ]; then
+    info=$((info+1))   # a shipped example with no gap phrase is trigger-activated by design
   else
-    echo "INFO: $agent_name has no gap phrase — trigger-activated by design, not gap-activated."
+    # NEVER skip silently: a project-authored specialist is the population most likely to carry a
+    # broken chain, and the previous derived skip list emitted nothing at all for it (R-10).
+    echo "INFO: $an has no gap phrase and is not a shipped example - verify it is protocol-spawned"
+    info=$((info+1))
   fi
 done
+echo "activation chains: $verified verified, $broken broken, $info info"
 ```
 
 **ALWAYS REPORT — `activation chains: N verified, M broken` or `activation chains: none installed`.

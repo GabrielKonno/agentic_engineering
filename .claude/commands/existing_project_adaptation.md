@@ -988,45 +988,48 @@ echo "=== Known Bug Patterns have efficacy tracking? ==="
 grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
 
 echo "=== Activation chain integrity? ==="
-# For each specialist agent (not process/core agents), verify a declaring component declares a matching gap
+# The DECLARED set is DERIVED from the three declaring components and compared by SET MEMBERSHIP,
+# never by substring: a substring test false-PASSED `coverage gap` against `Secrets coverage gap:`
+# and false-BROKE a hyphenated domain (`/audit` 2026-09-04 R-27, R-28).
+norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/' '   ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
+declared=""; declarers=""
+for dc in code-reviewer security-reviewer validator; do
+  f="projects/$ARGUMENTS/.claude/agents/$dc.md"; [ -f "$f" ] || continue
+  declarers="$declarers|$dc|"
+  while IFS= read -r g; do [ -n "$g" ] && declared="$declared|$(norm "$g")|"; done <<EOF
+$(grep -oiP '^> \K[A-Za-z][A-Za-z ]{2,30}?(?= gap:)' "$f" 2>/dev/null)
+EOF
+done
+# PRECONDITION, not prose: an empty set means the check cannot run, and a silent empty run
+# reads as a green (R-10).
+[ -z "$declared" ] && { echo "RED: no gap declarations found - the check cannot run"; exit 1; }
+verified=0; broken=0; info=0
 for f in projects/$ARGUMENTS/.claude/agents/*.md; do
-  agent_name=$(basename "$f" .md)
-  # DERIVE the specialist set; NEVER type it. A specialist is an agent this project installed
-  # FROM `assets/examples/agents/` (bootstrap Step 1.5 copies all of them there); everything else
-  # in `.claude/agents/` is protocol-spawned and legitimately has no gap phrase. The previous form
-  # typed a nine-name skip list that was already short by one — `skill-reviewer` warned on every
-  # internal-tool+ adaptation — which is the same hard-coded-set defect the framework bans one
-  # level up in D7.5 (`/audit` 2026-09-04 Q-32).
-  [ -f "projects/$ARGUMENTS/assets/examples/agents/$agent_name.md" ] || continue
-  # Extract domain from Pushy Description ("when [declaring component] declares a [domain] gap")
-  # `an?` and a NON-GREEDY `.+?`: domains are multi-word ("visual regression",
-  # "infrastructure security") and half take "an". A `\S+` after a literal "declares a "
-  # extracted 3 of the 10 real phrases and reported the other 7 as broken chains
-  # (`/audit` 2026-09-03 P-10).
-  # `tr` first: descriptions are YAML folded blocks, so the phrase can straddle a line break and
-  # a line-based grep misses it — today's set survives that only by where the wrapping happens.
-  # `-i` and `(an?|the)`: `Declares a`, `declares the X gap` and hyphenated domains all occur in
-  # legitimate phrasings and all returned EMPTY before (`/audit` 2026-09-04 Q-31).
-  # `tr -s ' '` + trim: collapsing newlines puts the wrap's leading indent INSIDE the captured
-  # domain, and a domain of "  secrets coverage" matches nothing. EXECUTING the loop caught this
-  # on a real specialist; reading it did not (`/audit` 2026-09-04 Q-31).
-  domain=$(tr '\n' ' ' < "$f" | tr -s ' ' | grep -oiP 'declares (an?|the) \K.+?(?= gap)' | head -1 | sed 's/^ *//;s/ *$//')
-  if [ -n "$domain" ]; then
-    found=0
-    # ALL THREE declaring components — `validator` declares the visual-regression gap from
-    # inside its own Validation Report (component-design §1). Grepping only the two reviewers
-    # made a validator-only declaration read as a broken chain (`/audit` 2026-09-03 P-9).
-    for dc in code-reviewer security-reviewer validator; do
-      # -F: the domain is DATA, not a pattern. An unquoted `.` or `/` in a domain name
-      # (`Node.js runtime`, `CI/CD pipeline`) makes the cross-check permissive and can pass a
-      # chain that does not exist (`/audit` 2026-09-04 Q-31).
-      grep -qiF "$domain gap" "projects/$ARGUMENTS/.claude/agents/$dc.md" 2>/dev/null && found=1
-    done
-    [ "$found" -eq 0 ] && echo "BROKEN CHAIN: $agent_name declares '$domain gap' but no declaring component has a matching gap declaration"
+  an=$(basename "$f" .md)
+  case "$declarers" in *"|$an|"*) continue ;; esac   # a declarer is not a specialist
+  # ALL gaps, never just the first (R-31). `\n\t` and an OPTIONAL article, because a tab-indented
+  # fold and a `declares X gap` phrasing both returned empty and were silently passed (R-29, R-30).
+  domains=$(tr '\n\t' '  ' < "$f" | tr -s ' ' | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z /-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
+  if [ -n "$domains" ]; then
+    while IFS= read -r domain; do
+      [ -z "$domain" ] && continue
+      case "$declared" in
+        *"|$(norm "$domain")|"*) verified=$((verified+1)) ;;
+        *) echo "BROKEN CHAIN: $an declares '$domain gap' but no declaring component declares it"; broken=$((broken+1)) ;;
+      esac
+    done <<EOF
+$domains
+EOF
+  elif [ -f "projects/$ARGUMENTS/assets/examples/agents/$an.md" ]; then
+    info=$((info+1))   # a shipped example with no gap phrase is trigger-activated by design
   else
-    echo "INFO: $agent_name has no gap phrase — trigger-activated by design, not gap-activated. Half the shipped specialists are; this is only a finding if the agent WAS meant to be gap-activated."
+    # NEVER skip silently: a project-authored specialist is the population most likely to carry a
+    # broken chain, and the previous derived skip list emitted nothing at all for it (R-10).
+    echo "INFO: $an has no gap phrase and is not a shipped example - verify it is protocol-spawned"
+    info=$((info+1))
   fi
 done
+echo "activation chains: $verified verified, $broken broken, $info info"
 ```
 
 **ALWAYS REPORT — `activation chains: N verified, M broken` or `activation chains: none installed`. NEVER emit nothing.** Twin parity with bootstrap Step 12.5b, which mandates the
