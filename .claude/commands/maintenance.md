@@ -24,7 +24,12 @@ This is a framework maintenance session, not a project bootstrap.
   sHASH | BLOCKED, reason]`. **NEVER emit nothing.** The gate had a rule and no invoker, no report
   key and no receipt, and it went unhonoured on the very next push 108 seconds after it was
   written (`/audit` 2026-09-03 N-41).
-  **THE `push:` VALUE IS A POINT-IN-TIME CLAIM AND IT DECAYS.**
+  **THE `push:` VALUE IS A POINT-IN-TIME CLAIM AND IT DECAYS — WITHIN a session AND BETWEEN
+  SESSIONS.** The next session ALWAYS re-checks before doing anything else: if `origin/main`
+  moved, commits a persisted receipt calls unpushed are now published and the mandated GREEN
+  never ran over them.
+  **Run D16 over the newly-published range and record it** — that is how
+  a live leak was found rather than shipped (`/audit` 2026-09-04 R-26, R-1).**
   **ALWAYS RE-CHECK `git status -sb`
   IMMEDIATELY BEFORE WRITING THE CLOSING `push:` LINE.** If `origin/main` advanced during the
   session — someone else pushed, or another session did — then commits this session described as
@@ -156,7 +161,8 @@ section only** — the text between that H2 and the next H1/H2, never the whole 
 for k in "inventory sweep" "instruction style" "references" "fences" "isolation" \
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
          "classification" "new component" "gates" "push" \
-         "audit" "verification audit" "placeholder" "control back-sweep"; do
+         "audit" "verification audit" "placeholder" "control back-sweep" \
+         "commit correction" "defect series"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
@@ -179,9 +185,17 @@ appear in the loop above.**
    `[A-Za-z ]` silently drops them — including the exact key of the finding that created Gate 4
    (`/audit` 2026-09-04 Q-39). Gate 4 below uses the SAME class for the same reason; **change
    both together or neither.**
-**Negation-proved when installed:** the corrected form harvests 8 keys where the old one
-harvested 1, and immediately went RED on `placeholder:` — a key mandated in this file and absent
-from the loop. A check whose first execution finds a real defect is a check; the one it replaced
+**THE HARVESTER SEES ONE MANDATE SHAPE, AND THAT IS ITS STATED LIMIT.** It matches
+``ALWAYS REPORT … `<key>:` `` on ONE line. Mandates phrased `ALWAYS REPORT all three results —` or
+`ALWAYS REPORT the outcome —`, or wrapped across a line break, are invisible to it — **measured, it
+reaches 10 of the 20 registered keys, and three surfaces once carried three different figures for
+this one number** (`/audit` 2026-09-04 R-3, R-4). So:
+**ALWAYS write a new report mandate in the
+harvestable shape**, on one line, and **ALWAYS report the harvest with its command and stdout**
+rather than a remembered figure. The check is a NET for the shape it can see, never a census.
+**Negation-proved when installed:** the corrected form went RED on `placeholder:` — a key mandated
+in this file and absent from the loop — and the next batch's `commit correction:` escaped it by
+wrapping, which is why the shape rule above now exists. A check whose first execution finds a real defect is a check; the one it replaced
 had never found anything.
 
 **TWO calibration rules, both learned by this check failing on itself:**
@@ -345,7 +359,15 @@ Each item encodes a real miss that survived a first pass and was only caught by 
 
    | Fix ID | Commit | File touched | LATERAL | PARALLEL | ADJACENT | DESCENDING | Extra instances found |
    |--------|--------|--------------|---------|----------|----------|------------|----------------------|
-   | [K-3]  | [path, or `none — deferred`] | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
+   | [K-3]  | [sHASH] | [path, or `none — deferred`] |
+
+   **A GROUP TABLE IS PERMITTED for a multi-commit batch ONLY WITH THESE COLUMNS:
+   `Group | Commit | Findings | File(s) touched`**, plus the sweep and its result. **Gate 2
+   checks `File(s) touched` against `git show --name-only` PER HASH**, so a group table without
+   that column makes Gate 2 unrunnable — which is what shipped, and run per hash it went RED on
+   a row attributing a finding to a commit that never touched that finding's file
+   (`/audit` 2026-09-04 R-6). **Every finding appears in exactly one row's `Findings` cell, and
+   the union of those cells MUST equal the ledger's disposed set** — check it, never assert it. ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
 
    Use `✓` (ran — and **ALWAYS QUOTE the actual grep pattern or command in the cell**, never a
    bare glyph: an unquoted `✓` is unverifiable by anyone but its author), `✗` (NOT run —
@@ -727,7 +749,11 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    different contracts.
 3. **Apply, then run item 4's CLASS SWEEP for every fix** — a report names one line; the line is
    almost never the only instance.
-4. **ALWAYS WRITE THE STATUS BACK into the report file in this same session** — `applied sHASH`
+4. **A WRITE-BACK COMMIT CARRIES STATUS AND RECEIPTS ONLY.** If it also changes a command, a
+   template or a rule, it is a FIX commit: it states a real `bump:` and carries its own gates.
+   Seven commits declaring `bump: none — write-back only` shipped normative content, one of
+   them a new mandate and slot AFTER the version bump (`/audit` 2026-09-04 R-45).
+   **ALWAYS WRITE THE STATUS BACK into the report file in this same session** — `applied sHASH`
    or `rejected — [reason]` per ID. The applying session owns this, not the next audit: a status
    that waits for the next run is a status nobody wrote.
    **ALWAYS WRITE THE POST-CHANGE CHECKLIST RECEIPTS into that same file**, under
@@ -767,7 +793,7 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    one batch is noise, and the obligation is that nothing goes unreceipted and everything stays
    re-readable, not that the sections be numerous. **A commit that appears in NO receipts table
    is the violation** (`/audit` 2026-09-03 P-4, which found item 6 broken four times inside the
-   batch that installed it). **NEVER let a closing commit carry neither.** When the
+   batch that installed it). **NEVER let a closing commit carry neither.**
    **THE SUBJECT'S COUNT IS THE COUNT OF DISTINCT FINDING IDs IN THE BODY** — not the number of
    edits, not the number of sites. Two group commits in one batch overstated it ("6 findings"
    carrying 5 IDs, "9 findings" carrying 7) while both reported `row-count N vs N`, and the
@@ -791,8 +817,7 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    `--amend`.** A later commit may already depend on the hash, and the record of what was claimed
    and when is itself evidence — the correction belongs beside the error, not in place of it. The
    follow-up states what the original claimed, what is true, and how the gap was found.
-   **ALWAYS
-   REPORT — `commit correction: sHASH corrected by sHASH — [what]` or `commit correction: none`.**
+   **ALWAYS REPORT — `commit correction: sHASH corrected by sHASH — [what]` or `commit correction: none`.**
    This was executed once with no written home; the only `amend` string in the repo forbade it for
    audit sessions only (`/audit` 2026-09-04 Q-44).
 9. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)

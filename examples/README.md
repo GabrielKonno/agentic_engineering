@@ -167,6 +167,6 @@ the per-kind sections and measure before citing any of these as universal (`/aud
 **Rules (WHAT constraints apply):**
 - Inviolable rules numbered — non-negotiable boundaries
 - Checklists for new entities (new table, new endpoint, etc.) — **where the domain HAS an
-  entity-creation flow: **1 of 11** examples carries one; 6 of 11 carry a `- [ ]` checklist of some kind, the other five being `REVIEW:` criteria. The unit is stated because only the looser reading produced 6 (`/audit` 2026-09-04 Q-43).** Its absence is not a violation
+  entity-creation flow. **1 of 11** examples carries one (`multi-tenancy-rules.md`'s “New Table Checklist”); **5 of 11** carry a `- [ ]` checklist of any kind, and those five are a different set. Both figures are measured, and the earlier `6` was carried through unmeasured twice (`/audit` 2026-09-04 R-39).
 - Testing section with verification queries
 - Domain-specific edge cases

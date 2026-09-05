@@ -503,6 +503,14 @@ CHECKS:
   D7.3. For each agent in examples/agents/ with invocation: subagent: same check
   D7.4. Flag the anti-pattern: descriptions that are ONLY triggers ("USE PROACTIVELY when X.
         NOT needed for Y. Without this Z.") with NO core function statement
+  D7.7. **REPORT THE THREE COUNTS SEPARATELY AND SAY WHETHER THE TWINS AGREE** —
+        `activation chain check: N verified, K broken, I info` FOR EACH twin, plus
+        `twins agree: yes/NO`. A single figure hid a divergence where both loops resolved the
+        same count while their INFO strings differed (`/audit` 2026-09-04 R-20).
+  D7.8. **VERIFY THE DERIVED SPECIALIST SET DOES NOT SKIP SILENTLY.** Plant a specialist that is
+        NOT a shipped example and whose gap no declarer declares; **expected: a line naming it.**
+        Zero output is RED — a derivation that skips the population most likely to be broken is
+        worse than the typed list it replaced (`/audit` 2026-09-04 R-10).
   D7.6. **EXTRACT THE EXECUTABLE ACTIVATION-CHAIN CHECK FROM THE COMMAND FILES AND RUN IT.**
         `bootstrap.md` Step 12.5b and `existing_project_adaptation.md` Step 5.1 each carry a shell
         loop that resolves every gap-declaring specialist against the three declaring components.
