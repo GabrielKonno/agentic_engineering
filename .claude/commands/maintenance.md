@@ -110,6 +110,29 @@ sentence.** (A fixed number here goes stale the moment an item is added, and the
 missing are the newest ones — exactly what happened when items 4-6 were added under a header that
 still said "three". This checklist is itself an inventory surface; see item 1.)
 
+### EVERY RECEIPT KEY CARRIES ITS COMMAND AND ITS LITERAL STDOUT
+
+**This is the one rule the nine-run defect series actually supports, and it is mechanical.**
+Measured across the last batch: **every receipt key whose command is quoted in this file and is
+re-runnable reproduced exactly — 4 of 4, verified independently by three parties. Every key whose
+number was NARRATED failed reproduction — 7 of 7.** Not one control in that batch was discharged by
+anyone other than its author (`/audit` 2026-09-04, meta-observation).
+
+**ALWAYS discharge a receipt key as:**
+```
+**<key>:** <the one-line verdict>
+    $ <the exact command, copy-pasteable>
+    <its literal stdout, unedited>
+```
+**NEVER as a sentence containing a number.** A number a second reader cannot reproduce by pasting
+one line is not evidence — it is a claim, and every such claim in the audited batch was wrong.
+**A key whose discharge has no `$` line is RED**, and `n/a` is a legitimate verdict that still needs
+its command (the one that returned nothing).
+
+**Where a key genuinely has no single command** — `classification:`, `new component:` — say so on
+the `$` line (`$ n/a — judgement, not measurement`) rather than omitting it. That makes the absence
+visible instead of indistinguishable from a forgotten one.
+
 **ALWAYS PERSIST every report line this checklist produces — saying it in the session is not
 reporting it.** Each numbered item below ends in an `ALWAYS REPORT` mandate, and a line that lives
 only in a transcript cannot be re-read by the `/audit` that verifies this batch, by the next
@@ -455,21 +478,42 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    that catalogued this item, reading said 4 of 6 agent blocks failed a newly promoted rule, the
    grep agreed — and after fixing those 4 it found **two more the reading had passed**.
    **ALWAYS RE-RUN the grep after fixing and report the second result — expected: 0 remaining.**
+   **THE RED STATE MUST BE MEASURED IN THIS SESSION, NEVER QUOTED.** A figure copied from a prior
+   finding, from a comment in the file being fixed, or from an earlier report is not a negation
+   proof — it is a citation. One shipped: `3 of 10 pre-fix` was lifted from a comment inside the
+   pre-fix file quoting an older finding's historical figure for a DIFFERENT command, and when the
+   pre-fix form was actually executed it returned the same result as the post-fix one
+   (`/audit` 2026-09-04 R-44).
+   **ALWAYS check out the pre-fix state (`git stash`, or run against
+   `<commit>~1`) and paste the red output with its `$` line.** If the pre-fix state cannot be
+   reconstructed, say `negation proof: NOT RUN — [why]` and let it be visible.
 
    ### CONTROL BACK-SWEEP — when this batch installs or amends a CHECK, GATE or REPORT KEY
 
    The rule above sweeps a newly promoted RULE against the artifacts it retroactively governs.
    **Nothing swept a newly promoted CONTROL against the shapes this same batch invented — and that
    is where the defects have been.** Seven verification runs found no correlation with batch size
-   (27%, 54%, 37%, 47%, 53%, 47%, 58% — the worst on the batch with the most controls) and a
+   (see `/audit` → “The defect series” for the figures — nine runs, no trend; this sentence carried a fourth copy that was already wrong when written, `/audit` 2026-09-04 R-8) and a
    consistent one with SIMULTANEITY: a control and the shape it must read, authored together and
    never run against each other (`/audit` 2026-09-04, meta-observation).
 
-   **ALWAYS, before committing a batch that touches any check, gate or report key:**
-   1. **LIST the controls this batch installed or amended** — every check with a stated expected
-      result, every gate, every `ALWAYS REPORT` key.
-   2. **LIST the shapes this batch invented** — a new receipts form, a new commit split, a new
-      slot, a new status vocabulary, a new heading.
+   **THE ENUMERATION IS A COMMAND, NOT A RECOLLECTION.** The first form of this sweep was prose
+   with no command and no expected result; it could not go red, it reported `0 defects` on four
+   commits that carried ten later findings, and only one of its four claimed catches survived
+   independent verification (`/audit` 2026-09-04 R-43). Two of the other three were the negation
+   proof of a different finding, counted a second time under a different key.
+   ```bash
+   # 1. THE CONTROLS THIS FILE DEFINES — the denominator. Never typed.
+   grep -nE '^\s*(\$ )?(grep|for k in|python -c|diff -r|git (diff|show|status)|node|sed -n)' \
+     .claude/commands/maintenance.md .claude/commands/audit.md | wc -l
+   # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
+   git diff --cached -U0 .claude/commands/ | grep '^+' \
+     | grep -cE '(grep|python -c|diff -r|git (diff|show|status)|node|sed -n)'
+   # 3. RUN EVERY CONTROL IN (1), not only those in (2), and paste each one's stdout.
+   ```
+   **Expected: (1) is the denominator you report, (2) is at least 1 or this section is `N/A`, and
+   every control in (1) has a `$` line with its literal output in the receipts.** A control you did
+   not run is not a control you may report GREEN.
    3. **RUN EVERY OTHER CONTROL IN THIS CHECKLIST against those shapes**, not only the new one.
       A control written for the old shape and never re-run against the new one is the defect:
       a row-count gate whose command reaches one commit of six; a key list that predates the key
@@ -482,9 +526,11 @@ Each item encodes a real miss that survived a first pass and was only caught by 
       character class could not cross an em-dash, and a second one blind to the key class of the
       finding that created it.
 
-   **ALWAYS REPORT — `control back-sweep: N controls × M shapes, K re-run, J defects found` or
-   `control back-sweep: N/A — no control touched`. NEVER emit nothing, and NEVER report it without
-   naming the shapes.**
+   **ALWAYS REPORT — `control back-sweep: K of N controls re-run, J defects found` with the
+   command and stdout from step 1 beneath it, or `control back-sweep: N/A — no control touched`.
+   NEVER emit nothing, NEVER report it without naming the shapes, and NEVER count a control's own
+   calibration or another key's negation proof as a defect this sweep found** — both were counted
+   that way, and the double-count is how `4 defects` was reported for 1 (`/audit` 2026-09-04 R-43).
 
    **ALWAYS REPORT — `back-sweep: N rules, M artifacts fixed of M found, re-run clean` or
    `back-sweep: N/A — no process rule promoted`. NEVER emit the total without the table.** Per
@@ -751,8 +797,8 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    audit sessions only (`/audit` 2026-09-04 Q-44).
 9. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
-   moment where the fixes themselves are the least-verified thing in the repo: the eight documented executions (the series lives in THREE surfaces — this one included — and `/audit` Phase 3 owns keeping all three current; `/audit` 2026-09-04 Q-18)
-   this pass found defects in **4 of 15** (2026-08-31), **13 of 24** (2026-09-02 Run 2), **11 of 30** (Run 3) **8 of 17** (Run 4) and **27 of 51** (Run 5)
+   moment where the fixes themselves are the least-verified thing in the repo: the documented executions (the per-run figures live in ONE table — `/audit` → “The defect series” — and are never copied here; `/audit` 2026-09-04 R-7)
+   this pass found defects in a rate the ONE table records — `/audit` → “The defect series”.
    applied findings, and step 2's
    re-verification runs BEFORE applying, never after. Report
    `verification audit: proposed / ran / skipped — [owner deferred]`; NEVER nothing.

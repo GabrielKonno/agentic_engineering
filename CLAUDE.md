@@ -144,15 +144,7 @@ upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner 
 (d) **after a `/maintenance` session applies an audit batch** — in `verification` mode
 (`/audit` Phase 0), which re-reads the structure around every `applied` fix instead of only
 checking that the required text is present. Trigger (d) exists because the fixes
-themselves introduce defects. The **verification mode** has run **eight** times — **COUNT them from disk, NEVER increment a
-stored number**: `grep -lE '(# Run [0-9]+ — verification|Run mode:.*verification)' assets/docs/audit-*.md`
-then one row per match. An increment cannot detect a SKIPPED run, and one was skipped: the count
-said five while seven had happened, and the omitted run's figure lived in the same file as the
-one being edited (`/audit` 2026-09-04 Q-18, Q-19). Defects found in already-applied findings:
-**4 of 15** (`audit-2026-08-31.md` Run 2), **13 of 24** and **11 of 30** and **8 of 17** and
-**27 of 51** (`audit-2026-09-02.md` Runs 3-5 and its closing pass), **23 of 51**
-(`audit-2026-09-03.md` Run 6), **22 of 45** (Run 7) and **21 of 36** (`audit-2026-09-04.md`
-Run 8) applied findings.
+themselves introduce defects. The **verification mode** has run **nine** times. **The per-run figures live in ONE table — `/audit` → “The defect series” — and are NEVER repeated here**: four surfaces carried copies of this series, three disagreed, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8). `/audit` Phase 3 owns appending a row.
 **`/audit` Phase 3 OWNS keeping this series current** — it was stale for a full run because
 nobody did, and the batch that rewrapped a line inside this very paragraph did not notice
 (`/audit` 2026-09-03 P-26). The first TWO ran under trigger (c)/owner request;

@@ -35,11 +35,7 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 ## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
 
 An audit run has two modes. They differ in what each agent is told to look at, and the difference
-is not cosmetic: across its **eight** documented executions — a figure COUNTED from disk, never
-incremented — the verification mode found defects in **4 of 15** (`audit-2026-08-31.md` Run 2), **13 of 24** and **11 of 30** and **8 of 17** and
-**27 of 51** (`audit-2026-09-02.md` Runs 3-5 and its closing pass), **23 of 51**
-(`audit-2026-09-03.md` Run 6), **22 of 45** (Run 7) and **21 of 36** (`audit-2026-09-04.md`
-Run 8) already-`applied` findings. The mode was practice
+is not cosmetic. **The per-run figures live in ONE table — “The defect series” below, immediately above Phase 1 — and are cited from here, never repeated.** Nine runs so far, no trend. The mode was practice
 before it was instruction — executed twice with its verdict vocabulary supplied by the invoking
 prompt rather than by this file. That gap is what this phase closes.
 
@@ -103,6 +99,29 @@ carry-forward rule (still-`open` findings) is unchanged and additional to this l
 `applied` finding is re-verified in this mode, never skipped because its status says applied.**
 
 ---
+
+
+### The defect series — THE ONE TABLE. Every other surface CITES it; none repeats it.
+
+Defects found in already-`applied` findings, one row per verification run. **A figure appearing
+anywhere else in the repo is a copy and is forbidden** — four surfaces carried this series, three
+disagreed with each other, and one asserted a count its own list contradicted (`/audit` 2026-09-04
+R-7, R-8). **Append a row; never re-derive the old ones.**
+
+| # | Report file | Run | How the mode is declared there | Not clean / verdicted |
+|---|---|---|---|---|
+| 1 | `audit-2026-08-31.md` | Run 2 | `# Run 2 — verification pass` (predates the `Run mode:` convention) | 4 of 15 |
+| 2 | `audit-2026-09-02.md` | Run 2 | `## Part 1 — Verification ledger for 0954d69` | 13 of 24 |
+| 3 | `audit-2026-09-02.md` | Run 3 | `**Run mode:** verification (over a28f661)` | 11 of 30 |
+| 4 | `audit-2026-09-02.md` | Run 4 | `**Run mode:** verification (over afccff3)` | 8 of 17 |
+| 5 | `audit-2026-09-02.md` | Run 5 | `**Run mode:** verification (over f2fcccf)` | 27 of 51 |
+| 6 | `audit-2026-09-03.md` | Run 6 | `**Run mode:** verification (over a2f4890)` | 23 of 51 |
+| 7 | `audit-2026-09-03.md` | Run 7 | `**Run mode:** verification (over s1c7c1f9 + sbb8cbec)` | 22 of 45 |
+| 8 | `audit-2026-09-04.md` | Run 8 | `**Run mode:** verification (over the Run 7 batch)` | 21 of 36 |
+| 9 | `audit-2026-09-04.md` | Run 9 | `**Run mode:** verification (over the Run 8 batch)` | 25 of 42 |
+
+**Nine runs, no trend** (27%, 54%, 37%, 47%, 53%, 45%, 49%, 58%, 60%). Batch size has been
+exonerated five times and should not be re-litigated without new evidence.
 
 ## Phase 1 — Dispatch Audit Agents
 
@@ -1097,19 +1116,23 @@ step is the carry-over half.
    original keeps its `applied sHASH` status and gains a pointer to the new ID. **NEVER silently
    reopen an applied finding under its old ID** — the ledger is how a later session tells "this
    was never fixed" from "this was fixed and the fix was wrong".
-6. **In `verification` mode, ALWAYS UPDATE THE DEFECT SERIES in BOTH places that carry it** —
-   `CLAUDE.md`'s **When it runs** paragraph, this file's Phase 0 preamble, AND
-   `maintenance.md`'s Version-bumps section — **THREE surfaces, not two.** Append this run's
-   `N of M` and **RE-COUNT the runs from disk** with
-   `grep -lE '(# Run [0-9]+ — verification|Run mode:.*verification)' assets/docs/audit-*.md`.
-   **NEVER increment a stored number** — an increment cannot detect a skipped run, and the
-   previous owner mandated exactly that while a run was already missing (`/audit` 2026-09-04
-   Q-19).
-   **ALWAYS RECOMPUTE `N of M` FROM THE LEDGER, never from a prior report's summary
-   prose** — the last published figure was off by one against its own ledger (Q-20). **The series is a factual claim about this command's own
-   history and it has no other owner**; it went stale for a whole run, and the batch that
-   rewrapped a line inside that very paragraph did not catch it (`/audit` 2026-09-03 P-26).
-   **ALWAYS REPORT — `defect series: updated in N of 3 surfaces` or `N/A — baseline mode`.**
+6. **In `verification` mode, APPEND ONE ROW to the defect-series table above Phase 1 — and
+   TOUCH NOTHING ELSE.** Every other surface CITES that table; **if one repeats a figure, DELETE
+   the copy rather than updating it.** Four surfaces carried copies, three disagreed with each
+   other, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8).
+   **RECOMPUTE this run's `N of M` FROM THE LEDGER, never from a prior summary**, then append.
+   **NEVER claim a single grep derives the whole series** — the reports predate their own
+   conventions and the historical set matches no one pattern: measured, a `grep -l` returns 4
+   (it counts FILES), an occurrence grep returns 12 (three runs carry both a heading and a
+   `Run mode:` line), and a `## Part 1` anchor returns 10 and misses the earliest run entirely.
+   The previous form of this item claimed a command that returned 4 beside a figure of 8
+   (`/audit` 2026-09-04 R-16). **From Run 9 onward every report carries exactly one
+   `**Run mode:** \`verification (over …)\`` line**, so the forward-going count IS derivable:
+   ```bash
+   grep -c '^\*\*Run mode:\*\* `verification' assets/docs/audit-*.md   # Run 9 onward, per file
+   ```
+   **ALWAYS REPORT `defect series:` with the row you appended, and its `$` line.**
+
 7. **ALWAYS COMMIT the report in THIS session — LAST, after every content item above** — writing it to disk is not persisting it.
    ```bash
    git add assets/docs/audit-YYYY-MM-DD.md && git commit -m "docs(audit): persist [run] — [N] findings open"
