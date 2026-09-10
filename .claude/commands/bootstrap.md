@@ -602,7 +602,7 @@ gap that installs nothing and registers nothing is a gap the project can never a
 #### Step 12.5b — Validate activation chains
 
 > **The declaring components are gap SOURCES, not gap targets, and the loop below DERIVES that set rather than listing it** — it harvests the declared gaps from whichever files declare them and excludes exactly those files.
-> **NEVER type the set here**: a typed five-name copy stood two lines above the loop that derives it, and its twin carried no such paragraph at all (`/audit` 2026-09-04 R-32).
+> **NEVER type the set here**: a typed five-name copy stood two lines above the loop that derives it, and its twin carried no such paragraph at all (`/audit` 2026-09-04 R-32). The replacement then asserted a derivation the loop did not perform — it still typed the three declarer names — until `/audit` 2026-09-09 T-16 made the loop match the paragraph.
 
 For each remaining specialist agent:
 
@@ -617,29 +617,44 @@ existed on one; a prior receipt recorded that absence as a clearance rather than
 (`/audit` 2026-09-04 Q-33).
 
 ```bash
+# The DECLARER set and the DECLARED set are BOTH DERIVED, never typed (R-32, T-16): any agent
+# carrying a gap declaration IS a declaring component, whatever it is called.
+# TWO declaration forms are live and BOTH must be harvested — the blockquote form
+# (`> Accessibility gap:`) and the bold form (`ALWAYS DECLARE a **visual regression gap**`).
+# Anchoring on the blockquote alone derived ZERO gaps from the validator, so the chain held
+# only because code-reviewer duplicated the gap; deleting that row broke it (T-8).
+# The specialist side reads the `description:` field ONLY — a whole-file grep false-BREAKS
+# on "When spawned" prose, on negations and on historical notes (T-9).
+# The domain char class admits DIGITS and DOTS, and EVERY branch echoes: a domain the class
+# could not match fell through emitting nothing at all (T-15 — R-10's symptom, second door).
+# candidate replacement for bootstrap Step 12.5b / EPA Step 5.1
 echo "=== Activation chain integrity? ==="
-# The DECLARED set is DERIVED from the three declaring components and compared by SET MEMBERSHIP,
-# never by substring: a substring test false-PASSED `coverage gap` against `Secrets coverage gap:`
-# and false-BROKE a hyphenated domain (`/audit` 2026-09-04 R-27, R-28).
-norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/' '   ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
+norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/.' '    ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
+AG="projects/$ARGUMENTS/.claude/agents"
 declared=""; declarers=""
-for dc in code-reviewer security-reviewer validator; do
-  f="projects/$ARGUMENTS/.claude/agents/$dc.md"; [ -f "$f" ] || continue
-  declarers="$declarers|$dc|"
-  while IFS= read -r g; do [ -n "$g" ] && declared="$declared|$(norm "$g")|"; done <<EOF
-$(grep -oiP '^> \K[A-Za-z][A-Za-z ]{2,30}?(?= gap:)' "$f" 2>/dev/null)
+for f in "$AG"/*.md; do
+  [ -f "$f" ] || continue
+  g=$( { grep -oiP '^> *\K[A-Za-z][A-Za-z0-9 ./-]{2,30}?(?= gap:)' "$f"; \
+         grep -oiP '\*\*\K[A-Za-z][A-Za-z0-9 ./-]{2,30}?(?= gap\*\*)' "$f"; } 2>/dev/null | sort -u)
+  [ -z "$g" ] && continue
+  declarers="$declarers|$(basename "$f" .md)|"
+  while IFS= read -r d; do [ -n "$d" ] && declared="$declared|$(norm "$d")|"; done <<EOF
+$g
 EOF
 done
-# PRECONDITION, not prose: an empty set means the check cannot run, and a silent empty run
-# reads as a green (R-10).
-[ -z "$declared" ] && { echo "RED: no gap declarations found - the check cannot run"; exit 1; }
+if [ -z "$declarers" ]; then
+  echo "activation chains: none installed - no declaring component in $AG"; exit 0
+fi
+if [ -z "$declared" ]; then
+  echo "RED: declaring components present but no gap parsed - the check cannot run"; exit 1
+fi
 verified=0; broken=0; info=0
-for f in projects/$ARGUMENTS/.claude/agents/*.md; do
+for f in "$AG"/*.md; do
+  [ -f "$f" ] || continue
   an=$(basename "$f" .md)
-  case "$declarers" in *"|$an|"*) continue ;; esac   # a declarer is not a specialist
-  # ALL gaps, never just the first (R-31). `\n\t` and an OPTIONAL article, because a tab-indented
-  # fold and a `declares X gap` phrasing both returned empty and were silently passed (R-29, R-30).
-  domains=$(tr '\n\t' '  ' < "$f" | tr -s ' ' | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z /-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
+  case "$declarers" in *"|$an|"*) continue ;; esac
+  desc=$(sed -n '/^description:/,/^[a-z_]*: /p' "$f" | tr '\n\t' '  ' | tr -s ' ' | sed 's/\*\*//g')
+  domains=$(printf '%s' "$desc" | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z0-9 ./-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
   if [ -n "$domains" ]; then
     while IFS= read -r domain; do
       [ -z "$domain" ] && continue
@@ -651,10 +666,9 @@ for f in projects/$ARGUMENTS/.claude/agents/*.md; do
 $domains
 EOF
   elif [ -f "projects/$ARGUMENTS/assets/examples/agents/$an.md" ]; then
-    info=$((info+1))   # a shipped example with no gap phrase is trigger-activated by design
+    echo "INFO: $an - shipped example, no gap phrase, trigger-activated by design"
+    info=$((info+1))
   else
-    # NEVER skip silently: a project-authored specialist is the population most likely to carry a
-    # broken chain, and the previous derived skip list emitted nothing at all for it (R-10).
     echo "INFO: $an has no gap phrase and is not a shipped example - verify it is protocol-spawned"
     info=$((info+1))
   fi
@@ -662,8 +676,11 @@ done
 echo "activation chains: $verified verified, $broken broken, $info info"
 ```
 
-**ALWAYS REPORT — `activation chains: N verified, M broken` or `activation chains: none installed`.
-NEVER emit nothing.**
+**ALWAYS REPORT the loop's literal last line — `activation chains: N verified, M broken, I info`,
+or `activation chains: none installed - no declaring component in <path>`. NEVER emit nothing.**
+(**COPIED FROM the loop verbatim.** It emits THREE counts, so a two-count slot cannot receive it, and
+`none installed` is now a real branch rather than a verdict the step could never produce —
+`/audit` 2026-09-09 T-13, T-14.)
 
 This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the declarer-to-orchestrator-to-specialist activation chain is broken.
 
