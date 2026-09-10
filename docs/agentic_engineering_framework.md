@@ -338,6 +338,7 @@ The bootstrap prompt (`.claude/commands/bootstrap.md`) is a 15-step pipeline (15
 ```
 Step     Source (framework repo)                     Output (project folder)
 ----     -------------------------                   -----------------------
+Setup    (unnumbered, runs first)                --> projects/<name>/ + assets/docs/ + early `git init`
 0.5      (this repo's git remote/upstream)       --> Framework-clone freshness verified (fails CLOSED)
 1        assets/docs/prd.md                      --> Extract product data
 1.1      prd.md "Cross-cutting Concerns"         --> routing list consumed by Steps 3 / 4 / 13

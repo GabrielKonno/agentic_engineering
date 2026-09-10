@@ -29,7 +29,7 @@ This is a framework maintenance session, not a project bootstrap.
   moved, commits a persisted receipt calls unpushed are now published and the mandated GREEN
   never ran over them.
   **Run D16 over the newly-published range and record it** — that is how
-  a live leak was found rather than shipped (`/audit` 2026-09-04 R-26, R-1).**
+  a live leak was found rather than shipped (`/audit` 2026-09-04 R-26, R-1).
   **ALWAYS RE-CHECK `git status -sb`
   IMMEDIATELY BEFORE WRITING THE CLOSING `push:` LINE.** If `origin/main` advanced during the
   session — someone else pushed, or another session did — then commits this session described as
@@ -55,7 +55,16 @@ This is a framework maintenance session, not a project bootstrap.
 - All changes must be committed with descriptive messages
 - Verify cross-references after modifying any document
 
-**Workflow:** Run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction
+**Workflow:** **FIRST re-check `git status -sb`** — if `origin/main` advanced since the last
+session, commits a persisted receipt calls unpushed are now PUBLISHED and the mandated D16 GREEN
+never ran over them. Mechanical, expected result stated:
+`git fetch -q origin && git status -sb | head -1` — **expected: no `behind` segment and
+`origin/main` where the last receipt left it; anything else means D16 is owed before any edit.**
+The rule was written with no invoker in this sequence and no self-check
+(`/audit` 2026-09-04 R-26; `/audit` 2026-09-09 T-29). **ALWAYS REPORT — `push decay: origin/main
+unchanged` or `push decay: advanced to sHASH — D16 re-run over the newly-published range: [GREEN |
+RED, findings]`. NEVER emit nothing.**
+Then run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction
 plan provided by the user (an audit report → "Audit intake"; project evolution docs → "Upstream
 intake"), apply all changes in order, then run the post-change checklist to completion — **EVERY numbered
 item in it, counted in the file** — and commit. The checklist OWNS the version bump, the §5
@@ -117,7 +126,7 @@ still said "three". This checklist is itself an inventory surface; see item 1.)
 
 ### EVERY RECEIPT KEY CARRIES ITS COMMAND AND ITS LITERAL STDOUT
 
-**This is the one rule the nine-run defect series actually supports, and it is mechanical.**
+**This is the one rule the defect series actually supports, and it is mechanical.**
 Measured across the last batch: **every receipt key whose command is quoted in this file and is
 re-runnable reproduced exactly — 4 of 4, verified independently by three parties. Every key whose
 number was NARRATED failed reproduction — 7 of 7.** Not one control in that batch was discharged by
@@ -131,6 +140,11 @@ anyone other than its author (`/audit` 2026-09-04, meta-observation).
 ```
 **NEVER as a sentence containing a number.** A number a second reader cannot reproduce by pasting
 one line is not evidence — it is a claim, and every such claim in the audited batch was wrong.
+**THE STDOUT MUST BE THE ACTUAL OUTPUT OF THE QUOTED COMMAND, PASTED — NEVER a parenthetical
+standing in for it.** The first key discharged under this rule quoted a grep, showed
+"(enumerated by hand)" where its output belonged, and the command actually returns a number
+unrelated to the claim (`/audit` 2026-09-09 T-24). A quoted-but-unrun command is strictly WORSE
+than a narrated number: it looks reproducible and reproduces something else.
 **A key whose discharge has no `$` line is RED**, and `n/a` is a legitimate verdict that still needs
 its command (the one that returned nothing).
 
@@ -167,7 +181,7 @@ for k in "inventory sweep" "instruction style" "references" "fences" "isolation"
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
          "classification" "new component" "gates" "push" \
          "audit" "verification audit" "placeholder" "control back-sweep" \
-         "commit correction" "defect series" "applied-proof" "report deletions"; do
+         "commit correction" "defect series" "applied-proof" "report deletions" "push decay"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
@@ -349,6 +363,15 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    `^\*\*<key>:`, so a single pipe-joined line scores 1/0/0 and a format-compliant discharge reads
    RED (`/audit` 2026-09-03 P-5). Write them as:
    `**references:** N of M cited sections resolved`
+   **M COMES FROM THIS COMMAND, NEVER FROM THE RECEIPT'S OWN ENUMERATION.** The denominator is
+   every distinct citation target in the BATCH DIFF; counting the receipt's own list instead is how
+   `9 of 9` was reported against a measured 22 (`/audit` 2026-09-09 T-21), one run after the same
+   key was `14 of 14` against ≥42:
+   ```bash
+   git diff <first>~1..<last> | grep '^+' \
+     | grep -ohE '`[A-Za-z0-9_./-]+\.md`|component-design §[0-9]+|D[0-9]+\.[0-9]+[a-z]?|Phase [0-9]+ item [0-9]+' \
+     | sort -u | wc -l
+   ```
    `**fences:** N of M templates extract non-empty`
    `**isolation:** N files scanned, 0 hits`.
    **ALWAYS STATE THE UNIT for `references:` and ALWAYS give it a DENOMINATOR** — the unit is
@@ -380,7 +403,14 @@ Each item encodes a real miss that survived a first pass and was only caught by 
 
    | Fix ID | Commit | File touched | LATERAL | PARALLEL | ADJACENT | DESCENDING | Extra instances found |
    |--------|--------|--------------|---------|----------|----------|------------|----------------------|
-   | [K-3]  | [sHASH] | [path, or `none — deferred`] |
+   | [K-3]  | [sHASH] | [path, or `none — deferred`] | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
+
+   **THE TEMPLATE ROW HAS THE SAME CELL COUNT AS THE HEADER — COUNT THE PIPES BEFORE COMMITTING.**
+   Mechanical self-check (expected result stated): over the three lines above,
+   `awk -F'|' 'NF{print NF-2}'` → **expected: three identical numbers.** The fix for the
+   missing 8th column instead left the row with THREE cells and welded the other five onto the
+   end of the paragraph below — an insert made INSIDE a table row, which is strictly worse than
+   the defect it repaired and survived a passing class sweep (`/audit` 2026-09-09 T-7).
 
    **A GROUP TABLE IS PERMITTED for a multi-commit batch ONLY WITH THESE COLUMNS:
    `Group | Commit | Findings | File(s) touched`**, plus the sweep and its result. **Gate 2
@@ -388,15 +418,20 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    that column makes Gate 2 unrunnable — which is what shipped, and run per hash it went RED on
    a row attributing a finding to a commit that never touched that finding's file
    (`/audit` 2026-09-04 R-6). **Every finding appears in exactly one row's `Findings` cell, and
-   the union of those cells MUST equal the ledger's disposed set** — check it, never assert it. ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | ✓ / ✗ / n/a | [what, where] |
+   the union of those cells MUST equal the ledger's disposed set** — check it, never assert it.
 
    Use `✓` (ran — and **ALWAYS QUOTE the actual grep pattern or command in the cell**, never a
    bare glyph: an unquoted `✓` is unverifiable by anyone but its author), `✗` (NOT run —
    legitimate ONLY with a stated reason on the same row), or `n/a` (the direction cannot apply,
    e.g. the artifact has no twin). **A row with a `✗` and no reason is RED. A `✓` with no quoted
    pattern is RED.**
-   **Mechanical self-check (expected result stated): the table's row count MUST equal the number
-   of findings applied this session.** Count both and state both — **expected: equal**. Merging
+   **Mechanical self-check (expected result stated), STATED PER FORM — the two tables count
+   different things and one rule cannot govern both (`/audit` 2026-09-09 T-26):**
+   - **PER-FIX table:** row count MUST equal the number of findings applied this session.
+   - **GROUP table:** row count equals the number of COMMITS, and it is the union of the
+     `Findings` cells that MUST equal the findings applied. Report BOTH —
+     `rows N = commits N | findings-union M = disposed M`. A group table reporting
+     `row-count 45 vs 45` over three rows is asserting the per-fix rule it does not satisfy. Count both and state both — **expected: equal**. Merging
    two findings into one row is how a fix whose sweep was skipped disappears into a neighbour
    (`/audit` 2026-09-02 L-23: 17 findings reported in 14 rows). If two findings genuinely share
    one fix, give them one row each and write "same edit as [ID]" in the last column.
@@ -539,7 +574,12 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    confirm it returns non-zero** — a grep that is already 0 before the fix is measuring nothing.
 
    **ALWAYS STATE the denominator, and ALWAYS make `N fixed` equal `N found`** or name the
-   exception on that row. **`N found` comes from RUNNING the grep, never from reading.** On the run
+   exception on that row.
+   **THE CLOSING TOTAL MUST EQUAL THE SUM OF THE ROWS' `N fixed` CELLS — ADD THEM UP, NEVER ASSERT
+   THEM.** Mechanical, expected result stated: sum the `N fixed` column and compare with the total
+   you are about to write — **expected: equal.** A back-sweep closed at `19 of 19` over rows summing
+   to **39**, one run after the identical failure closed at `26 of 26` over rows summing to 22
+   (`/audit` 2026-09-09 T-20). **`N found` comes from RUNNING the grep, never from reading.** On the run
    that catalogued this item, reading said 4 of 6 agent blocks failed a newly promoted rule, the
    grep agreed — and after fixing those 4 it found **two more the reading had passed**.
    **ALWAYS RE-RUN the grep after fixing and report the second result — expected: 0 remaining.**
@@ -558,7 +598,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    The rule above sweeps a newly promoted RULE against the artifacts it retroactively governs.
    **Nothing swept a newly promoted CONTROL against the shapes this same batch invented — and that
    is where the defects have been.** Seven verification runs found no correlation with batch size
-   (see `/audit` → “The defect series” for the figures — nine runs, no trend; this sentence carried a fourth copy that was already wrong when written, `/audit` 2026-09-04 R-8) and a
+   (see `/audit` → “The defect series” for the figures — no trend; this sentence carried a fourth copy that was already wrong when written, `/audit` 2026-09-04 R-8, and its run count was a fifth, `/audit` 2026-09-09 T-41) and a
    consistent one with SIMULTANEITY: a control and the shape it must read, authored together and
    never run against each other (`/audit` 2026-09-04, meta-observation).
 
@@ -568,9 +608,19 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    independent verification (`/audit` 2026-09-04 R-43). Two of the other three were the negation
    proof of a different finding, counted a second time under a different key.
    ```bash
-   # 1. THE CONTROLS THIS FILE DEFINES — the denominator. Never typed.
-   grep -nE '^\s*(\$ )?(grep|for k in|python -c|diff -r|git (diff|show|status)|node|sed -n)' \
-     .claude/commands/maintenance.md .claude/commands/audit.md | wc -l
+   # 1. THE CONTROLS THIS FILE DEFINES — the denominator. Never typed. COUNT BOTH SHAPES, PER FILE.
+   # Controls live in TWO places and a one-shape count is arbitrary: measured 2026-09-09, this repo
+   # carries 7 in fenced blocks and 45 in INLINE BACKTICKS. The previous form matched neither
+   # cleanly — it counted 15, of which 2 were prose sentences beginning with "grep", while
+   # `audit.md` contributed only 2 despite holding the majority (`/audit` 2026-09-09 T-17).
+   for f in .claude/commands/maintenance.md .claude/commands/audit.md; do
+     inf=$(awk '/^```/{g=!g;next} g' "$f" \
+       | grep -cE '^\s*(\$ )?(grep|for |awk |python -c|diff -r|git |node|sed -n)')
+     inl=$(grep -ohE '`(grep|git|diff|awk|sed|node|python|ls) [^`]{4,}`' "$f" | wc -l)
+     echo "$f: $inf fenced + $inl inline = $((inf+inl))"
+   done
+   # RED CONDITION, so step 1 CAN fail: if a file's total is LOWER than the previous batch
+   # reported, a control was deleted — name which. An enumerator with no threshold cannot go red.
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
    git diff --cached -U0 .claude/commands/ | grep '^+' \
      | grep -cE '(grep|python -c|diff -r|git (diff|show|status)|node|sed -n)'
@@ -867,7 +917,11 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    substitution commit.** Receipts and ledger rows cite the commit they describe, so write a
    literal placeholder token (`sBATCH`, `sGROUP4`) everywhere the hash belongs, make the fix
    commit, then make ONE follow-up commit that substitutes the real short hash and states how many
-   places it replaced. **A pure-substitution commit is EXEMPT from the receipts requirement in item
+   places it replaced. **A pure-VERSION-BUMP commit (`chore: bump to vX.Y.Z`) is likewise EXEMPT,
+   and ALWAYS SAYS SO** — it changes a label, not content. Three such commits were made with no
+   written home at all (`/audit` 2026-09-09 T-30). **PREFER applying the bump inside the batch's
+   closing commit;** the standalone form is for a bump the batch forgot.
+   **A pure-substitution commit is EXEMPT from the receipts requirement in item
    6** — it changes identifiers, not content — and **ALWAYS SAY SO in its message** so the exemption
    is visible rather than assumed. This convention was executed at least four times before it had a
    written home; `grep -rn "placeholder" .claude/commands/*.md` returned 0
@@ -882,10 +936,10 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    audit sessions only (`/audit` 2026-09-04 Q-44).
 9. **ALWAYS PROPOSE a `verification`-mode `/audit` after the batch lands** — this is trigger (d)
    in CLAUDE.md and `/audit` Phase 0, and this step is its invoker. Applying a batch is the one
-   moment where the fixes themselves are the least-verified thing in the repo: the documented executions (the per-run figures live in ONE table — `/audit` → “The defect series” — and are never copied here; `/audit` 2026-09-04 R-7)
-   this pass found defects in a rate the ONE table records — `/audit` → “The defect series”.
-   applied findings, and step 2's
-   re-verification runs BEFORE applying, never after. Report
+   moment where the fixes themselves are the least-verified thing in the repo: every documented
+   execution of this pass has found defects in already-applied findings, at a rate the ONE table
+   records (`/audit` → “The defect series”; the figures are never copied here — `/audit`
+   2026-09-04 R-7), and step 2's re-verification runs BEFORE applying, never after. Report
    `verification audit: proposed / ran / skipped — [owner deferred]`; NEVER nothing.
 
 ## Upstream intake — absorbing framework evolutions from projects

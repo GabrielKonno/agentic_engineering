@@ -15,6 +15,10 @@ own report (Phase 3), which is this session's output, not a change to the thing 
   `git diff`, `git grep`, `git rev-list`, `git check-ignore`, `git reflog`. Several checks below MANDATE these
   (D16.3c scans all commits and messages; Agent 6's D17.1 classifies `git log`; Phase 3's own
   self-check runs `git status`). They read history; they change nothing.
+- **APPEND ONE ROW to the defect-series table in THIS file (`.claude/commands/audit.md`)** — Phase 3
+  item 6 mandates it and the authorized-operations list forbade it, a contradiction that stood
+  unreported for two runs and left the row unappended (`/audit` 2026-09-09 T-50). This is the ONE
+  line of the ONE table the run computes; nothing else in this file may be touched.
 - **`git add` + `git commit` of THAT ONE FILE** (Phase 3's COMMIT item, the last one). A report that lives only in the
   working tree does not survive a `git clean`, a `git checkout`, or a session boundary — which is
   exactly what happened to every report written before this line existed. **This is the ONLY
@@ -35,7 +39,7 @@ own report (Phase 3), which is this session's output, not a change to the thing 
 ## Phase 0 — Determine the RUN MODE (ALWAYS, before dispatching anything)
 
 An audit run has two modes. They differ in what each agent is told to look at, and the difference
-is not cosmetic. **The per-run figures live in ONE table — “The defect series” below, immediately above Phase 1 — and are cited from here, never repeated.** Nine runs so far, no trend. The mode was practice
+is not cosmetic. **The per-run figures live in ONE table — “The defect series” below, immediately above Phase 1 — and are cited from here, never repeated — the RUN COUNT included, which is that table's row count and nothing else (`/audit` 2026-09-09 T-41).** The mode was practice
 before it was instruction — executed twice with its verdict vocabulary supplied by the invoking
 prompt rather than by this file. That gap is what this phase closes.
 
@@ -61,7 +65,17 @@ no owner (`/audit` 2026-09-02 K-18).
 | (d) after a `/maintenance` session applied an audit batch | **verification (over that batch's commit)** |
 
 **Verification mode requires an audit report with `applied sHASH` findings** — that is what its
-Part 1 re-reads. Only trigger (d) supplies one. An upstream absorption has no report and no applied
+Part 1 re-reads. Only trigger (d) supplies one.
+
+**IF THAT REPORT IS MISSING, TRUNCATED OR CONDENSED, RECONSTRUCT IT FROM GIT AND FILE THE DAMAGE
+AS A FINDING — NEVER proceed on the damaged copy and NEVER downgrade to baseline silently.**
+```bash
+git log --oneline -- assets/docs/audit-YYYY-MM-DD.md   # find the last good revision
+git show <hash>:assets/docs/audit-YYYY-MM-DD.md        # read Part 1's input from there
+```
+**ALWAYS SAY SO in the report header** — `Part 1 input reconstructed from <hash>` — and open a
+finding against whatever destroyed it. A write-back deleted 554 of 574 lines of a persisted report,
+and this mode had no fallback for the state it left behind (`/audit` 2026-09-09 T-1, T-45). An upstream absorption has no report and no applied
 findings, so (a) is baseline; if the owner ALSO wants that absorption's commit re-read, the
 did-it-land discipline for it lives in `framework-audit`'s Q4, not here (`/audit` 2026-09-02 K-19).
 
@@ -85,6 +99,14 @@ place, contradicts its neighbour, or orphaned the block below it — every such 
 > - **CONFIRMED-FIXED** — the fix landed, in the right place, and its class was swept.
 > - **PARTIALLY-FIXED** — the named instance is fixed; something the finding required is not.
 > - **FIXED-BUT-CLASS-NOT-SWEPT** — correct at the named line; the same defect survives elsewhere.
+> - **NOT-FIXED — no diff exists.** The finding is marked `applied` and **nothing was written**.
+>   **ALWAYS SETTLE THIS FIRST, MECHANICALLY, BEFORE READING ANYTHING:**
+>   `git log -L <line>,<line>:<file> --oneline <batch range>` → **expected: at least one commit;
+>   empty is NOT-FIXED.** This verdict is not a weaker PARTIALLY-FIXED — nothing was fixed — and
+>   the enumeration lacked it for the whole series to date, so cases of it were absorbed under a softer label and
+>   the defect series is an under-count to that extent. Ten of forty-five landed here in one batch,
+>   six of them under a commit message asserting a fix that does not exist
+>   (`/audit` 2026-09-09 T-10, T-51).
 > - **INTRODUCED-A-DEFECT** — the fix is present AND created a new problem (wrong nesting, a
 >   contradiction with a neighbouring line, a forward reference with no receiver, a stale count).
 >   May combine with any verdict above.
@@ -119,8 +141,9 @@ R-7, R-8). **Append a row; never re-derive the old ones.**
 | 7 | `audit-2026-09-03.md` | Run 7 | `**Run mode:** verification (over s1c7c1f9 + sbb8cbec)` | 22 of 45 |
 | 8 | `audit-2026-09-04.md` | Run 8 | `**Run mode:** verification (over the Run 7 batch)` | 21 of 36 |
 | 9 | `audit-2026-09-04.md` | Run 9 | `**Run mode:** verification (over the Run 8 batch)` | 25 of 42 |
+| 10 | `audit-2026-09-09.md` | Run 10 | `**Run mode:** verification (over the Run 9 batch)` | 38 of 45 |
 
-**Nine runs, no trend** (27%, 54%, 37%, 47%, 53%, 45%, 49%, 58%, 60%). Batch size has been
+**No trend** (27%, 54%, 37%, 47%, 53%, 45%, 49%, 58%, 60%, 84%). Batch size has been
 exonerated five times and should not be re-litigated without new evidence.
 
 ## Phase 1 — Dispatch Audit Agents
@@ -429,9 +452,9 @@ and description pattern compliance. Do NOT fix anything.
 FILES TO READ:
 1. docs/modules/agents/code_reviewer.md
 2. docs/modules/agents/security_reviewer.md
-3. All other files in docs/modules/agents/ (validator, arbitrator, red_team, blue_team,
-   criteria_enforcer, prd_sync_checker, diff_pattern_extractor, skill_reviewer) — ALL of them;
-   verify the count against `ls docs/modules/agents/` rather than trusting this list
+3. **EVERY file in `docs/modules/agents/` — GLOB it, never type it:** `ls docs/modules/agents/*.md`.
+   A typed roster here is the idiom D7.5 bans one level down, in this same file, and it goes
+   stale the moment an agent is added (`/audit` 2026-09-09 T-44).
 4. docs/modules/skills/validation-orchestrator/SKILL.md and
    docs/modules/skills/rules-agents-updater/SKILL.md — the two shipped components that CARRY the
    declaring-component vocabulary; D6 findings have landed in both (`/audit` 2026-09-03 P-12)
@@ -556,11 +579,28 @@ CHECKS:
         3. **ALWAYS REPORT — `activation chain check: N of M specialists resolved, K broken`.**
            **Expected: every gap-declaring specialist resolves and K = 0.** A resolved count below
            the number of gap phrases D6.1/D6.2/D6.2b extracted is RED.
-        4. **TRY TO BREAK IT.** Test the phrasings a future specialist might legitimately use —
-           `declares the X gap`, a sentence-initial `Declares`, a hyphenated or slashed domain, a
-           description whose fold puts a line break inside the phrase. **A check that passes on
-           today's set but dies on a plausible rephrasing is a finding**, and this one has been
-           repaired twice on exactly that ground.
+        4. **TRY TO BREAK IT — AND ALWAYS RE-RUN THE FULL REGRESSION SET BELOW, which is every
+           phrasing a previous run found broken. A regression here is a finding, not a nit.**
+           | # | Input | Expected |
+           |---|-------|----------|
+           | 1 | `declares a coverage gap for X` | BREAK — not a substring false-PASS (R-27) |
+           | 2 | hyphenated `visual-regression gap` | VERIFY (R-28) |
+           | 3 | slashed `data/integrity gap` | VERIFY |
+           | 4 | TAB-indented fold, phrase straddling it | VERIFY (R-29) |
+           | 5 | no-article `declares performance gap` | VERIFY (R-30) |
+           | 6 | a SECOND, bogus gap on the same agent | BREAK on the second (R-31) |
+           | 7 | sentence-initial `Declares` | VERIFY |
+           | 8 | space-fold line break inside the phrase | VERIFY |
+           | 9 | the gap phrase in BODY prose only, description clean | **no BREAK** (T-9) |
+           | 10 | a NEGATED body sentence (`NEVER declares an X gap`) | **no BREAK** (T-9) |
+           | 11 | digit in domain (`OAuth2 federation gap`) | seen — VERIFY or BREAK, never silent (T-15) |
+           | 12 | dot in domain (`Node.js runtime gap`) | seen — never silent (T-15) |
+           | 13 | the ONLY declarer of a gap is the validator (bold form) | VERIFY (T-8) |
+           | 14 | every declaring component removed | `none installed`, **exit 0** (T-14) |
+           **The four regression tests for the four bugs one batch had just fixed were never written
+           to disk, so the next run could not detect a regression in any of them
+           (`/audit` 2026-09-09 T-43).** Run them against the loop AS EXTRACTED FROM THE COMMAND
+           FILE, never as drafted, and against BOTH twins.
 
   D7.7. **REPORT THE THREE COUNTS SEPARATELY AND SAY WHETHER THE TWINS AGREE** —
         `activation chain check: N verified, K broken, I info` FOR EACH twin, plus
@@ -952,6 +992,23 @@ CHECKS:
         of the defects that batch was fixing, or add process without adding a gate. Cite evidence.
         **"The controls are adequate" is a valid conclusion when the evidence supports it — NEVER
         manufacture a finding to seem useful.**
+        **ALWAYS ANSWER, WITH THE MEASUREMENT: is this loop consuming more effort than it returns?**
+        Split every batch since the series began by where its lines LAND, and report the table:
+        ```bash
+        for r in <each batch range>; do
+          echo -n "$r shipped: "; git diff --shortstat $r -- docs/modules examples | tr -d '\n'
+          echo -n " | apparatus: "; git diff --shortstat $r -- .claude assets/docs CLAUDE.md
+        done
+        ```
+        **Shipped surface = `docs/modules/` + `examples/` — what bootstrapped projects receive.
+        Apparatus = everything else.** A defect rate is a property of how much normative text the
+        PREVIOUS run added; the shipped-surface delta is the only number that measures whether the
+        loop is producing anything. Measured across Runs 5-9 it fell 62 → 38 → 23 → 12 → **4** lines
+        while the apparatus took 7,961, a 94/6 split (`/audit` 2026-09-09, meta-observation).
+        **If shipped delta trends to zero while the rate does not fall, SAY SO and say the loop
+        should be re-pointed at the shipped surface** — that is a legitimate finding, and D17.6 is
+        the only dimension positioned to make it. This mandate lived only in a dispatch prompt for
+        one run and produced that run's most load-bearing measurement (`/audit` 2026-09-09 T-46).
 
 For each finding report: the flow/claim, the EVIDENCE (commit hashes / file:line), and
 where the missing instruction would naturally live. "No gaps" is a valid outcome — do not
@@ -1079,7 +1136,14 @@ no others** (`/audit` 2026-09-03 N-45, N-47):
 ### ID allocation — ALWAYS check for a collision before writing a finding
 
 **Each run allocates ONE letter series** (`F`, `G`, `H`, `J`, `K`, `L`, `M`, `N` …), skipping
-letters that read as digits. **ALWAYS grep the report for the ID before writing a row**
+letters that read as digits, and `S`, which collides with this repo's `s<hash>` notation.
+
+**EXTENDING A CLOSED SERIES — who may, and how.** A finding surfaced OUTSIDE the run that owns a
+letter (a follow-up verification, or a maintenance session reconciling `origin/main`) is filed by
+**appending to that run's ledger with the next free number in its series**, never by inventing a
+suffix and never by re-using an ID. **ALWAYS run the collision check first**, and **ALWAYS mark the
+row `[filed by <what> on <date>]`** so a later reader can tell it from the run's own findings. This
+was executed twice with no written home at all (`/audit` 2026-09-09 T-31). **ALWAYS grep the report for the ID before writing a row**
 (`grep -c "^| <ID> |"` → expected 0) and **ALWAYS number sequentially with no suffixes** — a
 `N-28b` is off-scheme and a reused ID costs a re-file and an erratum, both of which happened
 (`/audit` 2026-09-03 N-46, and the `M-16` collision it names).
@@ -1094,12 +1158,20 @@ run.** NEVER manufacture a class to fill the section: "no new class this run" is
 
 End with: **Suggestion:** Run `/maintenance` to apply fixes, using this report as the correction plan.
 
-### Closing status lines — ALWAYS both, verbatim keys, enumerated values
+### Closing status lines — ALWAYS ALL THREE, verbatim keys, enumerated values
+
+**Count them in this list, never from this sentence.** The heading read "ALWAYS both" over three
+bullets for two runs, because `defect series:` was added and the heading never swept — item 4's
+ADJACENT direction, in the file that defines it (`/audit` 2026-09-09 T-40).
 
 - **`Report status:`** — `COMPLETE` (all agents returned, all dimensions evaluated) or
   `INCOMPLETE — [which agents or dimensions did not return]`.
-- **`defect series:`** — `updated in N of 3 surfaces` (verification mode) or `N/A — baseline
-  mode`. Phase 3 owns keeping the series current in `CLAUDE.md` and this file's Phase 0.
+- **`defect series:`** — `row N appended` (verification mode) or `N/A — baseline mode`.
+  **ONE surface, never three.** The series lives in exactly one table — "The defect series" above
+  Phase 1 — and item 6 says APPEND ONE ROW AND TOUCH NOTHING ELSE. An earlier form of this line
+  mandated `updated in N of 3 surfaces` and named `CLAUDE.md` and Phase 0 as surfaces to keep
+  current, contradicting item 6 eleven hundred lines below it and re-creating the copies R-7/R-8
+  deleted (`/audit` 2026-09-09 T-42).
 - **`Application status:`** — exactly one of `PENDING` / `PARTIAL — N of M applied in sHASH` /
   `APPLIED — M of M in sHASH` / `SUPERSEDED by [later run]`.
   **A batch split across commits uses the SAME value with EVERY hash named** —

@@ -235,9 +235,11 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.19.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.20.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
-□ Session Protocol (pointers to /sprint-proposer, /session-end, /context-recovery, session-rules.md)
+□ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
+  /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
+  file; this line named three for two batches, `/audit` 2026-09-09 T-32)
 □ Commands section
 □ MCP Servers section
 □ Skills & Agents section (auto-discovery note, no explicit listing)
@@ -248,6 +250,13 @@ Required sections (compare against docs/modules/templates/claude_md.md — v2.19
 □ Design System section
 □ File Map section
 □ Environment Variables section
+□ Commit Hygiene section
+
+**COUNT THE BOXES AGAINST THE TEMPLATE, NEVER AGAINST THIS LIST.** Mechanical self-check
+(expected result stated): `grep -c '^## ' docs/modules/templates/claude_md.md` — **expected:
+equal to the number of □ above.** The list stood at 12 while the template shipped 13, and the
+missing one — `## Commit Hygiene` — appeared nowhere else in the repo, so no adapted project ever
+gained it and no audit dimension looked for it (`/audit` 2026-09-09 T-32).
 ```
 
 **Migration from v1.6.0 to v2.1.0:** If the CLAUDE.md contains inline Session Protocol (10 start steps, end steps, model switch protocol, validation failure post-mortem, sprint-approved mode, etc.), these should be REMOVED. All protocol logic now lives in process skills (sprint-proposer, session-end, context-recovery, validation-orchestrator) and session rules (.claude/rules/session-rules.md). Replace inline protocol sections with the slim Session Protocol pointers from the v2.1.0 template.
@@ -352,7 +361,7 @@ artifact**, and reports the count (`/audit` 2026-09-02 M-2, corrected 2026-09-03
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/pendencias_md.md` and create `.claude/phases/pendencias.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
-**DERIVE the consumer list; it is not written here.** Four successive attempts to enumerate it were wrong by four different mechanisms — reading, a fixed-line `sed`, a heading split that mis-attributed a PHASE-3 block, and one that named a step which never touches the file while omitting Phase 3, which names it three times (`/audit` 2026-09-04 R-11). **The command:** split on the bold `**Step N**` headings AND the `### Phase N` headings, then report every section whose body contains the filename. **A list typed here will be wrong again** — and **DERIVE this list, NEVER type it.** It has now been wrong three times by three different methods: once from reading, once from a fixed-line-range `sed` that fell short of a step's body, and once from a heading-split that attributed a PHASE-3 block to the step above it because Phase 3 does not use the `**Step N**` heading form (`/audit` 2026-09-04 Q-5). The derivation that survives both errors: split on the bold `**Step N**` headings, and confirm each hit's line number lies before the next PHASE heading as well. Step 1.1 also reaches this file, but through a glob that never names it, so it is deliberately excluded from a list of NAMED consumers., and this command's own Reading
+**DERIVE the consumer list; it is not written here.** Four successive attempts to enumerate it were wrong by four different mechanisms — reading, a fixed-line `sed`, a heading split that mis-attributed a PHASE-3 block, and one that named a step which never touches the file while omitting Phase 3, which names it three times (`/audit` 2026-09-04 Q-5, R-11). **The command:** split on the bold `**Step N**` headings AND the `### Phase N` headings, then report every section whose body contains the filename. **A list typed here will be wrong again.** Step 1.1 also reaches this file, but through a glob that never names it, so it is deliberately excluded from a list of NAMED consumers. (The fix for R-11 prepended this paragraph without deleting the one it replaced, leaving two contradictory rationales, two contradictory commands and a `.,` splice on one line — `/audit` 2026-09-09 T-38.)
 Report has an `[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected
 2026-09-03 N-24 — Step 5.1 does not read this file).
 
@@ -523,7 +532,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.19.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.20.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash

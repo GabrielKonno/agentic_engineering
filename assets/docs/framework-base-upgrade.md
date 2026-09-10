@@ -1,6 +1,6 @@
 # Framework-Base Upgrade Spec — abstrações para o gerador de bootstrap
 
-**Origem:** a sessão de origem (2026-06-22) — uma auditoria de qualidade do projeto-fonte revelou 6 pontos cegos do FRAMEWORK (não bugs de código), todos implementados nesta instância. Este documento **abstrai** essas melhorias (e a lição de COMO o framework evoluiu ao longo de ao longo de toda a história do projeto — ver §8) para o **gerador de bootstrap**, de modo que TODO projeto novo já nasça mais robusto.
+**Origem:** a sessão de origem (2026-06-22) — uma auditoria de qualidade do projeto-fonte revelou 6 pontos cegos do FRAMEWORK (não bugs de código), todos implementados nesta instância. Este documento **abstrai** essas melhorias (e a lição de COMO o framework evoluiu ao longo de toda a história do projeto — ver §8) para o **gerador de bootstrap**, de modo que TODO projeto novo já nasça mais robusto.
 
 **Escopo:** este doc é para o repositório do GERADOR, não para o projeto-fonte. Aqui não há nada específico de Supabase/Vercel no CORE — o que é de stack vira módulo plugável (§6).
 
@@ -99,7 +99,7 @@ Ao gerar um projeto novo, o bootstrap deve:
 
 ## 8. Evidência: a evolução do próprio framework ao longo do projeto
 
-> Esta seção abstrai COMO o framework deste projeto evoluiu ao longo de ao longo de toda a história do projeto — a criação/refino de agents, skills, rules, hooks; o fluxo, a orquestração e as convenções de descrição. O valor: cada mecanismo que **emergiu tarde para remendar uma falha recorrente** é exatamente o que o gerador deveria shipar desde a sessão 1. (Análise minerada dos logs de adaptação, do Progress Log e dos próprios componentes — preenchida na própria fase tardia.)
+> Esta seção abstrai COMO o framework deste projeto evoluiu ao longo de toda a história do projeto — a criação/refino de agents, skills, rules, hooks; o fluxo, a orquestração e as convenções de descrição. O valor: cada mecanismo que **emergiu tarde para remendar uma falha recorrente** é exatamente o que o gerador deveria shipar desde a sessão 1. (Análise minerada dos logs de adaptação, do Progress Log e dos próprios componentes — preenchida na própria fase tardia.)
 
 _[Preenchido com a síntese dos mineradores de evolução — ver subseções abaixo.]_
 
@@ -108,13 +108,13 @@ _[Preenchido com a síntese dos mineradores de evolução — ver subseções ab
 O framework deste projeto não nasceu pronto — ele **acretou em cinco fases**, e o padrão de quando cada mecanismo apareceu é a evidência central deste doc.
 
 - **Fase 0 — Sem framework (as primeiras sessões).** Build cru. Correções viravam prosa ad-hoc no log; a MESMA classe de bug (timezone `toISOString`→`a date-parsing helper`, dupla-contagem) recorreu em três sessões consecutivas da fase inicial, sem memória. **O custo de não ter loop de aprendizado está visível no próprio log.**
-- **Fase 1 — Primeiro protocolo (fase inicial).** Migração para "Agentic Engineering": loop de auto-validação, PRD retroativo, critérios de aceite, e os **primeiros 12 Known Bug Patterns minerados retroativamente das primeiras sessões** + o **cap de 20**. Lição: o artefato de aprendizado foi criado *depois* de 9 sessões de dor já paga.
+- **Fase 1 — Primeiro protocolo (fase inicial).** Migração para "Agentic Engineering": loop de auto-validação, PRD retroativo, critérios de aceite, e os **primeiros 12 Known Bug Patterns minerados retroativamente das primeiras sessões** + o **cap de 20**. Lição: o artefato de aprendizado foi criado *depois* de várias sessões de dor já paga.
 - **Fase 2 — Sprint + model-switch (fase intermediária).** Sprint-approved mode, exception stops, cap de 3 discoveries/sprint, extração de padrões por diff. O **1º MODEL SWITCH → Opus** dispara organicamente em fase intermediária (tarefa de arquitetura: cron auto-close).
-- **Fase 3 — Infra completa de skills/agents (Adapt.1 v1.6.0 ≈ fase intermediária; Adapt.3 v2.1.0 ≈ fase intermediária tardia).** Aqui nasce a espinha: `validator`+`arbitrator`; `evolution-policy` (FIX/DERIVED/CAPTURED + fronteira DATA/BEHAVIOR); `component-design` (gap-declaration); `session-end`+`context-recovery`; `auth-rules`+`multi-tenancy-rules`; Coverage Gap Declarations nos reviewers; especialistas (`data-integrity-checker`/`performance-auditor`) pré-instalados via vocabulário de gap. O Progress Log migrou de blocos completos → **tabela-índice** (blocos não sobrevivem a 100+ sessões — um *scaling move*).
+- **Fase 3 — Infra completa de skills/agents (Adapt.1 v1.6.0 ≈ fase intermediária; Adapt.3 v2.1.0 ≈ fase intermediária tardia).** Aqui nasce a espinha: `validator`+`arbitrator`; `evolution-policy` (FIX/DERIVED/CAPTURED + fronteira DATA/BEHAVIOR); `component-design` (gap-declaration); `session-end`+`context-recovery`; `auth-rules`+`multi-tenancy-rules`; Coverage Gap Declarations nos reviewers; especialistas (`data-integrity-checker`/`performance-auditor`) pré-instalados via vocabulário de gap. O Progress Log migrou de blocos completos → **tabela-índice** (blocos não sobrevivem a uma longa história de sessões — um *scaling move*).
 - **Fase 4 — Estado estacionário + acreção de guardas (fase intermediária→fase tardia).** Cadência estável de `+1/+2 KBP` por sessão; rules de domínio crescem com os módulos (`[dominio-a]-rules` numa fase intermediária, `[dominio-b]-rules` ≈ fase tardia). **PRD-dois-níveis** aprovado em fase tardia; **criteria-enforcer AUTHORING mode** ≈ fase tardia.
 - **Fase 5 — Camada de sistema-inteiro (fase tardia).** `codebase-audit`, `quality-budgets`, `metrics`, **back-sweep** e o **piso de CI** — TODOS nesta sessão, após toda uma história de review puramente diff-local e forward-only.
 
-**O loop de aprendizado (o mecanismo mais importante):** uma lição nasce como **Known Bug Pattern** no `code-reviewer.md` (cap 20); ao bater o teto, padrões bem-envelhecidos (1 trigger, há muitas sessões) são **promovidos para um rules-file de domínio** (liberando slot), e os que nunca disparam em ~20+ sessões são **removidos**. Os comentários HTML no `code-reviewer.md` são um *ledger de proveniência* completo. É um **loop de aprendizado com custo de contexto LIMITADO** — a abstração nº1 para qualquer gerador.
+**O loop de aprendizado (o mecanismo mais importante):** uma lição nasce como **Known Bug Pattern** no `code-reviewer.md` (cap 20); ao bater o teto, padrões bem-envelhecidos (1 trigger, há muitas sessões) são **promovidos para um rules-file de domínio** (liberando slot), e os que nunca disparam em muitas sessões são **removidos**. Os comentários HTML no `code-reviewer.md` são um *ledger de proveniência* completo. É um **loop de aprendizado com custo de contexto LIMITADO** — a abstração nº1 para qualquer gerador.
 
 ### 8.2 Arco de componentes + convenções de descrição
 
@@ -148,11 +148,11 @@ O sinal mais valioso não é *o que* o framework tem — é **QUANDO cada mecani
 
 | Mecanismo | 1ª aparição real | Veredito |
 |---|---|---|
-| Known Bug Patterns + cap | fase inicial (retroativo, minerando as primeiras sessões) | **Tarde-ish** — as 9 primeiras sessões pagaram o preço cheio |
+| Known Bug Patterns + cap | fase inicial (retroativo, minerando as primeiras sessões) | **Tarde-ish** — as primeiras sessões pagaram o preço cheio |
 | Sprint mechanics / model-switch | fase intermediária | Médio (orgânico, aceitável) |
 | Validation routes A/B/C + validator/arbitrator | Adapt.1/Adapt.3 (≈fase inicial→fase intermediária) | Médio — só plenamente ligado já bem adentro da fase intermediária |
 | Gap-declaration / FIX-DERIVED-CAPTURED / autonomy boundary | Adapt.3 | Médio |
-| **criteria-enforcer AUTHORING mode** | **≈ fase tardia** | **MUITO TARDE** — ✅-falso-positivo de specs falhos passou 100+ sessões |
+| **criteria-enforcer AUTHORING mode** | **≈ fase tardia** | **MUITO TARDE** — ✅-falso-positivo de specs falhos passou uma longa história de sessões |
 | **PRD-dois-níveis anti-drift** | **fase tardia** | **TARDE** — só quando um spec de fase de fato divergiu |
 | **Back-sweep (cegueira forward-only)** | **uma sessão tardia** | **MUITO TARDE** — toda a história de review só-para-frente |
 | **codebase-audit / quality-budgets / metrics** | **uma sessão tardia** | **MUITO TARDE** — um módulo central do projeto-fonte chegou a ~3300 linhas e o PITR ficou OFF sem ninguém medir |
@@ -160,7 +160,7 @@ O sinal mais valioso não é *o que* o framework tem — é **QUANDO cada mecani
 
 **O meta-sinal (a tese deste doc, agora com evidência histórica):** os mecanismos que emergiram dolorosamente tarde são EXATAMENTE os que perguntam *"o SISTEMA está saudável?"* (codebase-audit/ops/budgets, fase tardia), *"esta regra nova condena o código ANTIGO?"* (back-sweep, fase tardia), *"este SPEC é sólido?"* (criteria-enforcer AUTHORING, fase tardia) e *"os requisitos em 2 docs estão sincronizados?"* (PRD-dois-níveis, fase tardia) — i.e., **tudo ALÉM do loop per-diff "esta mudança está boa?"**, que esteve presente cedo.
 
-Um gerador que ship só o loop per-diff produz projetos que **não notam a ausência das camadas de sistema-inteiro e de authoring-time até ~100 sessões de dívida acumularem em silêncio.** Por isso §2 (eixo macro), §3.7 (framework auto-auditável) e a revisão de SPEC em authoring-time não são especulação — são as lições mais caras deste projeto, e devem nascer com o bootstrap.
+Um gerador que ship só o loop per-diff produz projetos que **não notam a ausência das camadas de sistema-inteiro e de authoring-time até uma longa história de sessões de dívida acumularem em silêncio.** Por isso §2 (eixo macro), §3.7 (framework auto-auditável) e a revisão de SPEC em authoring-time não são especulação — são as lições mais caras deste projeto, e devem nascer com o bootstrap.
 
 > **Fechamento:** as abstrações de §2–§7 não foram inventadas no abstrato — cada uma corresponde a um mecanismo que este projeto descobriu que faltava, tarde, ao custo de dívida real. O gerador que as assar de origem entrega projetos que chegam maduros já com a robustez que o projeto-fonte levou ao longo de toda a história do projeto para alcançar.
 
@@ -168,13 +168,13 @@ Um gerador que ship só o loop per-diff produz projetos que **não notam a ausê
 
 ## 9. A dimensão que faltava: CONTINUIDADE, memória e integridade do loop
 
-> **Nota de completude (verificação fase tardia, 2026-06-23):** uma auditoria de completude do próprio §8 revelou que a análise estava pesada no eixo de *review/aprendizado* e **conflava "memória do framework" com "o loop KBP→rules"**. Isso é só a memória de PADRÃO. Existe uma SEGUNDA dimensão, ortogonal e igualmente carga-de-peso: **como um único agente opera de forma coerente ao longo de ao longo de toda a história do projeto e faz deploy com segurança** — memória de DECISÃO/ESTADO, gates de deploy e integridade do loop. Esta seção a documenta no formato detalhado. (Sem ela, um bootstrap emite os eixos de review mas produz projetos onde perda de contexto = perda de conhecimento.)
+> **Nota de completude (verificação fase tardia, 2026-06-23):** uma auditoria de completude do próprio §8 revelou que a análise estava pesada no eixo de *review/aprendizado* e **conflava "memória do framework" com "o loop KBP→rules"**. Isso é só a memória de PADRÃO. Existe uma SEGUNDA dimensão, ortogonal e igualmente carga-de-peso: **como um único agente opera de forma coerente ao longo de toda a história do projeto e faz deploy com segurança** — memória de DECISÃO/ESTADO, gates de deploy e integridade do loop. Esta seção a documenta no formato detalhado. (Sem ela, um bootstrap emite os eixos de review mas produz projetos onde perda de contexto = perda de conhecimento.)
 
 Formato de cada mecanismo: **História · O que acontece · Por que acontece · Por que o framework-base deve absorver · Casos de uso / cenários.**
 
 ### 9.1 Memória durável em CAMADAS (logs append-only + Progress Log como índice + CLAUDE.md-contrato)
 
-- **História:** Nas Fases 0–1, decisões viravam prosa solta; em Adapt.1 (≈ fase intermediária) o Progress Log foi MIGRADO de blocos completos → **tabela-índice** porque "blocos não sobrevivem a 100+ sessões". O CLAUDE.md foi *enxugado* duas vezes (621→443→~160 linhas de protocolo inline → ponteiros).
+- **História:** Nas Fases 0–1, decisões viravam prosa solta; em Adapt.1 (≈ fase intermediária) o Progress Log foi MIGRADO de blocos completos → **tabela-índice** porque "blocos não sobrevivem a uma longa história de sessões". O CLAUDE.md foi *enxugado* duas vezes (encolhido em duas ordens de grandeza, de protocolo inline → ponteiros).
 - **O que acontece:** Três camadas distintas. (1) **Logs de sessão append-only** (`.claude/logs/`) — o registro DETALHADO (raciocínio, alternativas, erros), explicitamente **NÃO lido no início da sessão** (é propagado para frente), lido **sob demanda** para arqueologia ("por que isso foi decidido?"). (2) **Progress Log como TABELA-ÍNDICE** em `project.md` — uma linha por sessão, com o nome do log na última coluna; o detalhe vive nos logs, não no índice. (3) **CLAUDE.md como CONTRATO auto-carregado** todo início de sessão (estado atual, padrões-chave, File Map, ledger de migrations), mantido preciso pela skill `config-file-updater` ao fim da sessão.
 - **Por que acontece:** Nenhuma janela de contexto cabe ao longo de toda a história do projeto. A continuidade exige que o estado durável seja **em-forma-de-índice** (sobrevive) com detalhe **offloaded** para arquivos append-only por-sessão (recuperável sob demanda).
 - **Por que o framework-base deve absorver:** É a dimensão que permite chegar à maturidade sem re-derivar tudo. O loop KBP→rules é só memória de *padrão*; a memória de *decisão/estado/handoff* (logs + índice + CLAUDE.md) é um sistema separado e igualmente essencial. Totalmente stack-agnóstico.
