@@ -847,11 +847,22 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    Seven commits declaring `bump: none — write-back only` shipped normative content, one of
    them a new mandate and slot AFTER the version bump (`/audit` 2026-09-04 R-45).
    **A WRITE-BACK ADDS; IT NEVER REMOVES. A PERSISTED REPORT IS APPEND-ONLY.**
+   **COUNT STRUCTURE, NEVER RAW LINES.** A status write-back rewrites every ledger row in place
+   (`| open |` → ``| applied `sHASH` |``), so a raw `--numstat` deleted-count is large on a
+   perfectly healthy commit — measured, 52 on a write-back that removed nothing. A gate that fires
+   on the normal case is the inversion this file has had to repair three times (K-8, L-7, and this
+   line on the day it was written).
    ```bash
-   git diff --cached --numstat assets/docs/audit-*.md   # added <TAB> deleted <TAB> path
+   for f in $(git diff --cached --name-only assets/docs/audit-*.md); do
+     for pat in '^#{1,2} ' '^\| [A-Z]-[0-9]+ \|' '^> \*\*Errata '; do
+       b=$(git show HEAD:"$f" 2>/dev/null | grep -cE "$pat"); a=$(grep -cE "$pat" "$f")
+       [ "$a" -lt "$b" ] && echo "RED $f: $pat  $b -> $a"
+     done
+   done
    ```
-   **Expected: `deleted` is 0, or every deleted line is accounted for by an errata block in the
-   same commit.** ANY net deletion from a persisted report is RED and BLOCKS the commit. The two
+   **Expected: NO OUTPUT.** Headings, ledger rows and errata blocks may only increase. Any decrease
+   is RED and BLOCKS the commit unless an errata block in the SAME commit names what was removed
+   and why. The two
    forms in `/audit` → "Errata and superseded status" are the ONLY permitted modifications, and
    both ADD text beside what they correct — neither removes it. There is no condensation policy,
    no rotation policy and no size policy in this repository, and a report that grows is the
