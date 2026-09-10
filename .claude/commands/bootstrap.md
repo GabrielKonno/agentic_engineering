@@ -591,11 +591,13 @@ Read the project's `.claude/agents/code-reviewer.md`, `.claude/agents/security-r
 | compliance gap (security-reviewer) | compliance-auditor.md |
 | infrastructure security gap (security-reviewer) | iac-scanner.md |
 
-For each match found: copy from `assets/examples/agents/` to `.claude/agents/`, adapting only:
+For each match: copy from `assets/examples/agents/` to `.claude/agents/`, adapting only:
 - `created:` lineage: change from `example` to `s0 (bootstrap — pre-installed from example template)`
 - Verify the `description:` gap phrase matches the declaring component's gap declaration vocabulary
 
-If a gap was KEPT but no matching example exists in `assets/examples/agents/`: register in `pendencias.md` — "Create specialist agent for [gap] when domain implementation begins."
+If a gap was KEPT but no matching example exists in `assets/examples/agents/`: register in
+`pendencias.md` — "Create specialist agent for [gap] when domain implementation begins." A kept
+gap that installs nothing and registers nothing is a gap the project can never act on.
 
 #### Step 12.5b — Validate activation chains
 
@@ -818,7 +820,11 @@ git commit -m "chore: bootstrap from agentic framework"
   `/audit` 2026-09-03 P-21 — the mandate existed and had nowhere to land.)
 
 ### Hooks (Step 14) — ALWAYS report, never omit:
-- `smart-formatting ACTIVE` · `none — project has no formatter`
+- `configured — [the hooks written]` · `none — project has no formatter`
+  (**COPIED FROM Step 14's mandate verbatim** — those are the only two outcomes it writes. An
+  earlier slot offered `smart-formatting ACTIVE`, a verdict Step 14 never emits, while the twin
+  carried a third — `/audit` 2026-09-04 R-13, written back `applied` with nothing landed; re-filed
+  2026-09-09 T-10.)
   (BOTH verdicts Step 14 can produce, and ONLY those two — the enumeration is COPIED FROM the
   step, never paraphrased. A third, `SKIPPED: no formatter detected`, was a paraphrase of the
   second and appears nowhere in Step 14; the slot asserted it was one of "all three"

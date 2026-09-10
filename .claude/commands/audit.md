@@ -206,12 +206,22 @@ CHECKS:
          **EVERY framework-layer surface — `docs/**` (not only `docs/modules/`), `examples/**`,
          `.claude/**`, `assets/docs/**` and the root `*.md` files** — then cross-grep each against
          the projects' own `*.ts/*.tsx/*.js/*.sql/*.py` sources.
-         **ALWAYS EXCLUDE EVERY VERBATIM FRAMEWORK→PROJECT COPY PATH FROM THE COMPARISON SET —
-         `projects/*/assets/examples/` AND `projects/*/.claude/skills/` AND
-         `projects/*/.claude/agents/` AND `projects/*/.claude/rules/`.** Bootstrap
-         Step 1.5 copies `examples/` there, and Steps 5.7/5.8 copy `docs/modules/skills/`,
-         `docs/modules/agents/` and `docs/modules/rules/` into the other three; naming only the
-         first left three equally verbatim copy targets unexcluded (`/audit` 2026-09-04 Q-30), so a
+         **ALWAYS EXCLUDE EVERY VERBATIM FRAMEWORK→PROJECT COPY PATH FROM THE COMPARISON SET, AND
+         ALWAYS DERIVE THAT LIST FROM `bootstrap.md` RATHER THAN TYPING IT** — every `cp`/`cp -r`
+         target under `projects/` is a copy path, and a typed list has now been short twice:
+         ```bash
+         grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
+           | grep -E '(examples|\.claude|scripts)' | sort -u
+         ```
+         **Expected: at least 5 paths.** As of v2.20.0 they are
+         `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
+         `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
+         Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
+         `docs/modules/agents/` and `docs/modules/rules/` into the next three, and **Step 5.7
+         extracts `check_agent_frontmatter.md` into the fifth**. Naming only the
+         first left three equally verbatim copy targets unexcluded (`/audit` 2026-09-04 Q-30) and
+         the fifth was still missing a batch later, producing six false positives on execution
+         (`/audit` 2026-09-09 T-10, filed as R-19 and written back `applied` with nothing landed). So a
          match there means the identifier travelled framework → project — the OPPOSITE
          direction from a leak. Without the exclusion the check errs BOTH ways: it files a
          false hit, or it teaches the auditor to wave real hits off as "probably our own
@@ -472,15 +482,17 @@ CHECKS:
         component** declares (= agent exists but can never be triggered). **Scope this to the
         D6.8 set, never to the two reviewers** — a validator-declared gap would otherwise read as
         an orphaned specialist (`/audit` 2026-09-02 M-13).
-  D6.9. **VERIFY NO FOURTH SURFACE CONTRADICTS the declarer set.** `component-design` §1/§3 in both
-        twins is the policy; `docs/agentic_engineering_framework.md`'s coverage-gap handling
-        paragraph is a THIRD description of the same thing and has been stale before. A surface
-        naming two declarers where the policy names three is a FAIL (`/audit` 2026-09-03 P-14).
   D6.7. **INSTALL-LINK PARITY — the link that has broken TWICE.** For every gap from D6.1/D6.2
         AND every gap D6.8 attributes to any OTHER declaring component (run D6.8 first),
         verify a matching row exists in the specialist install table of BOTH
         `.claude/commands/bootstrap.md` AND `.claude/commands/existing_project_adaptation.md`.
-        Mechanical: `diff` the two tables — **expected: empty**. A gap that is declared and has a
+        **Mechanical: `diff` the two install BLOCKS — the table AND the prose around it, never the
+        table alone — expected: empty.** Extract from each command file the span running from the
+        paragraph that introduces the install table to the paragraph that closes it, and diff those.
+        The tables have been byte-identical while the prose diverged in six places, so a
+        table-only diff returns empty on the very state this check exists to find
+        (`/audit` 2026-09-04 R-35, written back `applied` with nothing landed; re-filed
+        2026-09-09 T-10). A gap that is declared and has a
         specialist but no install row on ONE path is a FAIL, not a nit: the declaring component will declare
         it forever and the specialist will never be installed on that path. This is exactly how
         `visual regression` broke as H-2 (bootstrap) and again as J-5 (EPA), while D6 returned
@@ -491,6 +503,10 @@ CHECKS:
         enumerate the same set. A specialist description naming a source the policy does not list
         is a FAIL.
 
+  D6.9. **VERIFY NO FOURTH SURFACE CONTRADICTS the declarer set.** `component-design` §1/§3 in both
+        twins is the policy; `docs/agentic_engineering_framework.md`'s coverage-gap handling
+        paragraph is a THIRD description of the same thing and has been stale before. A surface
+        naming two declarers where the policy names three is a FAIL (`/audit` 2026-09-03 P-14).
 [D7] Pushy Description pattern compliance
   D7.1. From component-design.md §2, the required pattern is:
         [Core function line — MANDATORY] +
@@ -503,34 +519,6 @@ CHECKS:
   D7.3. For each agent in examples/agents/ with invocation: subagent: same check
   D7.4. Flag the anti-pattern: descriptions that are ONLY triggers ("USE PROACTIVELY when X.
         NOT needed for Y. Without this Z.") with NO core function statement
-  D7.7. **REPORT THE THREE COUNTS SEPARATELY AND SAY WHETHER THE TWINS AGREE** —
-        `activation chain check: N verified, K broken, I info` FOR EACH twin, plus
-        `twins agree: yes/NO`. A single figure hid a divergence where both loops resolved the
-        same count while their INFO strings differed (`/audit` 2026-09-04 R-20).
-  D7.8. **VERIFY THE DERIVED SPECIALIST SET DOES NOT SKIP SILENTLY.** Plant a specialist that is
-        NOT a shipped example and whose gap no declarer declares; **expected: a line naming it.**
-        Zero output is RED — a derivation that skips the population most likely to be broken is
-        worse than the typed list it replaced (`/audit` 2026-09-04 R-10).
-  D7.6. **EXTRACT THE EXECUTABLE ACTIVATION-CHAIN CHECK FROM THE COMMAND FILES AND RUN IT.**
-        `bootstrap.md` Step 12.5b and `existing_project_adaptation.md` Step 5.1 each carry a shell
-        loop that resolves every gap-declaring specialist against the three declaring components.
-        **It is the framework's only EXECUTABLE activation check, and for four runs it had no
-        auditor on disk** — the verification lived in whichever prompt happened to be dispatched
-        (`/audit` 2026-09-04 Q-3, Q-33).
-        **ALWAYS:**
-        1. Build a synthetic project: every `docs/modules/agents/*.md` (renamed `_`→`-`) plus every
-           `examples/agents/*.md` into `.claude/agents/`, and every `examples/agents/*.md` into
-           `assets/examples/agents/`.
-        2. Extract the loop VERBATIM from the file and run it against that project.
-        3. **ALWAYS REPORT — `activation chain check: N of M specialists resolved, K broken`.**
-           **Expected: every gap-declaring specialist resolves and K = 0.** A resolved count below
-           the number of gap phrases D6.1/D6.2/D6.2b extracted is RED.
-        4. **TRY TO BREAK IT.** Test the phrasings a future specialist might legitimately use —
-           `declares the X gap`, a sentence-initial `Declares`, a hyphenated or slashed domain, a
-           description whose fold puts a line break inside the phrase. **A check that passes on
-           today's set but dies on a plausible rephrasing is a finding**, and this one has been
-           repaired twice on exactly that ground.
-
   D7.5. **DO NOT ENUMERATE the protocol-spawned set — DERIVE it.** The rule is structural, and
         stating it as a list has now failed three times, going 5 → 7 → 9 while the true figure moved
         with the directory (`/audit` 2026-09-02 M-22, then 2026-09-03 N-31, whose own count of
@@ -554,6 +542,34 @@ CHECKS:
         finding.** The Pushy Description pattern is most critical for the specialist agents in
         `examples/agents/`, which ARE gap-activated and where a PARTIAL IS a finding.
 
+  D7.6. **EXTRACT THE EXECUTABLE ACTIVATION-CHAIN CHECK FROM THE COMMAND FILES AND RUN IT.**
+        `bootstrap.md` Step 12.5b and `existing_project_adaptation.md` Step 5.1 each carry a shell
+        loop that resolves every gap-declaring specialist against the three declaring components.
+        **It is the framework's only EXECUTABLE activation check, and for four runs it had no
+        auditor on disk** — the verification lived in whichever prompt happened to be dispatched
+        (`/audit` 2026-09-04 Q-3, Q-33).
+        **ALWAYS:**
+        1. Build a synthetic project: every `docs/modules/agents/*.md` (renamed `_`→`-`) plus every
+           `examples/agents/*.md` into `.claude/agents/`, and every `examples/agents/*.md` into
+           `assets/examples/agents/`.
+        2. Extract the loop VERBATIM from the file and run it against that project.
+        3. **ALWAYS REPORT — `activation chain check: N of M specialists resolved, K broken`.**
+           **Expected: every gap-declaring specialist resolves and K = 0.** A resolved count below
+           the number of gap phrases D6.1/D6.2/D6.2b extracted is RED.
+        4. **TRY TO BREAK IT.** Test the phrasings a future specialist might legitimately use —
+           `declares the X gap`, a sentence-initial `Declares`, a hyphenated or slashed domain, a
+           description whose fold puts a line break inside the phrase. **A check that passes on
+           today's set but dies on a plausible rephrasing is a finding**, and this one has been
+           repaired twice on exactly that ground.
+
+  D7.7. **REPORT THE THREE COUNTS SEPARATELY AND SAY WHETHER THE TWINS AGREE** —
+        `activation chain check: N verified, K broken, I info` FOR EACH twin, plus
+        `twins agree: yes/NO`. A single figure hid a divergence where both loops resolved the
+        same count while their INFO strings differed (`/audit` 2026-09-04 R-20).
+  D7.8. **VERIFY THE DERIVED SPECIALIST SET DOES NOT SKIP SILENTLY.** Plant a specialist that is
+        NOT a shipped example and whose gap no declarer declares; **expected: a line naming it.**
+        Zero output is RED — a derivation that skips the population most likely to be broken is
+        worse than the typed list it replaced (`/audit` 2026-09-04 R-10).
 REPORT FORMAT:
 
 
@@ -572,7 +588,10 @@ REPORT FORMAT:
   | Gap | Declared by | Specialist file | Phrase match | bootstrap install row | EPA install row |
   |-----|-------------|-----------------|--------------|-----------------------|-----------------|
   [one row per gap — the last two columns are D6.7 and are MANDATORY, never blank]
-- Install-table diff (D6.7): [`diff` of the two tables — expected empty; paste any difference]
+- Install-block diff (D6.7): [`diff` of the two install blocks — **table AND surrounding prose** —
+  expected empty; paste any difference]
+- **Fourth-surface check (D6.9) — MANDATORY, never blank:** `docs/agentic_engineering_framework.md`'s
+  coverage-gap paragraph names [N] declarers; policy §1/§3 names [M]; match: [yes / NO — which is stale]
 - `declarers extracted: N of M` — **MANDATORY, never blank** (D6.2b; M derived, never typed)
 - Gap SOURCES found (D6.8): [every component that declares a gap] — policy §1/§3 lists: [set];
   match: [yes / NO — which twin is stale]
@@ -585,8 +604,13 @@ REPORT FORMAT:
   | Agent | Core function | Triggers | Exclusions | Consequence | Output | Status |
   |-------|--------------|----------|------------|-------------|--------|--------|
   [one row per agent — COMPLIANT / PARTIAL / NON-COMPLIANT]
-- **`activation chain check: N of M specialists resolved, K broken` (D7.6) — MANDATORY, never
-  blank.** Plus the rephrasings tested and which, if any, the check silently misses.
+- **`activation chain check: N verified, K broken, I info` — ONE LINE PER TWIN (D7.6, D7.7),
+  MANDATORY, never blank** — the loop emits THREE counts, so a two-count slot cannot receive it:
+  - bootstrap twin: [literal output]
+  - EPA twin: [literal output]
+  - `twins agree: yes / NO` — **counts AND info strings**, not counts alone (D7.7).
+  Plus one row per rephrasing tested, with its literal output, and which the check silently misses.
+- **Planted-specialist probe (D7.8) — MANDATORY, never blank:** [literal output]. **Zero output is RED.**
 - **Invariant proof output (D7.5) — MANDATORY, never blank.**
   **ALWAYS REPORT THE FILE COUNT BESIDE IT:** `files: N | output: [literal]`. **`output: 0` alone proves NOTHING** — measured, the
   command emits exactly `0` both when it reads 10 clean agents and when it reads none, so the

@@ -915,7 +915,7 @@ Q-34):**
 1. Verify it has a matching Coverage Gap Declaration in the declaring component (code-reviewer.md,
    security-reviewer.md or validator.md) whose domain vocabulary echoes the agent's Pushy Description
 2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the
-   validator) following the existing conditional format — see `component_design.md` sections 1-3
+   validator) following the existing conditional format — see `docs/modules/rules/component_design.md` sections 1-3
 3. The pass criterion: the domain must appear in **at least one** declaring component
 4. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
 
@@ -1136,7 +1136,10 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
   (the second verdict was missing; the enumeration is COPIED FROM the mandating step,
   never re-derived — `/audit` 2026-09-03 P-21)
 ### Skills: [list with status]
-### Hooks: smart-formatting [ACTIVE / SKIPPED: no formatter detected / none — project has no formatter]
+### Hooks: [configured — the hooks written / none — project has no formatter]
+(**COPIED FROM the hooks step's mandate verbatim**, and byte-equivalent to the bootstrap twin's
+slot. The banned three-verdict form lived here for two batches after being deleted from the twin —
+`/audit` 2026-09-04 R-13, written back `applied` with nothing landed; re-filed 2026-09-09 T-10.)
 
 ### Non-standard naming:
 - [e.g., `[nome-fora-do-padrao].md` — reference updated in CLAUDE.md]

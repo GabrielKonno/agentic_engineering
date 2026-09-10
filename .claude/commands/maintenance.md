@@ -147,9 +147,14 @@ maintenance session, or by you. Write them ALL, verbatim, into:
   file); OR
 - **the commit message body**, when there is no report file.
 
-**The receipts section heading is an H2 beginning `## Post-change checklist receipts (`.** Two
-completions are valid and only two: `(sHASH)` for a single-commit batch, and
-`(<batch name> — sHASH · sHASH · …)` for the consolidated form item 6 authorises. **The self-check
+**The receipts section heading is an H2 beginning `## Post-change checklist receipts (`.** THREE
+completions are valid: `(sHASH)` for a single-commit batch, `(\`sHASH\`)` — the backticked form,
+which 6 of 10 headings on disk actually use — and `(<batch name> — sHASH · sHASH · …)` for the
+consolidated form item 6 authorises. **A trailing clause naming anything that is not a hash
+(`· and this write-back`) is RED** — the batch is identified by its commits, and a write-back that
+changed the report is one of them. The rule admitted two completions while the disk carried three,
+and the mismatch was written back `applied` with the file byte-unchanged
+(`/audit` 2026-09-04 R-15; re-filed 2026-09-09 T-10). **The self-check
 greps the H2 PREFIX, never the full string** — an exact-string rule contradicted the consolidated
 form authorised in this same file, and only 2 of 6 headings on disk satisfied it
 (`/audit` 2026-09-04 Q-13). The self-check greps for it; writing it at any other level makes the check vacuous.
@@ -162,13 +167,29 @@ for k in "inventory sweep" "instruction style" "references" "fences" "isolation"
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
          "classification" "new component" "gates" "push" \
          "audit" "verification audit" "placeholder" "control back-sweep" \
-         "commit correction" "defect series"; do
+         "commit correction" "defect series" "applied-proof" "report deletions"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
 ```
 
 **Expected: every key exactly 1.** A missing key is RED; a duplicate is RED.
+
+**AND, IN THE SAME LOOP, ASSERT THE `$` LINE — the rule above is not a control until this runs.**
+```bash
+  printf '%s -> keys %s | $-line %s\n' "$k" \
+    "$(grep -cE "^\*\*$k:" <this run's section>)" \
+    "$(awk -v k="$k" 'index($0,"**"k":")==1{f=1;next} /^\*\*[a-z]/{f=0} f&&/^ *\$ /{n++} END{print n+0}' <this run's section>)"
+```
+**Expected: every key `$-line >= 1`.** A key with `0` is RED — that is the rule's own stated verdict.
+**A `$` line whose command is an angle-bracket description (`$ <the item-6 command>`) or an elision
+(`$ for t in …; do ...; done`) counts as ZERO** — it satisfies the shape and defeats the purpose.
+Grep them out: `grep -cE '^ *\$ *<|\.\.\.' ` over the section → **expected 0**, and name any
+survivor with the reason it cannot be written literally.
+**This check did not exist when the `$`-line rule shipped, and the rule's own first discharge
+scored 5 of 20 fully compliant — 9 keys with no `$` line at all, including both keys the rule
+text explicitly anticipates** (`/audit` 2026-09-09 T-5). component-design §6: a banned process
+anti-pattern needs a mechanical self-check, or it does not survive end-of-session context pressure.
 **THE KEY LIST IS ITSELF A SURFACE THAT GOES STALE.** Whenever you add an `ALWAYS REPORT`
 mandate anywhere in this file, ADD ITS KEY HERE IN THE SAME EDIT. The list stood at 14 while
 two mandated keys (`audit:` and `verification audit:`) had no entry, so the check returned
@@ -414,11 +435,33 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    applied — which happened, undetected, in a batch whose row-count check read `43 = 43`
    (`/audit` 2026-09-03 N-34).
 
+   **PER FINDING, NOT ONLY PER ROW — NEVER WRITE `applied <hash>` FOR A FINDING WHOSE LINE THE
+   BATCH DID NOT TOUCH.** The row-level form above compares the receipt's `File(s) touched` cell
+   to the diff; it cannot see a finding sharing a row with others whose own line was never edited.
+   **ALWAYS run this before writing any status back:**
+   ```bash
+   # for each finding ID and the file:line its ledger row names
+   git log -L <line>,<line>:<file> --oneline <first>~1..<last>   # expected: at least one commit
+   git show --name-only --format="" <hash> | grep -q '<file>'    # expected: exit 0
+   ```
+   **Expected: every ID written `applied` returns a commit. An ID returning nothing is RED and its
+   status is `open`, whatever the session intended.** This is the gate whose absence let **ten of
+   forty-five** findings be written back `applied` with no edit at all — six of them under a commit
+   message asserting a fix that does not exist — while every other control in this checklist passed
+   (`/audit` 2026-09-09 T-10). It is the cheapest control here: one command per ID, and the failure
+   it catches is 100% mechanically detectable.
+   **ALWAYS REPORT — `applied-proof: N of M IDs resolve to a commit touching their line, K forced
+   to open`. NEVER emit nothing.**
+
    **Gate 3 — ROW COUNT EQUALS DISPOSED COUNT.**
    ```bash
-   grep -c "applied sHASH" <the report file>     # plus any accepted-risk / rejected rows
+   grep -cE 'applied `?sHASH' <the report file>   # plus any accepted-risk / rejected rows
    # CONSOLIDATED FORM: one alternation over every hash in the batch —
-   # `grep -cE "applied .s(AAA|BBB|CCC)"` — compared against the single table's row count.
+   # `grep -cE 'applied `?s(AAA|BBB|CCC)'` — compared against the single table's row count.
+   # THE BACKTICK IS OPTIONAL AND MUST BE WRITTEN SO. Both `applied s312ad60` and
+   # ``applied `s312ad60` `` are live on disk; the earlier form used a bare `.`, which REQUIRES a
+   # character before the `s` and therefore returned 0 on every plain-form ledger — a gate reading
+   # zero on a healthy file (found while running this gate, 2026-09-09).
    ```
    **Expected: equal to the receipt table's row count.** Report BOTH numbers.
    **SCOPE BOTH COUNTS — the findings ledger and the per-fix receipt share the `| ID |` row shape,
@@ -753,6 +796,23 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    template or a rule, it is a FIX commit: it states a real `bump:` and carries its own gates.
    Seven commits declaring `bump: none — write-back only` shipped normative content, one of
    them a new mandate and slot AFTER the version bump (`/audit` 2026-09-04 R-45).
+   **A WRITE-BACK ADDS; IT NEVER REMOVES. A PERSISTED REPORT IS APPEND-ONLY.**
+   ```bash
+   git diff --cached --numstat assets/docs/audit-*.md   # added <TAB> deleted <TAB> path
+   ```
+   **Expected: `deleted` is 0, or every deleted line is accounted for by an errata block in the
+   same commit.** ANY net deletion from a persisted report is RED and BLOCKS the commit. The two
+   forms in `/audit` → "Errata and superseded status" are the ONLY permitted modifications, and
+   both ADD text beside what they correct — neither removes it. There is no condensation policy,
+   no rotation policy and no size policy in this repository, and a report that grows is the
+   intended shape.
+   **Evidence:** the rule above governed only addition, and the very next write-back deleted **554
+   of 574 lines** of a persisted report — two full audit reports, both findings ledgers, and the
+   errata block written 100 seconds earlier — while satisfying every word of it, because it touched
+   no command, template or rule (`/audit` 2026-09-09 T-1). It also wrote back **zero** statuses
+   under a subject reading "45 of 45 applied".
+   **ALWAYS REPORT — `report deletions: N lines deleted from M report files, all accounted for` or
+   `report deletions: none`. NEVER emit nothing.**
    **ALWAYS WRITE THE STATUS BACK into the report file in this same session** — `applied sHASH`
    or `rejected — [reason]` per ID. The applying session owns this, not the next audit: a status
    that waits for the next run is a status nobody wrote.
