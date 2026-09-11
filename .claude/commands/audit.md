@@ -243,7 +243,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.20.0 they are
+         **Expected: at least 5 paths.** As of v2.21.0 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
@@ -1169,12 +1169,13 @@ letters that read as digits, and `S`, which collides with this repo's `s<hash>` 
 **EXTENDING A CLOSED SERIES — who may, and how.** A finding surfaced OUTSIDE the run that owns a
 letter (a follow-up verification, or a maintenance session reconciling `origin/main`) is filed by
 **appending to that run's ledger with the next free number in its series**, never by inventing a
-suffix and never by re-using an ID. **ALWAYS run the collision check first**, and **ALWAYS mark the
-row `[filed by <what> on <date>]`** so a later reader can tell it from the run's own findings. This
-was executed twice with no written home at all (`/audit` 2026-09-09 T-31). **ALWAYS grep the report for the ID before writing a row**
-(`grep -c "^| <ID> |"` → expected 0) and **ALWAYS number sequentially with no suffixes** — a
-`N-28b` is off-scheme and a reused ID costs a re-file and an erratum, both of which happened
-(`/audit` 2026-09-03 N-46, and the `M-16` collision it names).
+suffix and never by re-using an ID. This was executed twice with no written home at all
+(`/audit` 2026-09-09 T-31); a `N-28b` is off-scheme, and a reused ID costs a re-file and an
+erratum, both of which happened (`/audit` 2026-09-03 N-46, and the `M-16` collision it names).
+**ALWAYS RUN THE COLLISION CHECK FIRST** — `grep -c "^| <ID> |" <the report>` → **expected 0.**
+**ALWAYS NUMBER SEQUENTIALLY, WITH NO SUFFIXES.**
+**ALWAYS MARK THE ROW `[filed by <what> on <date>]`** so a later reader can tell it from the run's
+own findings.
 
 ### Meta-observation — ALWAYS present (`## Meta-observation`)
 

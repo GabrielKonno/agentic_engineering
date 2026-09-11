@@ -61,9 +61,9 @@ never ran over them. Mechanical, expected result stated:
 `git fetch -q origin && git status -sb | head -1` — **expected: no `behind` segment and
 `origin/main` where the last receipt left it; anything else means D16 is owed before any edit.**
 The rule was written with no invoker in this sequence and no self-check
-(`/audit` 2026-09-04 R-26; `/audit` 2026-09-09 T-29). **ALWAYS REPORT — `push decay: origin/main
-unchanged` or `push decay: advanced to sHASH — D16 re-run over the newly-published range: [GREEN |
-RED, findings]`. NEVER emit nothing.**
+(`/audit` 2026-09-04 R-26; `/audit` 2026-09-09 T-29).
+**ALWAYS REPORT — `push decay: origin/main unchanged` or `push decay: advanced to sHASH — D16
+re-run over the newly-published range: [GREEN | RED, findings]`. NEVER emit nothing.**
 Then run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction
 plan provided by the user (an audit report → "Audit intake"; project evolution docs → "Upstream
 intake"), apply all changes in order, then run the post-change checklist to completion — **EVERY numbered
@@ -138,8 +138,15 @@ anyone other than its author (`/audit` 2026-09-04, meta-observation).
     $ <the exact command, copy-pasteable>
     <its literal stdout, unedited>
 ```
-**NEVER as a sentence containing a number.** A number a second reader cannot reproduce by pasting
-one line is not evidence — it is a claim, and every such claim in the audited batch was wrong.
+**NEVER as a sentence containing a number.**
+**THE `$` LINE MUST BE THE MANDATED COMMAND, BYTE-FOR-BYTE — NEVER A NARROWED, RE-SCOPED OR
+RE-WRITTEN VARIANT OF IT.** `references: 9 of 9` was discharged with the first alternative of the
+mandated regex silently DELETED; run verbatim the command returns 47 over that batch, and the
+narrowed form returns 22 — neither is 9, and one of the nine printed targets appears nowhere in the
+diff (`/audit` 2026-09-10 U-7, third consecutive occurrence of this class). Editing the command to
+fit the number is exactly what T-24, installed in the same batch, forbids. **If the mandated command
+returns a number you did not expect, the NUMBER is the finding — report it and investigate.**
+A number a second reader cannot reproduce by pasting one line is not evidence — it is a claim, and every such claim in the audited batch was wrong.
 **THE STDOUT MUST BE THE ACTUAL OUTPUT OF THE QUOTED COMMAND, PASTED — NEVER a parenthetical
 standing in for it.** The first key discharged under this rule quoted a grep, showed
 "(enumerated by hand)" where its output belonged, and the command actually returns a number
@@ -845,9 +852,19 @@ require it.)
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
-**The canonical set (GREP it, never recall it):** `README.md` (title line + structure diagram),
-`docs/modules/templates/claude_md.md` (the "slim orchestrator" line), and
-`.claude/commands/existing_project_adaptation.md` (its template-generation references).
+**The canonical set is DERIVED, never typed.** A typed three-name set (`README.md`,
+`docs/modules/templates/claude_md.md`, `.claude/commands/existing_project_adaptation.md`) omitted
+`.claude/commands/audit.md`'s "As of vX.Y.Z" claim, and the `version:` receipt then reported
+`3 of 3` over four surfaces — the inventory-completeness failure `inventory sweep:` exists to catch
+(`/audit` 2026-09-10 U-42). Those three remain the ones that always carry a stamp; **ENUMERATE the
+rest, every bump:**
+```bash
+OLD=2.20.0   # the version being replaced
+grep -rn "v$OLD" README.md docs/ .claude/ CLAUDE.md 2>/dev/null | grep -v 'created: framework-v'
+```
+**Expected BEFORE the bump: every surface that must move. Expected AFTER: ZERO hits.** A residue
+grep returns 0 when the state is correct, so `0 remaining` is reachable — a PRESENCE grep is not a
+control (item 5). `created: framework-vX.Y.Z` fields are excluded because they are LINEAGE.
 `created: framework-vX.Y.Z` fields inside components are **LINEAGE, never the current version** —
 they record when a component was born and MUST NOT be rewritten by a bump.
 
@@ -1027,6 +1044,23 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    written home; `grep -rn "placeholder" .claude/commands/*.md` returned 0
    (`/audit` 2026-09-03 P-31, P-4).
    **ALWAYS REPORT — `placeholder: N occurrences substituted in sHASH` or `placeholder: none`.**
+   **THE CHECK MUST NOT SELF-MATCH, AND MUST COVER EVERY TOKEN THE BATCH ACTUALLY USED.** The
+   first discharge grepped `sBATCH|sGROUP[0-9]`, was reported `0`, and returns **1** — the receipt
+   line quoting the pattern is itself the match — while being blind to `sPENDING`, the token that
+   batch really used (`/audit` 2026-09-10 U-38; R-16's literal defect). Exclude the lines that can
+   only ever be quotations. **ANCHOR ON THE POSITION WHERE A HASH BELONGS, NEVER ON THE BARE
+   TOKEN** — `sHASH` appears legitimately in PROSE describing the marker form, and a bare-token
+   grep therefore fires on the healthy state, which is the K-8/L-7 inversion (measured while
+   calibrating this very check, 2026-09-11):
+   ```bash
+   grep -nE 'applied `?s(BATCH|GROUP[0-9]+|PENDING)`?|\| *`?s(BATCH|GROUP[0-9]+|PENDING)`? *\|'      <the report file>
+   ```
+   **Expected: NO OUTPUT.** A hit is a placeholder still sitting where a real hash belongs — a
+   ledger status cell or a `Commit` column cell. NEGATION-PROVED both ways: planting `sBATCH` in a
+   status cell and `sGROUP1` in a `Commit` cell each returns exactly one line; the healthy file
+   returns none.
+   **ALWAYS LIST the tokens the batch used, and ALWAYS ADD any new one to the alternation in the
+   same edit.**
 8. **A FALSE CLAIM IN AN ALREADY-MADE COMMIT MESSAGE IS CORRECTED BY A FOLLOW-UP COMMIT, NEVER BY
    `--amend`.** A later commit may already depend on the hash, and the record of what was claimed
    and when is itself evidence — the correction belongs beside the error, not in place of it. The
