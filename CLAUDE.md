@@ -106,8 +106,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
   contract other clones will trust; (2) D16's triage keys on it — an identifier in an UNPUSHED
   commit is fixable locally, the same identifier once PUSHED requires history rewrite and becomes
   an owner escalation. **ALWAYS run D16 over the unpushed commits and get a GREEN before asking to
-  push — and RE-CHECK `git status -sb` immediately before writing the closing `push:` line, because
-  the claim DECAYS — **WITHIN a session AND BETWEEN SESSIONS.** If someone else pushed, whether
+  push**, and RE-CHECK `git status -sb` immediately before writing the closing `push:` line,
+  because the claim DECAYS — **WITHIN a session AND BETWEEN SESSIONS.** If someone else pushed, whether
   mid-session or between sessions, commits described as unpushed are now published and the
   mandated GREEN never ran over them. **The next session ALWAYS re-checks before doing anything
   else, re-runs D16 over the newly-published range, and records the result**
@@ -148,7 +148,7 @@ upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner 
 (d) **after a `/maintenance` session applies an audit batch** — in `verification` mode
 (`/audit` Phase 0), which re-reads the structure around every `applied` fix instead of only
 checking that the required text is present. Trigger (d) exists because the fixes
-themselves introduce defects. The **verification mode** runs on trigger (d) below. **The per-run figures AND the run count live in ONE table — `/audit` → “The defect series” — and are NEVER repeated here**: four surfaces carried copies of this series, three disagreed, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8). `/audit` Phase 3 owns appending a row.
+themselves introduce defects. **The per-run figures AND the run count live in ONE table — `/audit` → “The defect series” — and are NEVER repeated here**: four surfaces carried copies of this series, three disagreed, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8). `/audit` Phase 3 owns appending a row.
 **`/audit` Phase 3 OWNS keeping this series current** — it was stale for a full run because
 nobody did, and the batch that rewrapped a line inside this very paragraph did not notice
 (`/audit` 2026-09-03 P-26). The first TWO ran under trigger (c)/owner request;

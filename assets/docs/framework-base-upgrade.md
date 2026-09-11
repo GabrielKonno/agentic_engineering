@@ -45,7 +45,7 @@ Universais e stack-agnósticos. O gerador emite cada um como esqueleto.
 
 > Princípio recursivo: **um framework robusto não é o que tem mais regras — é o que tem um mecanismo para descobrir as regras que lhe FALTAM.** Os 6 buracos sobreviveram até a fase madura não por incompetência, mas porque ninguém *fazia a pergunta* periodicamente. Generalizar isso = generalizar a auto-correção.
 
-**8. Arquétipos de sessão.** O `session-end` assume sessão de IMPLEMENTAÇÃO (extrair padrões do diff primeiro). Tivemos atrito ≥2× (fase tardia, fase tardia) com sessões sem código (investigação, manutenção de framework) onde passos viraram "N/A". A abstração: o bootstrap define **tipos de sessão** — `implementation` / `investigation` / `framework-maintenance` / `ops` — cada um com um `session-end` adaptado (o que extrair, o que pular). Remove o atrito recorrente do passo inaplicável.
+**8. Arquétipos de sessão.** O `session-end` assume sessão de IMPLEMENTAÇÃO (extrair padrões do diff primeiro). Tivemos atrito ≥2×, ambas na fase tardia, com sessões sem código (investigação, manutenção de framework) onde passos viraram "N/A". A abstração: o bootstrap define **tipos de sessão** — `implementation` / `investigation` / `framework-maintenance` / `ops` — cada um com um `session-end` adaptado (o que extrair, o que pular). Remove o atrito recorrente do passo inaplicável.
 
 ---
 
@@ -155,7 +155,7 @@ O sinal mais valioso não é *o que* o framework tem — é **QUANDO cada mecani
 | **criteria-enforcer AUTHORING mode** | **≈ fase tardia** | **MUITO TARDE** — ✅-falso-positivo de specs falhos passou uma longa história de sessões |
 | **PRD-dois-níveis anti-drift** | **fase tardia** | **TARDE** — só quando um spec de fase de fato divergiu |
 | **Back-sweep (cegueira forward-only)** | **uma sessão tardia** | **MUITO TARDE** — toda a história de review só-para-frente |
-| **codebase-audit / quality-budgets / metrics** | **uma sessão tardia** | **MUITO TARDE** — um módulo central do projeto-fonte chegou a ~3300 linhas e o PITR ficou OFF sem ninguém medir |
+| **codebase-audit / quality-budgets / metrics** | **uma sessão tardia** | **MUITO TARDE** — um módulo central do projeto-fonte cresceu a vários milhares de linhas e o PITR ficou OFF sem ninguém medir |
 | **Piso de CI automático** | **uma sessão tardia** | **MUITO TARDE** — gates eram só intra-sessão (humano/IA podiam pular) |
 
 **O meta-sinal (a tese deste doc, agora com evidência histórica):** os mecanismos que emergiram dolorosamente tarde são EXATAMENTE os que perguntam *"o SISTEMA está saudável?"* (codebase-audit/ops/budgets, fase tardia), *"esta regra nova condena o código ANTIGO?"* (back-sweep, fase tardia), *"este SPEC é sólido?"* (criteria-enforcer AUTHORING, fase tardia) e *"os requisitos em 2 docs estão sincronizados?"* (PRD-dois-níveis, fase tardia) — i.e., **tudo ALÉM do loop per-diff "esta mudança está boa?"**, que esteve presente cedo.
@@ -296,7 +296,7 @@ Formato de cada loop: **História · O que Claude faz · Lê/Escreve · Fronteir
 - **Lê/Escreve:** lê codebase inteiro, dev DB (MCP), prod (read-only), métricas; escreve metrics.md (append) + pendencias (tasks).
 - **Fronteira de segurança:** investigação-only; read-only em prod; cost-disciplinado (largura barata, profundidade reservada).
 - **Princípio generalizável:** *O review per-diff responde "esta mudança está boa?" para sempre e nunca "o SISTEMA está saudável?".* Precisa de um segundo observador periódico no eixo MACRO, escalado por tier de risco, que arquiva trabalho em vez de corrigir.
-- **Cenário:** uma sessão da fase inicial. O sprint-proposer propõe a auditoria; ela acha que um arquivo cresceu para 1300 linhas, que o PITR está OFF, e que 6 itens LOW envelheceram — tudo vira backlog priorizado antes de a dívida acumular mais.
+- **Cenário:** uma sessão da fase inicial. O sprint-proposer propõe a auditoria; ela acha que um arquivo cresceu muito além do limite de tamanho, que o PITR está OFF, e que 6 itens LOW envelheceram — tudo vira backlog priorizado antes de a dívida acumular mais.
 
 ### 10.5 Loop de CRIAÇÃO DE SKILL — Skill Creator (draft → test → eval → iterate) — **o mais fraco/aspiracional**
 

@@ -93,7 +93,14 @@ After steps 2–3, verify output integrity — defense in depth against summariz
 - **project.md:** Progress Log table has a new row referencing the log filename from step 2.
 - **done_tasks.md:** For each task completed this session, the entry contains ALL of: `**Context:**`, `**State:**`, `**Constraints:**`, `**Complexity:**`, `**Changes:**`, and at least one `[x]` criterion. A summary-line-only entry is a bug — redo step 3.
 - **pendencias.md:** The tasks moved to done_tasks.md are no longer present in pendencias.md (no orphans in both files).
-- **Drafts sweep (only if `.claude/skills/skill-gate/` exists):** `.claude/drafts/` contains no orphans — every remaining draft is either mid-review (marker set, cycle ≤ 3) or already tracked as a pendency. A draft with neither is a silent leak: register it in pendencias.md now ("draft [name] — resume or discard"). ALWAYS list this session's gate activity in the session log: promotions (from `.claude/skill-gate/promotion.log`), reprovals with problem types, and drafts still pending.
+- **Drafts sweep (only if `.claude/skills/skill-gate/` exists):** `.claude/drafts/` contains no orphans — every remaining draft is either mid-review (marker set, cycle ≤ 3) or already tracked as a pendency. A draft with neither is a silent leak: register it in pendencias.md now ("draft [name] — resume or discard").
+
+**ALWAYS LIST this session's skill-gate activity in the session log — `gate activity: P promoted, R reproved, D pending`** (only if `.claude/skills/skill-gate/` exists; otherwise `gate activity: n/a — skill-gate not installed`). **NEVER emit nothing.** ALWAYS name, on its own line:
+- **Promotions:** each draft promoted, read from `.claude/skill-gate/promotion.log`.
+- **Reprovals:** each draft reproved, WITH its problem type.
+- **Still pending:** each draft still under review, with its cycle number.
+
+  (This mandate has its own output fields and sat at the TAIL of a four-sentence bullet whose subject is a different check — component-design §6 property 2, "dedicated section". A behavioral instruction buried mid-paragraph reads as documentation and fires inconsistently.)
 
 If any check fails, fix it in the same session — do NOT defer.
 
