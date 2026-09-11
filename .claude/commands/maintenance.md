@@ -680,8 +680,10 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # `<first>~1`; re-run at the tip the same command returns 55, so up to THREE controls could be
    # deleted and still read GREEN (`/audit` 2026-09-10 U-6). Baseline measured 2026-09-11, AFTER
    # the U-45 tightening, at the TIP of the batch that installed it (NOT at `<first>~1` — that is
-   # exactly how the stale `52` was produced): maintenance.md 3 fenced + 22 inline = 25;
-   # audit.md 7 + 28 = 35; TOTAL 60.
+   # exactly how the stale `52` was produced): maintenance.md 4 fenced + 23 inline = 27;
+   # audit.md 7 + 28 = 35; TOTAL 62.
+   # RE-MEASURE THIS AT THE FINAL TIP, NEVER MID-BATCH. Written mid-batch it read 54, then 60,
+   # and both were stale before the batch closed — U-6's own class, inside U-6's own fix.
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
    git diff --cached -U0 .claude/commands/ | grep '^+' \
      | grep -cE '(grep|python -c|diff -r|git (diff|show|status)|node|sed -n)'
