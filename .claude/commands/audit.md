@@ -19,7 +19,12 @@ own report (Phase 3), which is this session's output, not a change to the thing 
   item 6 mandates it and the authorized-operations list forbade it, a contradiction that stood
   unreported for two runs and left the row unappended (`/audit` 2026-09-09 T-50). This is the ONE
   line of the ONE table the run computes; nothing else in this file may be touched.
-- **`git add` + `git commit` of THAT ONE FILE** (Phase 3's COMMIT item, the last one). A report that lives only in the
+- **`git add` + `git commit` of THE REPORT — and, when Phase 3 item 6 appended a row, of
+  `.claude/commands/audit.md` TOO.** The authorised-operations bullet directly above permits that
+  append; this clause read "THAT ONE FILE", so taken literally the appended row would live only in
+  the working tree — the exact failure the COMMIT item exists to prevent. The contradiction was
+  created by the fix that created the operation (`/audit` 2026-09-10 U-47). **NO THIRD PATH may be
+  committed.** A report that lives only in the
   working tree does not survive a `git clean`, a `git checkout`, or a session boundary — which is
   exactly what happened to every report written before this line existed. **This is the ONLY
   git operation that WRITES.** NEVER `push`, NEVER `commit --amend`, NEVER a commit touching any
@@ -116,7 +121,8 @@ place, contradicts its neighbour, or orphaned the block below it — every such 
 
 **ALWAYS OPEN the merged report with a Part 1 verification ledger** — one row per applied finding
 (ID | verdict | evidence) — followed by the score line
-`N clean · N class-not-swept · N introduced-a-defect`, and THEN the new findings. Phase 3's
+`N clean · N partially-fixed · N class-not-swept · N not-fixed · N introduced-a-defect` — **all
+five, copied from the verdict list above** (`/audit` 2026-09-10 U-12) — and THEN the new findings. Phase 3's
 carry-forward rule (still-`open` findings) is unchanged and additional to this ledger: **an
 `applied` finding is re-verified in this mode, never skipped because its status says applied.**
 
@@ -573,9 +579,16 @@ CHECKS:
         auditor on disk** — the verification lived in whichever prompt happened to be dispatched
         (`/audit` 2026-09-04 Q-3, Q-33).
         **ALWAYS:**
-        1. Build a synthetic project: every `docs/modules/agents/*.md` (renamed `_`→`-`) plus every
+        1. Build a synthetic project **OUTSIDE THE REPO — ALWAYS in a scratch directory, NEVER
+           under any tracked path.** This command is read-only; a synthetic project written inside
+           the working tree is a write, and it can be committed by a later session by accident.
+           T-43's fix landed the regression table and "against BOTH twins" and left this half
+           prompt-only, which is T-43's own class (`/audit` 2026-09-10 U-31).
+           Into that directory: every `docs/modules/agents/*.md` (renamed `_`→`-`) plus every
            `examples/agents/*.md` into `.claude/agents/`, and every `examples/agents/*.md` into
            `assets/examples/agents/`.
+           **ALWAYS REPORT the path used, and ALWAYS confirm `git status --porcelain` is unchanged
+           by the probe.**
         2. Extract the loop VERBATIM from the file and run it against that project.
         3. **ALWAYS REPORT — `activation chains: N verified, K broken, I info`.**
            **Expected: every gap-declaring specialist resolves and K = 0.** A resolved count below
@@ -987,6 +1000,13 @@ CHECKS:
         broken — that inversion shipped twice (K-8's RELOCATE check, L-7's D8.7). Report both
         directions per check, and verify no NEW unprovable check was introduced by the batch
         under verification.
+        **DIVISION OF LABOUR WITH AGENT 4 — ALWAYS STATE IT, NEVER RE-RUN D10.** D10 (Agent 4)
+        asks whether a self-check's stated expectation MATCHES what its command returns today;
+        D17.4 asks whether the check has a reachable RED and a reachable GREEN **at all**. A check
+        can pass D10 and fail D17.4 (correct expectation, unreachable red) and vice versa.
+        **ALWAYS CITE D10's verdict per check rather than recomputing it**, and report only the
+        provability axis. T-46's first half was never written and the two dimensions have
+        overlapped silently since (`/audit` 2026-09-10 U-36).
   D17.5 SELF-REPORTED CONTROLS — who verifies them? For every control the post-change checklist
         mandates, state WHO checks it and WHERE its output is persisted. A control whose verifier
         is its own author, or whose output exists only in a transcript, is not a gate. Name each
@@ -1063,11 +1083,15 @@ never re-opening it (Phase 3's carry-forward report item; `/audit` 2026-09-02 M-
 
 | ID | Verdict | Evidence (file:line — STRUCTURAL, not "the text is present") |
 |----|---------|------|
-| [ID] | CONFIRMED-FIXED / PARTIALLY-FIXED / FIXED-BUT-CLASS-NOT-SWEPT / INTRODUCED-A-DEFECT | [what the structure AROUND the fix shows] |
+| [ID] | CONFIRMED-FIXED / PARTIALLY-FIXED / FIXED-BUT-CLASS-NOT-SWEPT / NOT-FIXED / INTRODUCED-A-DEFECT | [what the structure AROUND the fix shows] |
 
 **Score, counted over the FINDINGS (state the denominator — never the ledger's row total):
 [N] of [M] clean, [K] not clean.** Of the not-clean: [N] partially-fixed, [N] class-not-swept,
-[N] introduced-a-defect.
+[N] not-fixed, [N] introduced-a-defect. **ALL FOUR not-clean categories, ALWAYS — the
+enumeration is COPIED FROM the verdict list above, never re-derived.** The fifth verdict
+(`NOT-FIXED`) was added to the agent mandate and swept to neither the Part 1 row nor either
+score line, so a verdict with no field would simply not be reported — Gate 4's DESCENDING
+direction (`/audit` 2026-09-10 U-12).
 
 ## Summary
 
@@ -1160,6 +1184,27 @@ produced the per-fix receipt. **ALWAYS state the class, its evidence, and — wh
 supports it — where the NEXT batch's defects will come from, so the prediction is checkable next
 run.** NEVER manufacture a class to fill the section: "no new class this run" is a valid finding.
 
+**ALWAYS EVALUATE THE PRIOR RUN'S PREDICTION FIRST, CLAUSE BY CLAUSE, BEFORE STATING A NEW ONE.**
+This section MANDATES a prediction "so it is checkable next run" and NOTHING instructed the next
+run to check it: `grep -n "prediction"` returned exactly ONE hit, the line creating the obligation.
+It was evaluated three times anyway, from dispatch prompts rather than from disk — component-design
+§9, the invoker-owns-the-mandate class, inside the section that creates the mandate
+(`/audit` 2026-09-10 U-16). Mechanical, expected result stated:
+```bash
+sed -n '/^## Meta-observation/,/^## /p' <the PREVIOUS report> | grep -n 'Prediction'
+```
+**Expected: at least one hit, and one `held / failed / void` verdict per clause of it in THIS
+report.** A prior run with no prediction is a legitimate `n/a` — say so.
+**ALWAYS REPORT — `prediction: N clauses evaluated — [held/failed/void each]` or
+`prediction: n/a — the previous run stated none`. NEVER emit nothing.**
+
+**Meta-observation required elements (the SLOT — ALWAYS all three, in this order):**
+- `prediction: N clauses evaluated — [held | failed | void] each` · `prediction: n/a — the
+  previous run stated none` (BOTH verdicts the evaluation can produce, and ONLY those two —
+  COPIED FROM the mandate above, never re-derived.)
+- the RECURRING CLASS this run saw, with its evidence.
+- the NEW prediction, stated so it can fail.
+
 End with: **Suggestion:** Run `/maintenance` to apply fixes, using this report as the correction plan.
 
 ### Closing status lines — ALWAYS ALL THREE, verbatim keys, enumerated values
@@ -1239,6 +1284,23 @@ step is the carry-over half.
    ```bash
    grep -c '^\*\*Run mode:\*\* `verification' assets/docs/audit-*.md   # Run 9 onward, per file
    ```
+   **Expected: the number of declared verification runs ON DISK, PLUS the rows the table's own
+   "How the mode is declared there" column marks as pre-convention, EQUALS the table's row count
+   AFTER your append.** A command with no stated expected result can be evaluated neither red nor
+   green — T-40's second half never landed (`/audit` 2026-09-10 U-35). **COUNT LINES, NEVER FILES:**
+   three report FILES carry several runs each, so a `grep -l` form reads 5 against 11 rows — a
+   check firing on the healthy state, the K-8/L-7 inversion. Calibrated and negation-proved
+   2026-09-11:
+   ```bash
+   T=$(sed -n '/^### The defect series/,/^\*\*No trend/p' .claude/commands/audit.md)
+   V=$(grep -h '^\*\*Run mode:\*\* `verification' assets/docs/audit-*.md | wc -l)
+   ROWS=$(printf '%s
+' "$T" | grep -c '^| [0-9]* | `audit-')
+   PRE=$(printf '%s
+' "$T" | grep '^| [0-9]* | `audit-' | grep -vc 'Run mode:\*\* verification')
+   [ "$((V+PRE))" = "$ROWS" ] && echo "GREEN $V+$PRE=$ROWS" || echo "RED $V+$PRE vs $ROWS"
+   ```
+   **GREEN 9+2=11 today; deleting any row returns RED.**
    **ALWAYS REPORT `defect series:` with the row you appended, and its `$` line.**
 
 7. **ALWAYS COMMIT the report in THIS session — LAST, after every content item above** — writing it to disk is not persisting it.

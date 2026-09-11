@@ -181,7 +181,7 @@ for k in "inventory sweep" "instruction style" "references" "fences" "isolation"
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
          "classification" "new component" "gates" "push" \
          "audit" "verification audit" "placeholder" "control back-sweep" \
-         "commit correction" "defect series" "applied-proof" "report deletions" "push decay"; do
+         "commit correction" "defect series" "applied-proof" "report deletions" "push decay"          "report restore"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
@@ -198,8 +198,14 @@ done
 **Expected: every key `$-line >= 1`.** A key with `0` is RED — that is the rule's own stated verdict.
 **A `$` line whose command is an angle-bracket description (`$ <the item-6 command>`) or an elision
 (`$ for t in …; do ...; done`) counts as ZERO** — it satisfies the shape and defeats the purpose.
-Grep them out: `grep -cE '^ *\$ *<|\.\.\.' ` over the section → **expected 0**, and name any
-survivor with the reason it cannot be written literally.
+Grep them out — **BOTH alternatives ANCHORED to a `$` line**:
+`grep -cE '^ *\$ *<|^ *\$ .*(\.\.\.|…)'` over the section → **expected 0**, and name any survivor
+with the reason it cannot be written literally.
+**NEVER leave the ellipsis alternative unanchored.**
+Unanchored, `\.\.\.` matches any line containing three dots — including pasted `## main...origin/main`
+stdout — so the check returned **5 where 0 was expected on a healthy section**, and its discharge
+then quoted an unadvertised variant that returned 1 (`/audit` 2026-09-10 U-11). KNOWN FALSE
+POSITIVE: a genuine git three-dot range (`git log a...b`) on a real `$` line — eyeball it and say so.
 **This check did not exist when the `$`-line rule shipped, and the rule's own first discharge
 scored 5 of 20 fully compliant — 9 keys with no `$` line at all, including both keys the rule
 text explicitly anticipates** (`/audit` 2026-09-09 T-5). component-design §6: a banned process
@@ -223,8 +229,16 @@ appear in the loop above.**
 **THE HARVESTER SEES ONE MANDATE SHAPE, AND THAT IS ITS STATED LIMIT.** It matches
 ``ALWAYS REPORT … `<key>:` `` on ONE line. Mandates phrased `ALWAYS REPORT all three results —` or
 `ALWAYS REPORT the outcome —`, or wrapped across a line break, are invisible to it — **measured, it
-reaches 10 of the 20 registered keys, and three surfaces once carried three different figures for
-this one number** (`/audit` 2026-09-04 R-3, R-4). So:
+reaches only a fraction of the registered keys, and three surfaces once carried three different
+figures for this one number** (`/audit` 2026-09-04 R-3, R-4).
+**NEVER QUOTE THE FIGURE — RE-MEASURE IT.** It goes stale the moment a key is registered, and it went stale inside the very batch that
+changed it, three lines above the loop it describes (`/audit` 2026-09-10 U-33):
+```bash
+F=.claude/commands/maintenance.md
+echo "harvested $(grep -ocE 'ALWAYS REPORT[^`]*`[A-Za-z][A-Za-z0-9 ._-]*:' "$F") of $(sed -n '/^for k in "inventory sweep"/,/^done$/p' "$F" | grep -oE '"[a-z][a-z ._-]*"' | wc -l) registered"
+```
+**Expected: the harvested number is LOWER than the registered number, and that gap is the stated
+limit, not a defect.** Measured 2026-09-11, at the TIP: `harvested 14 of 24 registered`. So:
 **ALWAYS write a new report mandate in the
 harvestable shape**, on one line, and **ALWAYS report the harvest with its command and stdout**
 rather than a remembered figure. The check is a NET for the shape it can see, never a census.
@@ -431,10 +445,25 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    - **GROUP table:** row count equals the number of COMMITS, and it is the union of the
      `Findings` cells that MUST equal the findings applied. Report BOTH —
      `rows N = commits N | findings-union M = disposed M`. A group table reporting
-     `row-count 45 vs 45` over three rows is asserting the per-fix rule it does not satisfy. Count both and state both — **expected: equal**. Merging
-   two findings into one row is how a fix whose sweep was skipped disappears into a neighbour
-   (`/audit` 2026-09-02 L-23: 17 findings reported in 14 rows). If two findings genuinely share
-   one fix, give them one row each and write "same edit as [ID]" in the last column.
+     `row-count 45 vs 45` over three rows is asserting the per-fix rule it does not satisfy.
+     **DERIVE THE COMMIT COUNT FROM GIT, NEVER FROM THE TABLE.** Both sides of `rows N = commits N`
+     were read off the same table, so the check had NO RED STATE and was discharged `4 = 4` over a
+     SEVEN-commit batch, leaving two commits in no receipts table at all
+     (`/audit` 2026-09-10 U-15, U-14):
+     ```bash
+     git log --oneline <first>~1..<last> | wc -l              # commits in the batch - FROM GIT
+     git log --format=%s <first>~1..<last> \
+       | grep -cE '^(chore: bump to v|chore: substitute s)'   # item-7 EXEMPT commits
+     ```
+     **Expected: `rows` = commits - exempt, and EVERY exempt commit NAMED on its own line.** An
+     exemption that is not named is indistinguishable from a commit that was forgotten.
+
+   **MERGING TWO FINDINGS INTO ONE ROW is how a fix whose sweep was skipped disappears into a
+   neighbour** (`/audit` 2026-09-02 L-23: 17 findings reported in 14 rows) - **this rule governs
+   the PER-FIX table**, and it sat inside the GROUP bullet as splice residue, carrying a
+   form-agnostic rule inside the bullet that exists to say one rule cannot govern both forms
+   (`/audit` 2026-09-10 U-37). If two findings genuinely share one fix, give them one row each
+   and write "same edit as [ID]" in the last column.
    **ALWAYS NAME, IN EACH ROW, THE FILE THAT ROW EDITED** (a `File touched` column). A row that
    names no file cannot be checked against the commit, and that is what gate 2 below checks.
    Close with the total:
@@ -474,19 +503,36 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    BATCH DID NOT TOUCH.** The row-level form above compares the receipt's `File(s) touched` cell
    to the diff; it cannot see a finding sharing a row with others whose own line was never edited.
    **ALWAYS run this before writing any status back:**
+   **STATE THE LINE NUMBERING, OR THE GATE READS RED ON A HEALTHY BATCH.** A ledger `Location`
+   cell is a **PRE-BATCH** line number — it was written by the audit, against the tree BEFORE any
+   fix. `git log -L` resolves its argument against the **TIP** of the range, where the same number
+   points at different text. Run with the ledger's own numbers, the first form of this gate read
+   RED on **23 of 38** parseable IDs of a batch four of which were independently confirmed FIXED:
+   the K-8/L-7 inversion, in the gate installed to close that class (`/audit` 2026-09-10 U-1).
+   **ALWAYS resolve the pre-batch line to its TEXT first, and pickaxe on the text:**
    ```bash
-   # for each finding ID and the file:line its ledger row names
-   git log -L <line>,<line>:<file> --oneline <first>~1..<last>   # expected: at least one commit
-   git show --name-only --format="" <hash> | grep -q '<file>'    # expected: exit 0
+   # FORM A — PREFERRED. Anchor on what was AT that line before the batch; line numbers move, text
+   # does not. `-S` fires when the batch adds, deletes or edits that text.
+   anchor=$(git show <first>~1:<file> | sed -n '<line>p')
+   git log -S"$anchor" --oneline <first>~1..<last> -- <file>    # expected: at least one commit
+   # FORM B — FALLBACK, only when the pre-batch line is blank or its text is not unique in the
+   # file. It resolves against the range TIP, so pass a TIP line number, never the ledger's.
+   git log -L <line>,<line>:<file> --oneline <first>~1..<last>  # expected: at least one commit
+   git show --name-only --format="" <hash> | grep -q '<file>'   # expected: exit 0
    ```
+   **ALWAYS SAY WHICH FORM EACH ID USED** — an `applied-proof` line that does not name its form is
+   unreproducible, and this gate's own first discharge was run at the FILE level by a command that
+   returns filenames and can produce no per-ID number at all (`/audit` 2026-09-10 U-2).
    **Expected: every ID written `applied` returns a commit. An ID returning nothing is RED and its
    status is `open`, whatever the session intended.** This is the gate whose absence let **ten of
    forty-five** findings be written back `applied` with no edit at all — six of them under a commit
    message asserting a fix that does not exist — while every other control in this checklist passed
    (`/audit` 2026-09-09 T-10). It is the cheapest control here: one command per ID, and the failure
    it catches is 100% mechanically detectable.
-   **ALWAYS REPORT — `applied-proof: N of M IDs resolve to a commit touching their line, K forced
-   to open`. NEVER emit nothing.**
+   **ALWAYS REPORT — `applied-proof: N of M IDs resolve to a commit touching their line (form A:
+   N1, form B: N2), K forced to open`. NEVER emit nothing.**
+   **THE UNIT IS ONE FINDING ID, and the `$` line MUST be a per-ID command** — a file-union command returning paths tests no ID and no
+   line, and was pasted under a `49 of 49` claim (`/audit` 2026-09-10 U-2).
 
    **Gate 3 — ROW COUNT EQUALS DISPOSED COUNT.**
    ```bash
@@ -597,7 +643,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
 
    The rule above sweeps a newly promoted RULE against the artifacts it retroactively governs.
    **Nothing swept a newly promoted CONTROL against the shapes this same batch invented — and that
-   is where the defects have been.** Seven verification runs found no correlation with batch size
+   is where the defects have been.** The verification runs found no correlation with batch size
    (see `/audit` → “The defect series” for the figures — no trend; this sentence carried a fourth copy that was already wrong when written, `/audit` 2026-09-04 R-8, and its run count was a fifth, `/audit` 2026-09-09 T-41) and a
    consistent one with SIMULTANEITY: a control and the shape it must read, authored together and
    never run against each other (`/audit` 2026-09-04, meta-observation).
@@ -608,19 +654,27 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    independent verification (`/audit` 2026-09-04 R-43). Two of the other three were the negation
    proof of a different finding, counted a second time under a different key.
    ```bash
-   # 1. THE CONTROLS THIS FILE DEFINES — the denominator. Never typed. COUNT BOTH SHAPES, PER FILE.
-   # Controls live in TWO places and a one-shape count is arbitrary: measured 2026-09-09, this repo
-   # carries 7 in fenced blocks and 45 in INLINE BACKTICKS. The previous form matched neither
-   # cleanly — it counted 15, of which 2 were prose sentences beginning with "grep", while
-   # `audit.md` contributed only 2 despite holding the majority (`/audit` 2026-09-09 T-17).
+   # 1. THE CONTROLS THIS FILE DEFINES - the denominator. Never typed. COUNT BOTH SHAPES, PER FILE.
+   # Controls live in TWO places and a one-shape count is arbitrary (`/audit` 2026-09-09 T-17).
+   # `for ` MUST REQUIRE A LOOP VARIABLE AND `in`. A bare `for ` matches ENGLISH PROSE - "for one
+   # full batch, which is why..." was counted as a control, which is T-17's own defect returning
+   # through a new door: T-17 removed the `grep`-prose shape and reintroduced it via `for `
+   # (`/audit` 2026-09-10 U-45).
    for f in .claude/commands/maintenance.md .claude/commands/audit.md; do
      inf=$(awk '/^```/{g=!g;next} g' "$f" \
-       | grep -cE '^\s*(\$ )?(grep|for |awk |python -c|diff -r|git |node|sed -n)')
+       | grep -cE '^\s*(\$ )?(grep|awk |python -c|diff -r|git |node|sed -n|for [A-Za-z_][A-Za-z0-9_]* in )')
      inl=$(grep -ohE '`(grep|git|diff|awk|sed|node|python|ls) [^`]{4,}`' "$f" | wc -l)
      echo "$f: $inf fenced + $inl inline = $((inf+inl))"
    done
    # RED CONDITION, so step 1 CAN fail: if a file's total is LOWER than the previous batch
-   # reported, a control was deleted — name which. An enumerator with no threshold cannot go red.
+   # reported, a control was deleted - name which. An enumerator with no threshold cannot go red.
+   # THE THRESHOLD IS THE FIGURE THIS COMMAND RETURNS **TODAY**, NEVER A REMEMBERED ONE, AND NEVER
+   # A FIGURE MEASURED BEFORE THE BATCH. The `52` that certified one batch was measured at
+   # `<first>~1`; re-run at the tip the same command returns 55, so up to THREE controls could be
+   # deleted and still read GREEN (`/audit` 2026-09-10 U-6). Baseline measured 2026-09-11, AFTER
+   # the U-45 tightening, at the TIP of the batch that installed it (NOT at `<first>~1` — that is
+   # exactly how the stale `52` was produced): maintenance.md 3 fenced + 22 inline = 25;
+   # audit.md 7 + 28 = 35; TOTAL 60.
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
    git diff --cached -U0 .claude/commands/ | grep '^+' \
      | grep -cE '(grep|python -c|diff -r|git (diff|show|status)|node|sed -n)'
@@ -853,13 +907,27 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    on the normal case is the inversion this file has had to repair three times (K-8, L-7, and this
    line on the day it was written).
    ```bash
-   for f in $(git diff --cached --name-only assets/docs/audit-*.md); do
-     for pat in '^#{1,2} ' '^\| [A-Z]-[0-9]+ \|' '^> \*\*Errata '; do
-       b=$(git show HEAD:"$f" 2>/dev/null | grep -cE "$pat"); a=$(grep -cE "$pat" "$f")
-       [ "$a" -lt "$b" ] && echo "RED $f: $pat  $b -> $a"
+   # QUOTE THE PATHSPEC. An unquoted glob is expanded by the SHELL against the WORKING TREE, where
+   # a DELETED report no longer exists — so its filename was never passed to git and the deletion
+   # of an ENTIRE persisted report read GREEN. Proved in a clone (`/audit` 2026-09-10 U-3).
+   for f in $(git diff --cached --name-only -- 'assets/docs/audit-*.md'); do
+     # FIVE PATTERNS, NOT THREE. `^#{1,2} ` cannot see an `###` heading, and the receipts — every
+     # `$` line, every `**key:**`, the Meta-observation and both closing status lines — are the
+     # surface D17.5's only external verifier reads. The three-pattern form saw 105 of 531 report
+     # lines, 20% (`/audit` 2026-09-10 U-8).
+     for pat in '^#{1,3} ' '^\| [A-Z]-[0-9]+ \|' '^> \*\*Errata ' '^ *\$ ' '^\*\*[a-z][a-z ._-]*:'; do
+       b=$(git show HEAD:"$f" 2>/dev/null | grep -cE "$pat")
+       # A MISSING FILE COUNTS 0, NEVER ''. `grep -c` on a deleted path prints NOTHING, and
+       # `[ "" -lt "13" ]` is a shell ERROR, not a RED — U-3's second, independent layer.
+       if [ -f "$f" ]; then a=$(grep -cE "$pat" "$f"); else a=0; fi
+       [ "${a:-0}" -lt "${b:-0}" ] && echo "RED $f: $pat  ${b:-0} -> ${a:-0}"
      done
    done
    ```
+   **NEGATION-PROVED 2026-09-11, four ways in a throwaway clone:** a commit deleting the whole
+   report → RED on 3 patterns (old gate: SILENT); a healthy status write-back that only adds →
+   no output; a commit deleting just the receipts section → RED on `^#{1,3} `, `^ *\$ ` and
+   `^\*\*[a-z]…:` (old gate: SILENT); the old gate on that same state → nothing at all.
    **Expected: NO OUTPUT.** Headings, ledger rows and errata blocks may only increase. Any decrease
    is RED and BLOCKS the commit unless an errata block in the SAME commit names what was removed
    and why. The two
@@ -872,8 +940,29 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    errata block written 100 seconds earlier — while satisfying every word of it, because it touched
    no command, template or rule (`/audit` 2026-09-09 T-1). It also wrote back **zero** statuses
    under a subject reading "45 of 45 applied".
-   **ALWAYS REPORT — `report deletions: N lines deleted from M report files, all accounted for` or
-   `report deletions: none`. NEVER emit nothing.**
+   **ALWAYS REPORT — `report deletions: N structural decreases across M report files, all
+   accounted for` or `report deletions: none`. NEVER emit nothing.**
+   **THE UNIT IS A STRUCTURAL DECREASE — one `RED` line from the gate above — NEVER a raw line
+   count.** `a6349da` changed the
+   gate's unit from raw lines to structure and did not sweep the report key it feeds, leaving the
+   slot asking for a number the gate no longer produces (`/audit` 2026-09-10 U-43). A raw
+   `--numstat` deleted-count is large on a perfectly healthy write-back, which is why the gate
+   stopped counting lines in the first place.
+   **RESTORING A REPORT A PRIOR COMMIT DESTROYED — the APPLYING session owns this.** The gate above
+   BLOCKS a new deletion; nothing told the session what to do about one already in history. T-45's
+   fix tells the AUDIT to reconstruct a destroyed report for READING; that is a different act, and
+   it leaves the file on disk still broken. This was done correctly and unprompted once, which is
+   why it is written down (`/audit` 2026-09-10 U-44).
+   **ALWAYS DO ALL FOUR, in this order:**
+   1. **RESTORE the last intact revision** — `git show <hash>:<file> > <file>`, byte-faithful.
+   2. **KEEP every intervening receipt and status written after the destruction.** Restoring is
+      not reverting: re-apply those on top, never drop them.
+   3. **RECORD it as an ERRATUM in the restored file** (`/audit` → "Errata and superseded
+      status"), naming the destroying commit, the restoring commit and what was lost and regained.
+   4. **NEVER `--amend` or rewrite the destroying commit** — Audit intake item 8.
+   **ALWAYS REPORT — `report restore: <file> restored from sHASH, N lines, erratum written` or
+   `report restore: none`. NEVER emit nothing.**
+
    **ALWAYS WRITE THE STATUS BACK into the report file in this same session** — `applied sHASH`
    or `rejected — [reason]` per ID. The applying session owns this, not the next audit: a status
    that waits for the next run is a status nobody wrote.
