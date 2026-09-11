@@ -1021,8 +1021,20 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    re-readable, not that the sections be numerous. **A commit that appears in NO receipts table
    is the violation** (`/audit` 2026-09-03 P-4, which found item 6 broken four times inside the
    batch that installed it). **NEVER let a closing commit carry neither.**
-   **THE SUBJECT'S COUNT IS THE COUNT OF DISTINCT FINDING IDs IN THE BODY** — not the number of
-   edits, not the number of sites. Two group commits in one batch overstated it ("6 findings"
+   **THE SUBJECT'S COUNT IS THE COUNT OF DISTINCT FINDING IDs THE COMMIT DISPOSES OF** — not the
+   number of edits, not the number of sites, and **not every ID the body MENTIONS**.
+   **ALWAYS OPEN THE BODY WITH ONE `Applies <IDs> from <report>` LINE, and count THAT** — a body
+   legitimately CITES other IDs (a finding whose rule was fixed in a sibling commit, a class this
+   one recurs from), and a whole-body grep counts those too, so the mechanical rule contradicted
+   itself on first use (`/audit` 2026-09-10 U-14's commit; found by running the check below).
+   ```bash
+   # awk, NOT a sed range: `sed -n '/^Applies /,/from /p'` runs PAST a one-line Applies block,
+   # because sed tests the end pattern from the line AFTER the start. Measured, it scored 3 of 4
+   # healthy commits RED (2026-09-11).
+   git log -1 --format=%B <hash> | awk '/^Applies /{f=1} f&&/^$/{exit} f'      | grep -oE '[A-Z]-[0-9]+' | sort -u | wc -l      # MUST equal the number in the subject
+   ```
+   **Expected: equal.** **ALWAYS RUN IT BEFORE WRITING THE SUBJECT, NEVER AFTER** — once the commit
+   exists the only remedy is item 8's follow-up, which cannot change what the subject says. Two group commits in one batch overstated it ("6 findings"
    carrying 5 IDs, "9 findings" carrying 7) while both reported `row-count N vs N`, and the
    identical class already has an erratum from an earlier run (`/audit` 2026-09-04 Q-45).
    **Name the groups the same way every run** — `group A`, `group B`, … — rather than inventing a
