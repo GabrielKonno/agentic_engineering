@@ -556,7 +556,7 @@ CHECKS:
         stated:
         ```bash
         for a in docs/modules/agents/*.md; do
-          sed -n '/^description:/,/^[a-z_]*:/p' "$a" | grep -c "declares a"
+          sed -n '/^description:/,/^\(---\|[A-Za-z_][A-Za-z0-9_.-]*:\)/p' "$a" | grep -c "declares a"
         done | sort -u
         ```
         **Expected: `0` and nothing else.** A non-zero means a gap-activated agent has appeared in
@@ -577,9 +577,12 @@ CHECKS:
            `examples/agents/*.md` into `.claude/agents/`, and every `examples/agents/*.md` into
            `assets/examples/agents/`.
         2. Extract the loop VERBATIM from the file and run it against that project.
-        3. **ALWAYS REPORT — `activation chain check: N of M specialists resolved, K broken`.**
+        3. **ALWAYS REPORT — `activation chains: N verified, K broken, I info`.**
            **Expected: every gap-declaring specialist resolves and K = 0.** A resolved count below
            the number of gap phrases D6.1/D6.2/D6.2b extracted is RED.
+           **THE KEY AND THE COUNTS ARE THE LOOP'S OWN, COPIED — NEVER PARAPHRASED.** This slot
+           mandated a two-count `activation chain check:` the loop can never emit, contradicting
+           D7.7 and the report slot added in the same commit (`/audit` 2026-09-10 U-29).
         4. **TRY TO BREAK IT — AND ALWAYS RE-RUN THE FULL REGRESSION SET BELOW, which is every
            phrasing a previous run found broken. A regression here is a finding, not a nit.**
            | # | Input | Expected |
@@ -604,7 +607,7 @@ CHECKS:
            FILE, never as drafted, and against BOTH twins.
 
   D7.7. **REPORT THE THREE COUNTS SEPARATELY AND SAY WHETHER THE TWINS AGREE** —
-        `activation chain check: N verified, K broken, I info` FOR EACH twin, plus
+        `activation chains: N verified, K broken, I info` FOR EACH twin, plus
         `twins agree: yes/NO`. A single figure hid a divergence where both loops resolved the
         same count while their INFO strings differed (`/audit` 2026-09-04 R-20).
   D7.8. **VERIFY THE DERIVED SPECIALIST SET DOES NOT SKIP SILENTLY.** Plant a specialist that is
@@ -645,7 +648,7 @@ REPORT FORMAT:
   | Agent | Core function | Triggers | Exclusions | Consequence | Output | Status |
   |-------|--------------|----------|------------|-------------|--------|--------|
   [one row per agent — COMPLIANT / PARTIAL / NON-COMPLIANT]
-- **`activation chain check: N verified, K broken, I info` — ONE LINE PER TWIN (D7.6, D7.7),
+- **`activation chains: N verified, K broken, I info` — ONE LINE PER TWIN (D7.6, D7.7),
   MANDATORY, never blank** — the loop emits THREE counts, so a two-count slot cannot receive it:
   - bootstrap twin: [literal output]
   - EPA twin: [literal output]

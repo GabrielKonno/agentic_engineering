@@ -142,6 +142,19 @@ override (ASK — this decision governs the whole bootstrap). If no PRD exists, 
 **1.2c — Record it.** Write `**Risk profile:** [chosen]` into `project.md` Overview (Step 3) and
 CLAUDE.md (Step 2). The ceremony matrix lives in `session-rules.md` (copied Step 5.7).
 
+**RECEIVER MANDATE — Steps 2 and 3 ALWAYS confirm receipt, and this hand-off is not complete
+until they do.** Step 1.1's three hand-offs each carry one and this one did not; it survived only
+because both templates happen to ship the line as a bracketed placeholder, so a silent drop is
+indistinguishable from a correct write (`/audit` 2026-09-10 U-28). Mechanical, expected result
+stated, run after Step 3:
+```bash
+# ANCHOR ON THE TIER WORD, NEVER ON END-OF-LINE: both templates ship a trailing "— governs ..."
+# clause, so a `$`-anchored form returns 0 on a CORRECTLY resolved line - the K-8/L-7 inversion.
+grep -c '^\*\*Risk profile:\*\* \(prototype\|internal-tool\|production\|production-financial\)'   projects/$ARGUMENTS/project.md projects/$ARGUMENTS/CLAUDE.md
+```
+**Expected: `1` for BOTH files.** A `0` means the placeholder was never replaced — RED, and every
+tier-gated copy downstream is running off an unresolved profile.
+
 **Ceremony by tier (the matrix later steps obey):**
 
 | Skeleton / ceremony | prototype | internal-tool | production | production-financial |
@@ -576,7 +589,7 @@ mkdir -p projects/$ARGUMENTS/.claude/skills/[stack-name]
 
 #### Step 12.5a — Pre-install specialist agents matching kept gap declarations
 
-Read the project's `.claude/agents/code-reviewer.md`, `.claude/agents/security-reviewer.md` **and `.claude/agents/validator.md` — ALL THREE declaring components** (`component-design` §1; the validator declares the visual-regression gap from inside its own Validation Report, and the table below attributes that gap to it. Reading two of three meant this step could not produce its own table's row — `/audit` 2026-09-04 Q-1) (created in Steps 7-8). Identify which Coverage Gap Declaration sections were KEPT (not removed during pre-selection). For each kept gap, check if a matching specialist example exists in `assets/examples/agents/`:
+Read the project's `.claude/agents/code-reviewer.md`, `.claude/agents/security-reviewer.md` **and `.claude/agents/validator.md` — ALL THREE declaring components** (`component-design` §1; the validator declares the visual-regression gap from inside its own Validation Report, and the table below attributes that gap to it. Reading two of three meant this step could not produce its own table's row — `/audit` 2026-09-04 Q-1) (code-reviewer in Step 7, security-reviewer in Step 8, **validator in Step 10** — the parenthetical read `Steps 7-8` and was never updated when the validator became the third declarer, `/audit` 2026-09-10 U-25). Identify which Coverage Gap Declaration sections were KEPT (not removed during pre-selection). For each kept gap, check if a matching specialist example exists in `assets/examples/agents/`:
 
 | Gap declaration (in reviewer) | Specialist example to install |
 |-------------------------------|-------------------------------|
@@ -606,10 +619,29 @@ gap that installs nothing and registers nothing is a gap the project can never a
 
 For each remaining specialist agent:
 
-1. Verify it has a matching Coverage Gap Declaration in the declaring component (code-reviewer.md, security-reviewer.md or validator.md) whose domain vocabulary echoes the agent's Pushy Description
-2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the validator) following the existing conditional format (see `docs/modules/rules/component_design.md` sections 1-3)
+**THIS SPAN IS TWINNED — bootstrap Step 12.5b and EPA Step 5.1 MUST be byte-identical between
+the TWINNED SPAN markers, and ONLY between them.** D6.7 diffs the install TABLES, which were
+byte-identical while this prose diverged (`/audit` 2026-09-04 Q-34); the repair then asserted
+word-for-word equivalence over the whole block, and that claim was false in four places — item
+wrapping, the lead-in, the closer, and a bootstrap-only paragraph with no EPA counterpart
+(`/audit` 2026-09-10 U-24). An UNBOUNDED equivalence claim over prose that legitimately differs
+(step numbers, path prefixes) is unfalsifiable; the markers make it mechanical. The mandate also
+lived on ONE side only — the R-32 shape it exists to forbid — so it is now on both.
+**ALWAYS run this before committing either twin, expected result stated:**
+```bash
+ex() { sed -n '/TWINNED SPAN START: activation-chain criteria/,/TWINNED SPAN END/p' "$1"; }
+diff <(ex .claude/commands/bootstrap.md) <(ex .claude/commands/existing_project_adaptation.md)
+```
+**Expected: no output (exit 0).** Any output is RED and BLOCKS the commit.
+
+<!-- TWINNED SPAN START: activation-chain criteria (bootstrap Step 12.5b == EPA Step 5.1) -->
+1. Verify it has a matching Coverage Gap Declaration in the declaring component (code-reviewer.md,
+   security-reviewer.md or validator.md) whose domain vocabulary echoes the agent's Pushy Description
+2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the
+   validator) following the existing conditional format — see `docs/modules/rules/component_design.md` sections 1-3
 3. The pass criterion: the domain must appear in **at least one** declaring component
 4. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
+<!-- TWINNED SPAN END -->
 
 **ALWAYS RUN THIS CHECK — it is the same loop EPA Step 5.1 runs, and bootstrap had none.** The
 install link has broken on BOTH paths (H-2 on bootstrap, J-5 on EPA) while the mechanical net
@@ -619,14 +651,25 @@ existed on one; a prior receipt recorded that absence as a clearance rather than
 ```bash
 # The DECLARER set and the DECLARED set are BOTH DERIVED, never typed (R-32, T-16): any agent
 # carrying a gap declaration IS a declaring component, whatever it is called.
-# TWO declaration forms are live and BOTH must be harvested — the blockquote form
+# TWO declaration forms are live and BOTH must be harvested - the blockquote form
 # (`> Accessibility gap:`) and the bold form (`ALWAYS DECLARE a **visual regression gap**`).
 # Anchoring on the blockquote alone derived ZERO gaps from the validator, so the chain held
 # only because code-reviewer duplicated the gap; deleting that row broke it (T-8).
-# The specialist side reads the `description:` field ONLY — a whole-file grep false-BREAKS
-# on "When spawned" prose, on negations and on historical notes (T-9).
-# The domain char class admits DIGITS and DOTS, and EVERY branch echoes: a domain the class
-# could not match fell through emitting nothing at all (T-15 — R-10's symptom, second door).
+# The blockquote anchor is `^ *>`, NEVER `^>`: a `>` legitimately indented inside a list item is
+# a real declaration and a column-0 anchor drops it silently (U-46).
+# The specialist side reads the `description:` field ONLY - a whole-file grep false-BREAKS
+# on "When spawned" prose, on negations and on historical notes (T-9). THE RANGE TERMINATOR MUST
+# ADMIT HYPHENATED YAML KEYS AND THE CLOSING `---`: `^[a-z_]*: ` matches neither, so on the
+# CANONICAL frontmatter (`name:`/`description:`/`allowed-tools:`) the range ran to EOF and the
+# false-BREAK returned - for exactly the population component-design §1 mandates a
+# "When spawned" section on (U-4).
+# The domain char class admits DIGITS, DOTS and `&`, and EVERY branch echoes (T-15, U-9).
+# NO BRANCH MAY MISREPORT: a description carrying `declares ... gap` whose domain the class could
+# not parse is BROKEN and says so. Announcing it as "no gap phrase" asserted a fact the file
+# contradicts, under a reassuring `0 broken` (U-9).
+# NEGATION-PROVED 2026-09-11: on a fixture with ONE indented `>` declaration and ONE `&` domain,
+# the pre-U-4/U-9/U-46 loop printed `none installed` - the T-14 healthy-EMPTY verdict - on a
+# fully populated project. This comment is MAINTAINED ON BOTH TWINS (U-30).
 # candidate replacement for bootstrap Step 12.5b / EPA Step 5.1
 echo "=== Activation chain integrity? ==="
 norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/.' '    ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
@@ -634,8 +677,8 @@ AG="projects/$ARGUMENTS/.claude/agents"
 declared=""; declarers=""
 for f in "$AG"/*.md; do
   [ -f "$f" ] || continue
-  g=$( { grep -oiP '^> *\K[A-Za-z][A-Za-z0-9 ./-]{2,30}?(?= gap:)' "$f"; \
-         grep -oiP '\*\*\K[A-Za-z][A-Za-z0-9 ./-]{2,30}?(?= gap\*\*)' "$f"; } 2>/dev/null | sort -u)
+  g=$( { grep -oiP '^ *> *\K[A-Za-z][A-Za-z0-9 &./-]{2,30}?(?= gap:)' "$f"; \
+         grep -oiP '\*\*\K[A-Za-z][A-Za-z0-9 &./-]{2,30}?(?= gap\*\*)' "$f"; } 2>/dev/null | sort -u)
   [ -z "$g" ] && continue
   declarers="$declarers|$(basename "$f" .md)|"
   while IFS= read -r d; do [ -n "$d" ] && declared="$declared|$(norm "$d")|"; done <<EOF
@@ -653,8 +696,8 @@ for f in "$AG"/*.md; do
   [ -f "$f" ] || continue
   an=$(basename "$f" .md)
   case "$declarers" in *"|$an|"*) continue ;; esac
-  desc=$(sed -n '/^description:/,/^[a-z_]*: /p' "$f" | tr '\n\t' '  ' | tr -s ' ' | sed 's/\*\*//g')
-  domains=$(printf '%s' "$desc" | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z0-9 ./-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
+  desc=$(sed -n '/^description:/,/^\(---\|[A-Za-z_][A-Za-z0-9_.-]*:\)/p' "$f" | tr '\n\t' '  ' | tr -s ' ' | sed 's/\*\*//g')
+  domains=$(printf '%s' "$desc" | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z0-9 &./-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
   if [ -n "$domains" ]; then
     while IFS= read -r domain; do
       [ -z "$domain" ] && continue
@@ -665,6 +708,9 @@ for f in "$AG"/*.md; do
     done <<EOF
 $domains
 EOF
+  elif printf '%s' "$desc" | grep -qiE 'declares .{0,40}gap'; then
+    echo "BROKEN CHAIN: $an - description carries a gap phrase the domain pattern could not parse; widen the class"
+    broken=$((broken+1))
   elif [ -f "projects/$ARGUMENTS/assets/examples/agents/$an.md" ]; then
     echo "INFO: $an - shipped example, no gap phrase, trigger-activated by design"
     info=$((info+1))
@@ -823,7 +869,12 @@ git commit -m "chore: bootstrap from agentic framework"
   and caught by `/audit` 2026-09-03 N-23.)
 
 ### Activation chains (Step 12.5b) — ALWAYS report, never omit:
-- `N verified, M broken` · `none installed`
+- `activation chains: N verified, M broken, I info`
+- `activation chains: none installed - no declaring component in <path>`
+  (BOTH verdicts the loop can emit, and ONLY those two — **COPIED FROM the loop's own two `echo`
+  lines, never re-derived** (Gate 4). The loop emits THREE counts and this slot offered two, so a
+  compliant discharge had nowhere to land; the `none installed` verdict carries the path. The
+  MANDATE was corrected on both twins and the SLOT was not — `/audit` 2026-09-10 U-5, U-13.)
 
 ### Cross-cutting concerns (Step 1.1 → Steps 3/4/13) — ALWAYS report, never omit:
 - Classified at Step 1.1: [N] (R → rules, A → decisions, T → tasks)

@@ -302,8 +302,11 @@ behalf: two steps mandated to perform one write is how the count gets doubled or
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/project_md.md` and create `.claude/phases/project.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
-**Steps 1.1, 1.5, 2.2, 2.9b, 4.1b and 5.2 read or write it**, and this command's own Reading Report has an
-`[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected twice — `N-24` removed a
+**several later steps read or write it**, and this command's own Reading Report has an
+`[exists/missing]` slot for it. **DERIVE that set with the command below; NEVER type it here** —
+the typed form stood two steps above an identical DERIVE mandate that Step 2.3 honours, and the
+same list has been wrong four times by four mechanisms (`/audit` 2026-09-10 U-27; `/audit`
+2026-09-02 K-11; consumers corrected twice — `N-24` removed a
 justification naming two steps that read nothing here, and `P-36`'s sibling `P-19` then found the
 REPLACEMENT list equally wrong, naming two more steps that touch neither file while omitting
 `Step 2.9b`, which reads the risk profile from this file and writes back to it. **DERIVE the list
@@ -361,9 +364,13 @@ artifact**, and reports the count (`/audit` 2026-09-02 M-2, corrected 2026-09-03
 
 **If it does NOT exist: CREATE it.** Read the template at `docs/modules/templates/pendencias_md.md` and create `.claude/phases/pendencias.md` exactly as
 `/bootstrap` would, then run the upgrade checks BELOW against the file you just created. **NEVER assume the file exists** —
+**several later steps read or write it, and this command's own Reading Report has an
+`[exists/missing]` slot for it** (`/audit` 2026-09-02 K-11; consumers corrected 2026-09-03 N-24 —
+Step 5.1 does not read this file. The T-38 fix deleted this clause's PREDICATE and, with the old
+list, the subject that bridged into the sentence below, leaving one clause ending in an em-dash
+and the next opening mid-sentence — `/audit` 2026-09-10 U-17).
+
 **DERIVE the consumer list; it is not written here.** Four successive attempts to enumerate it were wrong by four different mechanisms — reading, a fixed-line `sed`, a heading split that mis-attributed a PHASE-3 block, and one that named a step which never touches the file while omitting Phase 3, which names it three times (`/audit` 2026-09-04 Q-5, R-11). **The command:** split on the bold `**Step N**` headings AND the `### Phase N` headings, then report every section whose body contains the filename. **A list typed here will be wrong again.** Step 1.1 also reaches this file, but through a glob that never names it, so it is deliberately excluded from a list of NAMED consumers. (The fix for R-11 prepended this paragraph without deleting the one it replaced, leaving two contradictory rationales, two contradictory commands and a `.,` splice on one line — `/audit` 2026-09-09 T-38.)
-Report has an `[exists/missing]` slot for it (`/audit` 2026-09-02 K-11; consumers corrected
-2026-09-03 N-24 — Step 5.1 does not read this file).
 
 **`done_tasks.md` — CREATE IT HERE TOO IF MISSING.** `pendencias-updater` moves completed tasks
 into `.claude/phases/done_tasks.md`; bootstrap creates it unconditionally and calls it
@@ -607,9 +614,23 @@ Skills and agents are auto-discovered by Claude Code. No explicit listing is nee
 The current framework scales ceremony by risk profile. Existing projects must be tiered too.
 
 1. **Determine the profile.** Read `project.md` Overview → **Risk profile:**. If absent, derive it
-   from the codebase + retroactive PRD (money/PII/multi-tenant → `production-financial`; public app
-   with auth/data → `production`; internal/admin → `internal-tool`; throwaway → `prototype`) and
+   from the codebase (money/PII/multi-tenant → `production-financial`; public app with auth/data →
+   `production`; internal/admin → `internal-tool`; throwaway → `prototype`) and
    **confirm with the owner** (ASK). Record it in `project.md` Overview and CLAUDE.md.
+
+   **FORWARD REFERENCE, FLAGGED: the retroactive PRD does NOT exist yet.** This step runs in
+   Phase 2; Phase 3 creates the PRD. The fallback source therefore names an artifact this step
+   cannot read — **on the COMMON path**, an existing project with no `Risk profile:` line, which
+   is exactly what this command targets. Every other Phase-2→later dependency in this file is
+   explicitly flagged and this one was silent (`/audit` 2026-09-10 U-18).
+   **NEVER wait for the PRD here, and NEVER read it.** The profile gates every tier-gated copy in
+   this same step, so it MUST resolve now, from the codebase plus the owner's answer.
+
+   **PHASE-3 RE-CHECK — ALWAYS run it, and ALWAYS REPORT — `risk profile: confirmed unchanged` or
+   `risk profile: revised [old] → [new] — N tier-gated artifacts [copied | already present]`.**
+   When the retroactive PRD lands in Phase 3, re-read it against the profile chosen here. A
+   revision UPWARD means tier-gated skeletons this step skipped are now owed: copy them then,
+   never silently. **NEVER emit nothing.**
 
 2. **Copy what the profile warrants** (uncopied = inactive ceremony; the cheap core clauses arrive
    automatically via the updated session-rules/evolution-policy/criteria-enforcer copied above):
@@ -920,16 +941,31 @@ gap that installs nothing and registers nothing is a gap the project can never a
 > **The declaring components are gap SOURCES, not gap targets, and the loop below DERIVES that set rather than listing it** — it harvests the declared gaps from whichever files declare them and excludes exactly those files.
 > **NEVER type the set here**: a typed five-name copy stood two lines above the loop that derives it, and its twin carried no such paragraph at all (`/audit` 2026-09-04 R-32). The replacement then asserted a derivation the loop did not perform — it still typed the three declarer names — until `/audit` 2026-09-09 T-16 made the loop match the paragraph.
 
-After installation, validate activation chains for every pre-installed specialist. **This block is
-the TWIN of bootstrap Step 12.5b and must stay word-for-word equivalent — D6.7 diffs the install
-TABLES, which were byte-identical while this prose diverged in six places (`/audit` 2026-09-04
-Q-34):**
+After installation, validate activation chains for every pre-installed specialist.
+
+**THIS SPAN IS TWINNED — bootstrap Step 12.5b and EPA Step 5.1 MUST be byte-identical between
+the TWINNED SPAN markers, and ONLY between them.** D6.7 diffs the install TABLES, which were
+byte-identical while this prose diverged (`/audit` 2026-09-04 Q-34); the repair then asserted
+word-for-word equivalence over the whole block, and that claim was false in four places — item
+wrapping, the lead-in, the closer, and a bootstrap-only paragraph with no EPA counterpart
+(`/audit` 2026-09-10 U-24). An UNBOUNDED equivalence claim over prose that legitimately differs
+(step numbers, path prefixes) is unfalsifiable; the markers make it mechanical. The mandate also
+lived on ONE side only — the R-32 shape it exists to forbid — so it is now on both.
+**ALWAYS run this before committing either twin, expected result stated:**
+```bash
+ex() { sed -n '/TWINNED SPAN START: activation-chain criteria/,/TWINNED SPAN END/p' "$1"; }
+diff <(ex .claude/commands/bootstrap.md) <(ex .claude/commands/existing_project_adaptation.md)
+```
+**Expected: no output (exit 0).** Any output is RED and BLOCKS the commit.
+
+<!-- TWINNED SPAN START: activation-chain criteria (bootstrap Step 12.5b == EPA Step 5.1) -->
 1. Verify it has a matching Coverage Gap Declaration in the declaring component (code-reviewer.md,
    security-reviewer.md or validator.md) whose domain vocabulary echoes the agent's Pushy Description
 2. If no match: add the gap declaration to the appropriate DECLARING COMPONENT (a reviewer, or the
    validator) following the existing conditional format — see `docs/modules/rules/component_design.md` sections 1-3
 3. The pass criterion: the domain must appear in **at least one** declaring component
 4. Run a vocabulary alignment check: `grep "[domain keyword]" .claude/agents/code-reviewer.md .claude/agents/security-reviewer.md .claude/agents/validator.md`
+<!-- TWINNED SPAN END -->
 
 This step prevents "orphan agents" that exist in `.claude/agents/` but are never spawned because the declarer-to-orchestrator-to-specialist activation chain is broken (twin parity with bootstrap Step 12.5b — `/audit` 2026-09-04 Q-34).
 
@@ -1000,14 +1036,36 @@ done
 echo "=== Known Bug Patterns have efficacy tracking? ==="
 grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/null || echo "No efficacy tracking in code-reviewer"
 
+# The DECLARER set and the DECLARED set are BOTH DERIVED, never typed (R-32, T-16): any agent
+# carrying a gap declaration IS a declaring component, whatever it is called.
+# TWO declaration forms are live and BOTH must be harvested - the blockquote form
+# (`> Accessibility gap:`) and the bold form (`ALWAYS DECLARE a **visual regression gap**`).
+# Anchoring on the blockquote alone derived ZERO gaps from the validator, so the chain held
+# only because code-reviewer duplicated the gap; deleting that row broke it (T-8).
+# The blockquote anchor is `^ *>`, NEVER `^>`: a `>` legitimately indented inside a list item is
+# a real declaration and a column-0 anchor drops it silently (U-46).
+# The specialist side reads the `description:` field ONLY - a whole-file grep false-BREAKS
+# on "When spawned" prose, on negations and on historical notes (T-9). THE RANGE TERMINATOR MUST
+# ADMIT HYPHENATED YAML KEYS AND THE CLOSING `---`: `^[a-z_]*: ` matches neither, so on the
+# CANONICAL frontmatter (`name:`/`description:`/`allowed-tools:`) the range ran to EOF and the
+# false-BREAK returned - for exactly the population component-design §1 mandates a
+# "When spawned" section on (U-4).
+# The domain char class admits DIGITS, DOTS and `&`, and EVERY branch echoes (T-15, U-9).
+# NO BRANCH MAY MISREPORT: a description carrying `declares ... gap` whose domain the class could
+# not parse is BROKEN and says so. Announcing it as "no gap phrase" asserted a fact the file
+# contradicts, under a reassuring `0 broken` (U-9).
+# NEGATION-PROVED 2026-09-11: on a fixture with ONE indented `>` declaration and ONE `&` domain,
+# the pre-U-4/U-9/U-46 loop printed `none installed` - the T-14 healthy-EMPTY verdict - on a
+# fully populated project. This comment is MAINTAINED ON BOTH TWINS (U-30).
+# candidate replacement for bootstrap Step 12.5b / EPA Step 5.1
 echo "=== Activation chain integrity? ==="
 norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/.' '    ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
 AG="projects/$ARGUMENTS/.claude/agents"
 declared=""; declarers=""
 for f in "$AG"/*.md; do
   [ -f "$f" ] || continue
-  g=$( { grep -oiP '^> *\K[A-Za-z][A-Za-z0-9 ./-]{2,30}?(?= gap:)' "$f"; \
-         grep -oiP '\*\*\K[A-Za-z][A-Za-z0-9 ./-]{2,30}?(?= gap\*\*)' "$f"; } 2>/dev/null | sort -u)
+  g=$( { grep -oiP '^ *> *\K[A-Za-z][A-Za-z0-9 &./-]{2,30}?(?= gap:)' "$f"; \
+         grep -oiP '\*\*\K[A-Za-z][A-Za-z0-9 &./-]{2,30}?(?= gap\*\*)' "$f"; } 2>/dev/null | sort -u)
   [ -z "$g" ] && continue
   declarers="$declarers|$(basename "$f" .md)|"
   while IFS= read -r d; do [ -n "$d" ] && declared="$declared|$(norm "$d")|"; done <<EOF
@@ -1025,8 +1083,8 @@ for f in "$AG"/*.md; do
   [ -f "$f" ] || continue
   an=$(basename "$f" .md)
   case "$declarers" in *"|$an|"*) continue ;; esac
-  desc=$(sed -n '/^description:/,/^[a-z_]*: /p' "$f" | tr '\n\t' '  ' | tr -s ' ' | sed 's/\*\*//g')
-  domains=$(printf '%s' "$desc" | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z0-9 ./-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
+  desc=$(sed -n '/^description:/,/^\(---\|[A-Za-z_][A-Za-z0-9_.-]*:\)/p' "$f" | tr '\n\t' '  ' | tr -s ' ' | sed 's/\*\*//g')
+  domains=$(printf '%s' "$desc" | grep -oiP 'declares (?:an? |the )?\K[A-Za-z][A-Za-z0-9 &./-]{2,40}?(?= gap)' | sed 's/^ *//;s/ *$//' | sort -u)
   if [ -n "$domains" ]; then
     while IFS= read -r domain; do
       [ -z "$domain" ] && continue
@@ -1037,6 +1095,9 @@ for f in "$AG"/*.md; do
     done <<EOF
 $domains
 EOF
+  elif printf '%s' "$desc" | grep -qiE 'declares .{0,40}gap'; then
+    echo "BROKEN CHAIN: $an - description carries a gap phrase the domain pattern could not parse; widen the class"
+    broken=$((broken+1))
   elif [ -f "projects/$ARGUMENTS/assets/examples/agents/$an.md" ]; then
     echo "INFO: $an - shipped example, no gap phrase, trigger-activated by design"
     info=$((info+1))
@@ -1116,8 +1177,21 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
   (Bootstrap's twin has carried "Delivered by receivers" since M-2; EPA's three verdicts were
   mandated with no slot to land in — `/audit` 2026-09-03 N-27.)
 
+### Risk profile re-check (Step 2.9b → Phase 3) — ALWAYS report, never omit:
+- `risk profile: confirmed unchanged`
+- `risk profile: revised [old] → [new] — N tier-gated artifacts [copied | already present]`
+  (BOTH verdicts the Phase-3 re-check can produce, and ONLY those two — COPIED FROM the mandating
+  step, never re-derived (Gate 4). Step 2.9b resolves the profile in Phase 2 from the codebase
+  alone, because the retroactive PRD its fallback named does not exist until Phase 3 —
+  `/audit` 2026-09-10 U-18.)
+
 ### Activation chains (Step 5.1) — ALWAYS report, never omit:
-- `N verified, M broken` · `none installed`
+- `activation chains: N verified, M broken, I info`
+- `activation chains: none installed - no declaring component in <path>`
+  (BOTH verdicts the loop can emit, and ONLY those two — **COPIED FROM the loop's own two `echo`
+  lines, never re-derived** (Gate 4). The loop emits THREE counts and this slot offered two, so a
+  compliant discharge had nowhere to land; the `none installed` verdict carries the path. The
+  MANDATE was corrected on both twins and the SLOT was not — `/audit` 2026-09-10 U-5, U-13.)
 
 ### PRD line (Step 2.1) — ALWAYS report, never omit:
 - `written, bracket removed` · `already present, untouched`
