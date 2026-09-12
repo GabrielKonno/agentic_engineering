@@ -576,7 +576,7 @@ done
 # `assets/docs/` (Phase 3 writes the retroactive PRD into it) and `.claude/docs/` (the upstream
 # channel `evolution-policy.md` mandates). Bootstrap created the first two and this twin did
 # not — twin asymmetry, found by the LATERAL directory sweep (`/audit` 2026-09-11).
-mkdir -p projects/$ARGUMENTS/.claude/rules projects/$ARGUMENTS/.claude/agents \n         projects/$ARGUMENTS/.claude/docs projects/$ARGUMENTS/assets/docs
+mkdir -p projects/$ARGUMENTS/.claude/rules projects/$ARGUMENTS/.claude/agents projects/$ARGUMENTS/.claude/docs projects/$ARGUMENTS/assets/docs
 for tmpl in session_rules evolution_policy component_design; do
   target=$(echo "$tmpl" | tr '_' '-')
   if [ ! -f "projects/$ARGUMENTS/.claude/rules/${target}.md" ]; then

@@ -366,7 +366,7 @@ Enable the Skill Creator plugin for automated skill evaluation:
 # project -> framework chain. Three shipped artifacts mandated the directory and NO command
 # created it, so 2 of 3 live projects had nowhere to write and the sweep read `0 pending`
 # on a channel that did not exist (`/audit` 2026-09-11, scoped sweep).
-mkdir -p projects/$ARGUMENTS/.claude/skills projects/$ARGUMENTS/.claude/agents \n         projects/$ARGUMENTS/.claude/docs
+mkdir -p projects/$ARGUMENTS/.claude/skills projects/$ARGUMENTS/.claude/agents projects/$ARGUMENTS/.claude/docs
 cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 # Tier-gated skills are copied ONLY by Step 5.8 per risk profile; README.md is framework docs.
 # Without this removal, file-presence tier-gating silently activates every ceremony on every tier.
