@@ -17,6 +17,15 @@ This is a framework maintenance session, not a project bootstrap.
   them at runtime.
 - **`git commit` — always. `git push` — ONLY when the owner has asked for it in this session, and
   ONLY after D16 over the unpushed commits comes back GREEN.** NEVER push on your own initiative:
+  **AND NEVER CHAIN THE GATE TO THE PUSH WITH `&&`. BRANCH ON THE VERDICT, NEVER ON THE EXIT
+  STATUS.** `<d16 scan> && git push` fires the push when the CHECK RAN, not when it PASSED.
+  The gate returned RED and the push went out anyway, publishing three project identifiers to
+  a PUBLIC repo (`/audit` 2026-09-10 U-48). **A gate whose result is not branched on is not a
+  gate.** ALWAYS:
+  ```bash
+  hits=$(<the D16 scan>)          # a COUNT, never a stream
+  if [ "$hits" -eq 0 ]; then git push origin main; else echo "D16 RED: $hits hits - BLOCKED"; fi
+  ```
   the unpushed/pushed boundary is what makes a privacy hit cheap or expensive to fix
   (`CLAUDE.md` → Repository Lifecycle; `/audit` 2026-09-02 M-56).
   **ALWAYS REPORT `push:` in the session's closing report and in the persisted receipts** —
@@ -413,6 +422,26 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    ```
    `**fences:** N of M templates extract non-empty`
    `**isolation:** N files scanned, 0 hits`.
+   **THE ISOLATION PATTERN IS DERIVED FROM DISK AT RUNTIME AND NEVER TYPED INTO THE RECEIPT.**
+   A `$` line that pastes the blocklist publishes exactly what the rule forbids: proving
+   "0 identifiers published" by quoting a grep whose PATTERN is the identifiers IS the leak.
+   It shipped to a PUBLIC repo and cost a force-push plus an accepted-risk record
+   (`/audit` 2026-09-10 U-48). This is `U-38`'s self-match class one level more serious:
+   there the self-match produced a wrong number, here it produced the damage.
+   **ALWAYS build the pattern with this, and ALWAYS paste only the COUNT:**
+   ```bash
+   P=$(ls -d projects/*/ | xargs -n1 basename | tr '_-' '\n\n' | awk 'length($0)>=4' \
+       | grep -vxE 'system|page|site|core|base|main|data|admin|trabalho|projeto' | sort -u | paste -sd'|' -)
+   git diff --cached --name-only | xargs grep -oniE "$P" | wc -l   # expected: 0
+   ```
+   **Expected: 0. NEVER echo `$P`.** Negation-prove it against a seeded file before trusting
+   it: the same pattern MUST return non-zero there. The generic-part stoplist exists because a
+   folder name split on `-`/`_` yields ordinary words that match English OR PORTUGUESE prose (one
+   such part matched 30+ occurrences of "systematic", another 7 occurrences of the ordinary
+   Portuguese word in the lineage docs); extend THAT list, never the
+   identifier list.
+   **THE DISTINCTION THAT MAKES `audit.md`'s OWN LITERAL LEGITIMATE:** that line is the RULE
+   naming the shape to detect; a receipt is EVIDENCE, and evidence must never paste the value.
    **ALWAYS STATE THE UNIT for `references:` and ALWAYS give it a DENOMINATOR** — the unit is
    *a distinct section or file path cited by text this session WROTE*, and M is every such citation
    in the diff, counted by a command. Without a denominator the number drifts free of the batch: a
