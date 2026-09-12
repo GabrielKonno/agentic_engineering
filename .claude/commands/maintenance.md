@@ -432,7 +432,10 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    ```bash
    P=$(ls -d projects/*/ | xargs -n1 basename | tr '_-' '\n\n' | awk 'length($0)>=4' \
        | grep -vxE 'system|page|site|core|base|main|data|admin|trabalho|projeto' | sort -u | paste -sd'|' -)
-   git diff --cached --name-only | xargs grep -oniE "$P" | wc -l   # expected: 0
+   # WORD BOUNDARIES ARE MANDATORY. Without them a short token matches inside an ordinary word
+   # and the gate blocks a healthy push: one 4-letter part matched "Grafana" in a shipped
+   # example and a lineage doc, and the check went RED on 2 clean files (measured 2026-09-12).
+   git diff --cached --name-only | xargs grep -oniE "($P)" | wc -l   # expected: 0
    ```
    **Expected: 0. NEVER echo `$P`.** Negation-prove it against a seeded file before trusting
    it: the same pattern MUST return non-zero there. The generic-part stoplist exists because a
