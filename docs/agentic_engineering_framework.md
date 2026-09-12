@@ -245,6 +245,9 @@ project/
 │   │   └── blue-team.md                  # (conditional) Defensive security verifier — validates defenses
 │   ├── skills/                           # Anthropic folder format: name/SKILL.md
 │   │   └── (installed or created as needed for the stack)
+│   ├── docs/                              # UPSTREAM CHANNEL — framework-evolution-*.md
+│   │   └── (a lesson the PROJECT learns about the FRAMEWORK is written here;
+│   │       the mother repo's /maintenance Step 0 globs exactly this path)
 │   └── settings.json                      # Permissions + hooks (Claude Code only)
 ```
 

@@ -359,7 +359,14 @@ Enable the Skill Creator plugin for automated skill evaluation:
 **Process skills (12 lifecycle — ALWAYS copied to `.claude/skills/`):**
 
 ```bash
-mkdir -p projects/$ARGUMENTS/.claude/skills projects/$ARGUMENTS/.claude/agents
+# `.claude/docs/` IS THE UPSTREAM CHANNEL AND IT IS CORE, NOT TIER-GATED. `evolution-policy.md`
+# is extracted unconditionally above and mandates writing
+# `.claude/docs/framework-evolution-YYYY-MM-DD-<slug>.md`; the mother repo's `/maintenance`
+# Step 0 globs exactly that path and is the ONLY mechanical owner of the whole
+# project -> framework chain. Three shipped artifacts mandated the directory and NO command
+# created it, so 2 of 3 live projects had nowhere to write and the sweep read `0 pending`
+# on a channel that did not exist (`/audit` 2026-09-11, scoped sweep).
+mkdir -p projects/$ARGUMENTS/.claude/skills projects/$ARGUMENTS/.claude/agents \n         projects/$ARGUMENTS/.claude/docs
 cp -r docs/modules/skills/* projects/$ARGUMENTS/.claude/skills/
 # Tier-gated skills are copied ONLY by Step 5.8 per risk profile; README.md is framework docs.
 # Without this removal, file-presence tier-gating silently activates every ceremony on every tier.

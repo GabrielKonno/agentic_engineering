@@ -83,12 +83,25 @@ remembering — the exact failure class the upstream protocol exists to eliminat
 **ALWAYS run this sweep before any edit, in every maintenance session — including sessions
 whose stated task has nothing to do with upstream:**
 
+**ALWAYS CHECK THE CHANNEL EXISTS BEFORE READING THE GLOB. An EMPTY glob has TWO causes and
+only one of them is health.** `grep -L` over a path that does not exist prints nothing, exactly
+like a project with no pending docs — so a project that CANNOT report reads identical to a project
+with nothing to report. Measured 2026-09-11: the sweep returned empty and **2 of 3 projects had no
+`.claude/docs/` at all**, because no command created it. Both twins now do; every project
+bootstrapped or adapted BEFORE that fix still lacks it.
+
 ```bash
+# 1. THE CHANNEL — run this FIRST. A project with no `.claude/docs/` cannot report anything.
+for d in projects/*/; do
+  [ -d "$d.claude/docs" ] || echo "NO CHANNEL: $d"
+done
+# 2. THE PENDING DOCS — only meaningful for projects that passed step 1.
 grep -L "STATUS.*upstreamed" projects/*/.claude/docs/framework-evolution-*.md 2>/dev/null
 ```
 
-Expected result: **EMPTY output = nothing pending.** Every path printed is an evolution doc
-whose disposition this repo still owes. (Reading `projects/` never violates the no-touch rule.)
+Expected result: **step 1 EMPTY and step 2 EMPTY = nothing pending.** Step 2 empty on its own
+proves nothing. Every path step 2 prints is an evolution doc whose disposition this repo still
+owes. (Reading `projects/` never violates the no-touch rule.)
 
 **A printed path has TWO possible meanings — ALWAYS separate them before reporting.** The grep
 only proves the project has not marked its own header yet; it cannot tell an un-absorbed doc from
@@ -106,8 +119,13 @@ lineage record to cite it verbatim, and dates collide across docs.
   ask the owner to authorize it again — cite the lineage file and move on.
 - **No lineage hit → genuinely `pending absorption`.**
 
-**ALWAYS report the outcome to the owner in one line, even when empty:**
-- Empty → `Upstream sweep: 0 pending.`
+**ALWAYS report the outcome to the owner in one line, even when empty — and ALWAYS report BOTH
+counts, never only the pending one:**
+- Both steps empty → `Upstream sweep: 0 pending, 0 projects without a channel.`
+- **Channel missing anywhere → `Upstream sweep: 0 pending BUT N of M projects have no
+  `.claude/docs/` — they cannot report.`** **NEVER report this as `0 pending` alone.** Those
+  projects predate the directory fix; the remedy is `/existing_project_adaptation <project>`, which
+  is a SEPARATE session — **NEVER write into `projects/` from here** (no-touch rule).
 - Absorbed-but-undischarged only → `Upstream sweep: 0 pending (N awaiting project-side discharge —
   <paths>).` No question follows; nothing is owed by this repo.
 - Genuinely pending → `Upstream sweep: N pending — <paths>`, followed by ONE question: does this
@@ -411,6 +429,30 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    EVERY fix applied this session, ALWAYS sweep all four directions before committing:
    - **LATERAL** — the same defect class in sibling files. Grep the pattern, not the path
      (a subagent told to spawn a subagent; a redirect with no `mkdir`; a stale count).
+     **"A redirect with no `mkdir`" HAS A MECHANICAL FORM — ALWAYS RUN IT when this session
+     touches either command twin.** Naming the class without a command is what let it survive:
+     three shipped artifacts mandated `.claude/docs/` and no command created it, so 2 of 3 live
+     projects had nowhere to write (`/audit` 2026-09-11). **BOTH HALVES, because they find
+     different things:**
+     ```bash
+     # HALF 1 — written but never created. MATCH BOTH PATH FORMS: `projects/$ARGUMENTS/` AND
+     # `$PROJ/`. A first form matched only the former and reported 5 false positives, two of them
+     # directories the file creates two lines away. Creation happens THREE ways: `mkdir -p`,
+     # `cp -r <src> <dest>/`, and PROSE in bootstrap's Setup step.
+     # HALF 2 — the one HALF 1 structurally cannot see: a path mandated by a SHIPPED artifact
+     # that no command mentions AT ALL. `.claude/docs/` was invisible to half 1 for exactly that
+     # reason, and it is the half that found the real defect.
+     # EXCLUDE `.claude/commands/`: docs/modules/README.md cites `.claude/commands/bootstrap.md`,
+     # the MOTHER REPO's own file, not a project path. A known false positive left
+     # unsuppressed fires every run and trains the reader to skip the check.
+     grep -rohE '`?\.claude/[a-z][a-z_-]*/' docs/modules/ | tr -d '`' | sort -u \
+       | grep -v '^[.]claude/commands/$' | while read d; do
+       grep -q "ARGUMENTS/${d%/}" .claude/commands/bootstrap.md || echo "MANDATED, NEVER CREATED: $d"
+     done
+     ```
+     **Expected: no output from either half.** A hit in half 2 is a shipped rule pointing at a
+     directory that will not exist in any project — and it fails SILENTLY, because `grep -L` and
+     `ls` over a missing path print nothing and read exactly like health.
    - **PARALLEL** — the sibling command twin, and sibling members of the same set (all 11 rules
      examples, all 20 agent examples), not only the one the report named.
    - **ADJACENT** — the lines immediately AROUND the edit: the header above the list, the

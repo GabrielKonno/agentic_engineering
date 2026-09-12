@@ -235,7 +235,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.21.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.22.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -539,7 +539,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.21.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.22.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -570,7 +570,13 @@ done
 
 **Copy rules files (to `.claude/rules/`):**
 ```bash
-mkdir -p projects/$ARGUMENTS/.claude/rules
+# THREE DIRECTORIES THIS COMMAND WRITES INTO AND NEVER CREATED. `cp` to a missing directory
+# FAILS, and this command targets projects with only PARTIAL framework structure, so none of
+# the three can be assumed: `.claude/agents/` (Step 4.6.5 copies specialists into it),
+# `assets/docs/` (Phase 3 writes the retroactive PRD into it) and `.claude/docs/` (the upstream
+# channel `evolution-policy.md` mandates). Bootstrap created the first two and this twin did
+# not — twin asymmetry, found by the LATERAL directory sweep (`/audit` 2026-09-11).
+mkdir -p projects/$ARGUMENTS/.claude/rules projects/$ARGUMENTS/.claude/agents \n         projects/$ARGUMENTS/.claude/docs projects/$ARGUMENTS/assets/docs
 for tmpl in session_rules evolution_policy component_design; do
   target=$(echo "$tmpl" | tr '_' '-')
   if [ ! -f "projects/$ARGUMENTS/.claude/rules/${target}.md" ]; then
