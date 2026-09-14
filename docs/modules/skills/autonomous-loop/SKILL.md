@@ -6,9 +6,13 @@ description: >
   Runs an approved backlog SEGMENT end-to-end with the main agent as ORCHESTRATOR rather than
   implementer — cuts the segment into phases by dependency and resource disjointness, dispatches
   one implementer subagent per medium task under a plan-first contract, verifies every return
-  from DISK, and closes each task to disk before the next opens. Opt-in: it NEVER activates by
-  itself. USE when the owner asks to run the backlog in loop mode, when sprint-proposer detects a
-  LOOP CONTINUATION marker, or when a sprint proposal's loop offer is accepted. NOT needed for
+  from DISK, and closes each task to disk before the next opens. Two modes: SEGMENT (a fixed task
+  list approved once) and CONTINUOUS (a standing admission POLICY approved once — the queue is
+  re-read at every task boundary, so tasks registered mid-session are picked up, bounded by a
+  checkpoint every 10 tasks, a discovery brake, and a capped class for self-discovered tasks).
+  Opt-in: it NEVER activates by itself. USE when the owner asks to run the backlog in loop mode or
+  in continuous mode, when sprint-proposer detects a LOOP CONTINUATION marker, or when a sprint
+  proposal's loop offer is accepted. NOT needed for
   single tasks, sprint-approved batches, planning sessions, or any segment containing a large or
   architecture/security task. Without this, long-horizon execution burns the main agent's context
   on implementation reasoning and cannot survive an autocompact.
@@ -25,6 +29,11 @@ acting as ORCHESTRATOR instead of implementer. Validated in practice before form
 **Opt-in, NEVER default.** The mode activates on owner request or explicit acceptance of a loop
 proposal — never by inference from a large backlog.
 
+**Two modes, one skill.** SEGMENT mode (Steps 1-3 below) approves a fixed LIST. CONTINUOUS mode
+approves a standing POLICY and keeps draining the queue as the owner adds to it — see
+"Continuous mode" below, which reuses Step 3, the task closure, the resource rules and the
+guardrails UNCHANGED and replaces only Step 1, the phase cut and the end condition.
+
 ---
 
 ## Entry — this skill NEVER repeats session entry
@@ -39,6 +48,8 @@ Two legitimate paths in:
 |------|----------------------|----------------------|
 | **Fresh loop** | sprint-proposer ran Steps 0-3; the owner requested loop mode or accepted the loop offer at §4d | Start at Step 1 (LOOP PLAN) |
 | **Resume** | sprint-proposer Step 1 found `LOOP CONTINUATION — active` and handed off | SKIP Step 1 — the plan is already approved; announce the resume, start Step 2 at the next phase |
+| **Fresh continuous** | sprint-proposer ran Steps 0-3; the owner asked for continuous mode | Go to "Continuous mode" → C1 (the POLICY replaces Step 1) |
+| **Continuous resume** | the marker carries `**Mode:** continuous` | SKIP C1 — the policy is already approved; go to "Continuous mode" → C6 re-entry |
 
 **If NEITHER happened** (the owner invoked this skill cold), ALWAYS run sprint-proposer Steps 0-3
 FIRST, then return here. A loop planned without the cadence check and the marker check is a loop
@@ -46,6 +57,8 @@ that can silently skip a due audit or overwrite an in-flight continuation.
 
 **ALWAYS REPORT which path was taken in one line** — `entry: fresh (sprint-proposer Steps 0-3 ran)`
 or `entry: resume (LOOP CONTINUATION marker, phase X of Y)` or
+`entry: fresh continuous (sprint-proposer Steps 0-3 ran)` or
+`entry: continuous resume (state S, window N of M closed)` or
 `entry: cold — ran sprint-proposer Steps 0-3 now`. NEVER emit nothing: a silence cannot be
 distinguished from a skipped entry.
 
@@ -288,6 +301,10 @@ SCOPE, and collapsing them costs an exception stop for something the orchestrato
   approved segment — they queue in pendencias and the final report proposes them as the next loop.
   Re-sequencing moves the ORDER of approved work; it NEVER widens the set. Without this line the
   authority above becomes the scope creep the integrity rule exists to forbid.
+- **In CONTINUOUS mode the SET is defined by the approved admission POLICY, not by a list** — see
+  "Continuous mode" → C1 and C3. A task that passes the policy IS approved work; a task that fails
+  it still queues for the owner. The policy replaces the list; it NEVER removes the rule that only
+  approved work runs.
 
 ---
 
@@ -348,6 +365,198 @@ On the NEXT session, `sprint-proposer` Step 1 detects this marker and hands off 
 - ALWAYS announce the resume in one line: "Resuming autonomous loop: phase X of Y ([tasks]). Say
   'cancel the loop' to revoke." — visibility, not an approval gate.
 - Remove the marker when the approved scope completes (final report) or the owner revokes.
+- **In continuous mode the marker carries extra fields** (`**Mode:** continuous`, policy, window
+  counters, held list, state) — defined ONCE in "Continuous mode" → C4, never restated here.
+
+---
+
+## Continuous mode — a standing POLICY instead of a fixed SEGMENT
+
+Segment mode ends when its approved list ends, and anything registered meanwhile waits for a new
+approval. Continuous mode removes that wait: the owner approves an ADMISSION POLICY once, the
+orchestrator re-reads the backlog at every task boundary, and every task that passes the policy is
+executed — including tasks the owner registers mid-session. The owner stops COMMANDING execution
+and SUPERVISES it: the policy up front, the digest at each checkpoint.
+
+**Opt-in, NEVER default — exactly as segment mode.** It activates ONLY when the owner explicitly
+asks for continuous mode.
+
+**NEVER infer continuous mode from a segment ending or from a growing backlog.**
+
+| | Segment mode | Continuous mode |
+|---|---|---|
+| What the owner approves | a task LIST cut into phases | an admission POLICY (C1) |
+| Task registered mid-session | queues for the next loop | admitted at the next task boundary if it passes (C2) |
+| Task discovered by the agent | never absorbed | admitted only in a restricted class, capped (C3) |
+| Large or architecture/security task | disqualifies the segment (Step 1a) | HELD for the owner; the rest continues (C3) |
+| When it ends | the segment is done | revocation or a stop (C5); an empty queue is IDLE, not an end (C6) |
+| Human contact | once per loop | policy approval + a digest at every checkpoint (C5) |
+
+**Inherited UNCHANGED — NEVER relaxed in this mode:** Step 3 (orchestrator role, plan-first
+contract, verify from disk, validation geometry), "Task closure" and its mechanical check,
+"Resource contention", "Loop guardrails", sprint-proposer's exception stops, and the rule that the
+loop NEVER runs an audit autonomously. **NOT used:** Step 1b's phase cut — the queue is re-read at
+every boundary, so a cut would be stale one task later.
+
+> **Why the policy has brakes a list does not need:** a list is bounded by construction; a queue the
+> executor can ADD to is a feedback loop. The framework's own audit series shows fixes introducing
+> defects that the next pass files as new work — run unattended, that is fix → discover → file →
+> implement → discover, with the backlog growing while the product drifts from intent. The
+> discovery class (C3), the discovery brake and the checkpoint (C5) are the damping.
+
+### C1. The admission policy — present it ONCE, for approval
+
+**ALWAYS run sprint-proposer Steps 0-3 and the liveness guard (Step 1a, last item) BEFORE presenting
+the policy.** Then ALWAYS present:
+
+```
+## Continuous Mode Policy: [project]
+### Entry: fresh continuous | cold — [detail]
+### Liveness: [N components OK]
+### Admission — a task enters the queue ONLY when ALL hold:
+- complexity small or medium (NEVER large)
+- `Complexity:` is NOT architecture/security
+- every `depends:` is in done_tasks.md or admitted ahead of it
+- acceptance criteria present, with at least 1 `BUILD:`
+- `origin: owner` (or no origin line) → admitted | `origin: discovered` → C3 class only
+### Discovery cap: 3 admitted discoveries per checkpoint window
+### Checkpoint: every 10 closed tasks OR audit due — whichever comes first
+### Discovery brake: STOP when discovered > closed in the window, once closed >= 3
+### Queue now: [N admitted — task list] | Held: [task — reason, or "none"]
+### Model & effort per admitted task (MUST include — never omit): [complexity → model + effort — why]
+### Pacing: per-task persistence (max ONE task in flight; each CLOSED to disk before the next)
+### Re-entry: `/loop /sprint-proposer` (see C6), or re-invoke manually
+### What I need from you: approve the policy — it stands until you say "cancel continuous mode".
+```
+
+The owner MAY change any value (a lower cap, a shorter checkpoint, excluding logic-heavy tasks).
+**ALWAYS WRITE the approved values into the marker (C4) before the first task** — the next session
+applies the marker, never a remembered conversation.
+
+### C2. The per-task cycle
+
+At EVERY task boundary — after the task-closure check reads OK — ALWAYS run, in this order:
+
+1. **RE-READ `pendencias.md` and `done_tasks.md` FROM DISK** — the owner is a concurrent writer,
+   and an in-memory backlog is a stale premise.
+   - **NEVER write `pendencias.md` from an in-memory copy — ALWAYS re-read it immediately before
+     each write** ("Resource contention": two writers, one doc).
+2. **APPLY the admission policy (C1, C3) to every task not yet classified.**
+   **ALWAYS REPORT — `admission: +A admitted, +H held, +D deferred (queue N)`. NEVER emit nothing.**
+3. **CHECK the stops (C5).** Any that fires → stop per C5; do NOT open a task.
+4. **RE-MEASURE the next task's premises** (Step 2 item 1, applied per task instead of per phase).
+5. **PICK the next admitted task** — dependency order first, then pendencias order — and execute it
+   per Step 3.
+6. **CLOSE it** per "Task closure", updating the marker's window counters IN THE SAME closure (C4).
+
+Queue empty after step 2 → C6 (idle).
+
+### C3. Held tasks and self-discovered tasks
+
+- **HOLD, never skip silently and never implement,** every task that fails admission for its KIND
+  (large, architecture/security, no criteria).
+  - **ALWAYS write each held task to the marker's `Held for owner` list, with its reason.**
+  - A task whose `depends:` includes a held task is held too — name the chain.
+- **ALWAYS tag every task this mode files** with `origin: discovered (sN, task M)` in its header block
+  (the `origin:` field of the pendencias template). An untagged task is treated as `origin: owner`:
+  it predates this mode or was registered by hand, and the owner saw the queue in C1.
+- **A discovered task is ADMITTED automatically ONLY when ALL hold:**
+  1. complexity small;
+  2. it is a bug or debt in code that a task CLOSED in this mode touched — never a new feature,
+     never a new module;
+  3. not architecture/security;
+  4. the window's admitted-discovery count is below the cap.
+- **Everything else is DEFERRED** — it stays in pendencias for the owner and is listed in the next
+  digest. Deferring is not a stop; the loop continues.
+
+### C4. The marker — continuous-mode fields
+
+Continuous mode reuses the SAME marker string, so sprint-proposer Step 1 detects it with no change.
+**ALWAYS write it with these fields:**
+
+```
+<!-- LOOP CONTINUATION — active -->
+### [date] — Session N (AUTONOMOUS LOOP — continuous)
+**Mode:** continuous
+**Policy:** cap [3] | checkpoint [10] | brake discovered>closed (min 3) | [owner changes, or "defaults"]
+**Window:** closed [N] | discovered [D] | admitted-discoveries [A]
+**Held for owner:** [task — reason, or "none"]
+**Deferred discoveries:** [task numbers, or "none"]
+**State:** running | idle — queue empty | checkpoint pending | stopped — [reason]
+**Last closed:** task [N] ([sHASH])
+```
+
+**The `Window` and `Last closed` lines are part of closure condition 2** — they ARE the loop's
+position, and nothing load-bearing may live only in the conversation. In continuous mode the
+task-closure check ALWAYS runs these two lines IN ADDITION to its own:
+
+```bash
+grep -c "^\*\*Mode:\*\* continuous" .claude/phases/project.md              # expected: 1
+grep -oE "^\*\*Window:\*\* closed [0-9]+" .claude/phases/project.md         # expected: previous boundary + 1
+```
+
+**Expected: `1`, and a `closed` value exactly ONE above the previous boundary's output** — counting
+from `0` after a checkpoint reset, so the first boundary after a reset reads `closed 1`.
+
+**Anything else is RED — the next task does NOT open.**
+
+**ALWAYS REPORT both outputs literally**, beside the two lines of the base check.
+
+### C5. Stops — the checkpoint, the brake, revocation
+
+Every stop below ends at a TASK boundary and ALWAYS does all four: write `**State:**`, run
+`/session-end`, emit the digest, and **END THE RECURRING TRIGGER** (for `/loop`: stop the loop). A
+stop that re-fires on its own schedule is not a stop.
+
+- **Checkpoint** — `closed` reaches the policy's checkpoint value, OR sprint-proposer Step 0 reports
+  an audit due → `State: checkpoint pending`. An audit is PROPOSED in the digest, NEVER run.
+- **Discovery brake** — `discovered > closed` with `closed >= 3` → `State: stopped — discovery
+  brake`. The backlog is growing faster than it drains: that is the loop feeding itself.
+- **Every segment guardrail and exception stop** ("Loop guardrails"; sprint-proposer → "Exception
+  stops") → `State: stopped — [which]`.
+- **Revocation** — the owner says "cancel continuous mode" → remove the marker, end the trigger.
+
+**On a resume whose state is `checkpoint pending` or `stopped`, NEVER open a task.** ALWAYS
+re-present the digest and wait. Only an explicit owner answer resumes; "continue" resets the
+window counters to 0 and sets `State: running`.
+
+**Audit-cadence equivalence in this mode:** count `ceil(closed / 3)` sessions per window — the lower
+bound of the sprint cap, so audit coverage NEVER thins as volume grows (segment mode's "one per
+phase" has no phases to count here).
+
+**The digest — ALWAYS this format** (it replaces segment mode's final report):
+
+```
+## Continuous Checkpoint: [date]
+### Stop reason: checkpoint (N closed) | audit due | discovery brake | [guardrail / exception stop]
+### Closed this window: [N] — one line each: task, result, commit
+### Admission (C2 step 2, summed over the window): [+A admitted, +H held, +D deferred]
+### Admitted discoveries: [A of cap] — [tasks]
+### Deferred discoveries (need you): [task — one line each, or "none"]
+### Held for owner: [task — reason, or "none"]
+### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
+### Orchestration lessons (ALWAYS present, "none" is a valid entry): [...]
+### Audit cadence: counts as [ceil(N/3)] sessions | audit due: [no | yes — proposed]
+### What I need from you: "continue" | adjust the policy | triage held/deferred | "cancel continuous mode"
+```
+
+### C6. Idle and re-entry
+
+- **An empty queue is IDLE, not an end.** When C2 step 2 leaves nothing admitted, ALWAYS write
+  `State: idle — queue empty`, run `/session-end` if any task closed since the last one, and end at
+  the boundary. The approval stands: the next re-entry picks up newly registered tasks with NO new
+  approval. **Idle does NOT end the recurring trigger** — that is the difference from a C5 stop.
+- **The framework defines the re-entry PROTOCOL — the marker — and NEVER a scheduler**
+  (component-design §7: do not rebuild native mechanisms). The recommended trigger is the native
+  `/loop /sprint-proposer` in self-paced mode: each firing runs sprint-proposer Steps 0-1, which
+  detect the marker and hand off here. Pace it by state — continue immediately while `running`;
+  wait long (20 minutes or more) while `idle`, because nothing changes faster than the owner types.
+  A manual invocation or a scheduled session re-enters identically, because the marker is the only
+  state.
+- **ALWAYS re-run the liveness guard on every re-entry** (Step 1a, last item) — a registry can break
+  between two firings, and the watchdog's "at loop start" means every start.
+- **ALWAYS announce the re-entry in one line:** `Resuming continuous mode: state [S], window [N] of
+  [checkpoint] closed, queue [Q]. Say 'cancel continuous mode' to revoke.`
 
 ---
 

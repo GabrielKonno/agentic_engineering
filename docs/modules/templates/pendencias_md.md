@@ -52,6 +52,11 @@ Last updated: [date]
 - `parallel: true` — can run simultaneously with other parallel tasks at same dependency level
 - If not declared: defaults to sequential (always safe)
 
+**Origin (who registered the task):**
+- `origin: owner` — registered by the owner (or at bootstrap). A task with NO origin line is read as `owner`.
+- `origin: discovered (sN, task M)` — filed by the AI during implementation.
+- ALWAYS set `origin: discovered` on every task the AI files — continuous mode (`autonomous-loop`) admits discovered tasks only in a restricted, capped class.
+
 ### 1. Project Setup
 depends: none
 parallel: false
@@ -78,6 +83,7 @@ parallel: false
 ### 2. [First module from Build Order]
 depends: [1]
 parallel: true (if independent of task 3)
+origin: owner
 
 **Context:** [WHY this task exists — business problem it solves, who uses it, from PRD section X.X]
 **State:** [What exists when this starts — which modules are done, what data/tables exist]

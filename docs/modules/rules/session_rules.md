@@ -44,7 +44,7 @@ never imposed. Read the profile, then apply ONLY the ceremonies its column marks
 ## Session lifecycle
 
 - Before implementation work, run `/sprint-proposer` (loads project state, syncs PRD, proposes sprint)
-- To run an approved backlog SEGMENT end-to-end (Level 5, opt-in), run `/autonomous-loop` — ALWAYS after `/sprint-proposer`, which owns session entry for every mode
+- To run an approved backlog SEGMENT end-to-end, or to keep draining the backlog under an approved admission POLICY (continuous mode) (Level 5, opt-in), run `/autonomous-loop` — ALWAYS after `/sprint-proposer`, which owns session entry for every mode
 - Every session with implementation work MUST end with `/session-end`
 - If context degrades mid-session, run `/context-recovery`
 
@@ -61,7 +61,10 @@ autocompacts, or subagent reports: a count is a stand-in for context usage, whic
 model cannot observe (an instructed "estimate" produces confabulation dressed as
 measurement). The session runs until the approved backlog SEGMENT is done or an
 emergency-degradation signal fires; it ends only at a natural TASK boundary, never
-mid-task. The mode never activates by itself: owner request or explicit acceptance of a
+mid-task. In **continuous mode** there is no segment to finish: the queue is governed by an
+approved admission policy, and the run ends at a checkpoint (every 10 closed tasks or an audit
+due), the discovery brake, a guardrail, or revocation — see `autonomous-loop` → "Continuous mode".
+The mode never activates by itself: owner request or explicit acceptance of a
 loop proposal only.
 
 ### Signals of exceeding
@@ -171,7 +174,7 @@ NOT degraded rigor).
 | Archetype | What it is | session-end adaptation |
 |-----------|-----------|------------------------|
 | `implementation` (default) | Building/fixing code | Full flow: diff-pattern-extractor first, then all updaters |
-| `investigation` | Research/analysis, no code shipped | SKIP diff-pattern-extractor; DO write session log + project.md index; findings → tasks in pendencias |
+| `investigation` | Research/analysis, no code shipped | SKIP diff-pattern-extractor; DO write session log + project.md index; findings → tasks in pendencias, tagged `origin: discovered` |
 | `framework-maintenance` | Editing this project's own agents/skills/rules/docs | SKIP app-code pattern extraction; instead log each component change with FIX/DERIVED/CAPTURED; re-check activation chains / counts |
 | `ops` | Runtime, deploy, infra, incident | SKIP app-pattern extraction; update ops-rules + metrics.md; log incident + reconciliation outcome |
 

@@ -169,7 +169,14 @@ ending only at a task boundary). There is deliberately NO numeric context gate: 
 cannot observe its own context usage, so a "% used" rule is unexecutable — persistence
 makes autocompaction a non-event instead.
 - ✅ Everything from Level 4
-- ✅ One approval covers the whole backlog (grouped in dependency-ordered phases of 3-5 tasks)
+- ✅ One approval covers the whole backlog (grouped in phases cut by dependency order and
+  resource disjointness — never by a task count; the 3-5 cap is an approval-attention limit
+  that does not apply once the segment is approved)
+- ✅ Continuous mode (opt-in within Level 5): the owner approves an ADMISSION POLICY instead of
+  a list; the orchestrator re-reads the backlog at every task boundary and executes every task
+  that passes it, including tasks registered mid-session. Self-discovered tasks enter only in a
+  restricted, capped class; a checkpoint digest every 10 tasks (or when an audit is due) and a
+  discovery brake keep the owner supervising instead of commanding
 - ✅ Role inversion: small tasks done directly; medium tasks implemented by subagents — the
   orchestrator's context holds sprint state, not implementation reasoning (this is what
   buys the long horizon, and it keeps the orchestrator uncontaminated as a judge)

@@ -235,7 +235,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.22.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.23.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -539,7 +539,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.22.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.23.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -1161,7 +1161,7 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 
 ### Process skills: [N of 12 copied from framework]
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
-- **Whole-segment orchestration (opt-in Level 5):** autonomous-loop
+- **Segment or continuous orchestration (opt-in Level 5):** autonomous-loop
 - **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **PRD workflows:** cross-cutting-analysis

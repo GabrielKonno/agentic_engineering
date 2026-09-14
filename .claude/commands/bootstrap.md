@@ -374,7 +374,7 @@ rm -rf projects/$ARGUMENTS/.claude/skills/codebase-audit projects/$ARGUMENTS/.cl
 ```
 
 - **Session lifecycle (user-triggered):** sprint-proposer, session-end, context-recovery
-- **Whole-segment orchestration (user-triggered, opt-in Level 5):** autonomous-loop
+- **Segment or continuous orchestration (user-triggered, opt-in Level 5):** autonomous-loop
 - **During implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **PRD workflows:** cross-cutting-analysis
@@ -924,7 +924,7 @@ git commit -m "chore: bootstrap from agentic framework"
 
 ### Process skills: copied from framework (Step 5.7):
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
-- **Whole-segment orchestration (opt-in Level 5):** autonomous-loop
+- **Segment or continuous orchestration (opt-in Level 5):** autonomous-loop
 - **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **PRD workflows:** cross-cutting-analysis

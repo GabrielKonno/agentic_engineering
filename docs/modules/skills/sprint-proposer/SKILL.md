@@ -8,8 +8,8 @@ description: >
   PRD, analyzes pendencias.md, selects 3-5 tasks by dependency, and presents for
   approval. Owns SESSION ENTRY for every mode (audit cadence, markers, PRD sync)
   and manages sprint-approved mode (exception stops, between-tasks workflow, sprint
-  reports); HANDS OFF to the `autonomous-loop` skill when Level 5 is requested or a
-  LOOP CONTINUATION marker is found. Not needed for
+  reports); HANDS OFF to the `autonomous-loop` skill when Level 5 (segment or
+  continuous mode) is requested or a LOOP CONTINUATION marker is found. Not needed for
   planning discussions, task management, or quick fixes. Without this,
   implementation sessions start without project context and wrong priorities.
 created: framework-v2.1.0 (pre-validated)
@@ -72,8 +72,13 @@ NOT silently skip it — include it in the resume announcement ("audit due — s
 to run it now, otherwise I'll propose it after the loop"). The loop NEVER runs an audit
 autonomously; audits stay owner-gated.
 
+**A marker carrying `**Mode:** continuous` hands off the SAME way** — to `autonomous-loop` →
+"Continuous mode" → C6 re-entry. That skill reads the marker's `State:`; this step NEVER decides
+whether a continuous resume may open a task.
+
 **ALWAYS REPORT the check — `loop marker: none` or `loop marker: active → handing off to
-autonomous-loop (phase X of Y)`. NEVER emit nothing.** This step is the INVOKER of the loop's
+autonomous-loop (phase X of Y)` or `loop marker: active → handing off to autonomous-loop
+(continuous, state S)`. NEVER emit nothing.** This step is the INVOKER of the loop's
 resume (component-design §9): nobody reads the `autonomous-loop` frontmatter in a session that has
 not already decided to run it. Mechanical self-check (expected result stated):
 `grep -c "LOOP CONTINUATION — active" .claude/phases/project.md` → `1` means hand off, `0` means
@@ -162,7 +167,7 @@ sprint for the task named in the marker. Context has changed and the continuatio
 ### Audit cadence: codebase-audit [due at N — proposed | not due, N of M | n/a — not installed]
                    framework-audit [same three verdicts]   (ALWAYS present; never blank)
                    (`n/a — skill not installed`, verbatim from the step; NEVER paraphrased)
-### Loop marker: [none | active → handing off to autonomous-loop (phase X of Y)]   (ALWAYS present)
+### Loop marker: [none | active → handing off to autonomous-loop (phase X of Y) | active → handing off to autonomous-loop (continuous, state S)]   (ALWAYS present)
 ### Audit due: [n/a | last run was INCOMPLETE (steps N,M)]   (ALWAYS present when a check reports it)
 ### Tasks selected (N):
 1. Task [N] — [name] (complexity, estimated scope)
@@ -186,6 +191,7 @@ Derive from each task's `Complexity:` field in pendencias.md. If no complexity f
 #### 4d. Handle response
 - **Human approves** → enter sprint-approved mode (medium tasks proceed without approval)
 - **Human approves in loop mode** (or requested it up front) → INVOKE the `autonomous-loop` skill (Level 5). Steps 0-3 above ARE the session entry it relies on — that skill NEVER repeats them
+- **Human asks for continuous mode** → INVOKE the `autonomous-loop` skill at "Continuous mode" → C1 (it presents the admission POLICY for approval; this proposal's task list is NOT that approval)
 - **Human adjusts** → apply adjustments and confirm
 - **Human wants task-by-task** → proceed as Level 3 (present each task individually)
 
@@ -204,7 +210,7 @@ When the human approves a sprint batch (step 4 above), the following rules apply
 - **Small tasks:** implement directly (same as Level 3).
 - **Medium tasks:** generate the plan, log it, and proceed WITHOUT waiting for approval.
 - **Large tasks:** still require individual plan approval, even within a sprint.
-- **Discoveries during implementation:** add new task to pendencias.md with full Context/State/Constraints/Complexity/Criteria. Continue sprint unless the discovery blocks the current task. **Cap: max 3 discoveries per sprint.** After 3, flag to human at next exception stop or sprint report.
+- **Discoveries during implementation:** add new task to pendencias.md with full Context/State/Constraints/Complexity/Criteria, and ALWAYS tag it `origin: discovered (sN, task M)` — continuous mode's admission policy keys on that field (`autonomous-loop` → "Continuous mode" → C3). Continue sprint unless the discovery blocks the current task. **Cap: max 3 discoveries per sprint.** After 3, flag to human at next exception stop or sprint report.
 
 ### Exception stops
 
@@ -257,13 +263,14 @@ collided on the same file" appears in NO diff. Full rationale and the loop's own
 
 ## Autonomous Loop Mode (Level 5) — lives in its OWN skill
 
-Level 5 (whole-SEGMENT execution with the main agent as ORCHESTRATOR) was extracted to
+Level 5 (SEGMENT or CONTINUOUS execution with the main agent as ORCHESTRATOR) was extracted to
 `.claude/skills/autonomous-loop/` in framework v2.8.0. Its mechanics are deliberately NOT restated
 here: a mode whose ~150 lines load in every non-loop session is context every ordinary sprint pays
 for and never uses.
 
 **ALWAYS INVOKE `autonomous-loop` — NEVER improvise loop mechanics from this file — when:**
 - the owner asks to run the backlog in loop mode, OR
+- the owner asks for continuous mode (a standing admission policy instead of a fixed list), OR
 - Step 1 found an active LOOP CONTINUATION marker (handoff), OR
 - Step 4c offered the loop and the owner accepted.
 

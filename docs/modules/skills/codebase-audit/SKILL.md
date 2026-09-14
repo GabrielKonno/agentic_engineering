@@ -102,6 +102,10 @@ to `framework-audit`).
 Produce the report, then write every actionable finding as a task in `pendencias.md` (findings
 that die in prose are invisible). NEVER auto-fix.
 
+ALWAYS tag each task this step writes `origin: discovered (sN, codebase-audit)` — continuous mode
+admits discovered tasks only in a restricted, capped class (`autonomous-loop` → "Continuous mode" →
+C3), and an untagged task is read as `owner`.
+
 ```
 ## Codebase Audit Report — Session N
 ### Completion status: COMPLETE | INCOMPLETE (steps N,M not run — reason)   ← ALWAYS first line

@@ -26,7 +26,7 @@ legitimately "N/A" versus required:
 
 - **`implementation`** (default) — run ALL steps below as written.
 - **`investigation`** — SKIP step 1 (no app diff to mine). Run steps 2-6; route findings to
-  pendencias.md as tasks.
+  pendencias.md as tasks, each tagged `origin: discovered (sN, investigation)`.
 - **`framework-maintenance`** — SKIP step 1's app-code mining. Instead, for each agent/skill/rule
   edited, log the change classified as FIX/DERIVED/CAPTURED, and re-verify counts/activation
   chains. Run steps 2, 3, 6.

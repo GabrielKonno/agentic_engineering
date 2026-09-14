@@ -6,7 +6,7 @@ Framework workflow skills — copied to projects during bootstrap Step 5.7.
 > `prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`.
 > They live in `docs/modules/agents/` and are copied to `.claude/agents/` during bootstrap.
 > This directory contains 15 skills: 12 **lifecycle** — ALWAYS copied, broken down as
-> 1 during-implementation + 5 session-end + 3 session lifecycle + 1 whole-segment orchestration + 1 PRD process +
+> 1 during-implementation + 5 session-end + 3 session lifecycle + 1 segment/continuous orchestration + 1 PRD process +
 > 1 commit workflow; their `invocation:` field varies independently of that (`user` for the ones
 > the owner calls, `inline` for the ones other components read) — plus 3 **tier-gated** skills
 > (codebase-audit, framework-audit — audits; skill-gate — creation gate) copied only when the
@@ -43,7 +43,7 @@ These skills implement steps of the Session Protocol, Execution Protocol, PRD wo
 | # | Skill | Type | When triggered |
 |---|-------|------|---------------|
 | 1 | sprint-proposer | Process + judgment | Start of session (user-triggered) — owns SESSION ENTRY for every mode, proposes sprint, manages sprint-approved mode, hands off to autonomous-loop |
-| 2 | autonomous-loop | Process + judgment | Whole-segment execution (user-triggered, opt-in Level 5) — main agent orchestrates, one implementer subagent per medium task; entered after sprint-proposer or by LOOP CONTINUATION handoff |
+| 2 | autonomous-loop | Process + judgment | Segment or continuous execution (user-triggered, opt-in Level 5) — main agent orchestrates, one implementer subagent per medium task; entered after sprint-proposer or by LOOP CONTINUATION handoff |
 | 3 | session-end | Process + judgment | End of session (user-triggered) |
 | 4 | context-recovery | Process pure | Mid-session emergency (user-triggered) |
 | 5 | validation-orchestrator | Process + judgment | Before + during implementation |

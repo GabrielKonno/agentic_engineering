@@ -80,7 +80,8 @@ promoted to a rules file in Step 2), ALWAYS sweep it backward:
 2. **Grep** the whole codebase (`Grep`/`Bash rg`) for pre-existing matches, excluding the
    files in this session's diff (those are already covered).
 3. **Triage** each hit: a genuine pre-existing violation → add a task to `pendencias.md`
-   tagged `[back-sweep sN]` with the file:line and the rule it violates. A false match → ignore.
+   tagged `[back-sweep sN]` and `origin: discovered (sN, back-sweep)` with the file:line and the
+   rule it violates. A false match → ignore.
 4. **Never auto-fix.** Back-sweep only archives tasks; the fix is prioritized normally.
 
 If a rule's wrong-pattern is not mechanically greppable (purely semantic), note

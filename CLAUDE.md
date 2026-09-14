@@ -67,7 +67,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   └── quality_budgets.md          # Quality caps + delta gate (production+)
 │   │   └── skills/                         # Pre-built process skills (15: 12 lifecycle/process + 3 tier-gated)
 │   │       ├── sprint-proposer/            # Session entry + sprint proposal (Levels 3-4)
-│   │       ├── autonomous-loop/            # Level 5 — whole-segment orchestration (opt-in)
+│   │       ├── autonomous-loop/            # Level 5 — segment or continuous orchestration (opt-in)
 │   │       ├── validation-orchestrator/    # Per-task lifecycle + validation routes
 │   │       ├── codebase-audit/             # MACRO axis — system health (internal-tool+)
 │   │       ├── framework-audit/            # Meta-loop — process blind spots (production+)

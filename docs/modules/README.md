@@ -62,6 +62,6 @@ Bias risk near-zero for routine tasks justifies skipping subagent overhead. Logi
 
 The step-by-step behavioral implementation is in skills (not here):
 - Session lifecycle → `skills/sprint-proposer/`, `skills/session-end/`, `skills/context-recovery/`
-- Whole-segment orchestration (Level 5, opt-in) → `skills/autonomous-loop/`
+- Segment or continuous orchestration (Level 5, opt-in) → `skills/autonomous-loop/`
 - Validation loop → `skills/validation-orchestrator/`
 - Evolution policy and auto-evolution boundaries → `rules/evolution_policy.md`

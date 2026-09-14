@@ -206,6 +206,8 @@ it" is not "it is healthy").
 
 ALWAYS create a task in pendencias.md for every finding mentioned in the report — findings that die in prose are invisible.
 
+ALWAYS tag each such task `origin: discovered (sN, task M)` — continuous mode admits discovered tasks only in a restricted, capped class (`autonomous-loop` → "Continuous mode" → C3), and an untagged task is read as `owner`.
+
 ---
 
 ## Validation Failure Post-Mortem
