@@ -10,9 +10,10 @@ description: >
   list approved once) and CONTINUOUS (a standing admission POLICY approved once — the queue is
   re-read at every task boundary, so tasks registered mid-session are picked up, bounded by a
   checkpoint every 10 tasks, a discovery brake, and a capped class for self-discovered tasks).
-  Opt-in: it NEVER activates by itself. USE when the owner asks to run the backlog in loop mode or
-  in continuous mode, when sprint-proposer detects a LOOP CONTINUATION marker, or when a sprint
-  proposal's loop offer is accepted. NOT needed for
+  Opt-in: it NEVER activates by itself. USE when the owner asks to run the backlog in loop mode,
+  in autonomous mode, or in continuous mode (keep executing tasks while the backlog has them, pick
+  up tasks as they are registered), when sprint-proposer detects a LOOP CONTINUATION marker, or when
+  a sprint proposal's loop offer is accepted. NOT needed for
   single tasks, sprint-approved batches, planning sessions, or any segment containing a large or
   architecture/security task. Without this, long-horizon execution burns the main agent's context
   on implementation reasoning and cannot survive an autocompact.
@@ -54,6 +55,16 @@ Two legitimate paths in:
 **If NEITHER happened** (the owner invoked this skill cold), ALWAYS run sprint-proposer Steps 0-3
 FIRST, then return here. A loop planned without the cadence check and the marker check is a loop
 that can silently skip a due audit or overwrite an in-flight continuation.
+
+**When the owner's request does not name the mode** ("run the backlog in autonomous mode"), the
+request is ambiguous between a SEGMENT and CONTINUOUS mode:
+- **ALWAYS ASK which mode, in ONE question, after the entry steps and before Step 1 or C1** —
+  segment ("the eligible tasks now, then stop") or continuous ("keep taking tasks as they arrive,
+  checkpoint every 10").
+- **NEVER default to continuous mode on an ambiguous request** — it is the wider authorization, and
+  opt-in means the owner names it.
+- **Words that DO name continuous mode:** continuous, "while there are tasks", "keep going as tasks
+  arrive", "pick up new tasks". A request carrying one of them needs no question.
 
 **ALWAYS REPORT which path was taken in one line** — `entry: fresh (sprint-proposer Steps 0-3 ran)`
 or `entry: resume (LOOP CONTINUATION marker, phase X of Y)` or

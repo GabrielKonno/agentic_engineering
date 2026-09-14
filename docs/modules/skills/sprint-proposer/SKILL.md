@@ -177,6 +177,7 @@ sprint for the task named in the marker. Context has changed and the continuatio
 - Task [N]: [complexity] → [model] + [effort] — [justification]
 - Task [N]: [complexity] → [model] + [effort] — [justification]
 ### Risks: [anything that might cause a stop]
+### Loop offer (only when the Level 5 section's conditions hold): [segment — why | continuous — why (N admissible, +M added since last session); alternative: [the other mode | sprint]]
 ### What I need from you:
 - Approve this sprint (I will execute all tasks, stopping only on exceptions)
 - OR adjust: remove/add/reorder tasks
@@ -191,7 +192,7 @@ Derive from each task's `Complexity:` field in pendencias.md. If no complexity f
 #### 4d. Handle response
 - **Human approves** → enter sprint-approved mode (medium tasks proceed without approval)
 - **Human approves in loop mode** (or requested it up front) → INVOKE the `autonomous-loop` skill (Level 5). Steps 0-3 above ARE the session entry it relies on — that skill NEVER repeats them
-- **Human asks for continuous mode** → INVOKE the `autonomous-loop` skill at "Continuous mode" → C1 (it presents the admission POLICY for approval; this proposal's task list is NOT that approval)
+- **Human asks for (or accepts the offer of) continuous mode** → INVOKE the `autonomous-loop` skill at "Continuous mode" → C1 (it presents the admission POLICY for approval; this proposal's task list is NOT that approval)
 - **Human adjusts** → apply adjustments and confirm
 - **Human wants task-by-task** → proceed as Level 3 (present each task individually)
 
@@ -278,6 +279,18 @@ for and never uses.
 dependencies resolvable in sequence, no large task, no architecture/security task that would force
 a model switch mid-loop. **Offering is NOT entering** — the owner decides, and `autonomous-loop`
 re-verifies the gate before planning (its Step 1a).
+
+**Step 4c MAY OFFER continuous mode instead** when ALL hold:
+1. the segment conditions above hold for the tasks that would be admitted;
+2. more admissible tasks are waiting than one sprint holds (more than 5);
+3. the backlog keeps receiving tasks — at least one task was added to `pendencias.md` since the
+   previous session (a queue that never grows is a segment, and the segment offer is enough).
+
+**ALWAYS offer AT MOST ONE mode, with the alternative named in the same line** — never two competing
+offers.
+
+**NEVER offer continuous mode in a session whose Step 0 reported an audit due** — the first thing
+the mode would do is stop at its checkpoint. Accepting the offer goes to §4d.
 
 What stays HERE and is SHARED by both modes: Steps 0-3 (session entry), "Between Tasks", the
 sprint report format, and the exception-stop list. `autonomous-loop` points back at them rather
