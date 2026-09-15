@@ -24,6 +24,15 @@ This is a **bootstrap session** (Session 0) for project **$ARGUMENTS**.
 
 Before starting the process:
 
+**ALWAYS REFUSE, BY READING THE NAME BEFORE RUNNING ANY FENCE, a project name that is empty, starts
+with `.`, or contains any character outside `[A-Za-z0-9._-]`** — tell the owner and stop. Every
+fence in this command expands `projects/$ARGUMENTS` (most of them unquoted), so a space splits the path into stray
+directories and a glob character matches other folders (`/audit` 2026-09-14 Y-8).
+**NO FENCE CAN ENFORCE THIS:** `$ARGUMENTS` is substituted as TEXT before bash parses a fence, so a
+`$(…)`, a backtick or a quote in the name executes, or breaks out of its quoting, in the first fence
+that contains it. The same prose guard
+opens `existing_project_adaptation.md`.
+
 1. If `projects/$ARGUMENTS/` does not exist, create it and `projects/$ARGUMENTS/assets/docs/`
 2. If `projects/$ARGUMENTS/.git/` does not exist, ALWAYS run `git init` inside `projects/$ARGUMENTS/` **before creating any other file**. This gives the project its own git identity from the first file onward. Without this early `git init`, any IDE opened on the project folder during bootstrap walks up the directory tree, attaches to the framework's `.git/`, and displays the framework's commit history as if it belonged to the project — a confusing (though harmless) artifact of git's walk-up behavior.
 3. If `projects/$ARGUMENTS/assets/docs/prd.md` does not exist, the session still works — PRD-derived sections will be marked "to be defined"
@@ -453,8 +462,9 @@ sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/quality_budgets.md | sed 
 ```
 
 **`production-financial` only — additionally** fill the ops-rules §6 reconciliation queries with
-schema-specific SELECTs (from the PRD data model), and note in `code-reviewer.md` that red-team is
-mandatory on money-paths.
+schema-specific SELECTs (from the PRD data model).
+**NEVER write the red-team-on-money-paths note here** — it belongs in `code-reviewer.md`, which does
+not exist until Step 7, and Step 7 writes it (`/audit` 2026-09-14 W-14).
 
 **`prototype` — copy none of the above.** The per-diff review loop is sufficient.
 
@@ -504,6 +514,10 @@ correctly). No skill found? That is fine — skills are optional.
 **Before creating any agent or skill in the steps below:** read `assets/examples/README.md` for conventions (frontmatter, structure, output format, invocation type). Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as a structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project.
 
 ### Step 7 — Create code-reviewer agent
+
+**`production-financial` (Step 1.2) — ALWAYS add, in BOTH branches below, a line under
+"Architecture Patterns": `red-team is MANDATORY on every diff that touches a money path.`** Step 5.8
+defers this note here because the file does not exist until this step.
 
 **If `.claude/agents/code-reviewer.md` already exists:** Do NOT overwrite. Verify it has "Known Bug Patterns" and "Architecture Patterns" sections. Add them if missing. Do not remove existing patterns.
 
@@ -884,13 +898,14 @@ git commit -m "chore: bootstrap from agentic framework"
   MANDATE was corrected on both twins and the SLOT was not — `/audit` 2026-09-10 U-5, U-13.)
 
 ### Cross-cutting concerns (Step 1.1 → Steps 3/4/13) — ALWAYS report, never omit:
-- Classified at Step 1.1: [N] (R → rules, A → decisions, T → tasks)
-- Delivered by receivers: R/R rules (Step 13) · A/A decisions (Step 3) · T/T tasks (Step 4)
-- [or `none — PRD has no Cross-cutting Concerns section`]
+- Classified at Step 1.1: `cross-cutting: N concerns classified (R → rules/Step 13, A → decisions/Step 3, T → tasks/Step 4)` · `cross-cutting: none — PRD has no such section`
+- Delivered by receivers: `cross-cutting received: R/R code concerns placed (rules file or pendencias task)` (Step 13) · A/A decisions (Step 3) · T/T tasks (Step 4)
+  (both enumerations COPIED FROM Step 1.1's and Step 13's mandates — they were paraphrased,
+  `/audit` 2026-09-14 W-18)
 - **Any receiver count below its Step 1.1 count is RED** — name the dropped concern.
 
 ### MCPs (Step 5) — ALWAYS report, never omit:
-- `N installed: [names]` · `none installed — placeholder replaced`
+- `MCP: N installed [names]` · `MCP: none installed — placeholder replaced`
   (BOTH verdicts Step 5 can produce. Neither had any slot at all until
   `/audit` 2026-09-03 P-21 — the mandate existed and had nowhere to land.)
 
@@ -920,6 +935,7 @@ git commit -m "chore: bootstrap from agentic framework"
 - .claude/skills/[domain]-test-patterns/SKILL.md ([lines] lines) ← if created (Step 12)
 - .claude/settings.json
 - .claude/logs/ (initialized — session logs start from session 1)
+- .claude/docs/ (upstream channel for framework-evolution docs — Step 5.7)
 - assets/examples/ (copied from framework — Step 1.5)
 
 ### Process skills: copied from framework (Step 5.7):
@@ -950,9 +966,11 @@ git commit -m "chore: bootstrap from agentic framework"
 ### Specialist agents pre-installed (from example templates — Step 12.5):
 - .claude/agents/[specialist].md ← activation chain verified
 - [list each pre-installed specialist, or "none — no gap declarations kept"]
+- Kept gaps with no matching example → registered in `pendencias.md` (Step 12.5a): [list each, or "none"]
 
 ### Risk profile: [prototype | internal-tool | production | production-financial]
 - Derived from: [PRD signals], confirmed by owner: [yes/override]
+- Receipt grep (Step 1.2): project.md [1 | 0] · CLAUDE.md [1 | 0] — expected `1` for both; a `0` is RED
 
 ### MACRO skeletons (tier-gated — Steps 5.8 / 14.2):
 - codebase-audit skill ← [copied (internal-tool+) / skipped (prototype)]

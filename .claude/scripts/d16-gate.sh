@@ -14,6 +14,11 @@
 #   bash .claude/scripts/d16-gate.sh log <rev-args>   # patches + messages + raw commits + paths: origin/main..HEAD, <first>~1..<last>, --all
 #   bash .claude/scripts/d16-gate.sh dir <path>...    # untracked surfaces: .claude/docs/, the agent memory directory
 #   bash .claude/scripts/d16-gate.sh selftest         # negation proof: seeds every form in throwaway repos
+# Optional, for identifiers the folder names do not yield (`/audit` D16.2, D16.2b, D16.2c):
+#   D16_EXTRA=<file>     one identifier per line — escaped, case-folded, matched as a substring
+#   D16_EXTRA_RE=<file>  one ERE per line (value shapes) — used as written after trimming each line;
+#                        a pattern that matches an empty line FAILS CLOSED
+#   Keep both files OUTSIDE the repo. A set but unreadable variable FAILS CLOSED.
 #
 # Output: `staged` / `log` / `dir` print exactly ONE line — `D16 <scope>: N <unit> scanned, H hits`
 # (GREEN iff H is 0) or `D16 RED: <reason>`; `selftest` prints one line per case and ends with
@@ -34,7 +39,9 @@
 #   - a full folder name shorter than 4 characters matches as a substring everywhere: false RED; rename.
 #   - a sparse index (index.sparse=true) makes `staged` fail closed on stderr.
 #   - `log <range>` reads commits, not tags; tag objects are read only when the args carry --all/--tags.
-#     A branch push (`git push origin main`) publishes no tag.
+#     A branch push publishes no tag ONLY with push.followTags off — `/maintenance`'s push gate pins
+#     it and scans the pushed ref's range, never HEAD's (`/audit` 2026-09-15 Z-1).
+#   - D16_EXTRA identifiers are case-folded for ASCII letters only; a non-ASCII letter matches its exact case.
 #
 # The blocklist is derived from the mother repo's `projects/*/` folder names (hidden ones included)
 # at run time, with CamelCase names split like separators (`AcmePortal` -> `Acme_Portal`):
@@ -89,13 +96,40 @@ build() {
          print "(^|[^[:alpha:]])" $0 "[A-Z]"
          print "[a-z]" u "([^A-Za-z]|[A-Z][a-z]|$)"
          print "(^|[^[:alpha:]])" u "[A-Z][a-z]" }' "$T/parts" > "$T/pc"
+  # Caller-supplied identifiers and value shapes ride the SAME reads (`/audit` 2026-09-15 Z-3).
+  # Normalised the way a Windows editor writes them: a UTF-8 BOM stripped, CR stripped, each line
+  # trimmed. A UTF-16 file (NUL bytes) FAILS CLOSED — stripping would silently corrupt the patterns;
+  # the first version of this read 0 hits over a leak for a BOM, a UTF-16 file and a trailing space.
+  : > "$T/xre"
+  # Validation runs in the MAIN shell, never under a redirect: `fail` inside `f > file` would write its
+  # `D16 RED:` line into the file and exit 2 with nothing on stdout.
+  extra_check() {
+    { [ -f "$1" ] && [ -r "$1" ]; } || fail "$2 is set but is not a readable file"
+    [ "$(tr -d '\000' < "$1" | wc -c)" = "$(wc -c < "$1")" ] || fail "$2 contains NUL bytes (UTF-16?) — save it as UTF-8"
+  }
+  # CR becomes a line break (a CR-only file is otherwise ONE pattern); a BOM is stripped on EVERY line.
+  extra_lines() { tr '\r' '\n' < "$1" | sed 's/^\xEF\xBB\xBF//; s/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$'; }
+  if [ -n "${D16_EXTRA:-}" ]; then
+    extra_check "$D16_EXTRA" D16_EXTRA
+    extra_lines "$D16_EXTRA" > "$T/xid" || true
+    [ -s "$T/xid" ] || fail "D16_EXTRA is set but yields no identifiers after normalising"
+    sed "$ESC" "$T/xid" | awk "$FOLD" >> "$T/full"
+  fi
+  if [ -n "${D16_EXTRA_RE:-}" ]; then
+    extra_check "$D16_EXTRA_RE" D16_EXTRA_RE
+    extra_lines "$D16_EXTRA_RE" > "$T/xre" || true
+    [ -s "$T/xre" ] || fail "D16_EXTRA_RE is set but yields no patterns after normalising"
+    # A pattern that matches an EMPTY line (`^`, `.*`) makes every line a hit — diagnose it, never report it as a leak.
+    printf '\n' | grep -qE -f "$T/xre" 2>/dev/null && fail "D16_EXTRA_RE has a pattern that matches an empty line"
+  fi
 }
 
 # Three pattern classes: flags then pattern file.
 # All three are case-folded or case-sensitive EREs — no `-F`, no `-i` (see FOLD above).
 CLASSES='-E:full
 -E:pi
--E:pc'
+-E:pc
+-E:xre'
 
 # Count matching lines of a plain text FILE (paths list, log stream). grep rc 0/1 = ok, >1 = error.
 count_file() {
@@ -305,6 +339,31 @@ case "$scope" in
     stage_one a.md "Grafana systematic pages";      expect "synthetic control"                green staged
     mkdir -p "$SM/projects/Ürsula";                 expect "non-ASCII folder name"            closed staged
     GATE=$SELF; rm -rf "$SM"
+    echo "caller-supplied identifiers (D16_EXTRA / D16_EXTRA_RE, invented values):"
+    XF="$S.ids"; XR="$S.res"
+    printf 'Zorblax Widgetry\nzorblaxcorp\n' > "$XF"; printf 'zq-[0-9]{6}\n' > "$XR"
+    stage_one a.md "a note on ZORBLAX WIDGETRY";    expect "extra identifier, no variable set" green staged
+    export D16_EXTRA="$XF" D16_EXTRA_RE="$XR"
+    stage_one a.md "a note on ZORBLAX WIDGETRY";    expect "extra identifier, contents"        red staged
+    reset_index; printf 'key zq-123456\n' | iconv -f UTF-8 -t UTF-16LE > a.md; git add a.md
+                                                    expect "extra value shape, UTF-16 file"    red staged
+    reset_index; git commit -q --allow-empty -m base3
+    git -c user.email="ops@zorblaxcorp.example" commit -q --allow-empty -m plain
+    expect "extra identifier, author e-mail" red log HEAD~1..HEAD
+    printf '\357\273\277  zorblaxcorp \t\r\n' > "$XF"                       # BOM + padding + CRLF
+    stage_one a.md "see zorblaxcorp docs";          expect "extra file with BOM and padding"   red staged
+    printf 'Unrelated\n\357\273\277zorblaxcorp\n' > "$XF"                   # BOM on a LATER line
+                                                    expect "extra file, BOM on a later line"   red staged
+    printf 'Unrelated\rzorblaxcorp\r' > "$XF"                                # CR-only line endings
+                                                    expect "extra file, CR-only endings"       red staged
+    printf 'zorblaxcorp\n' | iconv -f UTF-8 -t UTF-16LE > "$XF"
+                                                    expect "extra file in UTF-16"              closed staged
+    printf 'zorblaxcorp\n' > "$XF"; printf '   \n' > "$XR"
+                                                    expect "whitespace-only D16_EXTRA_RE"      closed staged
+    printf '^\n' > "$XR";                           expect "RE matching an empty line"         closed staged
+    printf 'zq-[0-9]{6}\n' > "$XR"
+    export D16_EXTRA="$S.missing";                  expect "unreadable D16_EXTRA"              closed staged
+    unset D16_EXTRA D16_EXTRA_RE; rm -f "$XF" "$XR"
     echo "controls:"
     stage_one a.md "Grafana systematic pages database administration"; expect "ordinary words"      green staged
     reset_index; expect "empty index"                                   green staged

@@ -229,8 +229,8 @@ CHECKS:
          and in CamelCase, so a `_`-glued snake_case identifier hits; `/audit` 2026-09-14 Y-3).
          **ALWAYS run the folder-name half with `bash .claude/scripts/d16-gate.sh`** — `staged`
          for tracked files, `dir <path>...` for `.claude/docs/` and the memory directory, `log --all`
-         for history. It derives every variant above, prints one line and never a match. Extend by
-         hand only with the D16.2 / D16.2c identifiers, which it does not derive.
+         for history. It derives every variant above, prints one line and never a match.
+         **ALWAYS feed the D16.2 / D16.2c identifiers it does not derive through `D16_EXTRA`** (D16.3c).
   D16.2. From each project's own CLAUDE.md / project.md (read-only), harvest additional
          identifiers: client/person names, deployment domains (*.vercel.app, custom
          domains), repo URLs, infra refs (e.g. Supabase project ids).
@@ -253,7 +253,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.23.1 they are
+         **Expected: at least 5 paths.** As of v2.23.2 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
@@ -312,10 +312,17 @@ CHECKS:
          resolvable" — never silently omit the surface.
   D16.3c. Git-history scan: names and values survive deletion — a leak removed from the
          tree still lives in every commit that contained it. Scan ALL commits:
-         - Contents: `git grep -I -c -E "<blocklist|value patterns>" $(git rev-list --all)`
-         - Messages: `git log --all --format="%h|%s|%b"` grepped for the same patterns
-         - Folder-name blocklist over patches, messages AND paths in one pass:
-           `bash .claude/scripts/d16-gate.sh log --all` (expected: `…, 0 hits`)
+         - **ONE PASS FOR EVERYTHING — folder names, the D16.2/D16.2c identifiers and the D16.2b
+           value shapes — over patches, messages, raw commit objects, tag objects AND paths.**
+           ALWAYS write the identifiers (one per line) and the value-shape EREs (one per line) to
+           two files OUTSIDE the repo — never tracked, never printed — and run:
+           `D16_EXTRA=<ids file> D16_EXTRA_RE=<EREs file> bash .claude/scripts/d16-gate.sh log --all`
+           (expected: `…, 0 hits`; the same two variables apply to `staged` and `dir`).
+         - **NEVER scan these patterns with `git grep -I` or `git log --format="%h|%s|%b"`** — both read
+           0 on UTF-16, NUL-byte and `binary`-attributed files, on paths, on author e-mails and on
+           tag objects, and both interpolate the pattern (`/audit` 2026-09-15 Z-3).
+         - A non-zero count is LOCATED by narrowing the scope (`log <A>..<B>`, `dir <path>`), NEVER
+           by printing the matched line.
          Classify each hit by reachability: in UNPUSHED commits → fixable locally
          (`git filter-branch --msg-filter` for messages, tree rewrite for contents);
          in PUSHED history → escalate to the owner (requires history rewrite + force

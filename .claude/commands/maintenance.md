@@ -23,10 +23,16 @@ This is a framework maintenance session, not a project bootstrap.
   a PUBLIC repo (`/audit` 2026-09-10 U-48). **A gate whose result is not branched on is not a
   gate.** ALWAYS:
   ```bash
-  out=$(bash .claude/scripts/d16-gate.sh log origin/main..HEAD)   # ONE line, never a stream
+  out=$(bash .claude/scripts/d16-gate.sh log origin/main..main)   # the PUSHED ref's range — ONE line
   hits=$(printf '%s' "$out" | sed -n 's/.*, \([0-9][0-9]*\) hits$/\1/p')
-  if [ "$hits" = 0 ]; then git push origin main; else echo "D16 BLOCKED: $out"; fi
+  if [ "$hits" = 0 ]; then git -c push.followTags=false push origin main; else echo "D16 BLOCKED: $out"; fi
   ```
+  **THE RANGE NAMES THE REF THE PUSH PUBLISHES, AND THE PUSH PINS WHAT ELSE IT COULD CARRY.**
+  `origin/main..HEAD` read `0 hits` over a leak committed on `main` while HEAD sat on another branch,
+  and `push.followTags=true` in a user config would have published an unscanned tag
+  (`/audit` 2026-09-15 Z-1).
+  **ALWAYS scan `origin/main..main` for `git push origin main`, and ALWAYS pin `push.followTags=false`** —
+  a push that must carry tags is a different push and needs `log --all`.
   **THE SCAN IS THE `log` SCOPE OVER THE UNPUSHED RANGE — NEVER A NET-TIP DIFF.** A push publishes
   every commit in the range, so a leak added and removed inside it is published; a net-tip form
   (`git diff --name-only origin/main HEAD | xargs grep`) read 0 over exactly that while
@@ -468,8 +474,9 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    that recolours or re-encodes git output (`color.ui`, `log.showRoot`, a diff textconv,
    `i18n.logOutputEncoding`, `i18n.commitEncoding`), an author e-mail, a blob or commit hidden by
    `git replace`, an annotated tag message, and — under INVENTED names in a synthetic mother repo — a
-   CamelCase, an all-caps and a hidden folder name — and each MUST read RED; a non-ASCII folder name
-   MUST fail closed; two controls (ordinary words, an
+   CamelCase, an all-caps and a hidden folder name, plus an identifier and a value shape supplied
+   through `D16_EXTRA` / `D16_EXTRA_RE` — and each MUST read RED; a non-ASCII folder name and an
+   unreadable `D16_EXTRA` MUST fail closed; two controls (ordinary words, an
    empty index) MUST read GREEN. Hand-picked seeds certified a gate blind to the whole name (X-20)
    and left the swapped form unseeded (Y-6).
    **ALWAYS ADD a selftest case in the same edit that teaches the gate a new form.** The selftest scans its own output with the gate before printing:
@@ -792,6 +799,9 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # how the stale `52` was produced): maintenance.md 5 fenced + 26 inline = 31;
    # audit.md 7 + 28 = 35; TOTAL 66. (The 2026-09-11 figure, 62, was stale by one from 512f07b; a
    # first write of THIS line said 65 and was stale before the batch closed — measured again here.)
+   # RE-MEASURED 2026-09-15 at the tip of the batch applying `/audit` 2026-09-15 Z-1 (its push-gate
+   # prose added one inline control): maintenance.md 5 fenced + 27 inline = 32; audit.md 7 + 28 = 35;
+   # TOTAL 67.
    # RE-MEASURE THIS AT THE FINAL TIP, NEVER MID-BATCH. Written mid-batch it read 54, then 60,
    # and both were stale before the batch closed — U-6's own class, inside U-6's own fix.
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.

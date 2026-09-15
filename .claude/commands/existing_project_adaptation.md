@@ -24,6 +24,15 @@ This is an **existing project adaptation session** for project **$ARGUMENTS**.
 
 Before starting the process:
 
+**ALWAYS REFUSE, BY READING THE NAME BEFORE RUNNING ANY FENCE, a project name that is empty, starts
+with `.`, or contains any character outside `[A-Za-z0-9._-]`** — tell the owner and stop. Every
+fence in this command expands `projects/$ARGUMENTS` (most of them unquoted), so a space splits the path into stray
+directories and a glob character matches other folders (`/audit` 2026-09-14 Y-8).
+**NO FENCE CAN ENFORCE THIS.** `$ARGUMENTS` is substituted as TEXT before bash parses a fence, so a
+`$(…)`, a backtick or a quote in the name EXECUTES, or breaks out of its quoting, in the first fence that contains it — a check inside that
+fence runs too late. The guard at the top of Step 2.9's first fence is a backstop for the path
+classes only. The same prose guard opens `bootstrap.md`.
+
 1. Verify `projects/$ARGUMENTS/` exists. If not, stop and tell the user: "Project '$ARGUMENTS' not found in projects/. Use `/bootstrap $ARGUMENTS` for a new project or place the existing project in `projects/$ARGUMENTS/`."
 
 Execute in order. Report results after each part.
@@ -235,7 +244,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.23.1 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.23.2 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -327,6 +336,10 @@ Check for required sections:
 
 If the Progress Log uses the old format (full session entry blocks), convert it to an index table during this adaptation. Extract session number, date, and 1-line summary from each block. Use `—` for the Log column (no log files exist for old sessions). Preserve old entries below the table as a legacy block.
 
+**THE TWO RECORDS BELOW ARE SPECIFIED HERE AND WRITTEN IN STEP 4.2 — NEVER write them in this step.**
+This step runs in Phase 2: the retroactive PRD the row announces does not exist until Phase 3, and
+`.claude/logs/` is created by Step 4.2 (`/audit` 2026-09-14 W-17).
+
 Add an adaptation row to the Progress Log index table:
 
 ```markdown
@@ -389,9 +402,15 @@ Check and upgrade:
 □ Criteria are at STRONG level (action + expected result + failure signal)
 □ done_tasks.md exists (or legacy Done section — will be migrated by pendencias-updater)
 □ Future Improvements section exists
+□ The task-format legend carries the `origin:` field (`owner` / `discovered`)
 □ Dependency mapping (depends:/parallel:) is optional but noted
 □ Evolution classification (FIX/DERIVED/CAPTURED) noted for items that originated from bug fixes or pattern captures during codebase analysis
 ```
+
+**ALWAYS ADD the `origin:` legend when it is missing** — copy its three lines from
+`docs/modules/templates/pendencias_md.md`. `autonomous-loop` continuous mode reads a task with no
+`origin:` line as `owner`, so a project without the legend admits every AI-filed task uncapped
+(`/audit` 2026-09-14 X-4).
 
 **For existing tasks without these fields:** Add them based on the task description and your understanding of the codebase. Mark additions with `← added during adaptation` so the user can review.
 
@@ -520,9 +539,16 @@ For each match: copy from `assets/examples/rules/` to `.claude/rules/`, adapting
 
 **Step 2.8 — Verify and upgrade skills:**
 
-Read each skill. Verify frontmatter has `effort:` field. Add if missing (most skills are `effort: medium`; security-related are `effort: high`). For review/validation/security skills, verify `invocation: subagent` and `receives:`/`produces:` fields. For knowledge/reference skills, verify `invocation: inline`.
+**NEVER edit in this step a component Steps 2.9 / 2.9b compare against the framework** — any skill
+whose folder name exists in `docs/modules/skills/`, and the agents `prd-sync-checker`,
+`criteria-enforcer`, `diff-pattern-extractor` and `skill-reviewer`. Those steps compare them byte
+for byte, and a field added here turns every pristine copy into `DIFFERS` (`/audit` 2026-09-14
+X-2). Other agents built from templates (code-reviewer, validator, …) are upgraded by their own
+steps and are NOT covered by this rule. A refresh brings their current frontmatter.
 
-**Verify lineage fields** on all agents/skills: `created:`, `last_eval:` (subagent only), `fixes:`, `derived_from:`. Add if missing — set `created:` to the adaptation session, `last_eval: none (pre-framework)`, `fixes: []`, `derived_from: null`.
+Read each OTHER skill. Verify frontmatter has `effort:` field. Add if missing (most skills are `effort: medium`; security-related are `effort: high`). For review/validation/security skills, verify `invocation: subagent` and `receives:`/`produces:` fields. For knowledge/reference skills, verify `invocation: inline`.
+
+**Verify lineage fields** on every OTHER agent/skill: `created:`, `last_eval:` (subagent only), `fixes:`, `derived_from:`. Add if missing — set `created:` to the adaptation session, `last_eval: none (pre-framework)`, `fixes: []`, `derived_from: null`.
 
 **Flat→folder migration (Claude Code skills):** If any skills exist as flat files (`.claude/skills/[name].md`), migrate to the Anthropic folder format:
 ```bash
@@ -539,28 +565,36 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.23.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.23.2 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
 # CREATE BOTH TARGETS FIRST. This command targets projects with PARTIAL structure, and `cp` into a
 # missing directory FAILS — the loops below ran before any mkdir and reported every copy as done
 # while installing nothing (`/audit` 2026-09-14 X-21, X-22). Bootstrap's twin creates them at 5.7.
+# BACKSTOP for the Setup guard — it catches a name that splits or globs, NEVER an injected `$(…)`,
+# which ran when this fence was parsed (`/audit` 2026-09-14 Y-8).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
 mkdir -p "projects/$ARGUMENTS/.claude/skills" "projects/$ARGUMENTS/.claude/agents"
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
   case "$skill_name" in codebase-audit|framework-audit|skill-gate) continue ;; esac  # tier-gated — copied in Step 2.9b
   if [ ! -d "projects/$ARGUMENTS/.claude/skills/$skill_name" ]; then
     if cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"; then echo "Copied skill: $skill_name"; else echo "FAILED to copy skill: $skill_name"; fi
-  elif diff -rq "${skill_dir%/}" "projects/$ARGUMENTS/.claude/skills/$skill_name" >/dev/null 2>&1; then
-    echo "SKIPPED (identical): $skill_name"
   else
-    echo "DIFFERS from framework: $skill_name — owner decides: refresh or keep"
+    diff -rq "${skill_dir%/}" "projects/$ARGUMENTS/.claude/skills/$skill_name" >/dev/null 2>&1; rc=$?
+    if [ $rc -eq 0 ]; then echo "SKIPPED (identical): $skill_name"
+    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $skill_name — owner decides: refresh or keep"
+    else echo "FAILED to compare skill: $skill_name"; fi   # exit 2 = unreadable, never a difference
   fi
 done
 ```
 
-**ALWAYS REPORT every `DIFFERS` skill and ASK the owner, per skill, whether to refresh it.**
+**ALWAYS REPORT every `DIFFERS` component and ASK the owner — ONE question per component OUTSIDE the
+coupled set below, and ONE question for the WHOLE coupled set.** ALWAYS show the diff before asking:
+a refresh REPLACES the project's copy. Asking per skill inside the set contradicted "ALL of it or
+NONE of it" (`/audit` 2026-09-14 X-4).
 - **NEVER overwrite silently** — the project may carry its own evolutions of that skill.
 - **NEVER skip silently** — the project would keep an old contract under the new version label.
 
@@ -572,16 +606,47 @@ discovered tasks would admit every AI-filed task uncapped. `autonomous-loop` →
 C1 fails CLOSED on that state, so a partial refresh leaves the mode unavailable rather than unsafe —
 but only a full refresh makes it usable (`/audit` 2026-09-14 W-2).
 
+**REFRESH — ONLY what the owner chose. `cp -r SRC DEST` onto an EXISTING `DEST` nests it
+(`DEST/<name>/SKILL.md`), so ALWAYS remove, then copy, with these helpers** (`/audit` 2026-09-14 X-4):
+```bash
+# Each helper VALIDATES THE SOURCE and THE TARGET'S KIND BEFORE touching anything: an empty or
+# template-less name must never reach `rm -rf`, and `cp` onto a DIRECTORY writes INSIDE it.
+refresh_skill() { s="./docs/modules/skills/$1"; d="projects/$ARGUMENTS/.claude/skills/$1"
+  case "$1" in ''|*[!a-z0-9-]*) echo "FAILED to refresh skill: '$1' is not a skill name — nothing removed"; return 1 ;; esac   # `../agents` passed the template check
+  if [ ! -d "$s" ]; then echo "FAILED to refresh skill: '$1' has no framework template — nothing removed"
+  elif [ -e "$d" ] && [ ! -d "$d" ]; then echo "FAILED to refresh skill: $1 — a file occupies the target"
+  elif rm -rf "$d" && cp -r "$s" "$d"; then echo "Refreshed skill: $1"; else echo "FAILED to refresh skill: $1"; fi; }
+refresh_agent() { s="docs/modules/agents/$1.md"; d="projects/$ARGUMENTS/.claude/agents/$(echo "$1" | tr '_' '-').md"
+  case "$1" in ''|*[!a-z_]*) echo "FAILED to refresh agent: '$1' is not a template name"; return 1 ;; esac
+  if [ ! -f "$s" ]; then echo "FAILED to refresh agent: '$1' has no framework template"
+  elif [ -d "$d" ]; then echo "FAILED to refresh agent: $1 — a directory occupies the target"
+  elif cp "$s" "$d"; then echo "Refreshed agent: $1"; else echo "FAILED to refresh agent: $1"; fi; }
+refresh_extract() { src=$1; lang=$2; d=$3; t=$(mktemp); sed -n "/^\`\`\`\`$lang\$/,/^\`\`\`\`\$/p" "$src" 2>/dev/null | sed '1d;$d' > "$t"
+  if [ ! -s "$t" ]; then echo "FAILED to refresh: $src extracted empty"
+  elif [ -d "$d" ]; then echo "FAILED to refresh: $d — a directory occupies the target"
+  elif cp "$t" "$d"; then echo "Refreshed: $d"; else echo "FAILED to refresh: $d"; fi; rm -f "$t"; }
+refresh_rule() { refresh_extract "docs/modules/rules/$1.md" markdown "projects/$ARGUMENTS/.claude/rules/$(echo "$1" | tr '_' '-').md"; }
+refresh_guard() { refresh_extract docs/modules/templates/check_agent_frontmatter.md js "projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs"; }
+# The coupled set, on ONE owner answer (add codebase-audit / skill-gate when Step 2.9b installed them):
+#   for s in autonomous-loop sprint-proposer pendencias-updater validation-orchestrator session-end; do refresh_skill "$s"; done
+#   refresh_agent diff_pattern_extractor
+```
+**ALWAYS define these helpers and call them in the SAME shell invocation** — a function defined in one
+Bash call does not exist in the next, and an undefined helper prints no verdict at all.
+
 **Copy process agents (3 subagents — to `.claude/agents/`):**
 ```bash
 for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
   dest_name=$(echo "$agent" | tr '_' '-')
-  if [ ! -f "projects/$ARGUMENTS/.claude/agents/$dest_name.md" ]; then
+  if [ -d "projects/$ARGUMENTS/.claude/agents/$dest_name.md" ]; then
+    echo "FAILED to copy agent: $dest_name — a directory occupies the target"   # X-23: cp would write INTO it
+  elif [ ! -e "projects/$ARGUMENTS/.claude/agents/$dest_name.md" ]; then
     if cp "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"; then echo "Copied agent: $dest_name"; else echo "FAILED to copy agent: $dest_name"; fi
-  elif cmp -s "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"; then
-    echo "SKIPPED (identical): $dest_name.md"
   else
-    echo "DIFFERS from framework: $dest_name.md — owner decides: refresh or keep (diff-pattern-extractor is in the coupled set above)"
+    cmp -s "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"; rc=$?
+    if [ $rc -eq 0 ]; then echo "SKIPPED (identical): $dest_name.md"
+    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $dest_name.md — owner decides: refresh or keep (diff-pattern-extractor is in the coupled set above)"
+    else echo "FAILED to compare agent: $dest_name.md"; fi
   fi
 done
 ```
@@ -597,27 +662,42 @@ done
 # not — twin asymmetry, found by the LATERAL directory sweep (`/audit` 2026-09-11).
 # `.claude/agents/` is now ALSO created at the top of the skills fence above, which runs first
 # (`/audit` 2026-09-14 X-22); repeating it here is harmless and keeps this fence self-sufficient.
-mkdir -p projects/$ARGUMENTS/.claude/rules projects/$ARGUMENTS/.claude/agents projects/$ARGUMENTS/.claude/docs projects/$ARGUMENTS/assets/docs
+mkdir -p "projects/$ARGUMENTS/.claude/rules" "projects/$ARGUMENTS/.claude/agents" "projects/$ARGUMENTS/.claude/docs" "projects/$ARGUMENTS/assets/docs"
+# A VERDICT FOR EVERY OUTCOME, and `Copied` ONLY after the write succeeded and is non-empty: a redirect
+# into an occupied path, or an empty extraction, printed `Copied` over nothing (`/audit` 2026-09-14 Y-8).
+# An existing file gets the same identical / DIFFERS verdict skills and agents get (X-4).
 for tmpl in session_rules evolution_policy component_design; do
   target=$(echo "$tmpl" | tr '_' '-')
-  if [ ! -f "projects/$ARGUMENTS/.claude/rules/${target}.md" ]; then
-    sed -n '/^````markdown$/,/^````$/p' "docs/modules/rules/${tmpl}.md" | sed '1d;$d' > "projects/$ARGUMENTS/.claude/rules/${target}.md"
-    echo "Copied ${target}.md"
-  else
-    echo "SKIPPED (already exists): ${target}.md — verify manually"
+  dest="projects/$ARGUMENTS/.claude/rules/${target}.md"
+  t=$(mktemp); sed -n '/^````markdown$/,/^````$/p' "docs/modules/rules/${tmpl}.md" | sed '1d;$d' > "$t"
+  if [ ! -s "$t" ]; then echo "FAILED to extract rule template: ${tmpl}.md"
+  elif [ ! -e "$dest" ]; then
+    if cp "$t" "$dest"; then echo "Copied ${target}.md"; else echo "FAILED to copy rule: ${target}.md"; fi
+  elif [ ! -f "$dest" ]; then echo "FAILED to copy rule: ${target}.md — the target is not a regular file"
+  else cmp -s "$t" "$dest"; rc=$?
+    if [ $rc -eq 0 ]; then echo "SKIPPED (identical): ${target}.md"
+    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: ${target}.md — owner decides: refresh or keep"
+    else echo "FAILED to compare rule: ${target}.md"; fi
   fi
+  rm -f "$t"
 done
 ```
 
 **Copy the component-registry liveness guard (all tiers — to `scripts/`):**
 ```bash
-mkdir -p projects/$ARGUMENTS/scripts
-if [ ! -f "projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs" ]; then
-  sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > "projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs"
-  echo "Copied guard: scripts/check-agent-frontmatter.mjs"
-else
-  echo "SKIPPED (already exists): check-agent-frontmatter.mjs — verify manually against framework version"
+mkdir -p "projects/$ARGUMENTS/scripts"
+dest="projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs"
+t=$(mktemp); sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > "$t"
+if [ ! -s "$t" ]; then echo "FAILED to extract guard template: check_agent_frontmatter.md"
+elif [ ! -e "$dest" ]; then
+  if cp "$t" "$dest"; then echo "Copied guard: scripts/check-agent-frontmatter.mjs"; else echo "FAILED to copy guard: scripts/check-agent-frontmatter.mjs"; fi
+elif [ ! -f "$dest" ]; then echo "FAILED to copy guard: scripts/check-agent-frontmatter.mjs — the target is not a regular file"
+else cmp -s "$t" "$dest"; rc=$?
+  if [ $rc -eq 0 ]; then echo "SKIPPED (identical): check-agent-frontmatter.mjs"
+  elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: check-agent-frontmatter.mjs — owner decides: refresh or keep"
+  else echo "FAILED to compare guard: check-agent-frontmatter.mjs"; fi
 fi
+rm -f "$t"
 ```
 
 An invalid YAML frontmatter makes a component silently VANISH from the registry
@@ -625,6 +705,13 @@ An invalid YAML frontmatter makes a component silently VANISH from the registry
 project has a `package.json`, register `"check:agents": "node scripts/check-agent-frontmatter.mjs"`;
 if it has a CI pipeline, add a `guards` stage running it (dependency-free, no install needed).
 Then RUN it once now — an adapted project may already carry a broken frontmatter.
+
+**ALWAYS STOP on any `FAILED` line printed by the fences of this step AND of Step 2.9b** — `FAILED to
+copy`, `FAILED to extract`, `FAILED to refresh`, `FAILED to compare`. The target is unwritable, occupied by a file or directory
+of the wrong kind, or its template extracted empty (`/audit` 2026-09-14 Y-9).
+- **NEVER continue past a FAILED component** — into Step 2.9b, or out of it — every CLAUDE.md pointer to it is a broken reference.
+- **ALWAYS name the path to the owner, ASK before removing anything that belongs to the project**, fix it, and re-run the fence until it prints no `FAILED` line.
+- **ALWAYS REPORT — `copy failures: none` or `copy failures: N resolved by re-run — [components]`.** An unresolved failure has no verdict, because the step has not ended.
 
 **Expected after this step:**
 - **Process skills (12 lifecycle):** sprint-proposer, autonomous-loop, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit
@@ -667,25 +754,64 @@ PROFILE="[chosen]"   # prototype | internal-tool | production | production-finan
 PROJ="projects/$ARGUMENTS"
 # EPA targets projects that may have NO framework structure — the metrics redirects below
 # fail silently without this. (bootstrap has the same guard at its Step 5.8.)
-mkdir -p "$PROJ/.claude/phases"
+mkdir -p "$PROJ/.claude/phases" "$PROJ/.claude/skills" "$PROJ/.claude/agents"
+# VERDICTS, NEVER A SILENT `[ ! -d ] && cp`: codebase-audit and skill-gate are members of Step 2.9's
+# coupled set, and a copy with no verdict cannot be refreshed all-or-none (`/audit` 2026-09-14 X-3).
+tier_skill() { d="$PROJ/.claude/skills/$1"
+  if [ ! -e "$d" ]; then if cp -r "docs/modules/skills/$1" "$d"; then echo "Copied skill: $1"; else echo "FAILED to copy skill: $1"; fi
+  elif [ ! -d "$d" ]; then echo "FAILED to copy skill: $1 — a file occupies the target"
+  else diff -rq "docs/modules/skills/$1" "$d" >/dev/null 2>&1; rc=$?
+    if [ $rc -eq 0 ]; then echo "SKIPPED (identical): $1"
+    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $1 — owner decides: refresh or keep (Step 2.9 coupled set)"
+    else echo "FAILED to compare skill: $1"; fi
+  fi; }
+tier_agent() { n=$(echo "$1" | tr '_' '-'); d="$PROJ/.claude/agents/$n.md"
+  if [ -d "$d" ]; then echo "FAILED to copy agent: $n.md — a directory occupies the target"
+  elif [ ! -e "$d" ]; then if cp "docs/modules/agents/$1.md" "$d"; then echo "Copied agent: $n.md"; else echo "FAILED to copy agent: $n.md"; fi
+  else cmp -s "docs/modules/agents/$1.md" "$d"; rc=$?
+    if [ $rc -eq 0 ]; then echo "SKIPPED (identical): $n.md"
+    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $n.md — owner decides: refresh or keep"
+    else echo "FAILED to compare agent: $n.md"; fi
+  fi; }
+# Extracted templates: a RULE gets identical / DIFFERS; a PHASE DOC (metrics) is project data once
+# present, so it is never compared. A redirect with no verdict left a 0-byte file silently.
+tier_tmpl() { src=$1; d=$2; kind=$3; t=$(mktemp); sed -n '/^````markdown$/,/^````$/p' "$src" | sed '1d;$d' > "$t"
+  if [ ! -s "$t" ]; then echo "FAILED to extract: $src"
+  elif [ -d "$d" ]; then echo "FAILED to copy: $d — a directory occupies the target"
+  elif [ ! -s "$d" ]; then   # absent, OR the 0-byte file the old silent redirect left behind
+    if cp "$t" "$d"; then echo "Copied: $d"; else echo "FAILED to copy: $d"; fi
+  elif [ "$kind" = data ]; then echo "SKIPPED (present — project data): $d"
+  else cmp -s "$t" "$d"; rc=$?
+    if [ $rc -eq 0 ]; then echo "SKIPPED (identical): $d"
+    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $d — owner decides: refresh or keep"
+    else echo "FAILED to compare: $d"; fi
+  fi; rm -f "$t"; }
 case "$PROFILE" in
   internal-tool|production|production-financial)
-    [ ! -d "$PROJ/.claude/skills/codebase-audit" ] && cp -r docs/modules/skills/codebase-audit "$PROJ/.claude/skills/"
-    [ ! -f "$PROJ/.claude/phases/metrics.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/metrics_md.md | sed '1d;$d' > "$PROJ/.claude/phases/metrics.md"
-    [ ! -d "$PROJ/.claude/skills/skill-gate" ] && cp -r docs/modules/skills/skill-gate "$PROJ/.claude/skills/"
-    [ ! -f "$PROJ/.claude/agents/skill-reviewer.md" ] && cp docs/modules/agents/skill_reviewer.md "$PROJ/.claude/agents/skill-reviewer.md"
+    tier_skill codebase-audit
+    tier_tmpl docs/modules/templates/metrics_md.md "$PROJ/.claude/phases/metrics.md" data
+    tier_skill skill-gate
+    tier_agent skill_reviewer
     mkdir -p "$PROJ/.claude/drafts/skills" "$PROJ/.claude/drafts/rules" "$PROJ/.claude/skill-gate/review_reports"
     ;;
 esac
 case "$PROFILE" in
   production|production-financial)
-    [ ! -d "$PROJ/.claude/skills/framework-audit" ] && cp -r docs/modules/skills/framework-audit "$PROJ/.claude/skills/"
-    [ ! -f "$PROJ/.claude/phases/framework-metrics.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/framework_metrics_md.md | sed '1d;$d' > "$PROJ/.claude/phases/framework-metrics.md"
-    [ ! -f "$PROJ/.claude/rules/ops-rules.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > "$PROJ/.claude/rules/ops-rules.md"
-    [ ! -f "$PROJ/.claude/rules/quality-budgets.md" ] && sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > "$PROJ/.claude/rules/quality-budgets.md"
+    tier_skill framework-audit
+    mkdir -p "$PROJ/.claude/rules"
+    tier_tmpl docs/modules/templates/framework_metrics_md.md "$PROJ/.claude/phases/framework-metrics.md" data
+    tier_tmpl docs/modules/rules/ops_rules.md "$PROJ/.claude/rules/ops-rules.md" rule
+    tier_tmpl docs/modules/rules/quality_budgets.md "$PROJ/.claude/rules/quality-budgets.md" rule
     ;;
 esac
 ```
+
+**Step 2.9's STOP rule governs every `FAILED` line the fence above prints.**
+
+**`production-financial` — ALWAYS add a line under "Architecture Patterns" in `code-reviewer.md`
+(Step 2.4 created or upgraded it): `red-team is MANDATORY on every diff that touches a money path.`**
+Bootstrap Step 7 writes the same line; this twin carried none (found by the `/audit` 2026-09-14
+W-14 PARALLEL sweep).
 
 3. **CI floor (internal-tool+):** if the project has no CI workflow, create one (install → lint →
    build → test) or register a task to add it. **prototype:** skip all of the above.
@@ -850,6 +976,14 @@ fi
 
 **Note:** The smart-formatting hook requires Prettier. If the project doesn't use Prettier, create settings.json with only the `permissions` block and skip the hook — but KEEP the skill-gate hook entry (it has no dependencies). If settings.json already existed, merge the skill-gate hook entry into its `PostToolUse` array — without it, the gate installed in Step 2.9b is never enforced (it remains a harmless no-op on tiers where skill-gate was not copied).
 
+**ALWAYS WRITE HERE the adaptation row and the session log that Step 2.2 specifies** — the
+retroactive PRD exists now (Phase 3) and the fence above just created `.claude/logs/`.
+
+**ALWAYS write the hooks outcome into CLAUDE.md's `## Hooks` section** — the configured hooks, or
+`none — project has no formatter` — **and ALWAYS REPORT — `configured — [the hooks written]` or
+`none — project has no formatter`** (the two outcomes bootstrap Step 14 writes; the report offered
+this slot with no step producing it — `/audit` 2026-09-14 W-19).
+
 **Step 4.3 — Discover and install MCPs:**
 
 **4.3a. Check existing MCPs:**
@@ -884,6 +1018,10 @@ npx @anthropic-ai/claude-code mcp add playwright -- npx -y @anthropic-ai/mcp-ser
 If any fails: do not install, log reason. If uncertain: ASK user. Max 5 MCPs on day 1.
 
 Register installed MCPs in CLAUDE.md "MCP Servers" section.
+**ALWAYS REPLACE any placeholder in that section before this step ends** — with the installed
+servers, or with the literal line `None installed.` — **and ALWAYS REPORT — `MCP: N installed [names]`
+or `MCP: none installed — placeholder replaced`** (bootstrap Step 5's mandate; the report's second
+verdict had no producing step here — `/audit` 2026-09-14 W-19).
 
 **Step 4.4 — Enable Skill Creator plugin:**
 
@@ -1159,9 +1297,11 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - Risk profile: [prototype | internal-tool | production | production-financial], derived from [signals]
 - MACRO skeletons: codebase-audit / metrics.md / skill-gate + skill-reviewer + `.claude/drafts/` /
   framework-audit / framework-metrics.md / ops-rules.md / quality-budgets.md —
-  [copied (tier) / skipped (tier)] each
+  each [`Copied` · `SKIPPED (identical)` · `SKIPPED (present — project data)` · `DIFFERS from framework` → refreshed / kept · not copied (tier)]
+  (COPIED FROM the Step 2.9b helpers' verdicts; any `FAILED` line lands in "Copy failures" above)
 - CI floor: [created / skipped / deferred — task added]
-- `scripts/check-agent-frontmatter.mjs`: [copied / already present]
+- `scripts/check-agent-frontmatter.mjs`: [`Copied guard` · `SKIPPED (identical)` · `DIFFERS from framework` → refreshed (`refresh_guard`) / kept]
+  (COPIED FROM the Step 2.9 guard fence's verdicts; `already present` was the pre-verdict form)
 - `assets/examples/` (Step 4.1): [copied / already present]
 - Plugin enablement (Step 4.4): [key merged / none — unavailable]
 
@@ -1181,20 +1321,27 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - [any other new files]
 
 ### Process skills: [N of 12 copied from framework]
-### Existing components that DIFFER from the framework (Step 2.9 — owner decision per item): [name — refreshed / kept, or "none"]
-### Continuous-mode coupled set: [refreshed as a set | kept as a set | not installed]
+### Existing components that DIFFER from the framework (Steps 2.9 / 2.9b — one owner decision per item, ONE for the coupled set): [name — refreshed / kept, or "none"]
+### Continuous-mode coupled set: [no member differed (copied fresh / identical) | refreshed as a set | kept as a set]
+  (COPIED FROM the Step 2.9 loop verdicts. The five lifecycle members are always installed by that
+  step, so `not installed` was a value it could never produce — `/audit` 2026-09-14 X-5.)
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
 - **Segment or continuous orchestration (opt-in Level 5):** autonomous-loop
 - **Implementation:** validation-orchestrator
 - **Session end:** project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator
 - **PRD workflows:** cross-cutting-analysis
 - **Commit workflow:** commit
-- [list copied / list skipped (already existed)]
+- Per skill, the loop's own verdict: `Copied skill` · `SKIPPED (identical)` · `DIFFERS from framework` → refreshed / kept
+
+### Process agents (Step 2.9): [per agent — `Copied agent` · `SKIPPED (identical)` · `DIFFERS from framework` → refreshed / kept]
+
+### Copy failures (Steps 2.9 / 2.9b) — ALWAYS report, never omit:
+- `copy failures: none` · `copy failures: N resolved by re-run — [components]`
 
 ### Rules:
-- .claude/rules/session-rules.md [CREATED / SKIPPED]
-- .claude/rules/evolution-policy.md [CREATED / SKIPPED]
-- .claude/rules/component-design.md [CREATED / SKIPPED]
+- .claude/rules/session-rules.md [Copied · SKIPPED (identical) · DIFFERS → refreshed / kept]
+- .claude/rules/evolution-policy.md [Copied · SKIPPED (identical) · DIFFERS → refreshed / kept]
+- .claude/rules/component-design.md [Copied · SKIPPED (identical) · DIFFERS → refreshed / kept]
 
 ### Cross-cutting concerns (Phase 3 → Step 4.1b → Steps 2.2 / 2.3 / 4.6) — ALWAYS report, never omit:
 - Identified in Phase 3: [N] — [or `none identified`]
@@ -1254,11 +1401,13 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - [ ] 7. Business Model
 - [ ] [other TBD sections]
 
-### MCPs: [list with status] · `none installed — placeholder replaced`
+### MCPs (Step 4.3) — ALWAYS report, never omit:
+- `MCP: N installed [names]` · `MCP: none installed — placeholder replaced`
   (the second verdict was missing; the enumeration is COPIED FROM the mandating step,
   never re-derived — `/audit` 2026-09-03 P-21)
 ### Skills: [list with status]
-### Hooks: [configured — the hooks written / none — project has no formatter]
+### Hooks (Step 4.2) — ALWAYS report, never omit:
+- `configured — [the hooks written]` · `none — project has no formatter`
 (**COPIED FROM the hooks step's mandate verbatim**, and byte-equivalent to the bootstrap twin's
 slot. The banned three-verdict form lived here for two batches after being deleted from the twin —
 `/audit` 2026-09-04 R-13, written back `applied` with nothing landed; re-filed 2026-09-09 T-10.)
