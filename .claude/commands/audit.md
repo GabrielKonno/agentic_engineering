@@ -149,6 +149,7 @@ R-7, R-8). **Append a row; never re-derive the old ones.**
 | 9 | `audit-2026-09-04.md` | Run 9 | `**Run mode:** verification (over the Run 8 batch)` | 25 of 42 |
 | 10 | `audit-2026-09-09.md` | Run 10 | `**Run mode:** verification (over the Run 9 batch)` | 38 of 45 |
 | 11 | `audit-2026-09-10.md` | Run 11 | `**Run mode:** verification (over the Run 10 batch)` | 24 of 51 |
+| 12 | `audit-2026-09-14.md` | Run 2 | `**Run mode:** verification (over ecace7a)` | 10 of 13 |
 
 **No trend** (27%, 54%, 37%, 47%, 53%, 45%, 49%, 58%, 60%, 84%, 47%). Batch size has been
 exonerated five times and should not be re-litigated without new evidence.
