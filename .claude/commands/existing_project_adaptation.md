@@ -549,11 +549,25 @@ for skill_dir in ./docs/modules/skills/*/; do
   if [ ! -d "projects/$ARGUMENTS/.claude/skills/$skill_name" ]; then
     cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"
     echo "Copied skill: $skill_name"
+  elif diff -rq "${skill_dir%/}" "projects/$ARGUMENTS/.claude/skills/$skill_name" >/dev/null 2>&1; then
+    echo "SKIPPED (identical): $skill_name"
   else
-    echo "SKIPPED (already exists): $skill_name — verify manually against framework version"
+    echo "DIFFERS from framework: $skill_name — owner decides: refresh or keep"
   fi
 done
 ```
+
+**ALWAYS REPORT every `DIFFERS` skill and ASK the owner, per skill, whether to refresh it.**
+- **NEVER overwrite silently** — the project may carry its own evolutions of that skill.
+- **NEVER skip silently** — the project would keep an old contract under the new version label.
+
+**THE CONTINUOUS-MODE COUPLED SET — ALWAYS refresh ALL of it or NONE of it:** `autonomous-loop`,
+`sprint-proposer`, `pendencias-updater`, `validation-orchestrator`, `session-end`, and — when
+installed — `codebase-audit`, `skill-gate` and the `diff-pattern-extractor` agent. Continuous mode
+reads an untagged task as `owner`; refreshing `autonomous-loop` without the writers that tag
+discovered tasks would admit every AI-filed task uncapped. `autonomous-loop` → "Continuous mode" →
+C1 fails CLOSED on that state, so a partial refresh leaves the mode unavailable rather than unsafe —
+but only a full refresh makes it usable (`/audit` 2026-09-14 W-2).
 
 **Copy process agents (3 subagents — to `.claude/agents/`):**
 ```bash
@@ -563,7 +577,10 @@ for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
     cp "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"
     echo "Copied agent: $dest_name"
   else
-    echo "SKIPPED (already exists): $dest_name.md — verify manually"
+  elif cmp -s "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"; then
+    echo "SKIPPED (identical): $dest_name.md"
+  else
+    echo "DIFFERS from framework: $dest_name.md — owner decides: refresh or keep (diff-pattern-extractor is in the coupled set above)"
   fi
 done
 ```
@@ -1160,6 +1177,8 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - [any other new files]
 
 ### Process skills: [N of 12 copied from framework]
+### Existing components that DIFFER from the framework (Step 2.9 — owner decision per item): [name — refreshed / kept, or "none"]
+### Continuous-mode coupled set: [refreshed as a set | kept as a set | not installed]
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
 - **Segment or continuous orchestration (opt-in Level 5):** autonomous-loop
 - **Implementation:** validation-orchestrator

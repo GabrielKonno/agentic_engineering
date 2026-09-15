@@ -43,7 +43,7 @@ guardrails UNCHANGED and replaces only Step 1, the phase cut and the end conditi
 LOOP CONTINUATION markers, `project.md`, PRD sync). Duplicating them here would create a second
 home for the same mandate — the failure component-design §9 exists to prevent.
 
-Two legitimate paths in:
+Four legitimate paths in — two per mode:
 
 | Path | What already happened | What this skill does |
 |------|----------------------|----------------------|
@@ -418,12 +418,36 @@ every boundary, so a cut would be stale one task later.
 ### C1. The admission policy — present it ONCE, for approval
 
 **ALWAYS run sprint-proposer Steps 0-3 and the liveness guard (Step 1a, last item) BEFORE presenting
-the policy.** Then ALWAYS present:
+the policy.**
+
+**ALWAYS RUN the tagging-writer check BEFORE presenting the policy — continuous mode FAILS CLOSED
+without it.** Admission reads an untagged task as `owner`, so a project whose task-writing
+components predate the `origin:` field would admit every AI-filed task uncapped:
+
+```bash
+for f in .claude/skills/pendencias-updater/SKILL.md .claude/skills/sprint-proposer/SKILL.md \
+         .claude/skills/validation-orchestrator/SKILL.md .claude/skills/session-end/SKILL.md \
+         .claude/skills/codebase-audit/SKILL.md .claude/skills/skill-gate/SKILL.md \
+         .claude/agents/diff-pattern-extractor.md; do
+  [ -f "$f" ] && ! grep -q "origin: discovered" "$f" && echo "UNTAGGED WRITER: $f"
+done; true
+```
+
+**Expected: no output.** A writer that is not installed (a tier-gated skill) is skipped, never
+reported.
+- **Any output → continuous mode is UNAVAILABLE — NEVER present the policy.**
+- **ALWAYS name the untagged writers and offer segment mode instead** — a fixed list cannot absorb an
+  untagged discovery.
+- The remedy is `/existing_project_adaptation`, which refreshes these writers as one set.
+- **ALWAYS REPORT — `tagging writers: N checked, 0 untagged` or `tagging writers: K untagged — continuous mode unavailable`. NEVER emit nothing.**
+
+Then ALWAYS present:
 
 ```
 ## Continuous Mode Policy: [project]
 ### Entry: fresh continuous | cold — [detail]
 ### Liveness: [N components OK]
+### Tagging writers: [N checked, 0 untagged]
 ### Admission — a task enters the queue ONLY when ALL hold:
 - complexity small or medium (NEVER large)
 - `Complexity:` is NOT architecture/security
@@ -436,7 +460,7 @@ the policy.** Then ALWAYS present:
 ### Queue now: [N admitted — task list] | Held: [task — reason, or "none"]
 ### Model & effort per admitted task (MUST include — never omit): [complexity → model + effort — why]
 ### Pacing: per-task persistence (max ONE task in flight; each CLOSED to disk before the next)
-### Re-entry: `/loop /sprint-proposer` (see C6), or re-invoke manually
+### Re-entry: `/loop /sprint-proposer continuous` (see C6), or re-invoke manually
 ### What I need from you: approve the policy — it stands until you say "cancel continuous mode".
 ```
 
@@ -467,7 +491,7 @@ Queue empty after step 2 → C6 (idle).
 - **HOLD, never skip silently and never implement,** every task that fails admission for its KIND
   (large, architecture/security, no criteria).
   - **ALWAYS write each held task to the marker's `Held for owner` list, with its reason.**
-  - A task whose `depends:` includes a held task is held too — name the chain.
+  - **ALWAYS HOLD every task whose `depends:` includes a held task, and NAME the chain.**
 - **ALWAYS tag every task this mode files** with `origin: discovered (sN, task M)` in its header block
   (the `origin:` field of the pendencias template). An untagged task is treated as `origin: owner`:
   it predates this mode or was registered by hand, and the owner saw the queue in C1.
@@ -498,16 +522,31 @@ Continuous mode reuses the SAME marker string, so sprint-proposer Step 1 detects
 ```
 
 **The `Window` and `Last closed` lines are part of closure condition 2** — they ARE the loop's
-position, and nothing load-bearing may live only in the conversation. In continuous mode the
-task-closure check ALWAYS runs these two lines IN ADDITION to its own:
+position, and nothing load-bearing may live only in the conversation.
+
+**ALWAYS COMMIT every change to the `Window` line** — at a C6 reset, and at task closure IN THE
+TASK'S LAST COMMIT (the marker change MUST be in `HEAD` when the boundary is checked). The previous
+value then lives in git history, on disk, where an autocompact or a re-entry cannot lose it; a value
+remembered from the previous boundary is exactly what a compact erases.
+
+In continuous mode the task-closure check ALWAYS runs these lines IN ADDITION to its own:
 
 ```bash
-grep -c "^\*\*Mode:\*\* continuous" .claude/phases/project.md              # expected: 1
-grep -oE "^\*\*Window:\*\* closed [0-9]+" .claude/phases/project.md         # expected: previous boundary + 1
+grep -c "^\*\*Mode:\*\* continuous" .claude/phases/project.md                        # expected: 1
+w() { grep -oE "^\*\*Window:\*\* closed [0-9]+" | grep -oE "[0-9]+$"; }
+chg() { git log -"$1" --format=%H -G'^\*\*Window:\*\* closed' -- .claude/phases/project.md; }
+prevc=$(chg 2 | sed -n 2p); lastc=$(chg 1)
+prev=$( [ -n "$prevc" ] && git show "$prevc":.claude/phases/project.md | w )
+cur=$(w < .claude/phases/project.md)
+[ "$lastc" = "$(git rev-parse HEAD)" ] && [ -n "$cur" ] && [ "$cur" = "$(( ${prev:-0} + 1 ))" ] \
+  && echo "OK — window ${prev:-0} -> $cur" \
+  || echo "RED — window ${prev:-none} -> ${cur:-none}; marker last changed in ${lastc:0:7}, HEAD is $(git rev-parse --short HEAD)"
 ```
 
-**Expected: `1`, and a `closed` value exactly ONE above the previous boundary's output** — counting
-from `0` after a checkpoint reset, so the first boundary after a reset reads `closed 1`.
+**Expected: `1`, and `OK — window N -> N+1`.** RED also when the task's code was committed without
+the marker change — HEAD must be the commit that moved the counter. The previous value is read from
+the previous commit that changed the `Window` line, so a C6 reset (committed as `closed 0`) makes the
+next boundary read `OK — window 0 -> 1`.
 
 **Anything else is RED — the next task does NOT open.**
 
@@ -515,9 +554,19 @@ from `0` after a checkpoint reset, so the first boundary after a reset reads `cl
 
 ### C5. Stops — the checkpoint, the brake, revocation
 
-Every stop below ends at a TASK boundary and ALWAYS does all four: write `**State:**`, run
-`/session-end`, emit the digest, and **END THE RECURRING TRIGGER** (for `/loop`: stop the loop). A
-stop that re-fires on its own schedule is not a stop.
+Every stop below EXCEPT revocation ends at a TASK boundary and ALWAYS does all four: write
+`**State:**`, run `/session-end`, emit the digest, and **END THE RECURRING TRIGGER**. A stop that
+re-fires on its own schedule is not a stop.
+
+**ALWAYS END THE TRIGGER WITH THE MECHANISM THAT TRIGGER PROVIDES, and NAME it in the digest:**
+- a self-paced `/loop` → do NOT schedule its next wake-up (tell the loop to stop);
+- a fixed-interval `/loop` → delete its scheduled job;
+- a scheduled session → disable its schedule.
+
+A trigger is owned by the session that armed it.
+
+**NEVER claim a trigger ended when this session does not own it** — say `still armed — owned by
+another session; it ends at its next firing`.
 
 - **Checkpoint** — `closed` reaches the policy's checkpoint value, OR sprint-proposer Step 0 reports
   an audit due → `State: checkpoint pending`. An audit is PROPOSED in the digest, NEVER run.
@@ -525,15 +574,23 @@ stop that re-fires on its own schedule is not a stop.
   brake`. The backlog is growing faster than it drains: that is the loop feeding itself.
 - **Every segment guardrail and exception stop** ("Loop guardrails"; sprint-proposer → "Exception
   stops") → `State: stopped — [which]`.
-- **Revocation** — the owner says "cancel continuous mode" → remove the marker, end the trigger.
+- **Revocation** — the owner says "cancel continuous mode" → remove the marker, run `/session-end`,
+  end the trigger. Three steps, not four: there is no `State` to write once the marker is gone.
+  - **A revocation said in ANOTHER session cannot end this session's trigger.** That trigger ends at
+    its next firing, through sprint-proposer Step 1's no-marker branch — which is why the trigger
+    MUST carry the `continuous` argument (C6).
 
 **On a resume whose state is `checkpoint pending` or `stopped`, NEVER open a task.** ALWAYS
-re-present the digest and wait. Only an explicit owner answer resumes; "continue" resets the
-window counters to 0 and sets `State: running`.
+re-present the digest and wait. Only an explicit owner answer resumes, and resuming ALWAYS runs
+C6's reset step first.
 
-**Audit-cadence equivalence in this mode:** count `ceil(closed / 3)` sessions per window — the lower
-bound of the sprint cap, so audit coverage NEVER thins as volume grows (segment mode's "one per
-phase" has no phases to count here).
+**Audit-cadence equivalence in this mode** — segment mode's "one per phase" has no phases to count:
+- **ALWAYS COUNT `ceil(closed / 3)` sessions per window** — the lower bound of the sprint cap, so
+  audit coverage NEVER thins as volume grows.
+- **ALWAYS WRITE `counts as N sessions for audit cadence` into the Progress Log entry of the
+  checkpoint's `/session-end`**, and `counts as 0 sessions for audit cadence — continuous window,
+  counted at checkpoint` into every idle `/session-end` entry (C6). Without the `0` the window is
+  counted twice. sprint-proposer Step 0 is the reader.
 
 **The digest — ALWAYS this format** (it replaces segment mode's final report):
 
@@ -548,6 +605,8 @@ phase" has no phases to count here).
 ### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
 ### Orchestration lessons (ALWAYS present, "none" is a valid entry): [...]
 ### Audit cadence: counts as [ceil(N/3)] sessions | audit due: [no | yes — proposed]
+### Trigger: [ended — which mechanism | still armed — owned by another session; ends at its next firing]
+### Tagging writers (re-checked at the last re-entry): [N checked, 0 untagged]
 ### What I need from you: "continue" | adjust the policy | triage held/deferred | "cancel continuous mode"
 ```
 
@@ -557,15 +616,25 @@ phase" has no phases to count here).
   `State: idle — queue empty`, run `/session-end` if any task closed since the last one, and end at
   the boundary. The approval stands: the next re-entry picks up newly registered tasks with NO new
   approval. **Idle does NOT end the recurring trigger** — that is the difference from a C5 stop.
+  - **A session-scoped trigger dies with its session, and the approval does NOT re-arm it.** ALWAYS
+    say so when going idle: `idle — re-entry needs this session open, or /loop /sprint-proposer
+    continuous in a new session`.
 - **The framework defines the re-entry PROTOCOL — the marker — and NEVER a scheduler**
   (component-design §7: do not rebuild native mechanisms). The recommended trigger is the native
-  `/loop /sprint-proposer` in self-paced mode: each firing runs sprint-proposer Steps 0-1, which
-  detect the marker and hand off here. Pace it by state — continue immediately while `running`;
-  wait long (20 minutes or more) while `idle`, because nothing changes faster than the owner types.
-  A manual invocation or a scheduled session re-enters identically, because the marker is the only
-  state.
-- **ALWAYS re-run the liveness guard on every re-entry** (Step 1a, last item) — a registry can break
-  between two firings, and the watchdog's "at loop start" means every start.
+  `/loop /sprint-proposer continuous` in self-paced mode: each firing runs sprint-proposer Steps 0-1,
+  which detect the marker and hand off here. The `continuous` argument tells Step 1 that the firing
+  came from this mode's trigger, so a firing that finds no marker ends the trigger instead of
+  proposing a sprint. A manual invocation or a scheduled session re-enters identically, because the
+  marker is the only state.
+  - **ALWAYS fire again immediately while `State: running`.**
+  - **ALWAYS wait 20 minutes or more between firings while `State: idle`** — nothing changes faster
+    than the owner types.
+- **On an owner "continue" after a checkpoint or a stop, ALWAYS RESET BEFORE opening a task:** set
+  `**Window:** closed 0 | discovered 0 | admitted-discoveries 0` and `**State:** running`, and
+  COMMIT that marker change on its own. It is the `0` the next closure check counts from (C4).
+- **ALWAYS re-run the liveness guard AND the C1 tagging-writer check on every re-entry** (Step 1a,
+  last item; C1) — a registry can break, and a project can be partially refreshed, between two
+  firings. The watchdog's "at loop start" means every start.
 - **ALWAYS announce the re-entry in one line:** `Resuming continuous mode: state [S], window [N] of
   [checkpoint] closed, queue [Q]. Say 'cancel continuous mode' to revoke.`
 

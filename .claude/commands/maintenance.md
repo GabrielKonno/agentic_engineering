@@ -435,7 +435,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # WORD BOUNDARIES ARE MANDATORY. Without them a short token matches inside an ordinary word
    # and the gate blocks a healthy push: one 4-letter part matched "Grafana" in a shipped
    # example and a lineage doc, and the check went RED on 2 clean files (measured 2026-09-12).
-   git diff --cached --name-only | xargs grep -oniE "($P)" | wc -l   # expected: 0
+   git diff --cached --name-only | xargs grep -oniwE "($P)" | wc -l   # expected: 0
    ```
    **Expected: 0. NEVER echo `$P`.** Negation-prove it against a seeded file before trusting
    it: the same pattern MUST return non-zero there. The generic-part stoplist exists because a
@@ -928,6 +928,12 @@ require it.)
   counts, typos, instruction-style rewrites.
 - **MAJOR:** a change that invalidates an existing project's structure without migration.
 
+**ALWAYS NAME THE MIGRATION PATH when a MINOR changes a skill that existing projects already hold.**
+`/existing_project_adaptation` refreshes an existing skill only on the owner's per-skill decision,
+so a contract that needs SEVERAL components refreshed together MUST name that set in the commit and
+in the adaptation command. v2.23.0 shipped continuous mode with no migration statement, and a
+partial refresh would have admitted every AI-filed task uncapped (`/audit` 2026-09-14 W-2).
+
 **The canonical set is DERIVED, never typed.** A typed three-name set (`README.md`,
 `docs/modules/templates/claude_md.md`, `.claude/commands/existing_project_adaptation.md`) omitted
 `.claude/commands/audit.md`'s "As of vX.Y.Z" claim, and the `version:` receipt then reported
@@ -1107,7 +1113,7 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    # awk, NOT a sed range: `sed -n '/^Applies /,/from /p'` runs PAST a one-line Applies block,
    # because sed tests the end pattern from the line AFTER the start. Measured, it scored 3 of 4
    # healthy commits RED (2026-09-11).
-   git log -1 --format=%B <hash> | awk '/^Applies /{f=1} f&&/^$/{exit} f'      | grep -oE '[A-Z]-[0-9]+' | sort -u | wc -l      # MUST equal the number in the subject
+   git log -1 --format=%B <hash> | awk '/^Applies /{f=1} f&&/^$/{exit} f'      | grep -oE '\b[A-Z]-[0-9]+\b' | sort -u | wc -l      # MUST equal the number in the subject
    ```
    **Expected: equal.** **ALWAYS RUN IT BEFORE WRITING THE SUBJECT, NEVER AFTER** — once the commit
    exists the only remedy is item 8's follow-up, which cannot change what the subject says. Two group commits in one batch overstated it ("6 findings"

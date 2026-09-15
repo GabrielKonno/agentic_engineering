@@ -57,6 +57,10 @@ the clock — treating its entry as "last run" is how the expensive half of an a
 for many cadences while the cheap half keeps publishing healthy numbers. If the most recent entry
 is INCOMPLETE, ALWAYS say so in the proposal: `audit due — last run was INCOMPLETE (steps N,M)`.
 
+**ALWAYS COUNT a Progress Log entry carrying `counts as N sessions for audit cadence` as N sessions,
+never as 1** — loop and continuous sessions write it (`autonomous-loop` → Step 2 and
+"Continuous mode" → C5), and an entry reading `counts as 0` counts 0.
+
 Proposing is not running — the owner decides. If both are due, propose codebase-audit first
 (code health) and note framework-audit is also due. Then continue to Step 1.
 
@@ -76,9 +80,14 @@ autonomously; audits stay owner-gated.
 "Continuous mode" → C6 re-entry. That skill reads the marker's `State:`; this step NEVER decides
 whether a continuous resume may open a task.
 
+**A firing of the continuous-mode trigger (`/sprint-proposer continuous`) that finds NO marker ALWAYS
+ENDS ITS TRIGGER AND STOPS** — the mode was revoked or completed, possibly from another session.
+**NEVER fall through to a sprint proposal on such a firing:** it would re-propose on every firing,
+unattended.
+
 **ALWAYS REPORT the check — `loop marker: none` or `loop marker: active → handing off to
 autonomous-loop (phase X of Y)` or `loop marker: active → handing off to autonomous-loop
-(continuous, state S)`. NEVER emit nothing.** This step is the INVOKER of the loop's
+(continuous, state S)` or `loop marker: none — continuous trigger ended (no marker)`. NEVER emit nothing.** This step is the INVOKER of the loop's
 resume (component-design §9): nobody reads the `autonomous-loop` frontmatter in a session that has
 not already decided to run it. Mechanical self-check (expected result stated):
 `grep -c "LOOP CONTINUATION — active" .claude/phases/project.md` → `1` means hand off, `0` means
@@ -167,7 +176,7 @@ sprint for the task named in the marker. Context has changed and the continuatio
 ### Audit cadence: codebase-audit [due at N — proposed | not due, N of M | n/a — not installed]
                    framework-audit [same three verdicts]   (ALWAYS present; never blank)
                    (`n/a — skill not installed`, verbatim from the step; NEVER paraphrased)
-### Loop marker: [none | active → handing off to autonomous-loop (phase X of Y) | active → handing off to autonomous-loop (continuous, state S)]   (ALWAYS present)
+### Loop marker: [none | active → handing off to autonomous-loop (phase X of Y) | active → handing off to autonomous-loop (continuous, state S) | none — continuous trigger ended (no marker)]   (ALWAYS present)
 ### Audit due: [n/a | last run was INCOMPLETE (steps N,M)]   (ALWAYS present when a check reports it)
 ### Tasks selected (N):
 1. Task [N] — [name] (complexity, estimated scope)
@@ -266,7 +275,7 @@ collided on the same file" appears in NO diff. Full rationale and the loop's own
 
 Level 5 (SEGMENT or CONTINUOUS execution with the main agent as ORCHESTRATOR) was extracted to
 `.claude/skills/autonomous-loop/` in framework v2.8.0. Its mechanics are deliberately NOT restated
-here: a mode whose ~150 lines load in every non-loop session is context every ordinary sprint pays
+here: a mode whose full text would load in every non-loop session is context every ordinary sprint pays
 for and never uses.
 
 **ALWAYS INVOKE `autonomous-loop` — NEVER improvise loop mechanics from this file — when:**

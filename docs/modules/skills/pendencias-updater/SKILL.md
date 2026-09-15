@@ -48,6 +48,9 @@ For every new task discovered during the session, add to "Next Steps" with:
 - **Constraints** — what NOT to do
 - **Complexity** — routine / logic-heavy / architecture-security
 - **Acceptance criteria** with tags (`BUILD:`, `VERIFY:`, `QUERY:`, `REVIEW:`, `MANUAL:`)
+- **Origin** — `origin: discovered (sN, task M)` for a task the AI found; `origin: owner` only for a task the owner dictated this session
+
+ALWAYS set the `origin:` line on every task this step adds. Continuous mode (`autonomous-loop` → "Continuous mode" → C3) admits discovered tasks only in a restricted, capped class, and an untagged task is read as `owner`.
 
 All criteria must be STRONG (action + expected result + failure signal).
 

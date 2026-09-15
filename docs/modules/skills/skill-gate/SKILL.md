@@ -85,6 +85,10 @@ The reviewer archives its JSON verdict in `.claude/skill-gate/review_reports/`.
 | `approved: true` + `empirical_claims` non-empty | Apply flags (Step 4), then promote (Step 5). |
 | `approved: true` + `empirical_claims` empty | Promote (Step 5). |
 
+**ALWAYS tag every pendency this skill registers, in any section, `origin: discovered (sN, skill-gate)`.**
+Continuous mode (`autonomous-loop` → "Continuous mode" → C3) holds such pendencies anyway (they carry
+no acceptance criteria), but an untagged one is read as `owner` and breaks the discovery brake's count.
+
 ## 4. Flag empirical claims (before promoting)
 
 If the verdict's `empirical_claims[]` is non-empty, ALWAYS edit the draft frontmatter with:

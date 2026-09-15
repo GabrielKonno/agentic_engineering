@@ -150,7 +150,7 @@ stated, run after Step 3:
 ```bash
 # ANCHOR ON THE TIER WORD, NEVER ON END-OF-LINE: both templates ship a trailing "— governs ..."
 # clause, so a `$`-anchored form returns 0 on a CORRECTLY resolved line - the K-8/L-7 inversion.
-grep -c '^\*\*Risk profile:\*\* \(prototype\|internal-tool\|production\|production-financial\)'   projects/$ARGUMENTS/project.md projects/$ARGUMENTS/CLAUDE.md
+grep -c '^\*\*Risk profile:\*\* \(prototype\|internal-tool\|production\|production-financial\)\b'   projects/$ARGUMENTS/.claude/phases/project.md projects/$ARGUMENTS/CLAUDE.md
 ```
 **Expected: `1` for BOTH files.** A `0` means the placeholder was never replaced — RED, and every
 tier-gated copy downstream is running off an unresolved profile.
