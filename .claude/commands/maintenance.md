@@ -430,15 +430,33 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    there the self-match produced a wrong number, here it produced the damage.
    **ALWAYS build the pattern with this, and ALWAYS paste only the COUNT:**
    ```bash
+   # TWO PATTERNS, TWO MATCH MODES — BOTH MANDATORY, SUMMED.
+   # F = each FULL folder name plus its `_`<->`-` swapped forms, matched as a SUBSTRING (no `-w`).
+   #     A full name is specific enough that no ordinary word contains it, and `-w` treats `_` as a
+   #     WORD character: with `-w` a full name glued by `_` (`old_<name>`, `<name>_v2`) and, with
+   #     parts only, the bare underscore-joined name itself read 0 (`/audit` 2026-09-14 X-6).
+   #     Full names skip the length/stoplist filters, so a future one-word generic folder name would
+   #     turn the gate RED on healthy files — that FAILS CLOSED; rename the folder, never drop F.
+   # P = the PARTS (split on `_`/`-`, length >= 4, generic words stoplisted), matched with `-w`.
+   F=$(ls -d projects/*/ | xargs -n1 basename \
+       | awk '{print; a=$0; gsub(/_/,"-",a); print a; b=$0; gsub(/-/,"_",b); print b}' | sort -u | paste -sd'|' -)
    P=$(ls -d projects/*/ | xargs -n1 basename | tr '_-' '\n\n' | awk 'length($0)>=4' \
        | grep -vxE 'system|page|site|core|base|main|data|admin|trabalho|projeto' | sort -u | paste -sd'|' -)
-   # WORD BOUNDARIES ARE MANDATORY. Without them a short token matches inside an ordinary word
+   # WORD BOUNDARIES ARE MANDATORY FOR P. Without them a short part matches inside an ordinary word
    # and the gate blocks a healthy push: one 4-letter part matched "Grafana" in a shipped
    # example and a lineage doc, and the check went RED on 2 clean files (measured 2026-09-12).
-   git diff --cached --name-only | xargs grep -oniwE "($P)" | wc -l   # expected: 0
+   # NUL-SEPARATED, UNQUOTED PATHS. A staged path with a SPACE, a QUOTE or an ACCENT was split by
+   # `xargs` or escaped by git, grep errored to stderr, and the count read 0 over 2 real leaks
+   # (`/audit` 2026-09-14 X-24). `-r` keeps an empty staged list from grepping stdin.
+   n() { git -c core.quotepath=off diff --cached --name-only -z | xargs -0 -r grep -oni"$1"E "($2)" | wc -l; }
+   echo $(( $(n '' "$F") + $(n w "$P") ))   # expected: 0
    ```
-   **Expected: 0. NEVER echo `$P`.** Negation-prove it against a seeded file before trusting
-   it: the same pattern MUST return non-zero there. The generic-part stoplist exists because a
+   **Expected: 0. NEVER echo `$F` or `$P`.** Negation-prove it against seeded files before trusting it:
+   **ALWAYS seed ALL THREE forms — every FULL folder name exactly as written, every full name glued by
+   `_` to other text (`old_<name>_v2`), AND one PART that survives the length and stoplist filters,
+   inside an ordinary sentence — and the command MUST return non-zero on EACH.** A stoplisted part
+   correctly reads 0, so seeding one proves nothing. A part-only seed certified a
+   pattern that was blind to the whole name (`/audit` 2026-09-14 X-20). The generic-part stoplist exists because a
    folder name split on `-`/`_` yields ordinary words that match English OR PORTUGUESE prose (one
    such part matched 30+ occurrences of "systematic", another 7 occurrences of the ordinary
    Portuguese word in the lineage docs); extend THAT list, never the

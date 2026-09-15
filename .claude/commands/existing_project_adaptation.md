@@ -543,12 +543,15 @@ The v2.23.0 CLAUDE.md references process skills and rules via pointers. Without 
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
+# CREATE BOTH TARGETS FIRST. This command targets projects with PARTIAL structure, and `cp` into a
+# missing directory FAILS — the loops below ran before any mkdir and reported every copy as done
+# while installing nothing (`/audit` 2026-09-14 X-21, X-22). Bootstrap's twin creates them at 5.7.
+mkdir -p "projects/$ARGUMENTS/.claude/skills" "projects/$ARGUMENTS/.claude/agents"
 for skill_dir in ./docs/modules/skills/*/; do
   skill_name=$(basename "$skill_dir")
   case "$skill_name" in codebase-audit|framework-audit|skill-gate) continue ;; esac  # tier-gated — copied in Step 2.9b
   if [ ! -d "projects/$ARGUMENTS/.claude/skills/$skill_name" ]; then
-    cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"
-    echo "Copied skill: $skill_name"
+    if cp -r "$skill_dir" "projects/$ARGUMENTS/.claude/skills/$skill_name"; then echo "Copied skill: $skill_name"; else echo "FAILED to copy skill: $skill_name"; fi
   elif diff -rq "${skill_dir%/}" "projects/$ARGUMENTS/.claude/skills/$skill_name" >/dev/null 2>&1; then
     echo "SKIPPED (identical): $skill_name"
   else
@@ -574,9 +577,7 @@ but only a full refresh makes it usable (`/audit` 2026-09-14 W-2).
 for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
   dest_name=$(echo "$agent" | tr '_' '-')
   if [ ! -f "projects/$ARGUMENTS/.claude/agents/$dest_name.md" ]; then
-    cp "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"
-    echo "Copied agent: $dest_name"
-  else
+    if cp "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"; then echo "Copied agent: $dest_name"; else echo "FAILED to copy agent: $dest_name"; fi
   elif cmp -s "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"; then
     echo "SKIPPED (identical): $dest_name.md"
   else
@@ -593,6 +594,8 @@ done
 # `assets/docs/` (Phase 3 writes the retroactive PRD into it) and `.claude/docs/` (the upstream
 # channel `evolution-policy.md` mandates). Bootstrap created the first two and this twin did
 # not — twin asymmetry, found by the LATERAL directory sweep (`/audit` 2026-09-11).
+# `.claude/agents/` is now ALSO created at the top of the skills fence above, which runs first
+# (`/audit` 2026-09-14 X-22); repeating it here is harmless and keeps this fence self-sufficient.
 mkdir -p projects/$ARGUMENTS/.claude/rules projects/$ARGUMENTS/.claude/agents projects/$ARGUMENTS/.claude/docs projects/$ARGUMENTS/assets/docs
 for tmpl in session_rules evolution_policy component_design; do
   target=$(echo "$tmpl" | tr '_' '-')
