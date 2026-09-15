@@ -1,7 +1,7 @@
 # Template: CLAUDE.md (slim orchestrator)
 
 > Create at project root as `CLAUDE.md`.
-> This is the v2.23.2 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
+> This is the v2.24.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
 > For design rationale and architectural decisions, see `docs/modules/README.md`.
 
 ```markdown
@@ -58,7 +58,7 @@ Auto-discovered from `.claude/skills/` and `.claude/agents/`. Each file's `descr
 
 ## Hooks
 
-[Configured in Step 14 below — depends on project formatter.]
+[Configured in Step 14 below — the skill-gate hook always, the formatter hook when the project has one.]
 
 ## Architecture
 

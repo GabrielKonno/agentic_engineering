@@ -87,6 +87,12 @@ The rule was written with no invoker in this sequence and no self-check
 (`/audit` 2026-09-04 R-26; `/audit` 2026-09-09 T-29).
 **ALWAYS REPORT — `push decay: origin/main unchanged` or `push decay: advanced to sHASH — D16
 re-run over the newly-published range: [GREEN | RED, findings]`. NEVER emit nothing.**
+**ALWAYS DISCHARGE an `advanced` verdict with the gate over the newly-published range — the command on
+the `$` line with the range written as REAL hashes (`log <old>..<new>`, never the placeholder), and
+its literal output line beneath it.** This key is
+the ONE persisted home of the gate over commits pushed after their own receipts were written — a
+write-back, an audit report — and three such pushes left no persisted gate anywhere
+(`/audit` 2026-09-14 X-16, recurring through 2026-09-15).
 Then run Step 0 (upstream discovery sweep) below, read the maintenance prompt/correction
 plan provided by the user (an audit report → "Audit intake"; project evolution docs → "Upstream
 intake"), apply all changes in order, then run the post-change checklist to completion — **EVERY numbered
@@ -196,7 +202,7 @@ than a narrated number: it looks reproducible and reproduces something else.
 **A key whose discharge has no `$` line is RED**, and `n/a` is a legitimate verdict that still needs
 its command (the one that returned nothing).
 
-**Where a key genuinely has no single command** — `classification:`, `new component:` — say so on
+**Where a key genuinely has no single command** — `classification:`, `new component:`, `verifier rounds:`, and `receipt generator:` (whose pasted fence IS the evidence) — say so on
 the `$` line (`$ n/a — judgement, not measurement`) rather than omitting it. That makes the absence
 visible instead of indistinguishable from a forgotten one.
 
@@ -229,7 +235,7 @@ for k in "inventory sweep" "instruction style" "references" "fences" "isolation"
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
          "classification" "new component" "gates" "push" \
          "audit" "verification audit" "placeholder" "control back-sweep" \
-         "commit correction" "defect series" "applied-proof" "report deletions" "push decay"          "report restore"; do
+         "commit correction" "defect series" "applied-proof" "report deletions" "push decay"          "report restore" "verifier rounds" "receipt generator"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
@@ -952,6 +958,22 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    `grep -c "new component:"` counts every quotation of the key inside the per-fix table and
    returns 3, which is how this check went RED on a healthy discharge on its first run
    (`/audit` 2026-09-02 M-27).
+
+10. **Independent pre-commit verification — the verifier rounds and the receipt generator.** Both ran
+    in three consecutive maintenance sessions, reproduced 15+ defects before commit and had no written
+    home: no rule for when to run them, what to give them, or where their output lives
+    (`/audit` 2026-09-14 X-17, Y-15).
+    **ALWAYS SPAWN at least one independent verifier subagent before committing a batch that changes
+    a bash fence in `.claude/commands/` or a file in `.claude/scripts/`.**
+    - **ALWAYS give it ONLY the staged diff, a scratch-mother-repo recipe and the privacy rule** (counts only, invented names).
+    - **NEVER give it the finding texts** — a verifier handed the findings probes the named symptom and inherits its frame (`/audit` 2026-09-14 Run 3 meta-observation).
+    - **ALWAYS ask it the three CROSS-SURFACE questions, not only whether each fence behaves:** (a) does every verdict string a changed fence can print have a slot in that command's report; (b) is every ALWAYS/NEVER line added to one command twin present in the other, or named twin-specific; (c) does every step reference the batch adds point to an EARLIER step, or is it flagged. Every residue of the batch verified fence-by-fence was one of these three (`/audit` 2026-09-15 Run 2 meta-observation).
+    - **ALWAYS file each reproduced defect** in the applied report with the `[filed by … from its independent pre-commit verifier]` tag, and fix it or leave it `open` like any finding.
+    **ALWAYS REPORT — `verifier rounds: N rounds, D defects reproduced, F fixed before commit — [filed IDs]` or `verifier rounds: N/A — no bash fence or script changed`.** NEVER emit nothing.
+    **When a script generated the receipts' `$` lines, ALWAYS PASTE that script verbatim in a bash
+    fence directly under the `receipt generator:` key** — a generator left in a scratchpad made
+    "EXECUTED by a script" unverifiable four times.
+    **ALWAYS REPORT — `receipt generator: pasted below — N lines` or `receipt generator: none — receipts typed by hand`.** NEVER emit nothing.
 
 ## Version bumps — the framework version is a CLAIM, and it decays silently
 

@@ -807,12 +807,16 @@ settings file now — this step is the RECEIVER of that handoff. The template do
 template). If Step 5.5 logged the plugin as unavailable, ALWAYS state "no enabledPlugins to merge —
 Step 5.5 reported the plugin unavailable" rather than silently writing nothing.
 
-**Prerequisite:** Prettier must be installed (`npm install -D prettier`). If the project does not use Prettier, skip the hooks section.
+**Prerequisite — for the FORMATTER hook only:** Prettier (`npm install -D prettier`).
+**If the project does not use Prettier, ALWAYS drop the Prettier hook entry and KEEP the skill-gate
+hook entry** — it has no dependency and is a silent no-op on tiers where Step 5.8 did not copy
+skill-gate. Skipping the whole hooks section left every internal-tool+ project without Prettier with
+a skill-gate that is installed and never enforced (`/audit` 2026-09-15 V-16).
 
 **ALWAYS write the outcome back into CLAUDE.md's `## Hooks` section** — the template ships the
-placeholder "[Configured in Step 14 below — depends on project formatter.]", and a project whose
+placeholder "[Configured in Step 14 below — the skill-gate hook always, the formatter hook when the project has one.]", and a project whose
 CLAUDE.md still carries that line references a bootstrap step that does not exist in the project.
-Replace it with the configured hooks, or with "none — project has no formatter".
+Replace it with `configured — [the hooks written]`, or with `configured — skill-gate hook only (project has no formatter)`.
 
 **Note:** If `.claude/settings.json` or `.claude/settings.local.json` already exists, merge the keys rather than overwriting.
 
@@ -910,7 +914,9 @@ git commit -m "chore: bootstrap from agentic framework"
   `/audit` 2026-09-03 P-21 — the mandate existed and had nowhere to land.)
 
 ### Hooks (Step 14) — ALWAYS report, never omit:
-- `configured — [the hooks written]` · `none — project has no formatter`
+- `configured — [the hooks written]` · `configured — skill-gate hook only (project has no formatter)`
+  (`none — project has no formatter` was false once the skill-gate hook became unconditional —
+  `/audit` 2026-09-15 V-15, V-16.)
   (**COPIED FROM Step 14's mandate verbatim** — those are the only two outcomes it writes. An
   earlier slot offered `smart-formatting ACTIVE`, a verdict Step 14 never emits, while the twin
   carried a third — `/audit` 2026-09-04 R-13, written back `applied` with nothing landed; re-filed
@@ -972,7 +978,7 @@ git commit -m "chore: bootstrap from agentic framework"
 - Derived from: [PRD signals], confirmed by owner: [yes/override]
 - Receipt grep (Step 1.2): project.md [1 | 0] · CLAUDE.md [1 | 0] — expected `1` for both; a `0` is RED
 
-### MACRO skeletons (tier-gated — Steps 5.8 / 14.2):
+### MACRO skeletons (tier-gated — Steps 5.8 / 7 / 14.2):
 - codebase-audit skill ← [copied (internal-tool+) / skipped (prototype)]
 - metrics.md ← [copied (internal-tool+) / skipped]
 - skill-gate skill + skill-reviewer agent + .claude/drafts/ + .claude/skill-gate/review_reports/ ← [copied (internal-tool+) / skipped (prototype)]
@@ -981,11 +987,11 @@ git commit -m "chore: bootstrap from agentic framework"
 - ops-rules.md ← [copied (production+) / skipped]
 - quality-budgets.md ← [copied (production+) / skipped]
 - CI floor ← [created (internal-tool+) / skipped / deferred — task added]
-- [production-financial] reconciliation queries filled, red-team mandatory on money-paths: [yes/N/A]
+- [production-financial] reconciliation queries filled (Step 5.8) · red-team-on-money-paths line written into `code-reviewer.md` (Step 7): [yes/N/A]
 
 ### Hooks configured: [see the `Hooks (Step 14)` slot above — this section lists the CONFIGURED
 HOOK ENTRIES, not the verdict. One verdict, one home (`/audit` 2026-09-04 Q-8).]
-- [hook entries written into settings.json, or `none`]
+- [hook entries written into settings.json — the skill-gate entry always, the formatter entry when the project has one]
 
 ### MCPs installed: [see the `MCPs (Step 5)` slot above for the VERDICT — this section lists
 the per-MCP connection status.]

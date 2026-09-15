@@ -46,6 +46,6 @@
 
 **Permissions:** The `allow` rules grant automatic approval for editing framework files (`CLAUDE.md`, `.claude/**`), reading files, and running common commands (`git`, `npm`, `npx`). Prevents permission prompts during end-of-session documentation updates. `bypassPermissions` is the fallback.
 
-**Prerequisite:** Prettier must be installed (`npm install -D prettier`). If the project does not use Prettier, skip the hooks section.
+**Prerequisite — for the formatter hook only:** Prettier (`npm install -D prettier`). If the project does not use Prettier, drop the Prettier entry and KEEP the skill-gate entry — it has no dependency, and skipping the whole hooks section leaves an installed skill-gate unenforced.
 
 **Merge rule:** If `.claude/settings.json` or `.claude/settings.local.json` already exists, merge the `hooks` key into the existing file rather than overwriting.

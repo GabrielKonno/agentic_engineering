@@ -244,7 +244,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.23.2 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.24.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -565,7 +565,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.23.2 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.24.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -595,6 +595,9 @@ done
 coupled set below, and ONE question for the WHOLE coupled set.** ALWAYS show the diff before asking:
 a refresh REPLACES the project's copy. Asking per skill inside the set contradicted "ALL of it or
 NONE of it" (`/audit` 2026-09-14 X-4).
+- **ALWAYS ASK the coupled-set question in Step 2.9b, never here** — two of its members
+  (`codebase-audit`, `skill-gate`) get their verdicts only there, once the risk profile is decided
+  (`/audit` 2026-09-15 V-9). Components outside the set are asked here.
 - **NEVER overwrite silently** — the project may carry its own evolutions of that skill.
 - **NEVER skip silently** — the project would keep an old contract under the new version label.
 
@@ -611,6 +614,9 @@ but only a full refresh makes it usable (`/audit` 2026-09-14 W-2).
 ```bash
 # Each helper VALIDATES THE SOURCE and THE TARGET'S KIND BEFORE touching anything: an empty or
 # template-less name must never reach `rm -rf`, and `cp` onto a DIRECTORY writes INSIDE it.
+# BACKSTOP (Setup guard) — no fence in this step may act on a missing project (`/audit` 2026-09-15 V-12).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
 refresh_skill() { s="./docs/modules/skills/$1"; d="projects/$ARGUMENTS/.claude/skills/$1"
   case "$1" in ''|*[!a-z0-9-]*) echo "FAILED to refresh skill: '$1' is not a skill name — nothing removed"; return 1 ;; esac   # `../agents` passed the template check
   if [ ! -d "$s" ]; then echo "FAILED to refresh skill: '$1' has no framework template — nothing removed"
@@ -627,15 +633,16 @@ refresh_extract() { src=$1; lang=$2; d=$3; t=$(mktemp); sed -n "/^\`\`\`\`$lang\
   elif cp "$t" "$d"; then echo "Refreshed: $d"; else echo "FAILED to refresh: $d"; fi; rm -f "$t"; }
 refresh_rule() { refresh_extract "docs/modules/rules/$1.md" markdown "projects/$ARGUMENTS/.claude/rules/$(echo "$1" | tr '_' '-').md"; }
 refresh_guard() { refresh_extract docs/modules/templates/check_agent_frontmatter.md js "projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs"; }
-# The coupled set, on ONE owner answer (add codebase-audit / skill-gate when Step 2.9b installed them):
-#   for s in autonomous-loop sprint-proposer pendencias-updater validation-orchestrator session-end; do refresh_skill "$s"; done
-#   refresh_agent diff_pattern_extractor
+# The coupled-set refresh runs in Step 2.9b ("THE COUPLED-SET QUESTION"), after all its members' verdicts exist.
 ```
 **ALWAYS define these helpers and call them in the SAME shell invocation** — a function defined in one
 Bash call does not exist in the next, and an undefined helper prints no verdict at all.
 
 **Copy process agents (3 subagents — to `.claude/agents/`):**
 ```bash
+# BACKSTOP (Setup guard) — no fence in this step may act on a missing project (`/audit` 2026-09-15 V-12).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
 for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
   dest_name=$(echo "$agent" | tr '_' '-')
   if [ -d "projects/$ARGUMENTS/.claude/agents/$dest_name.md" ]; then
@@ -662,6 +669,9 @@ done
 # not — twin asymmetry, found by the LATERAL directory sweep (`/audit` 2026-09-11).
 # `.claude/agents/` is now ALSO created at the top of the skills fence above, which runs first
 # (`/audit` 2026-09-14 X-22); repeating it here is harmless and keeps this fence self-sufficient.
+# BACKSTOP (Setup guard) — the mkdir below must never create a missing project (`/audit` 2026-09-15 V-12).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
 mkdir -p "projects/$ARGUMENTS/.claude/rules" "projects/$ARGUMENTS/.claude/agents" "projects/$ARGUMENTS/.claude/docs" "projects/$ARGUMENTS/assets/docs"
 # A VERDICT FOR EVERY OUTCOME, and `Copied` ONLY after the write succeeded and is non-empty: a redirect
 # into an occupied path, or an empty extraction, printed `Copied` over nothing (`/audit` 2026-09-14 Y-8).
@@ -685,6 +695,9 @@ done
 
 **Copy the component-registry liveness guard (all tiers — to `scripts/`):**
 ```bash
+# BACKSTOP (Setup guard) — the mkdir below must never create a missing project (`/audit` 2026-09-15 V-12).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
 mkdir -p "projects/$ARGUMENTS/scripts"
 dest="projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs"
 t=$(mktemp); sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_agent_frontmatter.md | sed '1d;$d' > "$t"
@@ -706,12 +719,12 @@ project has a `package.json`, register `"check:agents": "node scripts/check-agen
 if it has a CI pipeline, add a `guards` stage running it (dependency-free, no install needed).
 Then RUN it once now — an adapted project may already carry a broken frontmatter.
 
-**ALWAYS STOP on any `FAILED` line printed by the fences of this step AND of Step 2.9b** — `FAILED to
-copy`, `FAILED to extract`, `FAILED to refresh`, `FAILED to compare`. The target is unwritable, occupied by a file or directory
+**ALWAYS STOP on any line beginning `FAILED` printed by the fences of this step AND of Step 2.9b** —
+`FAILED to copy`, `FAILED to extract`, `FAILED to refresh`, `FAILED to compare`, and the backstops' `FAILED:` lines. The target is unwritable, occupied by a file or directory
 of the wrong kind, or its template extracted empty (`/audit` 2026-09-14 Y-9).
 - **NEVER continue past a FAILED component** — into Step 2.9b, or out of it — every CLAUDE.md pointer to it is a broken reference.
 - **ALWAYS name the path to the owner, ASK before removing anything that belongs to the project**, fix it, and re-run the fence until it prints no `FAILED` line.
-- **ALWAYS REPORT — `copy failures: none` or `copy failures: N resolved by re-run — [components]`.** An unresolved failure has no verdict, because the step has not ended.
+- **ALWAYS REPORT — `copy failures: none` or `copy failures: N resolved by re-run — [components, or "project name" for a backstop line]`.** An unresolved failure has no verdict, because the step has not ended.
 
 **Expected after this step:**
 - **Process skills (12 lifecycle):** sprint-proposer, autonomous-loop, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit
@@ -754,6 +767,9 @@ PROFILE="[chosen]"   # prototype | internal-tool | production | production-finan
 PROJ="projects/$ARGUMENTS"
 # EPA targets projects that may have NO framework structure — the metrics redirects below
 # fail silently without this. (bootstrap has the same guard at its Step 5.8.)
+# BACKSTOP (Setup guard) — the mkdir below must never create a missing project (`/audit` 2026-09-15 V-12).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "$PROJ" ] || { echo "FAILED: $PROJ is not an existing folder"; exit 1; }
 mkdir -p "$PROJ/.claude/phases" "$PROJ/.claude/skills" "$PROJ/.claude/agents"
 # VERDICTS, NEVER A SILENT `[ ! -d ] && cp`: codebase-audit and skill-gate are members of Step 2.9's
 # coupled set, and a copy with no verdict cannot be refreshed all-or-none (`/audit` 2026-09-14 X-3).
@@ -807,6 +823,26 @@ esac
 ```
 
 **Step 2.9's STOP rule governs every `FAILED` line the fence above prints.**
+
+**THE COUPLED-SET QUESTION — ALWAYS ASK IT HERE, ONCE, over the members' verdicts from Steps 2.9 AND
+2.9b.** The members are the five lifecycle skills and `diff-pattern-extractor` (Step 2.9) plus
+`codebase-audit` and `skill-gate` whenever they are PRESENT in the project — installed by the fence
+above at this tier, or left from an earlier one (a leftover copy is still a writer continuous mode reads).
+- **ALWAYS show every differing member's diff before asking.**
+- **Answer "refresh" → ALWAYS run the Step 2.9 REFRESH helpers fence and the fence below in ONE shell invocation.**
+- **Answer "keep", or no member differed → run nothing, and say so in the coupled-set slot.**
+```bash
+# BACKSTOP (Setup guard) — no fence in this step may act on a missing project (`/audit` 2026-09-15 V-12).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
+command -v refresh_skill >/dev/null 2>&1 || { echo "FAILED to refresh: the Step 2.9 helpers are not defined in this invocation"; exit 1; }
+for s in autonomous-loop sprint-proposer pendencias-updater validation-orchestrator session-end; do refresh_skill "$s"; done
+for s in codebase-audit skill-gate; do
+  # `-e`, never `-d`: a FILE at the target must reach refresh_skill's own "a file occupies" FAILED.
+  if [ -e "projects/$ARGUMENTS/.claude/skills/$s" ]; then refresh_skill "$s"; else echo "SKIPPED (not installed): $s"; fi
+done
+refresh_agent diff_pattern_extractor
+```
 
 **`production-financial` — ALWAYS add a line under "Architecture Patterns" in `code-reviewer.md`
 (Step 2.4 created or upgraded it): `red-team is MANDATORY on every diff that touches a money path.`**
@@ -974,15 +1010,18 @@ SETTINGS
 fi
 ```
 
-**Note:** The smart-formatting hook requires Prettier. If the project doesn't use Prettier, create settings.json with only the `permissions` block and skip the hook — but KEEP the skill-gate hook entry (it has no dependencies). If settings.json already existed, merge the skill-gate hook entry into its `PostToolUse` array — without it, the gate installed in Step 2.9b is never enforced (it remains a harmless no-op on tiers where skill-gate was not copied).
+**The smart-formatting hook requires Prettier. If the project does not use Prettier, ALWAYS drop the
+Prettier hook entry and KEEP the skill-gate hook entry** — it has no dependency (bootstrap Step 14
+carries the same rule; `/audit` 2026-09-15 V-16). If settings.json already existed, merge the skill-gate hook entry into its `PostToolUse` array — without it, the gate installed in Step 2.9b is never enforced (it remains a harmless no-op on tiers where skill-gate was not copied).
 
 **ALWAYS WRITE HERE the adaptation row and the session log that Step 2.2 specifies** — the
 retroactive PRD exists now (Phase 3) and the fence above just created `.claude/logs/`.
 
 **ALWAYS write the hooks outcome into CLAUDE.md's `## Hooks` section** — the configured hooks, or
-`none — project has no formatter` — **and ALWAYS REPORT — `configured — [the hooks written]` or
-`none — project has no formatter`** (the two outcomes bootstrap Step 14 writes; the report offered
-this slot with no step producing it — `/audit` 2026-09-14 W-19).
+`configured — skill-gate hook only (project has no formatter)` — **and ALWAYS REPORT — `configured — [the hooks written]` or
+`configured — skill-gate hook only (project has no formatter)`** (the two outcomes bootstrap Step 14 writes; the report offered
+this slot with no step producing it — `/audit` 2026-09-14 W-19). The note above keeps the skill-gate
+entry for a project with no formatter, so `none` was never a true outcome (`/audit` 2026-09-15 V-15).
 
 **Step 4.3 — Discover and install MCPs:**
 
@@ -1299,6 +1338,7 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
   framework-audit / framework-metrics.md / ops-rules.md / quality-budgets.md —
   each [`Copied` · `SKIPPED (identical)` · `SKIPPED (present — project data)` · `DIFFERS from framework` → refreshed / kept · not copied (tier)]
   (COPIED FROM the Step 2.9b helpers' verdicts; any `FAILED` line lands in "Copy failures" above)
+- [production-financial] red-team-on-money-paths line written into `code-reviewer.md` (Step 2.9b): [yes / N/A — profile]
 - CI floor: [created / skipped / deferred — task added]
 - `scripts/check-agent-frontmatter.mjs`: [`Copied guard` · `SKIPPED (identical)` · `DIFFERS from framework` → refreshed (`refresh_guard`) / kept]
   (COPIED FROM the Step 2.9 guard fence's verdicts; `already present` was the pre-verdict form)
@@ -1320,11 +1360,13 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - .claude/agents/arbitrator.md (if created)
 - [any other new files]
 
-### Process skills: [N of 12 copied from framework]
+### Process skills (Step 2.9): [N `Copied skill` · N `SKIPPED (identical)` · N `DIFFERS from framework` — of 12]
 ### Existing components that DIFFER from the framework (Steps 2.9 / 2.9b — one owner decision per item, ONE for the coupled set): [name — refreshed / kept, or "none"]
-### Continuous-mode coupled set: [no member differed (copied fresh / identical) | refreshed as a set | kept as a set]
-  (COPIED FROM the Step 2.9 loop verdicts. The five lifecycle members are always installed by that
-  step, so `not installed` was a value it could never produce — `/audit` 2026-09-14 X-5.)
+### Continuous-mode coupled set (asked in Step 2.9b): [no member differed (copied fresh / identical) | refreshed as a set | kept as a set]
+  (COPIED FROM the verdicts of Steps 2.9 AND 2.9b — `codebase-audit` and `skill-gate` get theirs in
+  Step 2.9b — and from its refresh fence: `Refreshed skill` · `Refreshed agent` · `SKIPPED (not installed)` ·
+  `FAILED to refresh`. The five lifecycle members are always installed, so `not installed` is never
+  the set's value — `/audit` 2026-09-14 X-5; 2026-09-15 V-11.)
 - **Session lifecycle:** sprint-proposer, session-end, context-recovery
 - **Segment or continuous orchestration (opt-in Level 5):** autonomous-loop
 - **Implementation:** validation-orchestrator
@@ -1336,7 +1378,7 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 ### Process agents (Step 2.9): [per agent — `Copied agent` · `SKIPPED (identical)` · `DIFFERS from framework` → refreshed / kept]
 
 ### Copy failures (Steps 2.9 / 2.9b) — ALWAYS report, never omit:
-- `copy failures: none` · `copy failures: N resolved by re-run — [components]`
+- `copy failures: none` · `copy failures: N resolved by re-run — [components, or "project name" for a backstop line]`
 
 ### Rules:
 - .claude/rules/session-rules.md [Copied · SKIPPED (identical) · DIFFERS → refreshed / kept]
@@ -1407,7 +1449,7 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
   never re-derived — `/audit` 2026-09-03 P-21)
 ### Skills: [list with status]
 ### Hooks (Step 4.2) — ALWAYS report, never omit:
-- `configured — [the hooks written]` · `none — project has no formatter`
+- `configured — [the hooks written]` · `configured — skill-gate hook only (project has no formatter)`
 (**COPIED FROM the hooks step's mandate verbatim**, and byte-equivalent to the bootstrap twin's
 slot. The banned three-verdict form lived here for two batches after being deleted from the twin —
 `/audit` 2026-09-04 R-13, written back `applied` with nothing landed; re-filed 2026-09-09 T-10.)

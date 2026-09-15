@@ -179,6 +179,17 @@ splits, and ALWAYS this way:
 outcome** — `criteria-enforcer: ran — [N criteria strengthened]` or `skipped — [reason]`. NEVER
 emit nothing.
 
+**When criteria-enforcer changes a task's SCOPE — not only its wording — ALWAYS RE-CHECK the plan
+before dispatching it.** The task grew: more call sites to fix, a sibling write path of worse
+consequence, a new file in its set. The plan was built on the OLD scope, so the widened task can now
+collide with another task, or cross the medium/large line.
+- **Segment mode — RE-CHECK the phase cut (Step 1b):** a new collision or dependency → RE-CUT the remaining phases under "Bounded re-sequencing authority" (reordering, no stop); the task is now LARGE → STOP and re-propose (removing a task changes WHAT is in the segment).
+- **Continuous mode — there is no phase cut (C1 replaces Step 1): RE-APPLY admission (C1, C3):** the task is now large, architecture/security, or depends on a held task → HOLD it (C3).
+- **ALWAYS REPORT — `scope: unchanged` or `scope: widened — [what] — [phase cut unchanged | re-sequenced | stopped]` (segment) / `[admission unchanged | held]` (continuous)**, beside the `criteria-enforcer:` line. NEVER emit nothing.
+
+Measuring the task before delegating is the highest-leverage step of a loop; this rule only gives a
+destination to what that step already produces and would otherwise discard.
+
 ### 3b. Dispatch — the plan-first implementer contract
 
 - **Small tasks** (single file, routine): implement DIRECTLY — spawning costs more than doing.
@@ -217,7 +228,7 @@ PARTIAL STATE (what is done, what is running, where the log is)." An implementer
 on a monitor returns a useless report over real, possibly irreversible work.
 
 **Resource declaration — ALWAYS require it in the prompt:** the implementer DECLARES the exclusive
-resources it touches (file set, shared test environment/database, phase docs).
+resources it touches (file set, shared test environment/database, phase docs, scratchpad files).
 
 ### 3c. After return — trust but verify, from the DISK
 
@@ -234,6 +245,11 @@ into a recoverable state instead of a blind commit — or a falsely-failed phase
   loses its main justification for low-risk diffs.
 - **Logic-heavy:** full Route 2 (code-reviewer → validator), unchanged.
 - **Security-relevant:** full chain including security-reviewer (+ red-team when high-risk), unchanged.
+- **NEVER skip a money-path reviewer on a `production-financial` task citing another's APPROVE or a
+  clean mutation score — the reviewers are COMPLEMENTARY.** code-reviewer, the data-integrity checker (when
+  installed) and red-team each find a class the others cannot — a test that counts a compensating
+  write but never checks what it restored; an inconsistent state no existing query detects; an
+  escalation reproduced live — and a fully-killed mutation round can omit the one mutant a reviewer names.
 - ❌ handling, the 3-retry cap, and arbitrator escalation are inherited unchanged.
 - **NEVER downgrade this geometry because previous tasks validated clean.** A run of green is the
   state in which rigor is cheapest to drop and most expensive to have dropped; the geometry is
@@ -334,8 +350,27 @@ step needs. The orchestrator MUST keep an explicit RESOURCE map when dispatching
 - **NEVER run two writers on the same phase doc at once** — including session-end's own steps, which
   were written for serial execution and CAN conflict with each other (one step editing a file
   another step targets is a skip/collision, not a hypothetical).
+- **NEVER run an agent that MUTATES the working tree in parallel with an agent that READS it.**
+  A mutator writes files others read — a validator's mutation round (it injects mutants into real
+  files and reverts them), a fixer, a formatter, a mass-edit script. A reader is a code-reviewer,
+  red-team or integrity checker. Disjoint WRITERS is not enough: while a mutant sits on disk the
+  tree is sabotaged for every reader, and a verdict issued in that window is about code that does
+  not exist — and looks legitimate.
+  **ALWAYS order it: readers first, then mutators, then `git status` / `git diff` before any verdict
+  or commit.**
+- **ALWAYS put the SCRATCHPAD on the resource map.** It is one directory shared by every subagent
+  of the session, so a helper there is a shared resource: a subagent that rewrites a helper under the
+  same name can silently drop a safety guard (a read-only check on a database script) the
+  orchestrator relies on — a lost control no test catches, because the script still "works".
+  - **ALWAYS give each subagent its own scratchpad file names**, declared in its prompt.
+  - **ALWAYS re-verify a shared helper's guards before reusing it** — never trust the file name.
 - Minimal practical rule when the full map feels heavy: parallelize only work with DISJOINT file
-  sets that runs NO live tests; serialize everything else.
+  sets that runs NO live tests and MUTATES nothing another agent reads; serialize everything else.
+
+> The mutator/reader and scratchpad rules come from ONE observed loop session in a production
+> project. They are cheap to follow and kept as HYPOTHESES: `framework-audit` measures them from the
+> session logs (a reviewer verdict discarded for having read a mutant; a scratchpad collision), and a
+> window with zero occurrences is "not exercised", never "effective".
 
 ---
 
@@ -603,6 +638,7 @@ C6's reset step first.
 ### Deferred discoveries (need you): [task — one line each, or "none"]
 ### Held for owner: [task — reason, or "none"]
 ### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
+### Scope changes (Step 3a): [task — widened what — admission unchanged | held, or "none"]
 ### Orchestration lessons (ALWAYS present, "none" is a valid entry): [...]
 ### Audit cadence: counts as [ceil(N/3)] sessions | audit due: [no | yes — proposed]
 ### Trigger: [ended — which mechanism | still armed — owned by another session; ends at its next firing]
@@ -649,8 +685,9 @@ lines:
 ### Phases completed: [N/N]  (counts as N sessions for audit cadence)
 ### Re-sequencing events: [one line each, or "none"]
 ### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
+### Scope changes (Step 3a): [task — widened what — phase cut unchanged | re-sequenced | stopped, or "none"]
 ### Orchestration lessons (ALWAYS present, "none" is a valid entry):
-[subagent collisions/contention, implementer-report gaps, stale-premise surprises — distinct
+[subagent collisions/contention, mutator/reader overlaps, scratchpad collisions, implementer-report gaps, stale-premise surprises — distinct
  from code discoveries]
 ### Next loop proposal: [the discoveries that queued during this segment]
 ```
