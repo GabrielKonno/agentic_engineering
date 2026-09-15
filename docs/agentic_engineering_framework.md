@@ -1499,7 +1499,7 @@ If any item is ⚠️: ASK the user, explain the risk.
 Maximum 5 tools on day 1. Install only if the resource already exists (do not install a database tool if the database is not yet created).
 
 ### Quality tools (Claude Code only):
-- **Skill Creator plugin** (`/plugin install skill-creator@claude-plugins-official`) — automates skill eval: generates test cases, runs baselines, grades results, iterates. Installed during bootstrap (see tool-specific session0 prompt). If unavailable, the framework's creation eval protocol handles quality validation manually.
+- **Skill Creator plugin** (`/plugin install skill-creator@claude-plugins-official`) — automates skill eval: generates test cases, runs baselines, grades results, iterates. Installed during bootstrap (see `/bootstrap`, `.claude/commands/bootstrap.md`). If unavailable, the framework's creation eval protocol handles quality validation manually.
 
 ---
 
@@ -1651,7 +1651,7 @@ When creating agents or skills, classify their reasoning requirement:
 - **Deep reasoning** (security testing, financial calculations, architectural analysis, complex debugging): the agent/skill should trigger the tool's maximum reasoning mode when invoked.
 - **Standard reasoning** (code review checklist, pattern reference, style guide): default reasoning is sufficient.
 
-The tool-specific implementation (frontmatter, config, etc.) is defined in the session0 bootstrap. The principle is: security and financial agents always get deep reasoning, regardless of the session's default setting.
+The tool-specific implementation (frontmatter, config, etc.) is defined in the `/bootstrap` command. The principle is: security and financial agents always get deep reasoning, regardless of the session's default setting.
 
 ### Before creating (quality reference):
 
@@ -2063,7 +2063,7 @@ This framework is tool-agnostic. The concepts apply to any AI coding agent.
 | `.claude/commands/bootstrap.md` | Prompt to bootstrap a new project in session 0 (creates all files, installs tools) | Yes — Claude Code specific |
 | `.claude/commands/existing_project_adaptation.md` | Prompt to upgrade an existing project to the current framework version (reads codebase, creates retroactive PRD, upgrades docs without overwriting) | Yes — Claude Code specific |
 
-**Path context:** The PRD prompts reference `assets/docs/prd.md` relative to the project root. When using the framework repository structure (with `projects/` directory), the full path from the framework root is `projects/[project-name]/assets/docs/prd.md`. The session0 prompts handle this mapping — no changes to the PRD prompts are needed.
+**Path context:** The PRD prompts reference `assets/docs/prd.md` relative to the project root. When using the framework repository structure (with `projects/` directory), the full path from the framework root is `projects/[project-name]/assets/docs/prd.md`. The `/bootstrap` and PRD commands handle this mapping — no changes to the PRD prompts are needed.
 
 For Claude Code implementation, see `.claude/commands/bootstrap.md` which provides:
 - Exact file templates (CLAUDE.md, project.md, pendencias.md, code-reviewer.md)
@@ -2071,4 +2071,4 @@ For Claude Code implementation, see `.claude/commands/bootstrap.md` which provid
 - Skill discovery and installation process
 - Session Protocol and Execution Protocol embedded in the CLAUDE.md template
 
-For other AI tools (Cursor, Windsurf, Codex, Cline), adapt the session0 prompt to the tool's configuration format while preserving the concepts from this framework.
+For other AI tools (Cursor, Windsurf, Codex, Cline), adapt the bootstrap command (`.claude/commands/bootstrap.md`) to the tool's configuration format while preserving the concepts from this framework.
