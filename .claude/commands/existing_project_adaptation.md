@@ -235,7 +235,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.23.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.23.1 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -539,7 +539,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.23.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.23.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -588,7 +588,8 @@ done
 
 **Copy rules files (to `.claude/rules/`):**
 ```bash
-# THREE DIRECTORIES THIS COMMAND WRITES INTO AND NEVER CREATED. `cp` to a missing directory
+# FOUR DIRECTORIES THIS FENCE CREATES: `.claude/rules/`, which the loop below writes into, plus
+# THREE THIS COMMAND WRITES INTO AND NEVER CREATED (`/audit` 2026-09-14 Y-10). `cp` to a missing directory
 # FAILS, and this command targets projects with only PARTIAL framework structure, so none of
 # the three can be assumed: `.claude/agents/` (Step 4.6.5 copies specialists into it),
 # `assets/docs/` (Phase 3 writes the retroactive PRD into it) and `.claude/docs/` (the upstream

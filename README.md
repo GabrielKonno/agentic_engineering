@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.23.0
+# Agentic Engineering Framework v2.23.1
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -132,18 +132,20 @@ Run these from the framework root with Claude Code:
 agentic_engineering/
 ├── CLAUDE.md                           ← Meta-project contract (Claude Code reads this)
 ├── .gitignore                          ← Ignores projects/ folder
+├── .gitattributes                      ← Keeps *.sh LF
 ├── README.md                           ← You are here
 │
 ├── .claude/                            ← Active config for this repo (makes the slash commands work)
 │   ├── commands/                       ← 6 slash commands: /bootstrap, /prd_planning, /prd_change, /existing_project_adaptation, /maintenance, /audit
 │   ├── rules/                          ← component-design.md (consulted during /maintenance when editing agents/skills/rules)
 │   ├── skills/                         ← cross-cutting-analysis (runtime skill used during PRD sessions)
+│   ├── scripts/                        ← d16-gate.sh (project-information isolation gate, run by /maintenance and /audit)
 │   └── settings.json                   ← Claude Code settings
 │
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.23.0)
+│   ├── modules/                            ← Single source of truth (v2.23.1)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)

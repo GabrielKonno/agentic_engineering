@@ -15,6 +15,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 ├── CLAUDE.md                               ← You are reading this
 ├── README.md                               ← Project overview and quick start
 ├── .gitignore                              ← Contains "projects/" — isolates project repos
+├── .gitattributes                          ← Keeps `*.sh` LF (autocrlf would break bash)
 ├── .claude/                                ← Active config for this repo (framework runtime)
 │   ├── commands/                           # 6 slash commands (5 sessions + 1 utility)
 │   │   ├── bootstrap.md                    # Create project structure from PRD (Session 0)
@@ -27,6 +28,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   └── component-design.md             # Agent/skill/rule design policy (consulted during /maintenance)
 │   ├── skills/
 │   │   └── cross-cutting-analysis/         # Runtime skill used during PRD sessions
+│   ├── scripts/
+│   │   └── d16-gate.sh                     # D16 isolation gate — the ONE definition (/maintenance, push gate, /audit D16)
 │   ├── docs/                               # Framework notes and ideas (not copied to projects)
 │   ├── settings.json                       # Claude Code settings
 │   └── settings.local.json                 # Machine-local overrides (gitignored)

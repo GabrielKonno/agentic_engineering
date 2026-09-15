@@ -52,7 +52,7 @@ Four legitimate paths in — two per mode:
 | **Fresh continuous** | sprint-proposer ran Steps 0-3; the owner asked for continuous mode | Go to "Continuous mode" → C1 (the POLICY replaces Step 1) |
 | **Continuous resume** | the marker carries `**Mode:** continuous` | SKIP C1 — the policy is already approved; go to "Continuous mode" → C6 re-entry |
 
-**If NEITHER happened** (the owner invoked this skill cold), ALWAYS run sprint-proposer Steps 0-3
+**If NONE of the four paths applies** (the owner invoked this skill cold), ALWAYS run sprint-proposer Steps 0-3
 FIRST, then return here. A loop planned without the cadence check and the marker check is a loop
 that can silently skip a due audit or overwrite an in-flight continuation.
 

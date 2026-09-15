@@ -360,7 +360,7 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ```bash
 # `.claude/docs/` IS THE UPSTREAM CHANNEL AND IT IS CORE, NOT TIER-GATED. `evolution-policy.md`
-# is extracted unconditionally above and mandates writing
+# is extracted unconditionally below (this step's "Session rules" fence) and mandates writing
 # `.claude/docs/framework-evolution-YYYY-MM-DD-<slug>.md`; the mother repo's `/maintenance`
 # Step 0 globs exactly that path and is the ONLY mechanical owner of the whole
 # project -> framework chain. Three shipped artifacts mandated the directory and NO command

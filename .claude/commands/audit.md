@@ -152,7 +152,8 @@ R-7, R-8). **Append a row; never re-derive the old ones.**
 | 12 | `audit-2026-09-14.md` | Run 2 | `**Run mode:** verification (over ecace7a)` | 10 of 13 |
 | 13 | `audit-2026-09-14.md` | Run 3 | `**Run mode:** verification (over 700a382)` | 5 of 6 |
 
-**No trend** (27%, 54%, 37%, 47%, 53%, 45%, 49%, 58%, 60%, 84%, 47%). Batch size has been
+**No trend** — derive each row's share from the table above; NEVER copy the percentages onto this
+line (it carried 11 figures for a 12-row table, `/audit` 2026-09-14 Y-13). Batch size has been
 exonerated five times and should not be re-litigated without new evidence.
 
 ## Phase 1 — Dispatch Audit Agents
@@ -222,7 +223,13 @@ CHECKS:
 
 [D16] Project-information isolation (privacy)
   D16.1. Build the blocklist DYNAMICALLY: list the folder names under projects/ (each name
-         plus obvious variants — hyphen/underscore forms, with and without suffixes).
+         plus obvious variants — hyphen/underscore swaps, separator-less and space-joined forms,
+         with and without suffixes — AND each PART of 4+ characters matched at LETTER boundaries
+         and in CamelCase, so a `_`-glued snake_case identifier hits; `/audit` 2026-09-14 Y-3).
+         **ALWAYS run the folder-name half with `bash .claude/scripts/d16-gate.sh`** — `staged`
+         for tracked files, `dir <path>...` for `.claude/docs/` and the memory directory, `log --all`
+         for history. It derives every variant above, prints one line and never a match. Extend by
+         hand only with the D16.2 / D16.2c identifiers, which it does not derive.
   D16.2. From each project's own CLAUDE.md / project.md (read-only), harvest additional
          identifiers: client/person names, deployment domains (*.vercel.app, custom
          domains), repo URLs, infra refs (e.g. Supabase project ids).
@@ -245,7 +252,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.23.0 they are
+         **Expected: at least 5 paths.** As of v2.23.1 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
@@ -277,6 +284,8 @@ CHECKS:
          Grep every OTHER framework-layer file for every blocklist entry, case-insensitive:
          all TRACKED files AND `.claude/docs/` (gitignored agent notes — the isolation
          principle covers the agent's own documents too). Exclude only projects/ and .git/.
+         **ALWAYS scan PATHS as well as CONTENTS** — a folder name present only in a file or
+         directory NAME is a hit, and a contents-only grep reads 0 on it (`/audit` 2026-09-14 Y-4).
   D16.3b. Agent-layer scan (MANDATORY when resolvable): the agent's persistent memory
          directory lives OUTSIDE the repo — resolve its path at runtime from the session
          context (the "# Memory" section of the system prompt, or the additional working
@@ -304,6 +313,8 @@ CHECKS:
          tree still lives in every commit that contained it. Scan ALL commits:
          - Contents: `git grep -I -c -E "<blocklist|value patterns>" $(git rev-list --all)`
          - Messages: `git log --all --format="%h|%s|%b"` grepped for the same patterns
+         - Folder-name blocklist over patches, messages AND paths in one pass:
+           `bash .claude/scripts/d16-gate.sh log --all` (expected: `…, 0 hits`)
          Classify each hit by reachability: in UNPUSHED commits → fixable locally
          (`git filter-branch --msg-filter` for messages, tree rewrite for contents);
          in PUSHED history → escalate to the owner (requires history rewrite + force

@@ -23,9 +23,17 @@ This is a framework maintenance session, not a project bootstrap.
   a PUBLIC repo (`/audit` 2026-09-10 U-48). **A gate whose result is not branched on is not a
   gate.** ALWAYS:
   ```bash
-  hits=$(<the D16 scan>)          # a COUNT, never a stream
-  if [ "$hits" -eq 0 ]; then git push origin main; else echo "D16 RED: $hits hits - BLOCKED"; fi
+  out=$(bash .claude/scripts/d16-gate.sh log origin/main..HEAD)   # ONE line, never a stream
+  hits=$(printf '%s' "$out" | sed -n 's/.*, \([0-9][0-9]*\) hits$/\1/p')
+  if [ "$hits" = 0 ]; then git push origin main; else echo "D16 BLOCKED: $out"; fi
   ```
+  **THE SCAN IS THE `log` SCOPE OVER THE UNPUSHED RANGE — NEVER A NET-TIP DIFF.** A push publishes
+  every commit in the range, so a leak added and removed inside it is published; a net-tip form
+  (`git diff --name-only origin/main HEAD | xargs grep`) read 0 over exactly that while
+  `git log -p` found 2, and this line was a `<the D16 scan>` placeholder until then
+  (`/audit` 2026-09-14 Y-7).
+  **ALWAYS compare with `=`, never `-eq`:** a `D16 RED:` line carries no number, `hits` is empty,
+  and the string compare fails CLOSED.
   the unpushed/pushed boundary is what makes a privacy hit cheap or expensive to fix
   (`CLAUDE.md` → Repository Lifecycle; `/audit` 2026-09-02 M-56).
   **ALWAYS REPORT `push:` in the session's closing report and in the persisted receipts** —
@@ -405,7 +413,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    done
    ```
    **Expected: every template non-zero.** A `0` is RED — either the fence broke or the command
-   does not match it, and BOTH are failures, and the D16 isolation grep runs over every touched file (no project names,
+   does not match it, and BOTH are failures, and the D16 isolation gate below runs over what the commit publishes (no project names,
    no source-project session numbers, no single-project vocabulary).
    **ALWAYS REPORT all three results, EACH ON ITS OWN LINE** — the receipts self-check greps
    `^\*\*<key>:`, so a single pipe-joined line scores 1/0/0 and a format-compliant discharge reads
@@ -421,46 +429,55 @@ Each item encodes a real miss that survived a first pass and was only caught by 
      | sort -u | wc -l
    ```
    `**fences:** N of M templates extract non-empty`
-   `**isolation:** N files scanned, 0 hits`.
+   `**isolation:** D16 log (patches + messages + paths): N commits scanned, 0 hits`.
    **THE ISOLATION PATTERN IS DERIVED FROM DISK AT RUNTIME AND NEVER TYPED INTO THE RECEIPT.**
    A `$` line that pastes the blocklist publishes exactly what the rule forbids: proving
    "0 identifiers published" by quoting a grep whose PATTERN is the identifiers IS the leak.
    It shipped to a PUBLIC repo and cost a force-push plus an accepted-risk record
    (`/audit` 2026-09-10 U-48). This is `U-38`'s self-match class one level more serious:
    there the self-match produced a wrong number, here it produced the damage.
-   **ALWAYS build the pattern with this, and ALWAYS paste only the COUNT:**
+   **ALWAYS RUN THE GATE AS ONE FILE — `.claude/scripts/d16-gate.sh` — and ALWAYS paste only its
+   one output line.** The script is the single definition; this item POINTS at it and never
+   restates its logic (component-design §5, RELOCATE). It reads what git PUBLISHES — index blobs and
+   index paths, or a range's patches, messages and paths — never the working tree, and passes every
+   pattern through `-f`. So a staged path beginning with `-`, a leak staged and then cleaned on
+   disk, a name present only in a PATH, and a regex metacharacter in a folder name no longer read 0
+   (`/audit` 2026-09-14 Y-1, Y-2, Y-4, Y-5). It matches each full folder name as written, swapped,
+   separator-less and space-joined, and each surviving PART at letter boundaries and in CamelCase
+   (Y-3). It prints no pattern and no match, and FAILS CLOSED (`D16 RED: …`, exit 2) on a missing
+   `projects/`, a bad range or any stderr.
    ```bash
-   # TWO PATTERNS, TWO MATCH MODES — BOTH MANDATORY, SUMMED.
-   # F = each FULL folder name plus its `_`<->`-` swapped forms, matched as a SUBSTRING (no `-w`).
-   #     A full name is specific enough that no ordinary word contains it, and `-w` treats `_` as a
-   #     WORD character: with `-w` a full name glued by `_` (`old_<name>`, `<name>_v2`) and, with
-   #     parts only, the bare underscore-joined name itself read 0 (`/audit` 2026-09-14 X-6).
-   #     Full names skip the length/stoplist filters, so a future one-word generic folder name would
-   #     turn the gate RED on healthy files — that FAILS CLOSED; rename the folder, never drop F.
-   # P = the PARTS (split on `_`/`-`, length >= 4, generic words stoplisted), matched with `-w`.
-   F=$(ls -d projects/*/ | xargs -n1 basename \
-       | awk '{print; a=$0; gsub(/_/,"-",a); print a; b=$0; gsub(/-/,"_",b); print b}' | sort -u | paste -sd'|' -)
-   P=$(ls -d projects/*/ | xargs -n1 basename | tr '_-' '\n\n' | awk 'length($0)>=4' \
-       | grep -vxE 'system|page|site|core|base|main|data|admin|trabalho|projeto' | sort -u | paste -sd'|' -)
-   # WORD BOUNDARIES ARE MANDATORY FOR P. Without them a short part matches inside an ordinary word
-   # and the gate blocks a healthy push: one 4-letter part matched "Grafana" in a shipped
-   # example and a lineage doc, and the check went RED on 2 clean files (measured 2026-09-12).
-   # NUL-SEPARATED, UNQUOTED PATHS. A staged path with a SPACE, a QUOTE or an ACCENT was split by
-   # `xargs` or escaped by git, grep errored to stderr, and the count read 0 over 2 real leaks
-   # (`/audit` 2026-09-14 X-24). `-r` keeps an empty staged list from grepping stdin.
-   n() { git -c core.quotepath=off diff --cached --name-only -z | xargs -0 -r grep -oni"$1"E "($2)" | wc -l; }
-   echo $(( $(n '' "$F") + $(n w "$P") ))   # expected: 0
+   bash .claude/scripts/d16-gate.sh staged                  # PRE-commit: the whole index
+   bash .claude/scripts/d16-gate.sh log <first>~1..<last>   # the RECEIPT: every commit of the batch
    ```
-   **Expected: 0. NEVER echo `$F` or `$P`.** Negation-prove it against seeded files before trusting it:
-   **ALWAYS seed ALL THREE forms — every FULL folder name exactly as written, every full name glued by
-   `_` to other text (`old_<name>_v2`), AND one PART that survives the length and stoplist filters,
-   inside an ordinary sentence — and the command MUST return non-zero on EACH.** A stoplisted part
-   correctly reads 0, so seeding one proves nothing. A part-only seed certified a
-   pattern that was blind to the whole name (`/audit` 2026-09-14 X-20). The generic-part stoplist exists because a
-   folder name split on `-`/`_` yields ordinary words that match English OR PORTUGUESE prose (one
-   such part matched 30+ occurrences of "systematic", another 7 occurrences of the ordinary
-   Portuguese word in the lineage docs); extend THAT list, never the
-   identifier list.
+   **Expected: `…, 0 hits` from both.**
+   **ALWAYS discharge `isolation:` with the `log` form over the batch range** — it re-runs verbatim
+   AFTER the commit. The `--cached` form it replaces scanned an empty list once the commit existed
+   and read a vacuous 0, so receipts re-scoped the `$` line and hand-added a file count (Y-11).
+   **NEVER echo the blocklist, and NEVER pipe the scan through anything that prints a matched line.**
+   **ALWAYS NEGATION-PROVE THE GATE WITH ITS OWN SELFTEST whenever this session edits the script** —
+   never with a hand-picked seed:
+   ```bash
+   bash .claude/scripts/d16-gate.sh selftest 2>/dev/null | tail -1   # expected: selftest: K of K cases as expected
+   ```
+   It seeds, per project and in a throwaway repo, every form the gate claims — the full name, the
+   `_`↔`-` swap, the `_`-glued, separator-less and space-joined forms, a name only in a path, leaks
+   under a leading-dash and a space/accent path, a staged-then-cleaned leak, a surviving part in a
+   sentence, `_`-glued and in CamelCase, a leak added and removed inside a range, a name in a commit
+   message, one in an untracked dir, a UTF-16 / NUL-byte / `binary`-attributed file, user config
+   that recolours or re-encodes git output (`color.ui`, `log.showRoot`, a diff textconv,
+   `i18n.logOutputEncoding`, `i18n.commitEncoding`), an author e-mail, a blob or commit hidden by
+   `git replace`, an annotated tag message, and — under INVENTED names in a synthetic mother repo — a
+   CamelCase, an all-caps and a hidden folder name — and each MUST read RED; a non-ASCII folder name
+   MUST fail closed; two controls (ordinary words, an
+   empty index) MUST read GREEN. Hand-picked seeds certified a gate blind to the whole name (X-20)
+   and left the swapped form unseeded (Y-6).
+   **ALWAYS ADD a selftest case in the same edit that teaches the gate a new form.** The selftest scans its own output with the gate before printing:
+   its first run leaked the folder names through a git CRLF warning quoting a seeded path.
+   The generic-part stoplist is the script's `STOP=` line. It exists because a folder name split on
+   `-`/`_` yields ordinary words that match English OR PORTUGUESE prose (one such part matched 30+
+   occurrences of "systematic", another 7 occurrences of the ordinary Portuguese word in the
+   lineage docs); extend THAT list, never the identifier list.
    **THE DISTINCTION THAT MAKES `audit.md`'s OWN LITERAL LEGITIMATE:** that line is the RULE
    naming the shape to detect; a receipt is EVIDENCE, and evidence must never paste the value.
    **ALWAYS STATE THE UNIT for `references:` and ALWAYS give it a DENOMINATOR** — the unit is
@@ -770,10 +787,10 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # THE THRESHOLD IS THE FIGURE THIS COMMAND RETURNS **TODAY**, NEVER A REMEMBERED ONE, AND NEVER
    # A FIGURE MEASURED BEFORE THE BATCH. The `52` that certified one batch was measured at
    # `<first>~1`; re-run at the tip the same command returns 55, so up to THREE controls could be
-   # deleted and still read GREEN (`/audit` 2026-09-10 U-6). Baseline measured 2026-09-11, AFTER
-   # the U-45 tightening, at the TIP of the batch that installed it (NOT at `<first>~1` — that is
-   # exactly how the stale `52` was produced): maintenance.md 4 fenced + 23 inline = 27;
-   # audit.md 7 + 28 = 35; TOTAL 62.
+   # deleted and still read GREEN (`/audit` 2026-09-10 U-6). Baseline RE-measured 2026-09-15 at
+   # the TIP of the batch applying `/audit` 2026-09-14 W-20 (NOT at `<first>~1` — that is exactly
+   # how the stale `52` was produced): maintenance.md 5 fenced + 25 inline = 30;
+   # audit.md 7 + 28 = 35; TOTAL 65. (The 2026-09-11 figure, 62, was stale by one from 512f07b.)
    # RE-MEASURE THIS AT THE FINAL TIP, NEVER MID-BATCH. Written mid-batch it read 54, then 60,
    # and both were stale before the batch closed — U-6's own class, inside U-6's own fix.
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
@@ -1223,7 +1240,7 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
 5. **NEVER edit the project's own evolution docs** (no-touch rule) — marking them
    `upstreamed` is the project's own next session's job, guided by this repo's lineage record.
 6. Run the post-change verification (cross-references, template fence extraction, D16
-   isolation grep over every touched file) before committing.
+   isolation gate, `bash .claude/scripts/d16-gate.sh staged`) before committing.
 7. **ALWAYS PROPOSE `/audit` after the absorption lands** — this is trigger (a) in CLAUDE.md,
    and this step is its invoker. An absorption changes templates every future project receives,
    so the net runs behind it. Report `audit: proposed / ran / skipped — [owner deferred]`; never

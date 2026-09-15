@@ -66,7 +66,7 @@ examples/
 ## How to use
 
 ### During bootstrap (automatic)
-The session0 prompt copies this entire directory to `assets/examples/` in the project. No manual action needed.
+`/bootstrap` Step 1.5 copies this entire directory to `assets/examples/` in the project. No manual action needed.
 
 ### During bootstrap — pre-installation (Step 12.5 + Step 13)
 After copying examples, the bootstrap also pre-installs relevant components directly into the project:
