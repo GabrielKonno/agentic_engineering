@@ -789,8 +789,9 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # `<first>~1`; re-run at the tip the same command returns 55, so up to THREE controls could be
    # deleted and still read GREEN (`/audit` 2026-09-10 U-6). Baseline RE-measured 2026-09-15 at
    # the TIP of the batch applying `/audit` 2026-09-14 W-20 (NOT at `<first>~1` — that is exactly
-   # how the stale `52` was produced): maintenance.md 5 fenced + 25 inline = 30;
-   # audit.md 7 + 28 = 35; TOTAL 65. (The 2026-09-11 figure, 62, was stale by one from 512f07b.)
+   # how the stale `52` was produced): maintenance.md 5 fenced + 26 inline = 31;
+   # audit.md 7 + 28 = 35; TOTAL 66. (The 2026-09-11 figure, 62, was stale by one from 512f07b; a
+   # first write of THIS line said 65 and was stale before the batch closed — measured again here.)
    # RE-MEASURE THIS AT THE FINAL TIP, NEVER MID-BATCH. Written mid-batch it read 54, then 60,
    # and both were stale before the batch closed — U-6's own class, inside U-6's own fix.
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
