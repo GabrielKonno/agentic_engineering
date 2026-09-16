@@ -49,7 +49,8 @@ If mismatch detected → ASK user before propagating.
 ### Propagation (when changes detected)
 1. Read full PRD
 2. Update project.md — add changes to Architectural Decisions if stack changed
-3. Update pendencias.md — add new tasks for new features, remove tasks for removed features. ALWAYS tag each task added here `origin: owner (PRD sync vX.X.X → vY.Y.Y)` — it comes from the owner's approved PRD, and continuous mode (`autonomous-loop` → C1) reads an untagged task as owner-origin only by default, never by declaration
+3. Update pendencias.md — add new tasks for new features, remove tasks for removed features.
+   - **ALWAYS tag each task added here `origin: owner (PRD sync vX.X.X → vY.Y.Y)`** — it comes from the owner's approved PRD, and continuous mode (`autonomous-loop` → C1) reads an untagged task as owner-origin only by default, never by declaration
 4. Update CLAUDE.md — if architecture or key patterns changed
 5. Ensure PRD changelog is updated
 6. Log in session log: `"PRD synced: vX.X.X → vY.Y.Y — [changes]"`

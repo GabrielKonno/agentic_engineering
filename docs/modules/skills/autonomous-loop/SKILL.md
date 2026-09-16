@@ -627,8 +627,8 @@ that changed the `Window` line, so a C6 reset (committed as `closed 0`) makes th
 RED — the check cannot tell it from the loop's own late commit; the disposition below resolves it.
 
 **Anything else is RED — the next task does NOT open.**
-**A closure RED is a C5 STOP: ALWAYS write `State: stopped — closure check RED at task N` and do
-the rest of C5's four steps.** It is never a silent pause: without a `State` the next re-entry cannot
+**ALWAYS treat a closure RED as a C5 STOP — write `State: stopped — closure check RED at task N` and
+do the rest of C5's four steps.** It is never a silent pause: without a `State` the next re-entry cannot
 tell a RED boundary from a healthy one.
 
 **ALWAYS REPORT both outputs literally**, beside the two lines of the base check.
@@ -666,8 +666,9 @@ another session; it ends at its next firing`.
   to write once the marker is gone, and no digest is emitted — ALWAYS say so in the one-line
   revocation report (`revoked — no digest; trigger [ended — which mechanism]`).
   - **A marker removed MID-TASK by another session is a revocation.** The task-closure check then
-    reads `0` on its marker line: ALWAYS commit the in-flight task, run `/session-end`, end the
-    trigger, and NEVER re-create the marker.
+    reads `0` on its marker line.
+    - **ALWAYS commit the in-flight task, run `/session-end` and end the trigger; NEVER re-create
+      the marker.**
   - **A revocation said in ANOTHER session cannot end this session's trigger.** That trigger ends at
     its next firing, through sprint-proposer Step 1's no-marker branch (the arming rule is in C6).
 

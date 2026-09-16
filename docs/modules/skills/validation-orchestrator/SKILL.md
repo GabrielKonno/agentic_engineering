@@ -202,7 +202,9 @@ owner exempts the commit. An exemption is written at commit time as a `Review-Ex
 trailer; for a commit that already exists, NEVER rewrite it — append
 `- exempt · owner decision · <reason> · commits: <sha7>` to the ledger. A commit that
 touches schema or migrations additionally needs a receipt from the adversarial or data reviewer when
-the project has one. **ALWAYS REPORT — `review receipts: N commits in range, 0 without receipt` or `review receipts: N commits in range, K without receipt — deploy blocked` or `review receipts: RED — range unreadable — deploy blocked`. NEVER emit nothing.**
+the project has one.
+
+**ALWAYS REPORT — `review receipts: N commits in range, 0 without receipt` or `review receipts: N commits in range, K without receipt — deploy blocked` or `review receipts: RED — range unreadable — deploy blocked`. NEVER emit nothing.**
 
 ## Subagent mechanics
 

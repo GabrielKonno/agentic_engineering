@@ -44,7 +44,7 @@ HIPÓTESE só onde a regra é nova (P6).
 | **P8** | Dois instrumentos do projeto (vivacidade e teto de padrões) no mesmo predicado | **NÃO ABSORVIDA** | — | Os dois scripts são do projeto. A lição geral ("dois instrumentos sobre o mesmo conceito compartilham o predicado") já é a regra de fonte única que o framework carrega |
 | **P9** | `security-reviewer` quando o diff toca DADO ENVIADO AO CLIENTE | **ADAPTADA** | `skills/validation-orchestrator` → Route 1 (Security check) e Route 2 | O gatilho do projeto citava a stack dele (ações de servidor, props de componente de servidor); o template usa formas gerais (forma de retorno de ação/rota/RPC, props servidor→cliente, figura privilegiada, dado pessoal) e acrescenta o report `security-reviewer: ran | skipped` |
 | **POL-1** | Decisão do dono → documento normativo no MESMO commit | **ADAPTADA** | `rules/session_rules.md` → nova seção "Owner decision → normative document in the SAME commit"; invocador: `skills/session-log-creator` → `## Owner decisions` | O projeto tem PRD em dois níveis (master + specs de fase); o template fala em "o PRD (ou o spec de fase que é normativo para a fase)" e amarra à entrada no Changelog do PRD + bump de versão (`/prd_change` é comando deste repo, não do projeto) |
-| **POL-2** | Split literal e cópia de template isentos do skill-gate, COM linha declarada no commit | **GRADUADA** | `rules/evolution_policy.md` → "Component creation gate" | — |
+| **POL-2** | Split literal e cópia de template isentos do skill-gate, COM linha declarada no commit | **GRADUADA** | `rules/evolution_policy.md` → "Component creation gate"; `skills/skill-gate` → "Scope check" APONTA para a isenção (2º commit do lote) | O 1º commit gravou a isenção só na política, e o executor seguia mandando todo split para o portão — achado pelo back-sweep depois do commit. A isenção ainda não tem quem ESCREVA a linha no momento da cópia nem quem a LEIA: finding aberto B-25 em `assets/docs/audit-2026-09-15.md` |
 | **POL-3** | Três docs de evolução antigos do projeto avaliados e um arquivado | **NÃO ABSORVIDA** | — | Higiene interna do projeto; o ciclo de vida desses docs já está no template de `evolution_policy` |
 
 **Achados de construção (do mesmo doc):** dois dos cinco subiram como regra geral em
@@ -87,6 +87,8 @@ disciplina de edição que o projeto carrega; não subiram.
 - **P9:** `framework-audit` → Q5 → linha "Mechanism utilization" (especialistas que nunca rodaram),
   lendo o report `security-reviewer: ran | skipped` dos relatórios de validação. Abaixo de `production`:
   **`unmeasured — no measurer at prototype / internal-tool`**.
+- **POL-2:** **`unmeasured — no measurer at any tier`** — nenhuma componente lê a linha
+  `skill-gate: exempt` nem detecta o bypass silencioso (finding aberto B-25).
 - **POL-1:** `unmeasured — no measurer at any tier` como contagem; o `prd-sync-checker` continua sendo o
   detector das derivas que escaparem, não um contador da regra.
 - **Meta:** a `/audit` de verificação deste repo sobre o commit da absorção.

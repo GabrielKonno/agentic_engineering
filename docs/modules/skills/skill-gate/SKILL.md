@@ -7,7 +7,8 @@ description: >
   blind review by the skill-reviewer subagent → autonomous correction → conditional
   promotion. MUST be followed whenever a NEW skill or rules file is created and this
   skill is installed (tier-gated: internal-tool+). NOT for in-place updates to
-  existing components (those follow evolution-policy). Without this, the session
+  existing components (those follow evolution-policy), nor for a split or copy
+  that evolution-policy's Exemption covers, under its conditions. Without this, the session
   that wrote a component also approves it — correlated errors pass, and unverified
   empirical claims enter the library as fact.
 created: framework-v2.4.0 (pre-validated)
@@ -26,8 +27,12 @@ components are out of scope (see `.claude/rules/evolution-policy.md`).
 - Creating a NEW skill or rules file → this skill applies.
 - Updating an EXISTING component → STOP, follow evolution-policy instead. If the
   update ADDS an empirical claim, ALWAYS mark that claim `verified: false` inline.
-- **EXTRACTING part of an existing component into a new one (a SPLIT) → this skill APPLIES to
-  the new component, and evolution-policy governs the edit to the source.** A split is both
+- **A VERBATIM SPLIT or an UPSTREAM COPY → this skill does NOT apply, ONLY under the conditions
+  evolution-policy → "Component creation gate" → Exemption states.** ALWAYS read them there and write
+  the commit-message line that section names; this skill NEVER restates them.
+- **EXTRACTING part of an existing component into a new one (a SPLIT) that the Exemption does not
+  cover → this skill APPLIES to the new component, and evolution-policy governs the edit to the
+  source.** A split is both
   branches at once; the tie-break is that the new component is what a future session will read
   cold, so it is what needs the blind review. Review its EXTRACTED content as written, not as
   inherited: content that was correct nested inside its parent can be incomplete standing alone

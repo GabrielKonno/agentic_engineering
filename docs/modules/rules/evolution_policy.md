@@ -58,12 +58,18 @@ through an independent gate instead of self-approval:
   review approves them (process: `.claude/skills/skill-gate/SKILL.md`).
 - **Exemption — a VERBATIM SPLIT or an UPSTREAM COPY.** A new file that contains NO new content does
   not go through the gate, because a blind review has nothing to judge: (a) an existing component
-  split by SUBJECT, whose integrity is proven by rebuilding the original from the parts; or (b) a
+  split by SUBJECT, whose integrity is proven by rebuilding the original from the parts with the
+  pointer lines below left out; or (b) a
   byte-identical copy of a framework template made during adaptation.
   - **ALWAYS declare the exemption in the commit message** — `skill-gate: exempt — verbatim split of <source>`
     or `skill-gate: exempt — upstream copy of <template path>`.
   - **A new file with neither that line nor a `promotion.log` entry is a silent bypass**, and a finding.
-  - **ANY new sentence added during the split or copy VOIDS the exemption** for that file.
+  - **ANY new sentence added during the split or copy VOIDS the exemption** for that file — EXCEPT
+    the pointer component-design §5 RELOCATE requires inside the new file (to what stays shared),
+    which moves no content. The source's own pointer is an in-place update and never voids it.
+  - **A part that cannot stand alone without a NEW entry condition is NOT a verbatim split** — write
+    the condition and take the gate. Leaving the condition out to keep the exemption ships exactly the
+    incomplete component the gate exists to catch.
   > Evidence (production project): 4 rules files and 1 skill + 6 agents entered as extractions or
   > copies, 3 of the 4 events with nothing recorded; the gate never ran in four audits, so the
   > ambiguity stayed invisible instead of being resolved.
