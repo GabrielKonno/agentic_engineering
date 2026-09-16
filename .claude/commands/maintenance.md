@@ -410,12 +410,22 @@ Each item encodes a real miss that survived a first pass and was only caught by 
 (owner question / audit):
 
 1. **Inventory propagation sweep.** When a change ADDS, REMOVES, or RENAMES any framework
-   artifact (template, skill, agent, rule, script, command), ALWAYS sweep the FIXED set of
-   inventory surfaces in the same session — grep the artifact's name AND the affected counts:
+   artifact (template, skill, agent, rule, script, command) — **OR ADDS A USER-VISIBLE CAPABILITY
+   INSIDE AN EXISTING ONE** (a mode, a maturity level, a command argument, an owner-facing workflow)
+   — ALWAYS sweep the FIXED set of inventory surfaces in the same session — grep the artifact's name
+   AND the affected counts, and for a capability grep its NAME in README.md and in
+   docs/agentic_engineering_framework.md → **expected ≥1 hit in EACH, in the narrative sections below**:
    - CLAUDE.md (Repository Structure tree + any counts)
-   - README.md (structure diagram, flow-diagram counts, "What Bootstrap Creates" table)
+   - README.md (structure diagram, flow-diagram counts, "What Bootstrap Creates" table, **and the
+     narrative a new reader learns from: "How development works", "Session flow", both command
+     tables, "Maturity Levels", "Key Concepts"**)
    - docs/modules/README.md (directory enumerations)
-   - docs/agentic_engineering_framework.md (components table + numeric claims)
+   - docs/agentic_engineering_framework.md (components table + numeric claims, **and the Maturity
+     Model plus the section that explains the capability**)
+   **A COUNT SWEEP CANNOT SEE AN OMISSION.** Level 5 shipped on 2026-07-14 inside an existing skill,
+   fired no sweep, and README's maturity table — last edited 2026-03-28 — still ended at Level 4 after
+   31 README commits; its only README mention was a count row added when the skill was later extracted
+   (owner review, 2026-09-16).
    - examples/README.md (the conventions it CLAIMS every example exhibits — verify, never assume)
    - **This command file itself:** its Authorized-operations list and any count/enumeration in a
      header above a list you edited. Adding a checklist item, an authorized surface, or a phase to
@@ -428,7 +438,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    correcting ALL live copies in the SAME session — executed surfaces first (commands,
    templates the AI obeys), descriptive surfaces second. Grep, never memory.
    **ALWAYS REPORT the result — `inventory sweep: N surfaces checked, M stale claims fixed` or
-   `inventory sweep: N/A — no artifact added, removed, renamed or split`. NEVER emit nothing, and
+   `inventory sweep: N/A — no artifact added, removed, renamed or split, and no user-visible capability added`. NEVER emit nothing, and
    ALWAYS NAME THE SURFACES** — a bare count cannot be re-measured by the audit that reads it, and
    an unfalsifiable receipt is not a receipt (`/audit` 2026-09-02 M-54).
    A count that lives in PROSE (a NOTE paragraph, an intro sentence) is the one that survives a

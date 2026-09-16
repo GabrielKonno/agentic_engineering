@@ -948,7 +948,13 @@ CHECKS:
          - Agent counts (look for "10 agent", "3 process agents")
          - Step counts (look for "15-step")
          - Example counts (look for "20", "9", "11" for agents/skills/rules)
-  D15.2. From README.md — extract all numeric claims about components
+  D15.2. From README.md — extract all numeric claims about components, AND check COVERAGE — an
+         OMISSION is a FINDING, because a claim-only check cannot see one (README's maturity table
+         ended at Level 4 for two months after Level 5 shipped; owner review, 2026-09-16):
+         - every `### Level N` heading of the concepts doc's "Maturity Model" has a row in README's
+           "Maturity Levels" table;
+         - every command file in `.claude/commands/` appears in BOTH README command tables
+           ("Available Commands" and "What each command does").
   D15.3. From docs/modules/README.md — extract any count claims
   D15.4. For each claim: compare against actual count on disk
   D15.5. List all skills folders in docs/modules/skills/ and count them

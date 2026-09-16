@@ -67,6 +67,8 @@ Human approves or redirects
 
 At Level 4 (Auto Pilot), the AI proposes sprints, executes 3-5 tasks autonomously, and stops only on exceptions. The human approves the batch, not individual tasks.
 
+At Level 5 (Backlog Loop — opt-in, per session), the AI stops implementing and becomes an ORCHESTRATOR: it works through a whole approved backlog segment — or, in continuous mode, keeps taking every task that passes an approved admission policy — delegating implementation to isolated subagents and closing each task to disk before opening the next. See [Maturity Levels](#maturity-levels) and [Autonomous Loop](#key-concepts).
+
 ---
 
 ## Quick Start
@@ -339,6 +341,19 @@ END → Update project.md → Update pendencias.md → Update agents/skills →
       Create session log → Commit
 ```
 
+At **Level 5** the flow changes shape. After you approve a loop plan (segment mode) or an admission policy (continuous mode), the main agent orchestrates instead of implementing:
+
+```
+START → Propose loop plan (phases cut by dependency, not by a task count) → Human approves ONCE →
+  For each phase:
+    For each task: dispatch implementer subagent → verify its work from DISK →
+                   validate (geometry by risk) → commit → close the task to disk
+    Phase boundary: task-closure check → 1-line report per task → next phase (no re-approval)
+END (segment done) → Final report → session-end ONCE
+```
+
+A stop mid-segment writes a `LOOP CONTINUATION` marker in `project.md`; the next session resumes at the next phase with no new approval.
+
 ### 5. Evolve
 
 The framework learns from your project:
@@ -358,6 +373,8 @@ The framework learns from your project:
 | `/bootstrap [name]` | Starting a new project | PRD at `assets/docs/prd.md` | Full project documentation structure |
 | `/existing_project_adaptation [name]` | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
 | `/prd_change [name]` | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
+| `/maintenance` | Changing the framework itself, or absorbing lessons projects recorded | An audit report or pending `framework-evolution-*.md` docs | Framework edits + write-back and receipts in the audit report |
+| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a maintenance batch that touched shipped surfaces | The repository (and the last report, in verification mode) | One dated report in `assets/docs/` with stable finding IDs |
 
 ---
 
@@ -369,8 +386,9 @@ The framework learns from your project:
 | 2 | Autocreate | Tests and reports bugs | Creates complete code |
 | 3 | Auto Execute | Approves plans and results | Implements, validates independently via subagents, reports with evidence |
 | **4** | **Auto Pilot (recommended)** | **Approves sprint batches** | **Plans sprints, executes autonomously, stops only on exceptions** |
+| 5 | Backlog Loop (opt-in, per session) | Approves a whole backlog segment once — or an admission policy (continuous mode) — and supervises checkpoints | Orchestrates: delegates implementation to subagents, verifies from disk, closes each task to disk, resumes across sessions |
 
-Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is reliable.
+Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is reliable. Use Level 5 per session, on top of Level 4, for backlogs of mostly small/medium independent tasks — it never activates by itself, and large or architecture/security tasks stay out of it.
 
 ---
 
@@ -383,6 +401,12 @@ Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is
 **Known Bug Patterns** — Every bug fixed becomes a check in future reviews. The AI gets smarter every session. Max 20 patterns; when exceeding, domain patterns are promoted to rules files.
 
 **Sprint Mode** — At Level 4, the AI proposes a batch of 3-5 tasks, the human approves once, and the AI executes all tasks without pausing between them. Stops only on persistent failures, ambiguity, or context degradation.
+
+**Autonomous Loop (Level 5)** — An opt-in mode where the main agent orchestrates instead of implementing, so its context holds sprint state rather than implementation reasoning and survives long sessions.
+- **How to start it:** ask for it ("run the backlog in loop mode", "autonomous mode", "continuous mode") or accept the loop offer in a sprint proposal. An ambiguous request gets ONE question: segment or continuous.
+- **Segment mode:** you approve a fixed task list once; the AI cuts it into phases by dependency and resource conflicts, runs every phase, and reports at each boundary. If the session ends mid-segment, a `LOOP CONTINUATION` marker lets the next session resume with no new approval. Say "cancel the loop" to revoke.
+- **Continuous mode:** you approve an ADMISSION POLICY instead of a list. The AI re-reads the backlog at every task boundary and executes every task that passes it — including tasks you register mid-session. Tasks the AI discovers enter only in a capped class; large or architecture/security tasks are held for you. A checkpoint digest every 10 tasks and a discovery brake keep you supervising. An empty queue is idle, not an end; re-entry across sessions uses the native `/loop /sprint-proposer continuous`. Say "cancel continuous mode" to revoke.
+- **What it never does:** activate by itself, relax the validation geometry after a streak of green, run an audit autonomously, or run an agent that mutates the working tree in parallel with one that reads it.
 
 **Session Logs** — Permanent record of every session (what was done, decisions made, reasoning, git diff). Not read by the AI during normal sessions — exists for human reference and project history.
 

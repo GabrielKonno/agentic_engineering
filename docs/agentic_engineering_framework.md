@@ -186,6 +186,45 @@ makes autocompaction a non-event instead.
 - ✅ Never a default: activated only by owner request or explicit acceptance of a loop
   proposal; large and architecture/security tasks stay out of loop scope
 
+**How to activate and operate Level 5** (the `autonomous-loop` skill is the authority; this is the map):
+- **Entry.** Ask for loop, autonomous or continuous mode, or accept the loop offer `sprint-proposer`
+  makes at §4d. `sprint-proposer` Steps 0-3 always run first (audit cadence, markers, PRD sync); the
+  loop never repeats them. A request that does not name the mode gets ONE question — segment or
+  continuous — and never defaults to continuous, the wider authorization.
+- **Segment mode.** Step 1a gates eligibility (no large or architecture/security task, resolvable
+  dependencies, the agent-frontmatter liveness guard passes); Step 1b cuts phases by dependency
+  order and resource disjointness; each phase re-measures its premises, runs its tasks, and passes
+  the task-closure check before the next opens. A stop writes `LOOP CONTINUATION — active` in
+  `project.md`; the next session's `sprint-proposer` Step 1 detects it and resumes at the next phase
+  with no new approval ("cancel the loop" revokes).
+- **Continuous mode.** Before presenting the policy, a tagging-writer check must pass — the mode
+  FAILS CLOSED when task-writing components predate the `origin:` tag, because an untagged task
+  would be admitted as the owner's. At each task boundary the queue is re-read and admitted per the
+  policy; self-discovered tasks are capped; a checkpoint (every 10 closed tasks, or an audit due)
+  and a discovery brake STOP the loop and emit a digest. An empty queue is IDLE, not an end.
+  Re-entry is the native `/loop /sprint-proposer continuous` (self-paced): a session-scoped trigger
+  dies with its session, and the approval does not re-arm it. "cancel continuous mode" revokes.
+- **Audit cadence.** A loop session counts as one session per completed phase, and the loop never
+  runs an audit autonomously — a due audit is announced and proposed, never executed.
+
+**Concurrency and scope rules** (added in v2.24–v2.25; the skill's "Resource contention", Step 3a
+and Step 3d hold the full text):
+- **Mutators never run in parallel with readers.** An agent that writes files others read — a
+  validator's mutation round, a fixer, a formatter — would expose readers (code-reviewer, red-team,
+  integrity checker) to a sabotaged tree. Order: readers, then mutators, then `git status` /
+  `git diff` before any verdict or commit. Disjoint WRITERS is not enough.
+- **The scratchpad is a shared resource.** It goes on the resource map; each subagent gets its own
+  file names, and a shared helper's guards are re-verified before reuse.
+- **Scope is re-checked after the criteria-enforcer measures a task.** When a task grows, the plan is
+  re-checked: in segment mode a new collision re-cuts the phase and a task grown LARGE stops the loop
+  for re-proposal; in continuous mode the admission policy is re-applied and the task is HELD.
+- **Money-path reviewers are complementary** (`production-financial`): one reviewer's APPROVE, or a
+  fully-killed mutation round, never excuses skipping another.
+- **Orchestration lessons are typed lines** (`- mutator/reader overlap: …`, `- scratchpad
+  collision: …`) emitted before `/session-end` and copied into the session log; the
+  mutator/reader and scratchpad rules are kept as HYPOTHESES that `framework-audit` measures from
+  those lines at `production`+ — below it they are unmeasured.
+
 **Progression:** Start at Level 3 until the validation loop is reliable and Known Bug Patterns are accumulating naturally (typically 3-5 sessions). Then enable Level 4 by approving sprint batches instead of individual tasks. The AI will propose sprints automatically — the human just needs to say "go" or adjust. Level 5 is a per-session opt-in on top of Level 4 for backlogs of mostly small/medium independent tasks.
 
 ---
@@ -1773,7 +1812,13 @@ See `.claude/rules/component-design.md` (or `modules/rules/component_design.md` 
 
 ## Task Parallelism
 
-For AI tools that support multi-agent execution (e.g., Codex subagents), tasks can run in parallel IF they have no dependencies on each other.
+For AI tools that support multi-agent execution (e.g., Claude Code or Codex subagents), tasks can run in parallel IF they have no dependencies on each other.
+
+> **Inside the autonomous loop (Level 5), the `autonomous-loop` skill's "Resource contention" rules
+> govern parallel subagents, and they are STRICTER than the checklist below:** disjoint files are not
+> enough — an agent that MUTATES the working tree never runs alongside one that READS it, the
+> scratchpad is a shared resource, and two writers never touch the same phase doc at once. See
+> [Maturity Model → Level 5](#level-5--backlog-loop-opt-in-per-session).
 
 ### Dependency mapping in pendencias.md
 
