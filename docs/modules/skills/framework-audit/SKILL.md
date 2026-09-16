@@ -62,8 +62,9 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    **ALWAYS run the HYPOTHESIS check as part of Q4.** A shipped component may keep a rule "as
    HYPOTHESES" — installed on one observation because it is cheap — and NAME the signal that would
    measure it. This check is that measurer; without it the rule reads as settled contract and nobody
-   counts anything (`/audit` 2026-09-15 B-11). ALWAYS enumerate the rules, then count each one's named
-   signal in the session logs since the last framework-audit:
+   counts anything (`/audit` 2026-09-15 B-11).
+   **ALWAYS ENUMERATE the rules, then COUNT each one's named signal in the session logs since the last
+   framework-audit:**
    ```bash
    grep -rlE '^> .*kept as HYPOTHES' .claude/skills .claude/rules      # the components to measure
    FM=.claude/phases/framework-metrics.md
@@ -78,9 +79,10 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    Zero is `not exercised` — NEVER `effective`.** The window starts at the date of the last
    `COMPLETE` row in `framework-metrics.md` (an INCOMPLETE row does not close a window — session-rules →
    "Cadence integrity") and is matched against the `YYYYMMDD_` prefix of each log's filename. A log
-   dated the audit day counts in both windows; say so when one does. **NEVER use file modification
-   times:** a fresh clone reset them and read `0` over two logged occurrences, and a missing metrics
-   file read `0` instead of failing (this check's pre-commit verifier, 2026-09-16).
+   dated the audit day counts in both windows; say so when one does.
+   **NEVER use file modification times** — a fresh clone reset them and read `0` over two logged
+   occurrences, and a missing metrics file read `0` instead of failing (this check's pre-commit
+   verifier, 2026-09-16).
    **ANCHOR the listing on the blockquote (`^> `) and COUNT TYPED LINES, never bare words:** the unanchored
    listing matched this very fence and its own report string, so `N/A` was unreachable; a bare
    `mutator|scratchpad` count read a negated "none — no scratchpad collision" as one occurrence and

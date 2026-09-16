@@ -119,11 +119,11 @@ derives the endpoint from that commit body by hand — say so (this rule's pre-c
 The rule was written with no invoker in this sequence and no self-check
 (`/audit` 2026-09-04 R-26; `/audit` 2026-09-09 T-29).
 **ALWAYS REPORT — `push decay: unchanged — origin/main at sHASH` or `push decay: advanced sOLD..sNEW — D16 re-run over the newly-published range: [GREEN | RED, findings] — origin/main at sNEW` or `push decay: advanced sOLD..sNEW (endpoint derived by hand — [why]) — D16 re-run over the newly-published range: [GREEN | RED, findings] — origin/main at sNEW` or `push decay: RED — [fetch failed | no origin/main ref | gate could not check: reason] — origin/main unverified`. NEVER emit nothing.**
-**A RED DISCHARGE ALWAYS STOPS THE SESSION BEFORE ANY EDIT.** A hit in the newly-published range is a
-PUBLISHED identifier: ALWAYS file it in the most recent report with status `escalated — owner
-decision pending`, tell the owner that removing it needs a history rewrite (the owner's call alone),
-and NEVER print the matched identifier. The discharge had no stated action for RED
-(`/audit` 2026-09-15 B-7).
+**A RED DISCHARGE ALWAYS STOPS THE SESSION BEFORE ANY EDIT** — a hit in the newly-published range is a
+PUBLISHED identifier, and the discharge had no stated action for RED (`/audit` 2026-09-15 B-7):
+- **ALWAYS file it** in the most recent report with status `escalated — owner decision pending`.
+- **ALWAYS tell the owner** that removing it needs a history rewrite, the owner's call alone.
+- **NEVER print the matched identifier.**
 **ALWAYS DISCHARGE an `advanced` verdict with the gate over the newly-published range — the command on
 the `$` line with the range written as REAL hashes (`log <old>..<new>`, never the placeholder), and
 its literal output line beneath it.** This key is
