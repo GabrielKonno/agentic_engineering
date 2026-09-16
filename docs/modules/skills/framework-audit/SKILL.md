@@ -59,6 +59,33 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    heading, contradicts its neighbour, or orphaned the block below it passes every presence check
    and is still broken. **ALWAYS REPORT the tally — `did-it-land: N confirmed, M defective` or
    `did-it-land: N/A — no prior approvals`. NEVER emit nothing.**
+   **ALWAYS run the HYPOTHESIS check as part of Q4.** A shipped component may keep a rule "as
+   HYPOTHESES" — installed on one observation because it is cheap — and NAME the signal that would
+   measure it. This check is that measurer; without it the rule reads as settled contract and nobody
+   counts anything (`/audit` 2026-09-15 B-11). ALWAYS enumerate the rules, then count each one's named
+   signal in the session logs since the last framework-audit:
+   ```bash
+   grep -rlE '^> .*kept as HYPOTHES' .claude/skills .claude/rules      # the components to measure
+   FM=.claude/phases/framework-metrics.md
+   if [ ! -f "$FM" ]; then echo "RED: $FM missing — no window"; else
+     SINCE=$(grep -E '^\| *[0-9]+ *\| *[0-9]{4}-[0-9]{2}-[0-9]{2} *\| *COMPLETE' "$FM" | tail -1 | awk -F'|' '{gsub(/[- ]/,"",$3); print $3}')
+     echo "window: logs dated on or after ${SINCE:-the first log (no COMPLETE row yet)}"
+     for f in .claude/logs/*.md; do d=$(basename "$f" | cut -c1-8); [ "$d" \< "${SINCE:-0}" ] || sed -n '/^## Orchestration lessons/,/^## /p' "$f"; done \
+       | grep -iE '^- (mutator/reader overlap|scratchpad collision):' | grep -viE ':[[:space:]]*none([[:space:][:punct:]]|$)' | wc -l   # autonomous-loop's signal
+   fi
+   ```
+   **Expected: the first command lists every component carrying such a rule, and each gets a count.
+   Zero is `not exercised` — NEVER `effective`.** The window starts at the date of the last
+   `COMPLETE` row in `framework-metrics.md` (an INCOMPLETE row does not close a window — session-rules →
+   "Cadence integrity") and is matched against the `YYYYMMDD_` prefix of each log's filename. A log
+   dated the audit day counts in both windows; say so when one does. **NEVER use file modification
+   times:** a fresh clone reset them and read `0` over two logged occurrences, and a missing metrics
+   file read `0` instead of failing (this check's pre-commit verifier, 2026-09-16).
+   **ANCHOR the listing on the blockquote (`^> `) and COUNT TYPED LINES, never bare words:** the unanchored
+   listing matched this very fence and its own report string, so `N/A` was unreachable; a bare
+   `mutator|scratchpad` count read a negated "none — no scratchpad collision" as one occurrence and
+   missed a real one phrased without either word (this check's pre-commit verifier, 2026-09-16).
+   **ALWAYS REPORT — `hypotheses: N components — [component: exercised K | not exercised]` or `hypotheses: N/A — no rule kept as HYPOTHESES`. NEVER emit nothing.**
 5. **Meta-metrics review** — read `framework-metrics.md`: is the escape rate rising? Any reviewer
    with high false-positive (cry-wolf)? Any Known Bug Pattern that never triggers (dead weight)?
    If skill-gate is installed, also: any promoted skill never loaded since promotion (cross-check
@@ -117,7 +144,7 @@ friendly until approved.
 ### Q1 Dimension coverage: [orphaned dimensions, or "all owned"]
 ### Q2 Axis coverage: [missing axes/bridges, or "complete"]
 ### Q3 Recurring escape classes: [classes with no owner, or "none"]
-### Q4 Aspirational-vs-real: [claimed-but-not-running mechanisms, or "none"] + did-it-land: [N confirmed, M defective | N/A]
+### Q4 Aspirational-vs-real: [claimed-but-not-running mechanisms, or "none"] + did-it-land: [N confirmed, M defective | N/A] + hypotheses: [N components — exercised K | not exercised, or N/A]
 ### Q5 Meta-metrics: [escape rate trend, dead KBPs, cry-wolf reviewers]
 ### Q6 Process back-sweep: [old artifacts a new process rule condemns]
 ### Proposed framework improvements (BEHAVIOR — needs owner approval):

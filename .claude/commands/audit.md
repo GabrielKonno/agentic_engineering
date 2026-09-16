@@ -84,6 +84,38 @@ and this mode had no fallback for the state it left behind (`/audit` 2026-09-09 
 findings, so (a) is baseline; if the owner ALSO wants that absorption's commit re-read, the
 did-it-land discipline for it lives in `framework-audit`'s Q4, not here (`/audit` 2026-09-02 K-19).
 
+**ALWAYS RUN THE POST-PUSH D16 BEFORE DISPATCHING, and ALWAYS PERSIST it in the report header.**
+A write-back or an audit report is pushed AFTER its own receipts were written, so no persisted gate
+covers it until a later session scans the range. Three consecutive runs executed this scan with no
+written home, while a maintenance receipt credited `/audit` with owning it (`/audit` 2026-09-15 B-7).
+Mechanical, expected result stated:
+```bash
+if git fetch -q origin; then
+  OLD=$(grep -hE '^\*\*(push|push decay|Post-push D16):\*\*' "$(ls assets/docs/audit-*.md | sort | tail -1)" \
+    | tr -d '\r' | grep -vE '^\*\*[A-Za-z0-9 -]+:\*\* RED' | grep -oE '— origin/main at s?[0-9a-f]{7,}$' | tail -1 | grep -oE '[0-9a-f]{7,}$')
+  NEW=$(git rev-parse -q --verify --short refs/remotes/origin/main)
+  if [ -z "$NEW" ]; then echo "RED: no origin/main ref after the fetch — origin/main unverified"
+  elif [ -n "$OLD" ]; then echo "origin/main at $NEW"; bash .claude/scripts/d16-gate.sh log "$OLD..$NEW"
+  else echo "RED: no recorded origin/main hash — origin/main at $NEW"; fi
+else echo "RED: fetch failed — origin/main unknown, nothing below is evidence"; fi
+```
+**NEVER write this as `[ -n "$OLD" ] && <gate> || echo …`** — the gate exits non-zero on a hit, so the
+`||` branch then ALSO printed "no recorded origin/main hash" beneath a real hit, mislabelling a
+published leak as a missing record (found by this batch's own negation proof, 2026-09-16).
+**Expected: `origin/main at sNEW` then `…, 0 hits`** (`0 commits scanned` when nothing was pushed
+since). **A `RED: no recorded origin/main hash` line means the endpoint must be derived by hand from
+the graph — do it, and SAY SO in the header. A `RED: fetch failed` line voids the scan — re-run it,
+never report it GREEN.** The fetch fails closed and the hash is anchored to the line end because a
+failed fetch read `0 commits scanned` over a range the remote had already extended, and an
+unanchored regex matched an old endpoint quoted mid-sentence (this rule's pre-commit verifier,
+2026-09-16). **(Forward references, flagged: the header slot is in Phase 2's report format, and the
+`escalated` status is Phase 3 item 2's.)** **A hit is a PUBLISHED privacy finding: file it `escalated — owner decision
+pending` and NEVER print the matched identifier.**
+**ALWAYS REPORT — `**Post-push D16:** log sOLD..sNEW [(endpoint derived by hand — why)] → N commits scanned, H hits — origin/main at sNEW` or `**Post-push D16:** RED — [fetch failed | no origin/main ref | gate could not check: reason] — origin/main unverified`.
+**A RED line NEVER ends with a hash** — the maintenance detector and this step read the last hash as
+"scanned up to here" (`.claude/commands/maintenance.md` → the `push:` rule).
+NEVER emit nothing.**
+
 ### Baseline mode
 
 Checks *claim vs fact* across the 17 dimensions. This is Phase 1 as written below, unchanged.
@@ -255,7 +287,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.24.0 they are
+         **Expected: at least 5 paths.** As of v2.25.0 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
@@ -1095,6 +1127,7 @@ After ALL 6 agents return, consolidate their reports into a single audit report.
 **Date:** [today's date]
 **Framework version:** [from README.md]
 **Run mode:** `baseline` | `verification (over sHASH)` — ALWAYS state it (Phase 0)
+**Post-push D16:** log sOLD..sNEW [(endpoint derived by hand — why)] → N commits scanned, H hits — origin/main at sNEW | RED — [fetch failed | no origin/main ref | gate could not check: reason] — origin/main unverified   ← Phase 0, ALWAYS
 **Dimensions checked:** 17 [+ a Part 1 fix-verification pass, in verification mode]
 **Agents dispatched:** 6
 
@@ -1215,10 +1248,16 @@ It was evaluated three times anyway, from dispatch prompts rather than from disk
 §9, the invoker-owns-the-mandate class, inside the section that creates the mandate
 (`/audit` 2026-09-10 U-16). Mechanical, expected result stated:
 ```bash
-sed -n '/^## Meta-observation/,/^## /p' <the PREVIOUS report> | grep -n 'Prediction'
+# SCOPE TO THE PREVIOUS RUN, NEVER THE WHOLE FILE: keep only the text after the LAST `# Run N`
+# heading that sits outside a code fence (the whole file when it has none).
+awk '/^```/{f=!f} !f&&/^# Run [0-9]+/{b=""} {b=b $0 "\n"} END{printf "%s", b}' <the PREVIOUS report> \
+  | sed -n '/^## Meta-observation/,/^## /p' | grep -c 'Prediction'
 ```
 **Expected: at least one hit, and one `held / failed / void` verdict per clause of it in THIS
 report.** A prior run with no prediction is a legitimate `n/a` — say so.
+**NEVER grep the whole file.** A report carrying several runs holds several predictions, so the
+whole-file form still read 1 after the previous run's own prediction was deleted — a check with no
+RED state (`/audit` 2026-09-15 B-16).
 **ALWAYS REPORT — `prediction: N clauses evaluated — [held/failed/void each]` or
 `prediction: n/a — the previous run stated none`. NEVER emit nothing.**
 

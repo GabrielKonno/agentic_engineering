@@ -30,8 +30,8 @@ fence in this command expands `projects/$ARGUMENTS` (most of them unquoted), so 
 directories and a glob character matches other folders (`/audit` 2026-09-14 Y-8).
 **NO FENCE CAN ENFORCE THIS.** `$ARGUMENTS` is substituted as TEXT before bash parses a fence, so a
 `$(…)`, a backtick or a quote in the name EXECUTES, or breaks out of its quoting, in the first fence that contains it — a check inside that
-fence runs too late. The guard at the top of Step 2.9's first fence is a backstop for the path
-classes only. The same prose guard opens `bootstrap.md`.
+fence runs too late. The BACKSTOP that opens EVERY writing fence of Steps 2.9–2.9b (forward reference, flagged) (the `case "$ARGUMENTS"`
+line plus the existence check) covers the path classes only (`/audit` 2026-09-15 B-3). The same prose guard opens `bootstrap.md`.
 
 1. Verify `projects/$ARGUMENTS/` exists. If not, stop and tell the user: "Project '$ARGUMENTS' not found in projects/. Use `/bootstrap $ARGUMENTS` for a new project or place the existing project in `projects/$ARGUMENTS/`."
 
@@ -244,7 +244,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.24.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.25.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -565,7 +565,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.24.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.25.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -844,13 +844,25 @@ done
 refresh_agent diff_pattern_extractor
 ```
 
+**`framework-audit` + `session-log-creator` ↔ `autonomous-loop` (v2.25.0 migration) — at `production`+,
+ALWAYS PRESENT THEM TOGETHER when any of them DIFFERS.** (EPA-only: bootstrap installs all three
+fresh, so it has no twin of this rule.) `autonomous-loop`'s HYPOTHESES note names `framework-audit` →
+Q4 → the HYPOTHESIS check as its measurer, and that check counts lines only `session-log-creator`
+writes. Refreshing `autonomous-loop` with the coupled set while keeping older copies of the other two
+leaves the note pointing at a check or a log section the project lacks, so the rules stay unmeasured
+(never unsafe) (`/audit` 2026-09-15 B-11). **Answer "refresh" → ALWAYS run `refresh_skill
+framework-audit` and `refresh_skill session-log-creator` in the same invocation as the Step 2.9
+helpers**, and record the choice on the `framework-audit` entry of the MACRO skeletons slot.
+
 **`production-financial` — ALWAYS add a line under "Architecture Patterns" in `code-reviewer.md`
 (Step 2.4 created or upgraded it): `red-team is MANDATORY on every diff that touches a money path.`**
 Bootstrap Step 7 writes the same line; this twin carried none (found by the `/audit` 2026-09-14
 W-14 PARALLEL sweep).
 
 3. **CI floor (internal-tool+):** if the project has no CI workflow, create one (install → lint →
-   build → test) or register a task to add it. **prototype:** skip all of the above.
+   build → test) or register a task to add it. **prototype:** skip THIS CI floor — never the
+   coupled-set question above, which runs at every tier because a leftover member can be present at
+   any tier (`/audit` 2026-09-15 B-2). (EPA-only wording: bootstrap has no coupled-set question.)
    **ALWAYS verify the test stage PROVES it executed** — whether the pipeline is new or
    pre-existing (session-rules → "Execution proof"): a zero-unit run must FAIL, and any
    conditional skip path (missing secrets/config) must exit RED with a named reason, never the

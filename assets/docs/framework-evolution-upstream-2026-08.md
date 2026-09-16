@@ -87,7 +87,16 @@ somou ZERO spawns em 24 sessões auditadas.
   — são instâncias já cobertas pela regra geral do instrumento; subir cada uma inflaria os
   templates sem adicionar controle novo.
 
-## Âncoras de eficácia — o que a próxima auditoria deve MEDIR
+## Âncoras de eficácia — o que MEDIR, e quem mede
+
+**Quem mede (acrescentado em 2026-09-16 pela back-sweep da regra do Upstream intake step 4 — a versão
+original dizia só "a próxima auditoria", sem dono; `/audit` 2026-09-15 B-11):**
+- **Pergunta 1:** `unmeasured — no measurer at any tier`. Nenhuma pergunta da `framework-audit` lê o
+  campo `status:` das linhas de cadência (a Q5 lê taxa de escape, falsos positivos e KBPs mortos).
+- **Perguntas 2-3:** a `framework-audit` de cada projeto — Q4 aspirational-vs-real para a 2, Q4
+  orphan-mandate check para a 3. Ela existe só em `production`+. **Abaixo de `production`, estas
+  perguntas ficam `unmeasured — no measurer at prototype / internal-tool`.**
+- **Meta:** a `/audit` deste repo — já respondida em 2026-08-31 (ver a linha Meta).
 
 O `evolution_policy.md` exige esta tabela de todo doc de evolução de PROJETO. O repo-mãe passa a
 aplicá-la a si mesmo (o mesmo back-sweep que o checklist item 5 agora exige). Nenhuma pergunta se

@@ -32,6 +32,9 @@ cat > "${LOGS_DIR}/${FILENAME}" <<EOF
 ## Discoveries
 - [unexpected findings]
 
+## Orchestration lessons
+- none
+
 ## Files changed
 $(git diff --stat HEAD~1 2>/dev/null || echo "(no prior commit)")
 

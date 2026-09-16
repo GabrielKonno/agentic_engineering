@@ -11,8 +11,9 @@ integralmente, uma ADAPTADA aos dois modos do loop, uma graduada como CONDICIONA
 QUE subiu, ONDE cada peça caiu, o que foi ADAPTADO e o que deliberadamente NÃO subiu. (Isolamento de
 informação de projeto: o projeto é referido só por papel; o número da sessão-fonte, o hash de commit
 do projeto e a sessão prevista da próxima auditoria dele foram removidos. Os números de caso da
-sessão-fonte são medidas portáveis que não identificam o projeto; ficam só neste registro, e o
-template carrega a forma geral — "mais pontos de chamada", "uma rodada de mutação toda morta".)
+sessão-fonte NÃO foram transcritos — nem aqui nem no template, que carrega só a forma geral — "mais
+pontos de chamada", "uma rodada de mutação toda morta". Corrigido em 2026-09-16: a redação anterior
+dizia que esses números "ficam só neste registro", e o registro nunca os conteve (`/audit` 2026-09-15 B-14).)
 
 **Lotes anteriores desta linhagem:** `framework-base-upgrade.md` (2026-06-23),
 `framework-evolution-upstream-2026-07.md` (2026-07-16) e `framework-evolution-upstream-2026-08.md`
@@ -52,7 +53,7 @@ script de consulta), que nenhum teste pega porque o script "funciona".
 
 | Peça | Destino no framework | Adaptação |
 |---|---|---|
-| Scratchpad no mapa; nomes próprios por subagente; travas re-verificadas antes de reusar um helper | `autonomous-loop/SKILL.md` → "Resource contention" | Escrita como dois ALWAYS dedicados |
+| Scratchpad no mapa; nomes próprios por subagente; travas re-verificadas antes de reusar um helper | `autonomous-loop/SKILL.md` → "Resource contention" | Escrita como três ALWAYS dedicados (scratchpad no mapa; nomes próprios por subagente; travas re-verificadas) — corrigido de "dois" em 2026-09-16 (`/audit` 2026-09-15 B-13) |
 | Declaração de recursos no prompt do implementador | `autonomous-loop/SKILL.md` → Step 3b "Resource declaration" | `scratchpad files` acrescentado à lista declarada |
 
 ## 3. Quando o criteria-enforcer muda o ESCOPO, o corte de fases é revisado antes de delegar — ABSORVIDA (adaptada ao modo contínuo)
@@ -89,7 +90,22 @@ depois de um veredito verde.
 - **Nenhuma regra foi rejeitada.** A evidência de uma sessão foi registrada como hipótese (nota no
   template e tabela abaixo), não como motivo para adiar.
 
-## Âncoras de eficácia — o que a próxima auditoria deve MEDIR
+## Âncoras de eficácia — o que MEDIR, e quem mede
+
+**Quem mede (acrescentado em 2026-09-16 — a versão original dizia só "a próxima auditoria", sem
+dono; `/audit` 2026-09-15 B-11):**
+- **Perguntas 1-2:** a `framework-audit` de cada projeto que roda o loop, Q4 → HYPOTHESIS check, que
+  conta as linhas tipadas `- mutator/reader overlap:` e `- scratchpad collision:` que o
+  `session-log-creator` grava em `## Orchestration lessons`. Ela existe só em `production`+; o
+  projeto-fonte (perfil com caminhos de dinheiro) a tem. **Abaixo de `production`, estas perguntas
+  ficam `unmeasured — no measurer at prototype / internal-tool`.** A segunda metade da pergunta 2 (os
+  prompts de dispatch declaram arquivos de scratchpad?) fica `unmeasured — no measurer at any tier`:
+  o check conta colisões, não declarações.
+- **Pergunta 3:** `unmeasured — no measurer at any tier`. A regra de escopo do Step 3a é contrato, não
+  hipótese, e nenhuma pergunta da `framework-audit` conta linhas `scope:`.
+- **Pergunta 4:** a mesma skill, Q4 aspirational-vs-real, só em projetos `production-financial`.
+- **Meta:** a `/audit` de verificação deste repo sobre o commit da absorção — executada em 2026-09-15
+  Run 3, que achou B-11 e B-12.
 
 Nenhuma pergunta se responde relendo este doc. Uma janela com ZERO ocorrências das perguntas 1-3 é
 "regra não exercida", nunca "eficácia confirmada".

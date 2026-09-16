@@ -64,6 +64,9 @@ Save to `.claude/logs/[filename]`:
 ## Discoveries
 - [unexpected findings]
 
+## Orchestration lessons
+- [autonomous-loop sessions: the typed lines `- <type>: <what>` COPIED VERBATIM from the `### Orchestration lessons` block the loop emitted before `/session-end` (autonomous-loop → C5); `none` when no loop ran or it recorded none]
+
 ## Files changed
 [git diff --stat]
 
@@ -86,6 +89,7 @@ Save to `.claude/logs/[filename]`:
 
 ## Rules
 - Logs are **append-only** — never edit old logs
+- **ALWAYS COPY an autonomous-loop session's `Orchestration lessons` lines VERBATIM into `## Orchestration lessons`** — `framework-audit` → Q4 → the HYPOTHESIS check counts them in this section, and a lesson left only in the chat report is counted by nobody (`/audit` 2026-09-15 B-11).
 - Logs are the **primary detailed record** — project.md Progress Log is a concise index only
 - Logs are **NOT read at session start** — relevant decisions are propagated to loaded documents by end-of-session skills
 - Logs are **read on-demand** when investigating past decisions or debugging recurring issues

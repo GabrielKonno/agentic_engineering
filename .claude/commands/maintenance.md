@@ -43,10 +43,19 @@ This is a framework maintenance session, not a project bootstrap.
   the unpushed/pushed boundary is what makes a privacy hit cheap or expensive to fix
   (`CLAUDE.md` → Repository Lifecycle; `/audit` 2026-09-02 M-56).
   **ALWAYS REPORT `push:` in the session's closing report and in the persisted receipts** —
-  `push: not requested` / `push: requested — D16 [GREEN | RED] over N unpushed commits → [pushed
-  sHASH | BLOCKED, reason]`. **NEVER emit nothing.** The gate had a rule and no invoker, no report
-  key and no receipt, and it went unhonoured on the very next push 108 seconds after it was
-  written (`/audit` 2026-09-03 N-41).
+  `push: not requested — origin/main at sHASH` / `push: requested — D16 [GREEN | RED] over N
+  unpushed commits → [pushed sOLD..sNEW | BLOCKED, reason] — origin/main at sHASH`. **NEVER emit nothing.**
+  The gate had a rule and no invoker, no report key and no receipt, and it went unhonoured on the very
+  next push 108 seconds after it was written (`/audit` 2026-09-03 N-41).
+  **EVERY `push:` AND `push decay:` LINE ALWAYS ENDS WITH `— origin/main at sHASH`** — the output of
+  `git rev-parse --short refs/remotes/origin/main` at the moment the line is written, AND ONLY WHEN
+  EVERY COMMIT UP TO THAT HASH HAS BEEN SCANNED. It is the `<old>` endpoint of the NEXT session's
+  discharge; without it that endpoint lived only in prose, and the receipt before this rule used
+  symbolic refs and recorded no hash at all (`/audit` 2026-09-15 B-7).
+  **A line whose scan did not complete ALWAYS ends with `— origin/main unverified`, NEVER with a
+  hash** — the detectors read the last hash as "scanned up to here", so a hash on a RED line made a
+  published leak before it invisible to every later discharge (this rule's pre-commit verifier,
+  2026-09-16).
   **THE `push:` VALUE IS A POINT-IN-TIME CLAIM AND IT DECAYS — WITHIN a session AND BETWEEN
   SESSIONS.** The next session ALWAYS re-checks before doing anything else: if `origin/main`
   moved, commits a persisted receipt calls unpushed are now published and the mandated GREEN
@@ -58,7 +67,7 @@ This is a framework maintenance session, not a project bootstrap.
   session — someone else pushed, or another session did — then commits this session described as
   unpushed are now PUBLISHED, and the mandated GREEN D16 never ran over any of them. **Re-run D16
   over the newly-pushed range and say so**: `push: not requested; origin/main advanced to sHASH
-  mid-batch — D16 re-run over the newly-published range: [GREEN | RED, findings]`. This is not
+  mid-batch — D16 re-run over the newly-published range: [GREEN | RED, findings] — origin/main at sHASH`. This is not
   hypothetical: it is exactly how an identifier crossed the unpushed→pushed boundary and became an
   accepted-risk record instead of a local fix, while six commits carried receipts reading
   `push: not requested` (`/audit` 2026-09-03 P-32).
@@ -81,12 +90,40 @@ This is a framework maintenance session, not a project bootstrap.
 **Workflow:** **FIRST re-check `git status -sb`** — if `origin/main` advanced since the last
 session, commits a persisted receipt calls unpushed are now PUBLISHED and the mandated D16 GREEN
 never ran over them. Mechanical, expected result stated:
-`git fetch -q origin && git status -sb | head -1` — **expected: no `behind` segment and
-`origin/main` where the last receipt left it; anything else means D16 is owed before any edit.**
+```bash
+if git fetch -q origin; then
+  git status -sb | head -1
+  LAST=$(grep -hE '^\*\*(push|push decay|Post-push D16):\*\*' "$(ls assets/docs/audit-*.md | sort | tail -1)" \
+    | tr -d '\r' | grep -vE '^\*\*[A-Za-z0-9 -]+:\*\* RED' | grep -oE '— origin/main at s?[0-9a-f]{7,}$' | tail -1 | grep -oE '[0-9a-f]{7,}$')
+  NOW=$(git rev-parse -q --verify --short refs/remotes/origin/main)
+  if [ -z "$NOW" ]; then echo "RED: no origin/main ref after the fetch — origin/main unverified"
+  elif [ -z "$LAST" ]; then echo "RED: no recorded origin/main hash — origin/main at $NOW"
+  elif [ "$(git rev-parse "$LAST")" = "$(git rev-parse "$NOW")" ]; then echo "unchanged at $NOW"
+  else echo "advanced $LAST..$NOW"; fi
+else echo "RED: fetch failed — origin/main unknown, nothing below is evidence"; fi
+```
+**FAIL CLOSED ON THE FETCH, AND ANCHOR THE HASH TO THE LINE END.** A failed fetch left a stale
+`origin/main` and the detector printed `unchanged` while the remote had moved; an unanchored hash
+regex matched an OLD endpoint quoted mid-sentence in an earlier receipt (found by this rule's own
+pre-commit verifier, 2026-09-16).
+**Expected: no `behind` segment, and `unchanged at sHASH` — `advanced sOLD..sNEW` means D16 is owed
+before any edit.** **COMPARE HASHES, NEVER THE STATUS LINE:** `git status -sb` prints no hash, so a
+push made from this same clone read `## main...origin/main` before AND after `origin/main` moved —
+the check could not go RED on the common case (`/audit` 2026-09-15 B-7). **A `RED: no recorded
+origin/main hash` line means the most recent report carries no hash-ending line yet: derive the
+endpoint from the graph by hand, and SAY SO in the key.** **KNOWN LIMIT, fails closed:** the detector
+reads only the most recent `assets/docs/audit-*.md`. A session whose receipts lived in a COMMIT BODY
+(no report file) is not read, so the next session sees `RED: no recorded origin/main hash` and
+derives the endpoint from that commit body by hand — say so (this rule's pre-commit verifier,
+2026-09-16).
 The rule was written with no invoker in this sequence and no self-check
 (`/audit` 2026-09-04 R-26; `/audit` 2026-09-09 T-29).
-**ALWAYS REPORT — `push decay: origin/main unchanged` or `push decay: advanced to sHASH — D16
-re-run over the newly-published range: [GREEN | RED, findings]`. NEVER emit nothing.**
+**ALWAYS REPORT — `push decay: unchanged — origin/main at sHASH` or `push decay: advanced sOLD..sNEW — D16 re-run over the newly-published range: [GREEN | RED, findings] — origin/main at sNEW` or `push decay: advanced sOLD..sNEW (endpoint derived by hand — [why]) — D16 re-run over the newly-published range: [GREEN | RED, findings] — origin/main at sNEW` or `push decay: RED — [fetch failed | no origin/main ref | gate could not check: reason] — origin/main unverified`. NEVER emit nothing.**
+**A RED DISCHARGE ALWAYS STOPS THE SESSION BEFORE ANY EDIT.** A hit in the newly-published range is a
+PUBLISHED identifier: ALWAYS file it in the most recent report with status `escalated — owner
+decision pending`, tell the owner that removing it needs a history rewrite (the owner's call alone),
+and NEVER print the matched identifier. The discharge had no stated action for RED
+(`/audit` 2026-09-15 B-7).
 **ALWAYS DISCHARGE an `advanced` verdict with the gate over the newly-published range — the command on
 the `$` line with the range written as REAL hashes (`log <old>..<new>`, never the placeholder), and
 its literal output line beneath it.** This key is
@@ -202,9 +239,12 @@ than a narrated number: it looks reproducible and reproduces something else.
 **A key whose discharge has no `$` line is RED**, and `n/a` is a legitimate verdict that still needs
 its command (the one that returned nothing).
 
-**Where a key genuinely has no single command** — `classification:`, `new component:`, `verifier rounds:`, and `receipt generator:` (whose pasted fence IS the evidence) — say so on
+**Where a key genuinely has no single command** — `classification:` and `new component:` — say so on
 the `$` line (`$ n/a — judgement, not measurement`) rather than omitting it. That makes the absence
 visible instead of indistinguishable from a forgotten one.
+**NEVER exempt a key whose verdict a command can decide.** `verifier rounds:` (its trigger is a
+diff count) and `receipt generator:` (its `$` line is the command that runs the pasted script) were
+added to this list, and neither could then go RED (`/audit` 2026-09-15 B-8, B-9).
 
 **ALWAYS PERSIST every report line this checklist produces — saying it in the session is not
 reporting it.** Each numbered item below ends in an `ALWAYS REPORT` mandate, and a line that lives
@@ -228,14 +268,22 @@ form authorised in this same file, and only 2 of 6 headings on disk satisfied it
 (`/audit` 2026-09-04 Q-13). The self-check greps for it; writing it at any other level makes the check vacuous.
 
 Mechanical self-check (expected result stated): after committing, over **THIS run's receipts
-section only** — the text between that H2 and the next H1/H2, never the whole file — run
+section only** — the text between that H2 and the next H1/H2 **OUTSIDE A CODE FENCE**, never the whole
+file — run
+**EXTRACT THE SECTION WITH A FENCE-AWARE COMMAND, NEVER BY EYE.** A pasted receipt generator carries
+`# comment` lines at column 0, which read as H1 headings: scoped naively, the section ended inside the
+generator and the key loop read `push -> keys 0` on a healthy section (`/audit` 2026-09-15 B-10).
+```bash
+sec() { awk -v h="$2" '/^```/{f=!f} !f&&/^#{1,2} /&&on{exit} index($0,h)==1{on=1} on' "$1"; }
+sec <the report file> '## Post-change checklist receipts (`sHASH`)' > /tmp/section.md   # then run the loops over /tmp/section.md
+```
 
 ```bash
 for k in "inventory sweep" "instruction style" "references" "fences" "isolation" \
          "class sweep" "back-sweep" "liveness" "negation proof" "version" \
          "classification" "new component" "gates" "push" \
          "audit" "verification audit" "placeholder" "control back-sweep" \
-         "commit correction" "defect series" "applied-proof" "report deletions" "push decay"          "report restore" "verifier rounds" "receipt generator"; do
+         "commit correction" "defect series" "applied-proof" "report deletions" "push decay"          "report restore" "verifier rounds" "receipt generator" "measurer"; do
   printf '%s -> %s
 ' "$k" "$(grep -cE "^\*\*$k:" <this run's section>)"
 done
@@ -959,21 +1007,56 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    returns 3, which is how this check went RED on a healthy discharge on its first run
    (`/audit` 2026-09-02 M-27).
 
-10. **Independent pre-commit verification — the verifier rounds and the receipt generator.** Both ran
-    in three consecutive maintenance sessions, reproduced 15+ defects before commit and had no written
+10. **Independent pre-commit verification — the verifier rounds, the bash syntax ratchet and the receipt generator.** All three ran
+    in consecutive maintenance sessions, reproduced 15+ defects before commit and had no written
     home: no rule for when to run them, what to give them, or where their output lives
-    (`/audit` 2026-09-14 X-17, Y-15).
+    (`/audit` 2026-09-14 X-17, Y-15). Their first home then left most of that unwritten
+    (`/audit` 2026-09-15 B-8, B-9).
     **ALWAYS SPAWN at least one independent verifier subagent before committing a batch that changes
-    a bash fence in `.claude/commands/` or a file in `.claude/scripts/`.**
-    - **ALWAYS give it ONLY the staged diff, a scratch-mother-repo recipe and the privacy rule** (counts only, invented names).
+    ANY file under `.claude/commands/`, `.claude/scripts/` or `docs/modules/skills/`.** The trigger is
+    this count, never a judgement — the earlier trigger named only bash fences and scripts, and the
+    defect its own verifier missed sat in a shipped skill (`/audit` 2026-09-15 B-8):
+    ```bash
+    git diff --cached --name-only -- .claude/commands .claude/scripts docs/modules/skills | wc -l   # PRE-COMMIT: 0 = N/A; anything else = a round is owed
+    git diff --name-only <first>~1 <last> -- .claude/commands .claude/scripts docs/modules/skills | wc -l   # THE RECEIPT: the same count over the batch
+    ```
+    **RUN THE RANGE FORM FOR THE RECEIPT, NEVER THE INDEX FORM.** Receipts are written after the commit, when
+    the index is empty: the index form then reads `0` and the receipt would claim `N/A` for a batch that
+    touched six such files (this rule's pre-commit verifier, 2026-09-16).
+    - **ALWAYS give it the staged diff, the REPORT-FORMAT section of every command or skill the diff touches, the scratch-mother-repo recipe below and the privacy rule** (counts only, invented names). Question (a) reads a report section, so a diff-only brief made it unanswerable (`/audit` 2026-09-15 B-8).
     - **NEVER give it the finding texts** — a verifier handed the findings probes the named symptom and inherits its frame (`/audit` 2026-09-14 Run 3 meta-observation).
-    - **ALWAYS ask it the three CROSS-SURFACE questions, not only whether each fence behaves:** (a) does every verdict string a changed fence can print have a slot in that command's report; (b) is every ALWAYS/NEVER line added to one command twin present in the other, or named twin-specific; (c) does every step reference the batch adds point to an EARLIER step, or is it flagged. Every residue of the batch verified fence-by-fence was one of these three (`/audit` 2026-09-15 Run 2 meta-observation).
-    - **ALWAYS file each reproduced defect** in the applied report with the `[filed by … from its independent pre-commit verifier]` tag, and fix it or leave it `open` like any finding.
-    **ALWAYS REPORT — `verifier rounds: N rounds, D defects reproduced, F fixed before commit — [filed IDs]` or `verifier rounds: N/A — no bash fence or script changed`.** NEVER emit nothing.
-    **When a script generated the receipts' `$` lines, ALWAYS PASTE that script verbatim in a bash
-    fence directly under the `receipt generator:` key** — a generator left in a scratchpad made
-    "EXECUTED by a script" unverifiable four times.
-    **ALWAYS REPORT — `receipt generator: pasted below — N lines` or `receipt generator: none — receipts typed by hand`.** NEVER emit nothing.
+    - **ALWAYS build the scratch mother repo with THIS recipe, and delete it afterwards:**
+      ```bash
+      M=$(mktemp -d) && git clone -q . "$M/repo" && git diff --cached > "$M/staged.patch" \
+        && git -C "$M/repo" apply --index "$M/staged.patch" && mkdir -p "$M/repo/projects/qzxv-wqjk"   # invented name, no dictionary-word part
+      ```
+    - **ALWAYS ask it the FOUR CROSS-SURFACE questions, not only whether each fence behaves:** (a) does every verdict string a changed fence can print have a slot in that command's report; (b) is every ALWAYS/NEVER line added to one command twin present in the other, or named twin-specific; (c) does every step reference the batch adds point to an EARLIER step, or is it flagged; (d) does every rule the batch adds that names another component, field, signal or role point at a step or section that PRODUCES it, in a component installed at every tier the rule ships to. Every residue of the batch verified fence-by-fence was one of (a)-(c) (`/audit` 2026-09-15 Run 2 meta-observation); (d) is the class that reappeared in the shipped skill once (a)-(c) cleared the twins (`/audit` 2026-09-15 Run 3, B-11, B-12).
+    - **ALWAYS PASTE the verifier's reproduced-defect list verbatim under the `verifier rounds:` key** — one line per defect, counts and invented names only. A one-line author summary of a subagent's output is a claim, not a receipt (`/audit` 2026-09-15 B-8).
+    - **ALWAYS file each reproduced defect** in the applied report with the tag `[filed by <the session> on <date>, from its independent pre-commit verifier]`, after the collision check in `/audit` → "ID allocation", and fix it or leave it `open` like any finding.
+    **ALWAYS RUN THE BASH SYNTAX RATCHET over every command file the batch changed.** Nothing syntax-checked the bash the commands tell an AI to run, while a commit body reported that gate as passed (`/audit` 2026-09-15 B-8). `maintenance.md` and `audit.md` legitimately carry DOCUMENTATION fences with `<placeholder>` arguments that never parse, so the rule is a RATCHET, never zero: **no failing fence at the tip may be absent from the base, per file, and the executed twins (`bootstrap.md`, `existing_project_adaptation.md`) MUST have 0 failing fences at the tip.** **COMPARE THE SET OF FAILING FENCES, NEVER THEIR COUNT** — fixing one placeholder fence while adding a new broken one kept the count equal and read GREEN (this rule's pre-commit verifier, 2026-09-16).
+    ```bash
+    A=HEAD; B=:0                       # PRE-COMMIT. For THE RECEIPT: A=<first>~1 B=<last>
+    T=$(mktemp -d)
+    if [ "$B" = :0 ]; then files=$(git diff --cached --name-only -- .claude/commands); else files=$(git diff --name-only "$A" "$B" -- .claude/commands); fi
+    for f in $files; do
+      for side in A B; do r=${!side}
+        git show "$r:$f" 2>/dev/null | awk '/^ *```bash *$/{b=1;s="";next} b&&/^ *```$/{b=0;printf "%s%c", s, 0;next} b{s=s $0 "\n"}' \
+          | while IFS= read -r -d '' body; do printf '%s' "$body" | bash -n 2>/dev/null \
+              || printf '%s' "$body" | grep -qE '<[a-z][^>]*>' || printf '%s' "$body" | cksum; done | sort > "$T/$side"
+      done
+      echo "$f base=$(wc -l < "$T/A") tip=$(wc -l < "$T/B") new=$(comm -13 "$T/A" "$T/B" | wc -l)"
+    done; rm -rf "$T"
+    ```
+    **Expected: every line reads `new=0`, and `tip=0` for both twins.** **KNOWN LIMIT, calibrated on the
+    healthy state:** a failing fence that carries a `<placeholder>` is DOCUMENTATION and is left out of the
+    compared set and from `base`/`tip`. Without that exemption, editing any placeholder
+    fence changed its checksum and read `new=1` on this rule's own healthy batch. A broken fence that
+    also carries a placeholder is therefore invisible here; the twins carry none, so their `tip=0` still
+    holds. Run it with `A=HEAD B=:0` before committing and with `A=<first>~1 B=<last>` for the receipt — after the commit the index form reads nothing.
+    **ALWAYS REPORT — `verifier rounds: N rounds, D defects reproduced, F fixed before commit — [filed IDs]; trigger T files; bash -n ratchet [GREEN | RED — file: new=K]` or `verifier rounds: N/A — trigger 0 files`.** NEVER emit nothing, and ALWAYS put the trigger count and the ratchet lines on its `$` lines.
+    **When a script generated the receipts' `$` lines, ALWAYS PASTE that script verbatim in a fence tagged with ITS OWN LANGUAGE** (```` ```python ````, ```` ```bash ````) **directly under the `receipt generator:` key, and ALWAYS put the exact command that runs it on the key's `$` line — interpreter, environment and working directory included** (e.g. `$ PYTHONIOENCODING=utf-8 python receipt_generator.py   # from the repo root`). A generator left in a scratchpad made "EXECUTED by a script" unverifiable four times; the first one pasted was Python in a `bash` fence, failed `bash -n`, and printed nothing under this host's default console encoding (`/audit` 2026-09-15 B-9).
+    **ALWAYS NAME, in the `receipt generator:` verdict, every receipt key with a `$` line that the generator did NOT produce** — those were typed by hand, and a reader must know which (`/audit` 2026-09-15 B-9).
+    **ALWAYS REPORT — `receipt generator: pasted below — N lines, K keys generated, hand-typed: [keys | none]` or `receipt generator: none — receipts typed by hand`.** NEVER emit nothing.
 
 ## Version bumps — the framework version is a CLAIM, and it decays silently
 
@@ -1082,13 +1165,23 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
      # `$` line, every `**key:**`, the Meta-observation and both closing status lines — are the
      # surface D17.5's only external verifier reads. The three-pattern form saw 105 of 531 report
      # lines, 20% (`/audit` 2026-09-10 U-8).
-     for pat in '^#{1,3} ' '^\| [A-Z]-[0-9]+ \|' '^> \*\*Errata ' '^ *\$ ' '^\*\*[a-z][a-z ._-]*:'; do
-       b=$(git show HEAD:"$f" 2>/dev/null | grep -cE "$pat")
+     # SIX, since B-10: the sixth counts FENCE MARKERS, so deleting a whole pasted receipt generator —
+     # evidence item 10 requires — is RED. The fence-aware filter alone made that deletion silent
+     # (this rule's pre-commit verifier, 2026-09-16).
+     for pat in '^#{1,3} ' '^\| [A-Z]-[0-9]+ \|' '^> \*\*Errata ' '^ *\$ ' '^\*\*[a-z][a-z ._-]*:' '^```'; do
+       # FENCE-AWARE: a `# comment` inside a pasted generator is not a heading (`/audit` 2026-09-15 B-10);
+       # the marker lines themselves stay visible for the sixth pattern.
+       b=$(git show HEAD:"$f" 2>/dev/null | awk '/^```/{g=!g;print;next} !g' | grep -cE "$pat")
        # A MISSING FILE COUNTS 0, NEVER ''. `grep -c` on a deleted path prints NOTHING, and
        # `[ "" -lt "13" ]` is a shell ERROR, not a RED — U-3's second, independent layer.
-       if [ -f "$f" ]; then a=$(grep -cE "$pat" "$f"); else a=0; fi
+       if [ -f "$f" ]; then a=$(awk '/^```/{g=!g;print;next} !g' "$f" | grep -cE "$pat"); else a=0; fi
        [ "${a:-0}" -lt "${b:-0}" ] && echo "RED $f: $pat  ${b:-0} -> ${a:-0}"
      done
+     # AND THE FENCED BODY: keeping the two markers while deleting everything between them read GREEN
+     # under the six patterns (this rule's pre-commit verifier, 2026-09-16).
+     b=$(git show HEAD:"$f" 2>/dev/null | awk '/^```/{g=!g;next} g' | grep -c .)
+     if [ -f "$f" ]; then a=$(awk '/^```/{g=!g;next} g' "$f" | grep -c .); else a=0; fi
+     [ "${a:-0}" -lt "${b:-0}" ] && echo "RED $f: fenced body lines  ${b:-0} -> ${a:-0}"
    done
    ```
    **NEGATION-PROVED 2026-09-11, four ways in a throwaway clone:** a commit deleting the whole
@@ -1264,6 +1357,15 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
    `YYYY-MM`; `YYYY-MM-DD` is equally valid.)
    Record what graduated, where each piece landed, what was adapted, and what was deliberately NOT
    absorbed (with why). That commit is the AUTHORITATIVE disposition for every doc in the batch.
+   **ALWAYS NAME THE MEASURER of every efficacy anchor the lineage doc records** — the component and
+   question that will count it, and whether that component is installed at every tier the absorbed
+   rule ships to. **An anchor with no installed measurer is written `unmeasured — no measurer at
+   <tier>`, NEVER "the next audit" / "a próxima auditoria".** The 2026-09 lineage named no measurer,
+   and the shipped template credited `framework-audit` with a measurement none of its questions
+   performed (`/audit` 2026-09-15 B-11). Mechanical, expected result stated:
+   `grep -ciE 'próxima auditoria deve|the next audit (must|should) measure' <the lineage doc>` →
+   **expected 0.**
+   **ALWAYS REPORT — `measurer: N anchors — M named, U unmeasured` or `measurer: N/A — no lineage doc written`. NEVER emit nothing.**
    **ALWAYS cite each absorbed doc by its FULL FILENAME** (e.g.
    `framework-evolution-2026-08-21-cadence-and-execution-proof.md`), not by date alone. The
    filename is what Step 0's cross-check greps for; a lineage doc that records only a date leaves

@@ -368,9 +368,14 @@ step needs. The orchestrator MUST keep an explicit RESOURCE map when dispatching
   sets that runs NO live tests and MUTATES nothing another agent reads; serialize everything else.
 
 > The mutator/reader and scratchpad rules come from ONE observed loop session in a production
-> project. They are cheap to follow and kept as HYPOTHESES: `framework-audit` measures them from the
-> session logs (a reviewer verdict discarded for having read a mutant; a scratchpad collision), and a
-> window with zero occurrences is "not exercised", never "effective".
+> project. They are cheap to follow and kept as HYPOTHESES. **Their measurer is `framework-audit` →
+> Q4 → the HYPOTHESIS check**, which counts the typed `- mutator/reader overlap:` and
+> `- scratchpad collision:` lines in the `## Orchestration lessons` section `session-log-creator`
+> writes into `.claude/logs/` (a mutator/reader overlap is, for example, a reviewer verdict discarded
+> for having read a mutant). A window with zero occurrences is
+> "not exercised", never "effective". **`framework-audit` is installed only at `production`+: below it
+> NOTHING measures these rules, and they stay unmeasured hypotheses, never validated ones**
+> (`/audit` 2026-09-15 B-11).
 
 ---
 
@@ -592,6 +597,11 @@ next boundary read `OK — window 0 -> 1`.
 Every stop below EXCEPT revocation ends at a TASK boundary and ALWAYS does all four: write
 `**State:**`, run `/session-end`, emit the digest, and **END THE RECURRING TRIGGER**. A stop that
 re-fires on its own schedule is not a stop.
+**ALWAYS EMIT THE `### Orchestration lessons` BLOCK BEFORE RUNNING `/session-end` — at every stop below,
+revocation included, and at every idle `/session-end` (C6).** `session-log-creator` copies that block
+into the log and has no other source; the digest is emitted AFTER `/session-end`, and revocation and
+idle emit no digest at all, so the lessons of those stops reached no log (`/audit` 2026-09-15 B-11,
+found by its pre-commit verifier).
 
 **ALWAYS END THE TRIGGER WITH THE MECHANISM THAT TRIGGER PROVIDES, and NAME it in the digest:**
 - a self-paced `/loop` → do NOT schedule its next wake-up (tell the loop to stop);
@@ -639,7 +649,7 @@ C6's reset step first.
 ### Held for owner: [task — reason, or "none"]
 ### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
 ### Scope changes (Step 3a): [task — widened what — admission unchanged | held, or "none"]
-### Orchestration lessons (ALWAYS present, "none" is a valid entry): [...]
+### Orchestration lessons (ALWAYS present, "none" is a valid entry): [one line each, `- <type>: <what>`, type ∈ subagent collision | mutator/reader overlap | scratchpad collision | implementer-report gap | stale-premise surprise — distinct from code discoveries; or `none`]
 ### Audit cadence: counts as [ceil(N/3)] sessions | audit due: [no | yes — proposed]
 ### Trigger: [ended — which mechanism | still armed — owned by another session; ends at its next firing]
 ### Tagging writers (re-checked at the last re-entry): [N checked, 0 untagged]
@@ -687,8 +697,7 @@ lines:
 ### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
 ### Scope changes (Step 3a): [task — widened what — phase cut unchanged | re-sequenced | stopped, or "none"]
 ### Orchestration lessons (ALWAYS present, "none" is a valid entry):
-[subagent collisions/contention, mutator/reader overlaps, scratchpad collisions, implementer-report gaps, stale-premise surprises — distinct
- from code discoveries]
+[one line each, `- <type>: <what>`, type ∈ subagent collision | mutator/reader overlap | scratchpad collision | implementer-report gap | stale-premise surprise — distinct from code discoveries; or `none`]
 ### Next loop proposal: [the discoveries that queued during this segment]
 ```
 
@@ -697,3 +706,12 @@ lines:
 same file" appears in NO diff. Multi-agent execution produces a lesson type the framework's
 collectors don't otherwise catch; this fixed section is the capture route, and session-end persists
 it (session log + rules-agents-updater routing when a lesson should harden a skill/rule).
+**ALWAYS WRITE EACH LESSON AS ONE TYPED LINE, `- <type>: <what>`, with the type taken from the slot's list.**
+**NEVER write a typed line for a type that did not occur** (`- scratchpad collision: none`) — the
+section's `none` stands alone. A typed negation still matched the counter (this rule's pre-commit
+verifier, 2026-09-16).
+`session-log-creator` copies these lines into the log's `## Orchestration lessons` section, and
+`framework-audit`'s HYPOTHESIS check counts them there by type. Untyped prose counted a negated
+"none — no scratchpad collision" as an occurrence and missed a real one phrased differently, and
+until 2026-09-16 no log section received the lessons at all, so "session-end persists it" was a claim
+with no producer (`/audit` 2026-09-15 B-11, found by its pre-commit verifier).
