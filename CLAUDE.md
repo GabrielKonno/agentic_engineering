@@ -148,10 +148,17 @@ Part 1 pass that re-reads the structure around every already-`applied` fix).
 
 **When it runs — ALWAYS one of these events, never a remembered interval:** (a) after every
 upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner request,
-(d) **after a `/maintenance` session applies an audit batch** — in `verification` mode
-(`/audit` Phase 0), which re-reads the structure around every `applied` fix instead of only
-checking that the required text is present. Trigger (d) exists because the fixes
-themselves introduce defects. **The per-run figures AND the run count live in ONE table — `/audit` → “The defect series” — and are NEVER repeated here**: four surfaces carried copies of this series, three disagreed, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8). `/audit` Phase 3 owns appending a row.
+(d) **after a `/maintenance` session applies an audit batch that touched a SHIPPED surface or
+disposed of a HIGH or MEDIUM finding** — in `verification` mode (`/audit` Phase 0), which re-reads
+the structure around every `applied` fix instead of only checking that the required text is
+present. Trigger (d) exists because the fixes themselves introduce defects.
+**Trigger (d) HAS AN EXIT, and it is mechanical:** a batch that touched no shipped surface
+(`docs/modules/`, `examples/`, `.claude/commands/bootstrap.md`,
+`.claude/commands/existing_project_adaptation.md`) AND disposed of only LOW findings does NOT fire it.
+Without that exit the rule was a loop by construction — audit, maintenance, audit — with no
+convergence criterion in "The defect series" and a shipped share of the work that `/audit` D17.6
+kept measuring as small (owner decision, 2026-09-16; the governing section is `/maintenance` →
+"Cycle governance"). **The per-run figures AND the run count live in ONE table — `/audit` → “The defect series” — and are NEVER repeated here**: four surfaces carried copies of this series, three disagreed, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8). `/audit` Phase 3 owns appending a row.
 **`/audit` Phase 3 OWNS keeping this series current** — it was stale for a full run because
 nobody did, and the batch that rewrapped a line inside this very paragraph did not notice
 (`/audit` 2026-09-03 P-26). The first TWO ran under trigger (c)/owner request;

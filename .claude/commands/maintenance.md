@@ -195,11 +195,53 @@ counts, never only the pending one:**
 - Absorbed-but-undischarged only → `Upstream sweep: 0 pending (N awaiting project-side discharge —
   <paths>).` No question follows; nothing is owed by this repo.
 - Genuinely pending → `Upstream sweep: N pending — <paths>`, followed by ONE question: does this
-  session absorb them (→ "Upstream intake" below), or defer?
+  session absorb them (→ "Upstream intake" below), or defer? **When a verification audit is also
+  owed, ALWAYS recommend the absorption first** ("Cycle governance" rule 4).
 
 **NEVER absorb a pending doc without the owner's answer, and NEVER let the sweep displace the
 session's stated task.** A pending doc is a REPORT, not a mandate — deferring is a valid
 answer, and the sweep runs again next session.
+
+## Cycle governance — the audit/maintenance loop has an EXIT (owner decision, 2026-09-16)
+
+The verification runs never converged (`/audit` → "The defect series"; figures never copied here):
+every applied batch fired trigger (d), every non-clean verdict became a finding, and every fix added
+prose controls the next run then audited, while the shipped share of the work — what projects
+actually receive — stayed small (`/audit` D17.6). These four rules stop the loop from feeding itself.
+
+1. **TRIGGER (d) FIRES ONLY WHEN IT CAN MATTER.** ALWAYS decide it with this command, never by
+   judgement:
+   ```bash
+   S=$(git diff --name-only <first>~1 <last> -- docs/modules examples .claude/commands/bootstrap.md .claude/commands/existing_project_adaptation.md | wc -l)
+   HM=$(grep -E '^\| [A-Z]-[0-9]+ \| (HIGH|MEDIUM) \|' <the applied report> | grep -cE 'applied `?s(<hash>|<hash>)')
+   [ "$S" -gt 0 ] || [ "$HM" -gt 0 ] && echo "trigger (d): fires — shipped files $S, HIGH/MEDIUM applied $HM" || echo "trigger (d): does not fire — apparatus-only, LOW-only"
+   ```
+   **Expected: one of the two lines.** A batch that fires it proposes the verification audit;
+   one that does not reports so and proposes nothing.
+2. **LOW FINDINGS ARE A BACKLOG, NEVER A SESSION.** They stay `open` and are carried forward
+   mechanically (`/audit` Phase 3 item 3).
+   - **NEVER open a maintenance session to apply only LOW findings on apparatus surfaces.**
+   - **ALWAYS apply a LOW finding when this session already edits its file for another reason**, and
+     say so in the commit.
+3. **APPARATUS MORATORIUM.** NEVER add a receipt key, a numbered checklist item or a new
+   prose-embedded control to this file or to `.claude/commands/audit.md`. A finding whose fix seems
+   to need one is fixed by amending an EXISTING control, by a script under `.claude/scripts/` with a
+   selftest that the prose only POINTS at (the `d16-gate.sh` pattern), or it stays `open`.
+   Mechanical, expected result stated:
+   ```bash
+   sed -n '/^for k in "inventory sweep"/,/^done$/p' .claude/commands/maintenance.md | grep -oE '"[a-z][a-z ._-]*"' | wc -l   # expected: 27
+   sed -n '/^## Post-change checklist/,/^## Version bumps/p' .claude/commands/maintenance.md | grep -cE '^[0-9]+\. \*\*'   # expected: 14
+   ```
+   **Any increase is RED.** The next step this moratorium points at — owner-approved, not yet done —
+   is MIGRATING the most-used prose controls (the receipt key loop, the report-deletions gate, the
+   push-decay detector, applied-proof) into `.claude/scripts/` with selftests, after which their
+   prose becomes a pointer.
+4. **UPSTREAM EVIDENCE OUTRANKS SELF-AUDIT.** A project's evolution doc comes from real use; a
+   verification run over apparatus comes from the loop itself. When Step 0 finds a genuinely
+   pending doc and a verification audit is also owed, ALWAYS recommend the absorption first.
+
+**ALWAYS REPORT this section's outcome inside the existing `verification audit:` key** (item 9 of
+Audit intake) — no new key, per rule 3.
 
 ## Post-change checklist (same session — the periodic /audit is the NET, never the primary)
 
@@ -1233,6 +1275,8 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    audit cannot check any of them.
 5. **State explicitly which findings were NOT applied and why.** Deferring is legitimate;
    silently dropping is not — they must still read `open` for the next carry-forward.
+   **LOW findings follow "Cycle governance" rule 2:** backlog, applied only when this session already
+   edits their file.
    **When the owner decides NOT to fix an ESCALATED finding, ALWAYS WRITE AN ACCEPTED-RISK RECORD
    into the report file.** `/audit` Phase 3 CONSUMES such records (`accepted-risk — see [record]`)
    and nothing said who authors them (`/audit` 2026-09-02 M-37). The record ALWAYS carries five
@@ -1328,8 +1372,10 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    moment where the fixes themselves are the least-verified thing in the repo: every documented
    execution of this pass has found defects in already-applied findings, at a rate the ONE table
    records (`/audit` → “The defect series”; the figures are never copied here — `/audit`
-   2026-09-04 R-7), and step 2's re-verification runs BEFORE applying, never after. Report
-   `verification audit: proposed / ran / skipped — [owner deferred]`; NEVER nothing.
+   2026-09-04 R-7), and step 2's re-verification runs BEFORE applying, never after.
+   **ALWAYS decide it first with "Cycle governance" rule 1** — an apparatus-only, LOW-only batch does
+   not fire trigger (d). Report
+   `verification audit: proposed / ran / skipped — [owner deferred] / not triggered — apparatus-only, LOW-only`; NEVER nothing.
 
 ## Upstream intake — absorbing framework evolutions from projects
 

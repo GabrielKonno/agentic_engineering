@@ -67,10 +67,12 @@ no owner (`/audit` 2026-09-02 K-18).
 | (a) after an upstream absorption | **baseline** |
 | (b) before a MINOR or MAJOR version bump | **baseline** |
 | (c) owner request | **baseline**, unless the owner names a batch to verify |
-| (d) after a `/maintenance` session applied an audit batch | **verification (over that batch's commit)** |
+| (d) after a `/maintenance` session applied an audit batch that touched a shipped surface or disposed of a HIGH/MEDIUM finding | **verification (over that batch's commit)** |
 
 **Verification mode requires an audit report with `applied sHASH` findings** — that is what its
 Part 1 re-reads. Only trigger (d) supplies one.
+**An apparatus-only, LOW-only batch does NOT fire trigger (d)** — `/maintenance` → "Cycle governance"
+owns the exit and its mechanical test; this table only maps the event (owner decision, 2026-09-16).
 
 **IF THAT REPORT IS MISSING, TRUNCATED OR CONDENSED, RECONSTRUCT IT FROM GIT AND FILE THE DAMAGE
 AS A FINDING — NEVER proceed on the damaged copy and NEVER downgrade to baseline silently.**
@@ -1188,6 +1190,9 @@ Paste each agent's full report in order (Agent 1 through Agent 6).
 ### Recommended Fixes
 
 Group FAIL items by priority:
+0. **LOW BACKLOG — never a session on its own.** List LOW findings here by file, and ALWAYS say
+   they are applied only when a later session already edits that file (`/maintenance` → "Cycle
+   governance"). A report whose findings are ALL LOW on apparatus surfaces recommends no session.
 1. **Quick fixes** — version mismatches, count corrections (single-line edits)
 2. **Structural fixes** — missing references, broken activation chains
 3. **Quality improvements** — instruction style, description compliance
@@ -1320,6 +1325,10 @@ step is the carry-over half.
    recent `assets/docs/audit-*.md`) into the new one, re-verifying each against the current disk:
    still true → carry with its original ID; fixed since → mark `applied`. An audit that silently
    drops the last one's open items is how "deferred" becomes "forgotten".
+   **A LOW finding whose file the audited batch did not touch is re-verified MECHANICALLY, never by
+   re-reading:** `git diff --name-only <batch range> -- <its file>` empty → still true by construction.
+   Say which LOW findings were carried this way (owner decision, 2026-09-16 — `/maintenance` → "Cycle
+   governance").
 4. **ALWAYS report in one line how many findings were carried forward** — `carried: N open + M
    escalated from [previous file]`, or `carried: none — first audit`. Never nothing.
    **An `accepted-risk` item is NOT carried forward as a finding.** Report it once per run as an
