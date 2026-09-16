@@ -20,6 +20,15 @@ cat > "${LOGS_DIR}/${FILENAME}" <<EOF
 ## Summary
 [1-2 sentences: goal and outcome]
 
+## Session entry
+[the PRD sync:, audit cadence: and loop marker: lines copied verbatim from sprint-proposer, or: none — sprint-proposer did not run (reason)]
+
+## Review receipts
+[this session's lines copied from .claude/logs/review-reports/receipts.md, or: none — no reviewer ran]
+
+## Owner decisions
+[normative propagation: N owner decisions recorded — K propagated to the PRD | owner decision with no normative effect — (reason) | none — no owner decision recorded]
+
 ## Tasks completed
 - [task]: [approach, key decisions]
 

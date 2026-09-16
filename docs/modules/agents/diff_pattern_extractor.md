@@ -85,7 +85,11 @@ promoted to a rules file in Step 2), ALWAYS sweep it backward:
 4. **Never auto-fix.** Back-sweep only archives tasks; the fix is prioritized normally.
 
 If a rule's wrong-pattern is not mechanically greppable (purely semantic), note
-`back-sweep: not greppable` for that rule instead of forcing a noisy search.
+`back-sweep: not greppable` for that rule instead of forcing a noisy search — and ALWAYS file ONE
+task in `pendencias.md` tagged `[back-sweep sN] not greppable` and `origin: discovered (sN, back-sweep)`,
+naming the rule and the semantic signature to look for. A note in this report is read by nobody;
+the task is what `codebase-audit` → step 6 consumes (a production project counted 13+ semantic
+sweeps deferred "to the next audit" that no audit ever read).
 
 ## Output
 

@@ -37,6 +37,17 @@ Save to `.claude/logs/[filename]`:
 ## Summary
 [1-2 sentences: goal, outcome, project state now.]
 
+## Session entry
+[The entry lines COPIED VERBATIM from this session's sprint-proposer output: `PRD sync:`, `Audit cadence:` (both audits) and `Loop marker:`. `none — sprint-proposer did not run ([reason])` when the session had no entry step.]
+
+## Review receipts
+[This session's lines COPIED from the ledger `.claude/logs/review-reports/receipts.md`, which validation-orchestrator → "Review receipts" appends to at verdict time:
+`- <reviewer> · <VERDICT> · report: .claude/logs/review-reports/s<N>-<reviewer>-<k>.md · commits: <sha7>`.
+`none — no reviewer ran` when none did. When the pre-deploy gate ran this session, ALSO its line: `review receipts: N commits in range, K without receipt` (validation-orchestrator → "Review receipts").]
+
+## Owner decisions
+[`normative propagation: N owner decisions recorded — K propagated to the PRD` or `owner decision with no normative effect — [reason]` or `none — no owner decision recorded` (session-rules → "Owner decision → normative document in the SAME commit")]
+
 ## Tasks completed
 - [task]: [approach, key decisions]
 
@@ -90,6 +101,10 @@ Save to `.claude/logs/[filename]`:
 ## Rules
 - Logs are **append-only** — never edit old logs
 - **ALWAYS COPY an autonomous-loop session's `Orchestration lessons` lines VERBATIM into `## Orchestration lessons`** — `framework-audit` → Q4 → the HYPOTHESIS check counts them in this section, and a lesson left only in the chat report is counted by nobody (`/audit` 2026-09-15 B-11).
+- **ALWAYS COPY the session's entry lines VERBATIM into `## Session entry`** (the `PRD sync:`, `audit cadence:` and `loop marker:` lines sprint-proposer emitted — a loop resume emits no PRD sync line) and this session's ledger lines into `## Review receipts`. A check that ran only in the chat is indistinguishable, one session later, from a check that never ran.
+  **Self-check (execute and report before closing the log):** `grep -cE '^- [^·]+ · [^·]+ · |^none — no reviewer ran' <this log>` → at least 1, and `grep -ciE '^(#+ *)?(prd sync|audit cadence|loop marker):|^none — sprint-proposer did not run' <this log>` → at least 1. A `0` means the section is empty: fill it before the session closes.
+  > Evidence (production project, 20-session window): 14 of 20 logs neither recorded a PRD sync run nor declared its skip, and 7 of 20 recorded no cadence check at all — including one that wrote "within cadence" while the audit was due.
+- **ALWAYS RUN the owner-decision self-check (session-rules → "Owner decision → normative document in the SAME commit") and write its result into `## Owner decisions`** — this step is its invoker.
 - Logs are the **primary detailed record** — project.md Progress Log is a concise index only
 - Logs are **NOT read at session start** — relevant decisions are propagated to loaded documents by end-of-session skills
 - Logs are **read on-demand** when investigating past decisions or debugging recurring issues

@@ -275,6 +275,21 @@ whoever executes the moment X must run.**
 > and in an inventory list; the skill that actually opens a session never mentioned it. Nobody
 > reads the frontmatter of an agent that is not being invoked.
 
+**The same rule governs GUARD SCRIPTS, one level down.** A script that exits non-zero on a violation
+is a control only when something EXECUTES it: a CI job, or a step in a skill, command or agent.
+A mention in a rules file, a log or the backlog is prose — it is where orphaned guards live.
+- **ALWAYS wire a new guard script to an executable invoker in the SAME change that creates it**,
+  and name the invoker in the script's header.
+- A guard that cannot run in CI (it reads a gitignored file, it needs production secrets) ALWAYS gets
+  a skill step instead — usually the session-start skill — never "run it by hand".
+- The periodic check is `codebase-audit` → step 6 → "every guard script has an EXECUTABLE invoker"
+  (`internal-tool`+; at `prototype` nothing checks it periodically — the same-change wiring is the
+  only control).
+
+> Evidence (production project): five guard scripts that exit 1 had no invoker at all. One watched
+> the age of the only backup, which then aged 13 of its 14 allowed days; the script had been run by
+> hand 3 times in 20 sessions.
+
 **Same family as §6 (banned anti-patterns need a mechanical self-check) and §8 (a component can be
 PRESENT and absent from the registry).** In all three, only a mechanical check separates
 "installed" from "actually running" — the textual claim never does.

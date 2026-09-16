@@ -149,9 +149,12 @@ Owner approval of the loop plan = prior approval for every phase. There is no pe
    heavyweight session-end per phase).
 
 **Audit-cadence equivalence:** for `AUDIT_CADENCE` counting, a loop session counts as ONE session
-PER COMPLETED PHASE (record "counts as N sessions for audit cadence" in the final report). A loop
-session ships several sessions' worth of code — counting it as one would silently thin audit
-coverage exactly when code volume spikes.
+PER COMPLETED PHASE. A loop session ships several sessions' worth of code — counting it as one would
+silently thin audit coverage exactly when code volume spikes.
+- **ALWAYS WRITE `counts as N sessions for audit cadence` (N = completed phases) in the final report
+  AND hand it to `/session-end`, so `project-md-updater` → step 1 writes it into the Progress Log
+  row.** sprint-proposer Step 0 reads the Progress Log, never a final report — a count left only in
+  the report is read by nobody, and the session counts as 1.
 
 **The loop NEVER runs an audit autonomously.** If sprint-proposer Step 0 reported an audit due, the
 resume announcement says so ("audit due — say 'pause for audit' to run it now, otherwise I'll
@@ -183,7 +186,9 @@ emit nothing.
 before dispatching it.** The task grew: more call sites to fix, a sibling write path of worse
 consequence, a new file in its set. The plan was built on the OLD scope, so the widened task can now
 collide with another task, or cross the medium/large line.
-- **Segment mode — RE-CHECK the phase cut (Step 1b):** a new collision or dependency → RE-CUT the remaining phases under "Bounded re-sequencing authority" (reordering, no stop); the task is now LARGE → STOP and re-propose (removing a task changes WHAT is in the segment).
+- **Segment mode — RE-CHECK the phase cut (Step 1b) AND the gate (Step 1a):**
+  - a new collision with, or dependency on, a task INSIDE the segment → RE-CUT the remaining phases under "Bounded re-sequencing authority" (reordering, no stop);
+  - a new dependency on an UNSTARTED task outside the segment, or the task is now LARGE or architecture/security → STOP and re-propose. Each fails a Step 1a gate item, and dropping the task changes WHAT is in the segment.
 - **Continuous mode — there is no phase cut (C1 replaces Step 1): RE-APPLY admission (C1, C3):** the task is now large, architecture/security, or depends on a held task → HOLD it (C3).
 - **ALWAYS REPORT — `scope: unchanged` or `scope: widened — [what] — [phase cut unchanged | re-sequenced | stopped]` (segment) / `[admission unchanged | held]` (continuous)**, beside the `criteria-enforcer:` line. NEVER emit nothing.
 
@@ -228,7 +233,9 @@ PARTIAL STATE (what is done, what is running, where the log is)." An implementer
 on a monitor returns a useless report over real, possibly irreversible work.
 
 **Resource declaration — ALWAYS require it in the prompt:** the implementer DECLARES the exclusive
-resources it touches (file set, shared test environment/database, phase docs, scratchpad files).
+resources it touches (file set, shared test environment/database, phase docs, scratchpad files) and
+whether it MUTATES the working tree — its MUTATOR or READER class, decided by what its prompt allows
+("Resource contention").
 
 ### 3c. After return — trust but verify, from the DISK
 
@@ -241,7 +248,8 @@ into a recoverable state instead of a blind commit — or a falsely-failed phase
 ### 3d. Validation geometry (hybrid by risk)
 
 - **Routine/small:** ONE merged review+validation subagent (single report: checklist review +
-  criteria verification). The implementer is already an isolated subagent, so the two-judge split
+  criteria verification) — plus security-reviewer when the diff touches client-bound data
+  (`validation-orchestrator` → Route 2; that trigger holds on every route). The implementer is already an isolated subagent, so the two-judge split
   loses its main justification for low-risk diffs.
 - **Logic-heavy:** full Route 2 (code-reviewer → validator), unchanged.
 - **Security-relevant:** full chain including security-reviewer (+ red-team when high-risk), unchanged.
@@ -352,12 +360,23 @@ step needs. The orchestrator MUST keep an explicit RESOURCE map when dispatching
   another step targets is a skip/collision, not a hypothetical).
 - **NEVER run an agent that MUTATES the working tree in parallel with an agent that READS it.**
   A mutator writes files others read — a validator's mutation round (it injects mutants into real
-  files and reverts them), a fixer, a formatter, a mass-edit script. A reader is a code-reviewer,
-  red-team or integrity checker. Disjoint WRITERS is not enough: while a mutant sits on disk the
-  tree is sabotaged for every reader, and a verdict issued in that window is about code that does
-  not exist — and looks legitimate.
+  files and reverts them), a fixer, a formatter, a mass-edit script. Disjoint WRITERS is not enough:
+  while a mutant sits on disk the tree is sabotaged for every reader, and a verdict issued in that
+  window is about code that does not exist — and looks legitimate.
   **ALWAYS order it: readers first, then mutators, then `git status` / `git diff` before any verdict
   or commit.**
+- **ALWAYS CLASSIFY an agent by what its PROMPT allows it to DO, NEVER by its NAME.** Before
+  dispatching, ask of each prompt: may it write files, inject a mutant, run a mutation check, apply a
+  fix, or run a test that writes files? If YES it is a MUTATOR — a code-reviewer or red team
+  included — and it either runs SERIALIZED against every agent that touches the same tree, or runs
+  with worktree isolation so its mutants never reach the shared tree. Only a strictly read-only prompt
+  makes a READER.
+  - **ALWAYS WRITE the class into the report's `### Parallel dispatches:` slot** (digest and final
+    report) — `code-reviewer — MUTATOR (mutation check) — serialized` — so a misclassification is
+    visible instead of silent.
+  - **Self-check (execute and report per parallel dispatch group):** grep each prompt of the group for
+    `mutant|mutation|apply the fix|fix it|run the test` (case-insensitive); a group with ≥1 hit and ≥2
+    agents on the same tree without worktree isolation is a violation — serialize it.
 - **ALWAYS put the SCRATCHPAD on the resource map.** It is one directory shared by every subagent
   of the session, so a helper there is a shared resource: a subagent that rewrites a helper under the
   same name can silently drop a safety guard (a read-only check on a database script) the
@@ -368,7 +387,10 @@ step needs. The orchestrator MUST keep an explicit RESOURCE map when dispatching
   sets that runs NO live tests and MUTATES nothing another agent reads; serialize everything else.
 
 > The mutator/reader and scratchpad rules come from ONE observed loop session in a production
-> project. They are cheap to follow and kept as HYPOTHESES. **Their measurer is `framework-audit` →
+> project; the classify-by-prompt rule from that project's later meta-audit, which found the
+> name-based wording still permitted the original incident — two reviewers, both named as readers,
+> had injected mutants into the shared tree and collided. They are cheap to follow and kept as
+> HYPOTHESES. **Their measurer is `framework-audit` →
 > Q4 → the HYPOTHESIS check**, which counts the typed `- mutator/reader overlap:` and
 > `- scratchpad collision:` lines in the `## Orchestration lessons` section `session-log-creator`
 > writes into `.claude/logs/` (a mutator/reader overlap is, for example, a reviewer verdict discarded
@@ -465,21 +487,31 @@ without it.** Admission reads an untagged task as `owner`, so a project whose ta
 components predate the `origin:` field would admit every AI-filed task uncapped:
 
 ```bash
-for f in .claude/skills/pendencias-updater/SKILL.md .claude/skills/sprint-proposer/SKILL.md \
-         .claude/skills/validation-orchestrator/SKILL.md .claude/skills/session-end/SKILL.md \
-         .claude/skills/codebase-audit/SKILL.md .claude/skills/skill-gate/SKILL.md \
-         .claude/agents/diff-pattern-extractor.md; do
-  [ -f "$f" ] && ! grep -q "origin: discovered" "$f" && echo "UNTAGGED WRITER: $f"
-done; true
+# Every installed skill/agent that mentions pendencias is a candidate writer — DERIVED, never a typed
+# list (a hand-typed list reads GREEN for any writer outside it). READERS names the components that
+# only read pendencias or edit an existing task in place; a project component of that kind is added
+# HERE, with its reason, never exempted silently.
+READERS=" config-file-updater context-recovery project-md-updater criteria-enforcer "  # read / edit in place, never add a task
+n=0
+for f in $(grep -l pendencias .claude/skills/*/SKILL.md .claude/agents/*.md 2>/dev/null); do
+  case "$f" in .claude/agents/*) c=$(basename "$f" .md) ;; *) c=$(basename "$(dirname "$f")") ;; esac
+  case "$READERS" in *" $c "*) continue ;; esac
+  n=$((n+1)); grep -q "origin:" "$f" || echo "UNTAGGED WRITER: $f"
+done; echo "writers checked: $n"
 ```
 
-**Expected: no output.** A writer that is not installed (a tier-gated skill) is skipped, never
-reported.
-- **Any output → continuous mode is UNAVAILABLE — NEVER present the policy.**
+**Expected: no `UNTAGGED WRITER` line, and `writers checked:` at least 1.** `writers checked: 0` means
+no task writer is installed at all — a broken install, never a healthy one: continuous mode is
+UNAVAILABLE. A tier-gated component
+that is not installed is never listed, so it is never reported. **KNOWN LIMIT:** the test is per
+FILE — a second, untagged write site inside a file that already carries a tag reads GREEN. Every
+writer's tag instruction therefore lives next to its write site, and a new write site in an existing
+writer MUST carry its own.
+- **Any `UNTAGGED WRITER` line, or `writers checked: 0` → continuous mode is UNAVAILABLE — NEVER present the policy.**
 - **ALWAYS name the untagged writers and offer segment mode instead** — a fixed list cannot absorb an
   untagged discovery.
 - The remedy is `/existing_project_adaptation`, which refreshes these writers as one set.
-- **ALWAYS REPORT — `tagging writers: N checked, 0 untagged` or `tagging writers: K untagged — continuous mode unavailable`. NEVER emit nothing.**
+- **ALWAYS REPORT — `tagging writers: N checked, 0 untagged` or `tagging writers: K untagged — continuous mode unavailable` or `tagging writers: 0 checked — continuous mode unavailable`, with N taken from the `writers checked:` line. NEVER emit nothing.**
 
 Then ALWAYS present:
 
@@ -578,25 +610,34 @@ chg() { git log -"$1" --format=%H -G'^\*\*Window:\*\* closed' -- .claude/phases/
 prevc=$(chg 2 | sed -n 2p); lastc=$(chg 1)
 prev=$( [ -n "$prevc" ] && git show "$prevc":.claude/phases/project.md | w )
 cur=$(w < .claude/phases/project.md)
-[ "$lastc" = "$(git rev-parse HEAD)" ] && [ -n "$cur" ] && [ "$cur" = "$(( ${prev:-0} + 1 ))" ] \
+# commits AFTER the counter moved, other than the owner's concurrent backlog writes and merges
+after=$( [ -n "$lastc" ] && git log --first-parent --no-merges --format=%h "$lastc"..HEAD -- . ':(exclude).claude/phases' ':(exclude).claude/logs' | wc -l )
+[ -n "$lastc" ] && [ "${after:-1}" -eq 0 ] && [ -n "$cur" ] && [ "$cur" = "$(( ${prev:-0} + 1 ))" ] \
   && echo "OK — window ${prev:-0} -> $cur" \
-  || echo "RED — window ${prev:-none} -> ${cur:-none}; marker last changed in ${lastc:0:7}, HEAD is $(git rev-parse --short HEAD)"
+  || echo "RED — window ${prev:-none} -> ${cur:-none}; marker last changed in ${lastc:0:7}, ${after:-?} later commit(s) outside .claude/phases and .claude/logs"
 ```
 
 **Expected: `1`, and `OK — window N -> N+1`.** RED also when the task's code was committed without
-the marker change — HEAD must be the commit that moved the counter. The previous value is read from
-the previous commit that changed the `Window` line, so a C6 reset (committed as `closed 0`) makes the
-next boundary read `OK — window 0 -> 1`.
+the marker change: no commit after the one that moved the counter may touch anything outside
+`.claude/phases/` and `.claude/logs/`. The owner is a declared concurrent writer of the backlog (C2
+step 1), and an idle `/session-end` writes the log and the Progress Log — those commits, and merge
+commits, never read RED. The previous value is read from the previous commit
+that changed the `Window` line, so a C6 reset (committed as `closed 0`) makes the next boundary read
+`OK — window 0 -> 1`. **KNOWN LIMIT:** an owner commit to any OTHER file after the counter moved reads
+RED — the check cannot tell it from the loop's own late commit; the disposition below resolves it.
 
 **Anything else is RED — the next task does NOT open.**
+**A closure RED is a C5 STOP: ALWAYS write `State: stopped — closure check RED at task N` and do
+the rest of C5's four steps.** It is never a silent pause: without a `State` the next re-entry cannot
+tell a RED boundary from a healthy one.
 
 **ALWAYS REPORT both outputs literally**, beside the two lines of the base check.
 
 ### C5. Stops — the checkpoint, the brake, revocation
 
-Every stop below EXCEPT revocation ends at a TASK boundary and ALWAYS does all four: write
-`**State:**`, run `/session-end`, emit the digest, and **END THE RECURRING TRIGGER**. A stop that
-re-fires on its own schedule is not a stop.
+Every stop below ends at a TASK boundary — revocation included. Every stop EXCEPT revocation ALWAYS
+does all four: write `**State:**`, run `/session-end`, emit the digest, and **END THE RECURRING
+TRIGGER**. A stop that re-fires on its own schedule is not a stop.
 **ALWAYS EMIT THE `### Orchestration lessons` BLOCK BEFORE RUNNING `/session-end` — at every stop below,
 revocation included, and at every idle `/session-end` (C6).** `session-log-creator` copies that block
 into the log and has no other source; the digest is emitted AFTER `/session-end`, and revocation and
@@ -619,11 +660,16 @@ another session; it ends at its next firing`.
   brake`. The backlog is growing faster than it drains: that is the loop feeding itself.
 - **Every segment guardrail and exception stop** ("Loop guardrails"; sprint-proposer → "Exception
   stops") → `State: stopped — [which]`.
-- **Revocation** — the owner says "cancel continuous mode" → remove the marker, run `/session-end`,
-  end the trigger. Three steps, not four: there is no `State` to write once the marker is gone.
+- **Closure check RED** (C4) → `State: stopped — closure check RED at task N`.
+- **Revocation** — the owner says "cancel continuous mode" → close the in-flight task at its boundary,
+  remove the marker, run `/session-end`, end the trigger. Three steps, not four: there is no `State`
+  to write once the marker is gone, and no digest is emitted — ALWAYS say so in the one-line
+  revocation report (`revoked — no digest; trigger [ended — which mechanism]`).
+  - **A marker removed MID-TASK by another session is a revocation.** The task-closure check then
+    reads `0` on its marker line: ALWAYS commit the in-flight task, run `/session-end`, end the
+    trigger, and NEVER re-create the marker.
   - **A revocation said in ANOTHER session cannot end this session's trigger.** That trigger ends at
-    its next firing, through sprint-proposer Step 1's no-marker branch — which is why the trigger
-    MUST carry the `continuous` argument (C6).
+    its next firing, through sprint-proposer Step 1's no-marker branch (the arming rule is in C6).
 
 **On a resume whose state is `checkpoint pending` or `stopped`, NEVER open a task.** ALWAYS
 re-present the digest and wait. Only an explicit owner answer resumes, and resuming ALWAYS runs
@@ -632,16 +678,18 @@ C6's reset step first.
 **Audit-cadence equivalence in this mode** — segment mode's "one per phase" has no phases to count:
 - **ALWAYS COUNT `ceil(closed / 3)` sessions per window** — the lower bound of the sprint cap, so
   audit coverage NEVER thins as volume grows.
-- **ALWAYS WRITE `counts as N sessions for audit cadence` into the Progress Log entry of the
-  checkpoint's `/session-end`**, and `counts as 0 sessions for audit cadence — continuous window,
-  counted at checkpoint` into every idle `/session-end` entry (C6). Without the `0` the window is
-  counted twice. sprint-proposer Step 0 is the reader.
+- **ALWAYS WRITE `counts as N sessions for audit cadence` (N = `ceil(closed / 3)` over the window)
+  into the Progress Log entry of EVERY stop's `/session-end`** — checkpoint, brake, guardrail,
+  exception stop, closure RED and revocation alike. The C6 reset then zeroes the window, so a stop
+  that did not write its count erases it for good. sprint-proposer Step 0 is the reader, and
+  `project-md-updater` → step 1 is the writer that carries the phrase into the row.
+- The idle entry's `counts as 0` is written by C6's idle step, which owns that moment.
 
 **The digest — ALWAYS this format** (it replaces segment mode's final report):
 
 ```
 ## Continuous Checkpoint: [date]
-### Stop reason: checkpoint (N closed) | audit due | discovery brake | [guardrail / exception stop]
+### Stop reason: checkpoint (N closed) | audit due | discovery brake | closure check RED at task N | [guardrail / exception stop]   (revocation emits no digest)
 ### Closed this window: [N] — one line each: task, result, commit
 ### Admission (C2 step 2, summed over the window): [+A admitted, +H held, +D deferred]
 ### Admitted discoveries: [A of cap] — [tasks]
@@ -650,6 +698,7 @@ C6's reset step first.
 ### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
 ### Scope changes (Step 3a): [task — widened what — admission unchanged | held, or "none"]
 ### Orchestration lessons (ALWAYS present, "none" is a valid entry): [one line each, `- <type>: <what>`, type ∈ subagent collision | mutator/reader overlap | scratchpad collision | implementer-report gap | stale-premise surprise — distinct from code discoveries; or `none`]
+### Parallel dispatches: [group — agent CLASS (MUTATOR/READER, why) — serialized | isolated | parallel; self-check hits N, or "none — every dispatch serial"]
 ### Audit cadence: counts as [ceil(N/3)] sessions | audit due: [no | yes — proposed]
 ### Trigger: [ended — which mechanism | still armed — owned by another session; ends at its next firing]
 ### Tagging writers (re-checked at the last re-entry): [N checked, 0 untagged]
@@ -662,27 +711,46 @@ C6's reset step first.
   `State: idle — queue empty`, run `/session-end` if any task closed since the last one, and end at
   the boundary. The approval stands: the next re-entry picks up newly registered tasks with NO new
   approval. **Idle does NOT end the recurring trigger** — that is the difference from a C5 stop.
+  - **ALWAYS WRITE `counts as 0 sessions for audit cadence — continuous window, counted at checkpoint`
+    into every idle `/session-end` Progress Log entry.** The window is counted once, by the stop that
+    closes it (C5); without the `0`, a reader counting the idle entry as 1 counts the window twice.
   - **A session-scoped trigger dies with its session, and the approval does NOT re-arm it.** ALWAYS
     say so when going idle: `idle — re-entry needs this session open, or /loop /sprint-proposer
     continuous in a new session`.
 - **The framework defines the re-entry PROTOCOL — the marker — and NEVER a scheduler**
   (component-design §7: do not rebuild native mechanisms). The recommended trigger is the native
   `/loop /sprint-proposer continuous` in self-paced mode: each firing runs sprint-proposer Steps 0-1,
-  which detect the marker and hand off here. The `continuous` argument tells Step 1 that the firing
-  came from this mode's trigger, so a firing that finds no marker ends the trigger instead of
-  proposing a sprint. A manual invocation or a scheduled session re-enters identically, because the
-  marker is the only state.
+  which detect the marker and hand off here. A manual invocation or a scheduled session re-enters
+  identically, because the marker is the only state.
+  - **ALWAYS ARM the recurring trigger — `/loop` or a scheduled session — with the `continuous`
+    argument.** It tells sprint-proposer Step 1 that the firing came from this mode's trigger, so a
+    firing that finds no marker ends the trigger instead of proposing a sprint — the only way a
+    revocation said in another session reaches this trigger (C5).
+  - **NEVER pass `continuous` on a manual start of the mode** — the owner starting continuous mode
+    asks for it in words (Entry, "Words that DO name continuous mode"), and a bare manual
+    `/sprint-proposer continuous` with no marker is read as a trigger firing and ends instead of starting.
   - **ALWAYS fire again immediately while `State: running`.**
   - **ALWAYS wait 20 minutes or more between firings while `State: idle`** — nothing changes faster
     than the owner types.
-- **On an owner "continue" after a checkpoint or a stop, ALWAYS RESET BEFORE opening a task:** set
+- **On an owner "continue" OR a policy adjustment after a checkpoint or a stop, ALWAYS RESET BEFORE
+  opening a task** — for an adjustment, write the new values into the marker's `**Policy:**` line in
+  the same commit. Set
   `**Window:** closed 0 | discovered 0 | admitted-discoveries 0` and `**State:** running`, and
   COMMIT that marker change on its own. It is the `0` the next closure check counts from (C4).
 - **ALWAYS re-run the liveness guard AND the C1 tagging-writer check on every re-entry** (Step 1a,
   last item; C1) — a registry can break, and a project can be partially refreshed, between two
   firings. The watchdog's "at loop start" means every start.
+- **ALWAYS re-run the task-closure check on every re-entry whose state is `running`, BEFORE opening
+  a task.** The previous firing may have died between a commit and its closure check.
+  - **Marker `Window` reads `closed 0`** (a fresh marker or a C6 reset, no task closed since) → run
+    the BASE check plus this line, which still sees a task committed after the reset without moving
+    the counter; the full C4 lines would compare `0` with the value before the reset and read RED on
+    a healthy state:
+    `git log --first-parent --no-merges --format=%h "$(git log -1 --format=%H -G'^\*\*Window:\*\* closed' -- .claude/phases/project.md)"..HEAD -- . ':(exclude).claude/phases' ':(exclude).claude/logs' | wc -l` → expected `0`.
+  - **Otherwise** → the base check AND the C4 lines. A RED here is a C5 stop like any other.
+  - **ALWAYS REPORT it in the re-entry announcement** (`closure on re-entry: OK | window 0 — base + later-commit line OK | RED — [output]`).
 - **ALWAYS announce the re-entry in one line:** `Resuming continuous mode: state [S], window [N] of
-  [checkpoint] closed, queue [Q]. Say 'cancel continuous mode' to revoke.`
+  [checkpoint] closed, queue [Q], closure on re-entry [OK | window 0 — base + later-commit line OK]. Say 'cancel continuous mode' to revoke.`
 
 ---
 
@@ -696,6 +764,7 @@ lines:
 ### Re-sequencing events: [one line each, or "none"]
 ### Closure checks: [N task boundaries, all OK | RED at task X — what was done]
 ### Scope changes (Step 3a): [task — widened what — phase cut unchanged | re-sequenced | stopped, or "none"]
+### Parallel dispatches: [group — agent CLASS (MUTATOR/READER, why) — serialized | isolated | parallel; self-check hits N, or "none — every dispatch serial"]
 ### Orchestration lessons (ALWAYS present, "none" is a valid entry):
 [one line each, `- <type>: <what>`, type ∈ subagent collision | mutator/reader overlap | scratchpad collision | implementer-report gap | stale-premise surprise — distinct from code discoveries; or `none`]
 ### Next loop proposal: [the discoveries that queued during this segment]

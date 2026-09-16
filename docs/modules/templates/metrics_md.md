@@ -12,8 +12,10 @@
 # [Project] — Code Health Metrics
 
 > One row per codebase-audit. Append-only. Compared against quality-budgets.md.
-> `Status` = `COMPLETE` or `INCOMPLETE (steps N,M not run — reason)`. An INCOMPLETE row records
-> valid data but does NOT satisfy the audit cadence — the reader anchors on the last COMPLETE.
+> `Status` = `IN PROGRESS` (written before the fan-out, replaced when the run ends), `COMPLETE` or
+> `INCOMPLETE (steps N,M not run — reason)`, followed by the per-step
+> line (`steps: 1 ✅ · 2 ✅ · … · 6 ⏭️ (structural reason)`). An INCOMPLETE row records valid data
+> but does NOT satisfy the audit cadence — the reader anchors on the last COMPLETE.
 
 | Session | Date | Status | Largest file (lines) | Type escapes | Fragile tests % | Test coverage (logic) | Open LOW debt | Budgets breached |
 |---------|------|--------|----------------------|--------------|-----------------|-----------------------|---------------|------------------|

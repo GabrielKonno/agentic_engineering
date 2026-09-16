@@ -93,7 +93,7 @@ suite that finishes implausibly fast is a skip until proven otherwise.
 Execute these steps in order. Do not skip steps — each one produces evidence for the validation report.
 
 1. **Code review** — Self-review using `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, edge cases.
-2. **Security check** — Check security-reviewer.md headers. If changes touch user input, auth, database, APIs, secrets, or HTML rendering: do the full security review.
+2. **Security check** — Check security-reviewer.md headers. If changes touch user input, auth, database, APIs, secrets, or HTML rendering: do the full security review. If they touch **client-bound data** (see Route 2): spawn the security-reviewer subagent — that trigger applies on every route.
 3. **UI verification (if UI files modified)** — Use the project's browser automation MCP to verify visual changes. Navigate to the affected pages, take snapshots, and verify that VERIFY: criteria match what's rendered. Test at a mobile viewport (≤430px) in addition to desktop. Code review alone is NOT sufficient for UI verification — browser automation is mandatory. If browser automation is unavailable: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:.
 4. **Criteria check** — Check all acceptance criteria by tag type (BUILD:/VERIFY:/QUERY:/REVIEW:).
 5. **Regression** — Run full test suite or re-check last 2-3 tasks' criteria.
@@ -107,6 +107,22 @@ Execute these steps in order. Do not skip steps — each one produces evidence f
 
 **If security-relevant** (auth, RLS, payment, AI/LLM, multi-tenancy, file upload, secrets):
 - Add **security-reviewer subagent** before validator.
+
+**ALWAYS ALSO spawn security-reviewer when the diff touches CLIENT-BOUND DATA — on ANY route, even a
+logic-heavy task with no auth change.** It is client-bound when ANY is true:
+- the RETURN SHAPE of a server action, API route or RPC changed;
+- the props a server component passes into a client component changed;
+- a role-gated or privileged figure, field or UI element was added or changed;
+- a surface renders personal data or credentials.
+
+**ALWAYS REPORT — `security-reviewer: ran — [verdict]` or `security-reviewer: skipped — no client-bound data ([reason])`, in the Validation Report's `Security reviewer:` slot. NEVER emit nothing.**
+
+> Evidence (production project): with the trigger limited to auth/payment keywords, the
+> security-reviewer recorded **0 spawns in 20 sessions** — including two sessions whose work was
+> exactly its declared scope (privileged financial figures sent to the client) and that ran as
+> logic-heavy tasks.
+
+**Then, for security-relevant or client-bound work:**
 - If high-risk (auth/RLS/payment/AI): add **Red Team subagent**.
 - After validation passes (if Red Team ran): run **Blue Team subagent**.
 
@@ -116,7 +132,8 @@ The declaring components are `code-reviewer`, `security-reviewer` and **`validat
 so a single pass structurally cannot reach the third.
 
 **Pass 1 — ALWAYS, after receiving the code-reviewer and security-reviewer reports:**
-1. READ the Coverage Gap Declaration section in each report. The section is ALWAYS present and
+1. READ the Coverage Gap Declaration section in each report (in code-reviewer's report format the
+   same section is headed `### Coverage gaps declared:`). The section is ALWAYS present and
    reads `None` when empty — an ABSENT section is a defect in that agent, not a skip condition.
 2. For each declared gap, SEARCH `.claude/agents/` descriptions for an agent whose
    description matches the gap's domain vocabulary.
@@ -145,6 +162,47 @@ no coverage gaps are declared.
 **UI tasks in Route 2:** The validator subagent handles UI verification via browser automation MCP. When spawning the validator, include in the prompt: (1) that UI files were modified, (2) which VERIFY: criteria require browser verification, and (3) the app URL or route where changes are visible. The validator will navigate, take snapshots, and verify elements match criteria.
 
 ---
+
+## Review receipts — every reviewer verdict leaves a durable artifact
+
+This section is the WRITER of the receipt discipline (session-rules → "Autonomous loop watchdog" →
+RECEIPT) and the EXECUTOR of the pre-deploy gate (session-rules → "Deploy gates").
+
+**Every time a reviewer subagent returns a verdict (code-reviewer, security-reviewer, validator, red
+team, data or specialist reviewers), ALWAYS:**
+1. **SAVE its final report verbatim** — `mkdir -p .claude/logs/review-reports` first — to
+   `.claude/logs/review-reports/s<N>-<reviewer>-<k>.md` (session, reviewer, sequence), and commit it.
+2. **APPEND one line to the receipts ledger `.claude/logs/review-reports/receipts.md`, IN THE SAME
+   COMMIT as the saved report:**
+   `- <reviewer> · <VERDICT> · report: .claude/logs/review-reports/s<N>-<reviewer>-<k>.md · commits: <sha7>, <sha7>`
+   — `<VERDICT>` MUST appear verbatim inside the saved report. The ledger exists from the moment of
+   the verdict; the session log is written only at session end, so a gate run mid-session could not
+   read a receipt kept only there. `session-log-creator` copies this session's lines into the log.
+3. **NEVER paste an internal agent id** into a log or report — the saved report IS the evidence.
+
+**Pre-deploy gate (production+ profiles) — BEFORE applying a migration to production, and BEFORE
+opening the deploy PR, ALWAYS run this over the range being shipped** (replace `src` with the
+project's code roots from CLAUDE.md):
+```bash
+R=origin/main..HEAD; L=.claude/logs/review-reports/receipts.md
+if ! C=$(git log --no-merges --format=%H "$R" -- src 2>&1); then
+  echo "RED: range $R unreadable — nothing checked"          # no remote yet, bad ref: FAILS CLOSED
+else n=0; k=0
+  for c in $C; do n=$((n+1))
+    git log -1 --format=%B "$c" | grep -qE '^Review-Exempt: .{10,}' && continue
+    grep -E '^- [^·]+ · [^·]+ · ' "$L" 2>/dev/null | grep -q "${c:0:7}" || { k=$((k+1)); echo "NO RECEIPT: ${c:0:7}"; }
+  done
+  echo "review receipts: $n commits in range, $k without receipt"
+fi
+```
+**Expected: exactly one line, `review receipts: N commits in range, 0 without receipt`.** The check
+reads ONLY receipt lines of the ledger — never a log's commit list, where every commit's hash appears.
+Any `NO RECEIPT` or `RED:` line blocks the deploy until a review runs, the range is readable, or the
+owner exempts the commit. An exemption is written at commit time as a `Review-Exempt: <reason>`
+trailer; for a commit that already exists, NEVER rewrite it — append
+`- exempt · owner decision · <reason> · commits: <sha7>` to the ledger. A commit that
+touches schema or migrations additionally needs a receipt from the adversarial or data reviewer when
+the project has one. **ALWAYS REPORT — `review receipts: N commits in range, 0 without receipt` or `review receipts: N commits in range, K without receipt — deploy blocked` or `review receipts: RED — range unreadable — deploy blocked`. NEVER emit nothing.**
 
 ## Subagent mechanics
 
@@ -182,6 +240,7 @@ Each subagent is a fresh Agent tool instance — isolated context.
 - Tests:      ✅/❌/⏭️  (N executed / N failed — ALWAYS the count, never just the verdict)
 - Review:     ✅/❌
 - Security:   ✅/❌/⏭️
+- Security reviewer: ran — [verdict] | skipped — no client-bound data ([reason])
 - Mutation Tests:   ✅/⏭️  (N mutants, N NEUTER)
 - DB:         ✅/❌/⏭️
 - UI:         ✅/❌/⏭️/BASELINE-CREATED  (BASELINE-CREATED is reachable only when the CODE-REVIEWER declared the gap, since a specialist spawned from THIS report's own declaration runs after this row is written)

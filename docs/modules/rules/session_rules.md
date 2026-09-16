@@ -105,10 +105,22 @@ never collapses them:
   subagent (code-reviewer / red-team / data reviewers), not the orchestrator's correlated
   second opinion.
 - **RECEIPT — the bridge between the two:** a review verdict only COUNTS when accompanied
-  by a verifiable artifact from a real subagent (the spawn's agent id + the structured
-  report it returned). A "reviewer APPROVE" written from the orchestrator's own MEMORY is
-  not evidence that a review happened and cannot enter the log/commit. No receipt → the
-  review didn't happen → the task does not close.
+  by a verifiable artifact from a real subagent. A "reviewer APPROVE" written from the
+  orchestrator's own MEMORY is not evidence that a review happened and cannot enter the
+  log/commit. No receipt → the review didn't happen → the task does not close.
+  - **ALWAYS SAVE the reviewer's FINAL report verbatim** to
+    `.claude/logs/review-reports/s<N>-<reviewer>-<k>.md` and commit it; the writer is
+    `validation-orchestrator` → "Review receipts". A spawn's agent id is NOT a receipt: nobody can
+    re-read it after the session, and internal agent ids do not belong in visible artifacts.
+  - **ALWAYS CITE each saved report by one line in the receipts ledger
+    `.claude/logs/review-reports/receipts.md`, in the same commit** — `session-log-creator` copies
+    this session's lines into the log's `## Review receipts`.
+
+> Evidence (production project, 20-session window): the receipt rule existed and **0 of 20 logs**
+> carried a receipt anyone could re-read — the "APPROVE" lines were prose. Two sessions shipped code
+> with no independent reviewer, and one applied migrations to production before the adversarial
+> reviewer ran; that reviewer then found three exploitable holes and forced a corrective migration.
+> The rule only stopped a session from CLAIMING a review; it never stopped SHIPPING without one.
 
 ## Execution proof — "passed" and "ran" are different propositions
 
@@ -135,12 +147,21 @@ discipline above: a receipt proves a REVIEWER ran; a count proves a TOOL ran.
   by reading its source, which is exactly the weak proxy this class teaches you to distrust. A
   pure decision is unit- and mutation-testable, and the mutant that matters is the **NEUTER**
   (keep the condition, kill its effect), not the DELETE.
+- **NEVER pipe a gate through a filter** (`| tail`, `| head`, `| grep`) when its exit status is the
+  verdict — the shell reports the FILTER's status, so a red gate prints its last lines and returns 0.
+  ALWAYS run the gate bare, or with `set -o pipefail`, and report its exit code.
+- **ALWAYS spawn a gate script's subprocesses WITHOUT a shell** (`execFileSync(bin, [args])`, never
+  `execSync("bin args")`). On Windows a shell routes through `cmd.exe`, where `^` is an escape
+  character: a range `a^..b` reached git as `a..b` and the first commit of every range went
+  unchecked, silently — a gate that loses input errs in the PERMISSIVE direction.
 
 > Evidence (production project, two incidents): a CI test job fell into a missing-secrets skip
 > path and reported `pass` in 39 seconds for 200+ test files; and a stray residue left by a
 > concurrent write caused a `ReferenceError` at IMPORT time, so the suite reported SUCCESS having
 > executed ZERO tests. In both, the only clue was the DURATION and a human noticed it — never the
-> status, because no mechanism was asking.
+> status, because no mechanism was asking. The two "NEVER pipe / NEVER use a shell" lines come from
+> one session building five gate scripts: a `| tail` let a commit ship on a red gate, and the
+> `cmd.exe` case surfaced only because a POSITIVE test came back with ZERO commits checked.
 
 ## Task presentation
 
@@ -164,6 +185,28 @@ Mechanisms stack: a standard-effort session uses high effort when security agent
 - Be specific: "Fixed month reopening to restore paid entries too" NOT "Fixed a bug"
 - Include WHY: "Added parseDateOnly() because toISOString() shifts dates across timezones"
 - Constraints go in rules files, not just session logs
+
+## Owner decision → normative document in the SAME commit
+
+A decision the owner takes in a session is usually recorded where it was taken — a rules file, a
+log, `pendencias.md`. When it changes a business rule, a phase's scope, or invalidates a statement
+in the PRD (or a phase spec that is normative for its phase), recording it there is not enough: the
+PRD keeps describing a system that no longer exists, while its version stays unchanged — so a sync
+check that compares VERSIONS cannot see the drift.
+
+- **ALWAYS propagate that decision to the normative document in the SAME commit** that records it,
+  with an entry in the PRD's Changelog and a PRD version bump.
+- **The recording file POINTS at the PRD section — NEVER becomes the only home of the decision.**
+- **Self-check at session end** — executed and reported by `session-log-creator` (its invoker): when
+  `git diff <session-range> -- .claude/rules .claude/phases` adds a line containing `owner decision`
+  (case-insensitive), `git diff <session-range> --stat -- assets/docs` MUST be non-empty — or the log
+  states `owner decision with no normative effect — [reason]`.
+- The PRD sync check (`prd-sync-checker`) stays the backstop; this rule is the control.
+
+> Evidence (production project): the same drift — owner decisions recorded in rules files and
+> logs, never reaching the normative spec — recurred in **5 sessions** after it was first measured.
+> Every instance was FOUND by the PRD sync checker afterwards; none was PREVENTED. The version check
+> passed each time, because the versions still matched.
 
 ## Session archetypes (all profiles)
 
@@ -205,12 +248,24 @@ while the CHEAP half (counters, greps, queries) survives and writes the reassuri
 - **Anti-thrash corollary — ALWAYS separate the two claims.** An interrupted audit is not wasted
   work: *the data it produced* stays valid (keep reading it); only *the claim of completeness* is
   false (never trust it). NEVER discard a partial run's findings on the grounds that it was partial.
+- **`COMPLETE` is a PER-STEP checklist, never an adjective.** ALWAYS write the steps line beside the
+  status — `steps: 1 ✅ · 2 ✅ · 3 ⏭️ (reason) · 4 ✅`. `COMPLETE` is allowed only when EVERY step is
+  ✅, or ⏭️ with a STRUCTURAL reason written in the line (the step cannot be executed as it stands —
+  e.g. a debt triage over backlog items that carry no age stamp). A step skipped for CAPACITY
+  (context, time, a usage limit, "later") makes the entry `INCOMPLETE`.
+  **Self-check (execute and report):** `grep -oiE 'steps:' ` over the entry (a report heading or a table
+  row's Status cell) → exactly 1 match, and no `⏭️` without a `(` after it.
+- **ALWAYS write an `IN PROGRESS` marker to disk BEFORE fanning out** — a usage-limit cut must leave
+  the run visible as `INCOMPLETE`, never as "never opened". The marker NEVER resets the clock.
 
 > Evidence (production project): a MACRO audit lost 10 of its 11 fan-out agents to a usage
 > limit. The session logged `interrupted` honestly — but the entry the cadence reader consults
 > said "cadence FULFILLED". Three sessions later the reader correctly concluded "not due" from a
 > lying anchor. The breadth half of the audit (separation · security · performance · types)
 > stayed frozen ~16 sessions while the cheap half kept publishing reassuring numbers.
+> Later the same project recorded two audits `COMPLETE` — one with its triage step only MEASURED,
+> one with "partial triage" — so the adjective absorbed both without telling a structural skip from
+> a capacity one; that is what the per-step line fixes.
 
 ## Deploy gates (production+ profiles)
 
@@ -219,6 +274,14 @@ criteria, recorded as a `DEPLOY GUARD` block in `pendencias.md` (see the pendenc
 Hard rule: do NOT open the deploy PR (e.g., `dev → main`) until the guard's criteria are met.
 When met, convert the block to `✅ FULFILLED (sN)` with the PR hash — preserve the original as
 history. This is a distinct gate tier ABOVE the per-diff CI gate and the per-task validation gate.
+
+**The review-receipt gate — BEFORE applying a migration to production and BEFORE opening the deploy
+PR, ALWAYS verify that every code commit in the range carries a review receipt.** The executor is
+`validation-orchestrator` → "Review receipts". A commit with no receipt blocks the deploy unless the
+owner exempted it explicitly — a `Review-Exempt: <reason>` trailer written at commit time, or, for a
+commit that already exists, an `exempt · owner decision` line in the receipts ledger. An implicit
+exemption does not exist.
+A project MAY script this check and run it in CI on the deploy PR; the rule does not depend on it.
 
 ## Scripts convention
 

@@ -968,9 +968,11 @@ Output: Validation Report with a per-category verdict (mostly ✅/❌/⏭️; Se
 
 **If security-relevant** (auth, RLS, payment, AI/LLM, multi-tenancy, file upload, secrets):
 
-**security-reviewer subagent** (before validator):
+**security-reviewer subagent** (before validator — and on ANY route when the diff touches client-bound data: a changed response shape, props passed from server to client, a privileged figure, rendered personal data):
 Input: git diff, security-reviewer.md, stack security skill, rules files.
 Output: Security Review Report.
+
+**Review receipts (every route that spawns a reviewer):** each reviewer's final report is saved verbatim under `.claude/logs/review-reports/` and cited by one line in the receipts ledger `.claude/logs/review-reports/receipts.md` (copied into the session log at session end). Before a migration reaches production or the deploy PR opens, a check over the commit range blocks any code commit without a receipt or an explicit owner exemption (a `Review-Exempt:` trailer, or an `exempt · owner decision` ledger line for an existing commit) (`validation-orchestrator` → "Review receipts").
 
 **Red Team subagent** (if high-risk: auth/RLS/payment/AI):
 Input: git diff, red-team.md, security context.

@@ -116,6 +116,11 @@ that already exist:
 
 This is a STEP of framework-audit, not a continuous system. One row per meta-audit.
 
+**ALWAYS write an `IN PROGRESS` row to `framework-metrics.md` BEFORE fanning out the six questions**,
+and replace its status when the run ends — a usage-limit cut must leave the audit visible as
+INCOMPLETE, never as "never opened". An `IN PROGRESS` row NEVER resets the cadence clock
+(session-rules → "Cadence integrity").
+
 **ALWAYS stamp the row with `Status: COMPLETE | INCOMPLETE (questions N,M not answered — reason)`,
 derived from which of the six questions actually ran** — never from the fact that the rollup step
 itself succeeded. The six questions are the expensive half (fan-out over logs, ledgers, components);

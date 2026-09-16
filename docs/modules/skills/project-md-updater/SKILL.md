@@ -26,6 +26,11 @@ Add a new row to the Progress Log table in project.md:
 | N | YYYY-MM-DD | [1-line specific summary] | `logs/[filename].md` |
 ```
 
+**ALWAYS END the summary with `counts as N sessions for audit cadence` when this session was an
+autonomous-loop session** — N as the loop handed it to `/session-end` (completed phases in segment
+mode; `ceil(closed / 3)` at a continuous stop; `0` on a continuous idle end). This row is the only
+place `sprint-proposer` Step 0 reads the weight; a row without the phrase counts as 1.
+
 ### 2. Update PRD version
 
 Update the `**PRD version:**` field in project.md Overview with the current PRD version.

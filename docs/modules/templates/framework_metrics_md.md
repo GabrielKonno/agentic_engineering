@@ -19,8 +19,9 @@
 > One row per framework-audit. Append-only. The detail behind each row lives in the session's
 > Framework Audit Report and in `.claude/docs/framework-evolution-*.md`.
 >
-> `Status` = `COMPLETE` or `INCOMPLETE (questions N,M not answered — reason)`. An INCOMPLETE row
-> records valid data but does NOT satisfy `FRAMEWORK_AUDIT_CADENCE`.
+> `Status` = `COMPLETE` or `INCOMPLETE (questions N,M not answered — reason)`, or `IN PROGRESS`
+> while the run is fanned out (written BEFORE the fan-out, replaced when it ends). Neither an
+> INCOMPLETE nor an IN PROGRESS row satisfies `FRAMEWORK_AUDIT_CADENCE`.
 
 | Session | Date | Status | Escape rate | Reviewer false-positives | Dead KBPs (never triggered) | Mechanisms never fired | Drift incidents | Oldest open debt | Evolutions pending upstream |
 |---------|------|--------|-------------|--------------------------|-----------------------------|------------------------|-----------------|------------------|-----------------------------|

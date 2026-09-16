@@ -58,8 +58,9 @@ for many cadences while the cheap half keeps publishing healthy numbers. If the 
 is INCOMPLETE, ALWAYS say so in the proposal: `audit due — last run was INCOMPLETE (steps N,M)`.
 
 **ALWAYS COUNT a Progress Log entry carrying `counts as N sessions for audit cadence` as N sessions,
-never as 1** — loop and continuous sessions write it (`autonomous-loop` → Step 2 and
-"Continuous mode" → C5), and an entry reading `counts as 0` counts 0.
+never as 1** — `project-md-updater` → step 1 writes it for loop and continuous sessions, from the
+count `autonomous-loop` hands to `/session-end` (Step 2; "Continuous mode" → C5 and C6), and an entry
+reading `counts as 0` counts 0.
 
 Proposing is not running — the owner decides. If both are due, propose codebase-audit first
 (code health) and note framework-audit is also due. Then continue to Step 1.
@@ -84,14 +85,21 @@ whether a continuous resume may open a task.
 ENDS ITS TRIGGER AND STOPS** — the mode was revoked or completed, possibly from another session.
 **NEVER fall through to a sprint proposal on such a firing:** it would re-propose on every firing,
 unattended.
+- **The `continuous` ARGUMENT is what marks a trigger firing** — only a recurring trigger carries it
+  (`autonomous-loop` → C6 arms it that way). An owner who wants to START continuous mode asks for it in
+  words and runs this skill WITHOUT the argument; the request then reaches Step 4d, never this branch.
+- **ALWAYS END the trigger with the mechanism it provides** — do not schedule the next wake-up of a
+  self-paced `/loop`, delete a fixed-interval `/loop`'s job, disable a scheduled session — and name it
+  in the report line below.
 
 **ALWAYS REPORT the check — `loop marker: none` or `loop marker: active → handing off to
 autonomous-loop (phase X of Y)` or `loop marker: active → handing off to autonomous-loop
-(continuous, state S)` or `loop marker: none — continuous trigger ended (no marker)`. NEVER emit nothing.** This step is the INVOKER of the loop's
+(continuous, state S)` or `loop marker: none — continuous trigger ended (no marker; [mechanism])`. NEVER emit nothing.** This step is the INVOKER of the loop's
 resume (component-design §9): nobody reads the `autonomous-loop` frontmatter in a session that has
 not already decided to run it. Mechanical self-check (expected result stated):
-`grep -c "LOOP CONTINUATION — active" .claude/phases/project.md` → `1` means hand off, `0` means
-continue below.
+`grep -c "LOOP CONTINUATION — active" .claude/phases/project.md` → `1` means hand off; `0` means
+continue below — EXCEPT on a firing carrying the `continuous` argument, where `0` means end the
+trigger and stop.
 
 ### 1b. Check for MODEL SWITCH continuation
 
@@ -176,7 +184,7 @@ sprint for the task named in the marker. Context has changed and the continuatio
 ### Audit cadence: codebase-audit [due at N — proposed | not due, N of M | n/a — not installed]
                    framework-audit [same three verdicts]   (ALWAYS present; never blank)
                    (`n/a — skill not installed`, verbatim from the step; NEVER paraphrased)
-### Loop marker: [none | active → handing off to autonomous-loop (phase X of Y) | active → handing off to autonomous-loop (continuous, state S) | none — continuous trigger ended (no marker)]   (ALWAYS present)
+### Loop marker: [none | active → handing off to autonomous-loop (phase X of Y) | active → handing off to autonomous-loop (continuous, state S) | none — continuous trigger ended (no marker; [mechanism])]   (ALWAYS present)
 ### Audit due: [n/a | last run was INCOMPLETE (steps N,M)]   (ALWAYS present when a check reports it)
 ### Tasks selected (N):
 1. Task [N] — [name] (complexity, estimated scope)

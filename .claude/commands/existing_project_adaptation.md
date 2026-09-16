@@ -244,7 +244,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.25.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.26.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -565,7 +565,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.25.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.26.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -602,15 +602,22 @@ NONE of it" (`/audit` 2026-09-14 X-4).
 - **NEVER skip silently** — the project would keep an old contract under the new version label.
 
 **THE CONTINUOUS-MODE COUPLED SET — ALWAYS refresh ALL of it or NONE of it:** `autonomous-loop`,
-`sprint-proposer`, `pendencias-updater`, `validation-orchestrator`, `session-end`, and — when
-installed — `codebase-audit`, `skill-gate` and the `diff-pattern-extractor` agent. Continuous mode
+`sprint-proposer`, `pendencias-updater`, `validation-orchestrator`, `session-end`,
+`project-md-updater`, the `prd-sync-checker` agent, and — when installed — `codebase-audit`,
+`skill-gate` and the `diff-pattern-extractor` agent. Continuous mode
 reads an untagged task as `owner`; refreshing `autonomous-loop` without the writers that tag
 discovered tasks would admit every AI-filed task uncapped. `autonomous-loop` → "Continuous mode" →
 C1 fails CLOSED on that state, so a partial refresh leaves the mode unavailable rather than unsafe —
 but only a full refresh makes it usable (`/audit` 2026-09-14 W-2).
+**v2.26.0 migration — two members joined the set.** `prd-sync-checker` now tags the tasks it adds, and
+C1's writer check is DERIVED from every installed component that mentions `pendencias`, so an older
+`prd-sync-checker` reads as an untagged writer and continuous mode stays unavailable. And
+`project-md-updater` now writes the `counts as N sessions for audit cadence` weight that
+`sprint-proposer` Step 0 reads — an older copy leaves every loop session counted as 1.
 
-**REFRESH — ONLY what the owner chose. `cp -r SRC DEST` onto an EXISTING `DEST` nests it
-(`DEST/<name>/SKILL.md`), so ALWAYS remove, then copy, with these helpers** (`/audit` 2026-09-14 X-4):
+**REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
+(`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
+**ALWAYS remove, then copy, with these helpers:**
 ```bash
 # Each helper VALIDATES THE SOURCE and THE TARGET'S KIND BEFORE touching anything: an empty or
 # template-less name must never reach `rm -rf`, and `cp` onto a DIRECTORY writes INSIDE it.
@@ -652,7 +659,7 @@ for agent in prd_sync_checker criteria_enforcer diff_pattern_extractor; do
   else
     cmp -s "docs/modules/agents/${agent}.md" "projects/$ARGUMENTS/.claude/agents/$dest_name.md"; rc=$?
     if [ $rc -eq 0 ]; then echo "SKIPPED (identical): $dest_name.md"
-    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $dest_name.md — owner decides: refresh or keep (diff-pattern-extractor is in the coupled set above)"
+    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $dest_name.md — owner decides: refresh or keep (diff-pattern-extractor and prd-sync-checker are in the coupled set above)"
     else echo "FAILED to compare agent: $dest_name.md"; fi
   fi
 done
@@ -661,9 +668,9 @@ done
 **Copy rules files (to `.claude/rules/`):**
 ```bash
 # FOUR DIRECTORIES THIS FENCE CREATES: `.claude/rules/`, which the loop below writes into, plus
-# THREE THIS COMMAND WRITES INTO AND NEVER CREATED (`/audit` 2026-09-14 Y-10). `cp` to a missing directory
-# FAILS, and this command targets projects with only PARTIAL framework structure, so none of
-# the three can be assumed: `.claude/agents/` (Step 4.6.5 copies specialists into it),
+# THREE THIS COMMAND WRITES INTO LATER (`/audit` 2026-09-14 Y-10). A write — `cp` or a `sed … >`
+# redirect — to a missing directory FAILS, and this command targets projects with only PARTIAL
+# framework structure, so this fence does not assume an earlier fence ran: `.claude/agents/` (Step 4.6.5 copies specialists into it),
 # `assets/docs/` (Phase 3 writes the retroactive PRD into it) and `.claude/docs/` (the upstream
 # channel `evolution-policy.md` mandates). Bootstrap created the first two and this twin did
 # not — twin asymmetry, found by the LATERAL directory sweep (`/audit` 2026-09-11).
@@ -778,7 +785,8 @@ tier_skill() { d="$PROJ/.claude/skills/$1"
   elif [ ! -d "$d" ]; then echo "FAILED to copy skill: $1 — a file occupies the target"
   else diff -rq "docs/modules/skills/$1" "$d" >/dev/null 2>&1; rc=$?
     if [ $rc -eq 0 ]; then echo "SKIPPED (identical): $1"
-    elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: $1 — owner decides: refresh or keep (Step 2.9 coupled set)"
+    elif [ $rc -eq 1 ]; then case "$1" in codebase-audit|skill-gate) m=" (Step 2.9 coupled set)" ;; *) m="" ;; esac
+      echo "DIFFERS from framework: $1 — owner decides: refresh or keep$m"
     else echo "FAILED to compare skill: $1"; fi
   fi; }
 tier_agent() { n=$(echo "$1" | tr '_' '-'); d="$PROJ/.claude/agents/$n.md"
@@ -825,7 +833,7 @@ esac
 **Step 2.9's STOP rule governs every `FAILED` line the fence above prints.**
 
 **THE COUPLED-SET QUESTION — ALWAYS ASK IT HERE, ONCE, over the members' verdicts from Steps 2.9 AND
-2.9b.** The members are the five lifecycle skills and `diff-pattern-extractor` (Step 2.9) plus
+2.9b.** The members are the six lifecycle skills and the `diff-pattern-extractor` and `prd-sync-checker` agents (Step 2.9) plus
 `codebase-audit` and `skill-gate` whenever they are PRESENT in the project — installed by the fence
 above at this tier, or left from an earlier one (a leftover copy is still a writer continuous mode reads).
 - **ALWAYS show every differing member's diff before asking.**
@@ -836,12 +844,13 @@ above at this tier, or left from an earlier one (a leftover copy is still a writ
 case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
 [ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
 command -v refresh_skill >/dev/null 2>&1 || { echo "FAILED to refresh: the Step 2.9 helpers are not defined in this invocation"; exit 1; }
-for s in autonomous-loop sprint-proposer pendencias-updater validation-orchestrator session-end; do refresh_skill "$s"; done
+for s in autonomous-loop sprint-proposer pendencias-updater validation-orchestrator session-end project-md-updater; do refresh_skill "$s"; done
 for s in codebase-audit skill-gate; do
   # `-e`, never `-d`: a FILE at the target must reach refresh_skill's own "a file occupies" FAILED.
   if [ -e "projects/$ARGUMENTS/.claude/skills/$s" ]; then refresh_skill "$s"; else echo "SKIPPED (not installed): $s"; fi
 done
 refresh_agent diff_pattern_extractor
+refresh_agent prd_sync_checker
 ```
 
 **`framework-audit` + `session-log-creator` ↔ `autonomous-loop` (v2.25.0 migration) — at `production`+,
