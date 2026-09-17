@@ -188,6 +188,7 @@ R-7, R-8). **Append a row; never re-derive the old ones.**
 | 14 | `audit-2026-09-15.md` | Run 1 | `**Run mode:** verification (over 6b4baa8 · 30c3d6e · d156dc4)` | 10 of 17 |
 | 15 | `audit-2026-09-15.md` | Run 2 | `**Run mode:** verification (over afa8ef0)` | 11 of 15 |
 | 16 | `audit-2026-09-15.md` | Run 3 | `**Run mode:** verification (over 7a7d1db)` | 7 of 10 |
+| 17 | `audit-2026-09-16.md` | Run 1 | `**Run mode:** verification (over 5ecefa9 · 28b157a · db70667 · 847d18f)` | 15 of 31 |
 
 **No trend** — derive each row's share from the table above; NEVER copy the percentages onto this
 line (it carried 11 figures for a 12-row table, `/audit` 2026-09-14 Y-13). Batch size has been
