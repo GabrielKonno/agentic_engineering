@@ -94,8 +94,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 
 ### Framework repo (this repo)
 - **Clone once:** `git clone [url] ~/agentic_engineering`
-- **Update before every bootstrap/adaptation:** `git fetch && git status -sb` — expected: a `...`
-  tracking segment and NOT behind. A bare `## main` with no tracking segment is RED, not green —
+- **Update before every bootstrap/adaptation:** `git fetch --prune && git status -sb` — expected: a `...`
+  tracking segment, NOT behind and NOT `[gone]`. A bare `## main` with no tracking segment is RED, not green —
   the command compared against nothing. Then `git pull` (clone) or
   `git fetch upstream && git merge upstream/main` (fork — the flow README recommends; a bare
   `git pull` on a fork pulls the fork's own origin, not upstream).

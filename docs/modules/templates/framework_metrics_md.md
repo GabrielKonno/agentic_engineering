@@ -22,10 +22,12 @@
 > `Status` = `COMPLETE` or `INCOMPLETE (questions N,M not answered — reason)`, or `IN PROGRESS`
 > while the run is fanned out (written BEFORE the fan-out, replaced when it ends). Neither an
 > INCOMPLETE nor an IN PROGRESS row satisfies `FRAMEWORK_AUDIT_CADENCE`.
+> A finished row's Status cell ALSO carries the per-question line `steps: 1 ✅ · … · 6 ✅`
+> (session-rules → "Cadence integrity").
 
 | Session | Date | Status | Escape rate | Reviewer false-positives | Dead KBPs (never triggered) | Mechanisms never fired | Drift incidents | Oldest open debt | Evolutions pending upstream |
 |---------|------|--------|-------------|--------------------------|-----------------------------|------------------------|-----------------|------------------|-----------------------------|
-| 0 | [date] | COMPLETE | — | 0 | 0 | — | 0 | — | 0 (baseline) |
+| 0 | [date] | COMPLETE — steps: 1 ✅ · 2 ✅ · 3 ✅ · 4 ✅ · 5 ✅ · 6 ✅ | — | 0 | 0 | — | 0 | — | 0 (baseline) |
 
 **Column sources (all harvested, none measured live):**
 

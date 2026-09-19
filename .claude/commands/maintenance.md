@@ -215,13 +215,14 @@ actually receive — stayed small (`/audit` D17.6). These four rules stop the lo
    judgement:
    ```bash
    S=$(git diff --name-only <first>~1 <last> -- docs/modules examples .claude/commands/bootstrap.md .claude/commands/existing_project_adaptation.md | wc -l)
-   HM=$(grep -hE '^\| [A-Z]-[0-9]+ \| (HIGH|MEDIUM) \|' <every report this batch applied findings from> | grep -cE 'applied `?s(<hash>|<hash>)')
+   HM=$(grep -hE '^\| [A-Z]-[0-9]+ \| (HIGH|MEDIUM) \|' assets/docs/audit-*.md | grep -cE 'applied `?s(<hash>|<hash>)')
    [ "$S" -gt 0 ] || [ "$HM" -gt 0 ] && echo "trigger (d): fires — shipped files $S, HIGH/MEDIUM applied $HM" || echo "trigger (d): does not fire — apparatus-only, LOW-only"
    ```
    **Expected: one of the two lines.** A batch that fires it proposes the verification audit;
    one that does not reports so and proposes nothing.
-   **ALWAYS pass EVERY report the batch disposed findings from** — one file counted 2 where 7 were
-   applied across two reports (`/audit` 2026-09-16 A-32).
+   **ALWAYS read the GLOB, never a typed report list — the batch's hashes do the scoping.** One file counted
+   2 where 7 were applied across two reports (`/audit` 2026-09-16 A-32), and the list that replaced it was
+   still typed from memory (`/audit` 2026-09-19 C-9).
 2. **LOW FINDINGS ARE A BACKLOG, NEVER A SESSION.** They stay `open` and are carried forward
    mechanically (`/audit` Phase 3 item 3).
    - **NEVER open a maintenance session to apply only LOW findings on apparatus surfaces.**
@@ -921,7 +922,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # RE-MEASURE THIS AT THE FINAL TIP, NEVER MID-BATCH. Written mid-batch it read 54, then 60,
    # and both were stale before the batch closed — U-6's own class, inside U-6's own fix.
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
-   git diff --cached -U0 .claude/commands/ | grep '^+' \
+   git diff --cached -U0 .claude/commands/ docs/modules/ | grep '^+' \
      | grep -cE '(grep|python -c|diff -r|git (diff|show|status)|node|sed -n)'
    # 3. RUN EVERY CONTROL IN (1), not only those in (2), and paste each one's stdout.
    ```
@@ -929,13 +930,17 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    every control in (1) has a `$` line with its literal output in the receipts.** A control you did
    not run is not a control you may report GREEN.
    3. **RUN EVERY OTHER CONTROL IN THIS CHECKLIST against those shapes**, not only the new one.
+      **ALWAYS include every fenced control inside a `docs/modules/` file this batch changed** — a shipped
+      control whose target text a batch reflowed read `N/A — numerator 0` here and listed 0 components in
+      every project (`/audit` 2026-09-16 A-3, A-4).
       A control written for the old shape and never re-run against the new one is the defect:
       a row-count gate whose command reaches one commit of six; a key list that predates the key
       the same batch mandated; a sum rule broken by the first line written under it; a heading rule
       contradicting the receipts form authorised beside it. All four shipped in one batch.
    4. **PROVE EACH AMENDED CONTROL BY NEGATION, WITH A COMMAND** — `component-design` §9 rule 4.
-      Run it against a state that MUST make it red, planted only inside
-      `bash .claude/scripts/probe-sandbox.sh run --staged -- …`. **A check that has never gone red is not
+      **ALWAYS run it against a state that MUST make it red, planted ONLY inside
+      `bash .claude/scripts/probe-sandbox.sh run --staged -- …`, and ALWAYS paste the final `probe-sandbox:`
+      line beside its output** (`/audit` 2026-09-19 C-18). **A check that has never gone red is not
       evidence of health; it is an unproven claim.** Three checks shipped in one batch could not
       fail at all: a guard asserting a symptom the command does not produce, a harvest regex whose
       character class could not cross an em-dash, and a second one blind to the key class of the
@@ -1088,12 +1093,14 @@ Each item encodes a real miss that survived a first pass and was only caught by 
     (`/audit` 2026-09-14 X-17, Y-15). Their first home then left most of that unwritten
     (`/audit` 2026-09-15 B-8, B-9).
     **ALWAYS SPAWN at least one independent verifier subagent before committing a batch that changes
-    ANY file under `.claude/commands/`, `.claude/scripts/` or `docs/modules/skills/`.** The trigger is
+    ANY file under `.claude/commands/`, `.claude/scripts/` or `docs/modules/`.** The trigger is
     this count, never a judgement — the earlier trigger named only bash fences and scripts, and the
-    defect its own verifier missed sat in a shipped skill (`/audit` 2026-09-15 B-8):
+    defect its own verifier missed sat in a shipped skill (`/audit` 2026-09-15 B-8), and the next form,
+    scoped to `docs/modules/skills`, read `0` on a batch that changed a shipped RULE by 73 lines (`/audit`
+    2026-09-16 A-5):
     ```bash
-    git diff --cached --name-only -- .claude/commands .claude/scripts docs/modules/skills | wc -l   # PRE-COMMIT: 0 = N/A; anything else = a round is owed
-    git diff --name-only <first>~1 <last> -- .claude/commands .claude/scripts docs/modules/skills | wc -l   # THE RECEIPT: the same count over the batch
+    git diff --cached --name-only -- .claude/commands .claude/scripts docs/modules | wc -l   # PRE-COMMIT: 0 = N/A; anything else = a round is owed
+    git diff --name-only <first>~1 <last> -- .claude/commands .claude/scripts docs/modules | wc -l   # THE RECEIPT: the same count over the batch
     ```
     **RUN THE RANGE FORM FOR THE RECEIPT, NEVER THE INDEX FORM.** Receipts are written after the commit, when
     the index is empty: the index form then reads `0` and the receipt would claim `N/A` for a batch that
@@ -1104,7 +1111,8 @@ Each item encodes a real miss that survived a first pass and was only caught by 
       ```bash
       out=$(bash .claude/scripts/probe-sandbox.sh run --staged --keep -- mkdir -p projects/qzxv-wqjk)   # invented name, no dictionary-word part
       M=$(printf '%s\n' "$out" | sed -n 's/^probe-sandbox: kept at //p'); [ -n "$M" ] || echo "RED: $out"
-      # afterwards — guarded, because an empty M makes `dirname` return `.`:  [ -n "$M" ] && rm -rf "${M%/r}"
+      # ... hand "$M" to the verifier; the next line is NOT optional — run it when the verifier returns:
+      [ -n "$M" ] && rm -rf "${M%/r}" && echo "scratch mother repo deleted"   # guarded: never an rm over an empty path
       ```
     - **ALWAYS give it the isolation rule `/audit` → Phase 1 prepends to every agent, verbatim** — a verifier probes fences by executing them.
     - **ALWAYS ask it the FOUR CROSS-SURFACE questions, not only whether each fence behaves:** (a) does every verdict string a changed fence can print have a slot in that command's report; (b) is every ALWAYS/NEVER line added to one command twin present in the other, or named twin-specific; (c) does every step reference the batch adds point to an EARLIER step, or is it flagged; (d) does every rule the batch adds that names another component, field, signal or role point at a step or section that PRODUCES it, in a component installed at every tier the rule ships to. Every residue of the batch verified fence-by-fence was one of (a)-(c) (`/audit` 2026-09-15 Run 2 meta-observation); (d) is the class that reappeared in the shipped skill once (a)-(c) cleared the twins (`/audit` 2026-09-15 Run 3, B-11, B-12).

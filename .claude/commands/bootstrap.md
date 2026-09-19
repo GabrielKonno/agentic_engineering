@@ -50,7 +50,7 @@ Execute in order. Report results after each part.
 ```bash
 git remote -v                                        # (a) EVERY remote — NEVER `head -1`: a fork's `upstream` is usually the second
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch track one?
-git fetch && git status -sb | head -1                # (c) ahead/behind
+git fetch --prune && git status -sb | head -1        # (c) ahead/behind — `--prune`: a remote that dropped the branch reads `[gone]`, never a stale `...` (`/audit` 2026-09-19 C-7)
 ```
 
 **Classify into exactly one of the SEVEN outcomes below — the table is exhaustive and its last row is the CATCH-ALL — the check FAILS CLOSED, never open:**
@@ -62,7 +62,7 @@ git fetch && git status -sb | head -1                # (c) ahead/behind
 | (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
 | (c) produced NO line — `git fetch` failed, so `&&` short-circuited | **RED — STOP.** `fetch failed — UNVERIFIABLE, STOPPED`. Re-run the two commands separately to see the error. |
 | (c) branch line contains `behind` | **RED — STOP.** `behind by N commits — STOPPED`. |
-| (c) branch line shows a `...` tracking segment and no `behind` | `up to date`. CONTINUE. |
+| (c) branch line shows a `...` tracking segment and neither `behind` nor `[gone]` | `up to date`. CONTINUE. A `[gone]` segment — the remote dropped the branch, which `--prune` makes visible — falls to the CATCH-ALL (`/audit` 2026-09-19 C-7). |
 | **anything else — any observation matching no row above** | **RED — STOP.** `unverifiable — STOPPED`. This CATCH-ALL is what makes the check fail CLOSED; without it an unmatched state is undefined rather than red (`/audit` 2026-09-02 K-1). |
 
 **NEVER read a bare `## main` (no `...upstream` segment) as "up to date".** With a remote present
@@ -169,7 +169,7 @@ tier-gated copy downstream is running off an unresolved profile.
 | Skeleton / ceremony | prototype | internal-tool | production | production-financial |
 |---------------------|:---------:|:-------------:|:----------:|:--------------------:|
 | Core: per-diff review, criteria-enforcer, KBP loop, session archetypes, per-incident post-mortem, class-checklist | ✅ | ✅ | ✅ | ✅ |
-| CI floor at t=0 (Step 14) | — | ✅ | ✅ | ✅ |
+| CI floor at t=0 (Step 14.2) | — | ✅ | ✅ | ✅ |
 | metrics.md (Step 5.8) + back-sweep + debt-aging + Post-Mortem ledger | — | ✅ | ✅ | ✅ |
 | codebase-audit skill (Step 5.8) | — | ✅ sparse | ✅ | ✅ |
 | skill-gate + skill-reviewer (Step 5.8) | — | ✅ | ✅ | ✅ |
@@ -695,6 +695,13 @@ existed on one; a prior receipt recorded that absence as a clearance rather than
 echo "=== Activation chain integrity? ==="
 norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/.' '    ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
 AG="projects/$ARGUMENTS/.claude/agents"
+# FAIL CLOSED WHEN `grep -P` CANNOT RUN (a C/POSIX locale on Git for Windows, or BSD/macOS grep). The
+# harvests below discard grep's stderr, so a grep that cannot run read as "no declaring component" and
+# printed the healthy `none installed` with exit 0 on a fully populated project (`/audit` 2026-09-19 C-2).
+if ! printf 'a
+' | grep -qP 'a' 2>/dev/null; then
+  echo "RED: this grep cannot run -P (C/POSIX locale, or a grep without PCRE) - the check cannot run"; exit 1
+fi
 declared=""; declarers=""
 for f in "$AG"/*.md; do
   [ -f "$f" ] || continue
@@ -744,7 +751,8 @@ echo "activation chains: $verified verified, $broken broken, $info info"
 ```
 
 **ALWAYS REPORT the loop's literal last line — `activation chains: N verified, M broken, I info`,
-or `activation chains: none installed - no declaring component in <path>`. NEVER emit nothing.**
+or `activation chains: none installed - no declaring component in <path>`, or one of the loop's two
+`RED: … - the check cannot run` lines, verbatim (a RED run's last line is the RED). NEVER emit nothing.**
 (**COPIED FROM the loop verbatim.** It emits THREE counts, so a two-count slot cannot receive it, and
 `none installed` is now a real branch rather than a verdict the step could never produce —
 `/audit` 2026-09-09 T-13, T-14.)
@@ -868,7 +876,7 @@ git commit -m "chore: bootstrap from agentic framework"
 
 **Do NOT run `git remote add origin` or `git push`.** The remote URL is project-specific and must be provided by the user after bootstrap. Step 15 will instruct the user on the exact commands to run.
 
-**If the commit fails because `user.name` / `user.email` is not configured:** report the error in Step 15's output and instruct the user to set those locally inside the project (`git -C projects/$ARGUMENTS config user.name "..."` / `user.email "..."`) and then re-run the two commands above. Do NOT modify global git config.
+**If the commit fails because `user.name` / `user.email` is not configured:** report the error in Step 15's output and instruct the user to set those locally inside the project (`git -C projects/$ARGUMENTS config user.name "..."` / `user.email "..."`) and then re-run the THREE commands of the fence above, `cd projects/$ARGUMENTS` FIRST — from the framework root the `-C` form implies, a bare `git add -A` stages in the framework repo (`/audit` 2026-09-19 C-23). Do NOT modify global git config.
 
 ---
 
@@ -896,8 +904,11 @@ git commit -m "chore: bootstrap from agentic framework"
 ### Activation chains (Step 12.5b) — ALWAYS report, never omit:
 - `activation chains: N verified, M broken, I info`
 - `activation chains: none installed - no declaring component in <path>`
-  (BOTH verdicts the loop can emit, and ONLY those two — **COPIED FROM the loop's own two `echo`
-  lines, never re-derived** (Gate 4). The loop emits THREE counts and this slot offered two, so a
+- `RED: this grep cannot run -P (C/POSIX locale, or a grep without PCRE) - the check cannot run`
+- `RED: declaring components present but no gap parsed - the check cannot run`
+  (the FOUR verdicts the loop can emit, and ONLY those four — **COPIED FROM the loop's own `echo`
+  lines, never re-derived** (Gate 4). The two RED lines had no slot — one of them added by
+  `/audit` 2026-09-19 C-2 — so a RED run had nowhere to land. The loop emits THREE counts and this slot offered two, so a
   compliant discharge had nowhere to land; the `none installed` verdict carries the path. The
   MANDATE was corrected on both twins and the SLOT was not — `/audit` 2026-09-10 U-5, U-13.)
 
@@ -1022,7 +1033,7 @@ the per-MCP connection status.]
 - Status: ✅ committed `[hash]` / ❌ FAILED — [reason]
 - Repo root verified: `git rev-parse --show-toplevel` → [path printed]
 - If ❌ (e.g. `user.name` / `user.email` unset): the repo has NO commit yet. Instruct the owner to
-  set the identity locally and re-run Step 14.5's two commands BEFORE the remote block below —
+  set the identity locally and re-run Step 14.5's three commands (`cd` first) BEFORE the remote block below —
   `git push` against a commit-less repo does nothing useful.
 
 ### Next session should:

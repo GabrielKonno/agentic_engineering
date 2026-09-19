@@ -389,8 +389,8 @@ step needs. The orchestrator MUST keep an explicit RESOURCE map when dispatching
 > The mutator/reader and scratchpad rules come from ONE observed loop session in a production
 > project; the classify-by-prompt rule from that project's later meta-audit, which found the
 > name-based wording still permitted the original incident — two reviewers, both named as readers,
-> had injected mutants into the shared tree and collided. They are cheap to follow and kept as
-> HYPOTHESES. **Their measurer is `framework-audit` →
+> had injected mutants into the shared tree and collided. They are cheap to follow and
+> kept as HYPOTHESES. **Their measurer is `framework-audit` →
 > Q4 → the HYPOTHESIS check**, which counts the typed `- mutator/reader overlap:` and
 > `- scratchpad collision:` lines in the `## Orchestration lessons` section `session-log-creator`
 > writes into `.claude/logs/` (a mutator/reader overlap is, for example, a reviewer verdict discarded

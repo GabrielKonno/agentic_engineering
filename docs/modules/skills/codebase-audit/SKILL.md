@@ -102,6 +102,12 @@ ones a usage limit, a dead fan-out agent, or an owner interrupt kills first; ste
 survives. NEVER write `COMPLETE` because the metrics step itself succeeded (session-rules →
 "Cadence integrity"). The data in a partial row stays valid and readable; only the completeness
 claim is withheld — and withholding it is what keeps the cadence honest.
+**ALWAYS RUN session-rules → "Cadence integrity"'s self-check over the row's Status cell and REPORT it as
+`steps self-check: [1 match | RED]`** — the rule's self-check had no executing step (`/audit` 2026-09-16 A-19):
+`grep -E '^\| *[0-9]+ *\|' .claude/phases/metrics.md | tail -1 | awk -F'|' '{print $4}' | grep -oiE 'steps:' | wc -l`
+→ **expected 1**, and the same cell piped to `grep -cE '⏭️ *([^( ]|$)'` → **expected 0**. It selects the LAST
+DATA ROW, never the file's last line: a table followed by prose read RED on a healthy row (this batch's
+pre-commit verifier, 2026-09-19).
 
 ### 6. Debt-aging triage — the backlog AND the Known Bug Patterns
 
@@ -120,7 +126,8 @@ this skill exists).
 grep -n 'not greppable' .claude/phases/pendencias.md
 ```
 ALWAYS give EVERY hit an explicit verdict: **SWEPT** (the semantic sweep was done now — N violations
-found, each filed as a task) / **CLOSE** (obsolete) / **KEEP** (with a reason). A hit left without a
+found, each filed as a task tagged `origin: discovered (sN, codebase-audit)`, like every other task this
+skill writes — `/audit` 2026-09-16 A-24) / **CLOSE** (obsolete) / **KEEP** (with a reason). A hit left without a
 verdict makes this step ⏭️ for CAPACITY, and the audit `INCOMPLETE`.
 
 **ALWAYS CHECK that every guard script has an EXECUTABLE invoker** (component-design §9) — a script
@@ -129,17 +136,22 @@ guard/check scripts (e.g. `ls scripts/check-*`, or the `check:*` entries of its 
 each one grep its name in the CI workflows and in `.claude/skills`, `.claude/commands` and
 `.claude/agents`:
 ```bash
-# Invokers = CI config (any provider present) + skills/commands/agents. A task-runner alias whose
+# Invokers = CI config (any provider present) + hook runners (`.claude/settings.json` hooks, `.husky/`,
+# `.pre-commit-config.yaml`, `lefthook.yml`) + a `Makefile` + skills/commands/agents. Without the hook runners
+# and the Makefile, guards with real invokers printed NO INVOKER (`/audit` 2026-09-16 A-13). A task-runner alias whose
 # command names the script (a package.json "check:agents" running scripts/check-agent-frontmatter.mjs)
 # counts as the script's own name. Names match at word boundaries: check-backup is not check-backup-age.
-CI=$(ls -d .github/workflows .gitlab-ci.yml .circleci azure-pipelines.yml bitbucket-pipelines.yml Jenkinsfile 2>/dev/null)
+CI=$(ls -d .github/workflows .gitlab-ci.yml .circleci azure-pipelines.yml bitbucket-pipelines.yml Jenkinsfile \
+  .husky .pre-commit-config.yaml lefthook.yml Makefile 2>/dev/null)
+HOOKS=$(grep -hsE '"command" *:' .claude/settings.json)   # hook COMMANDS only — a permissions.allow entry naming a script is not an invoker
 n=0; k=0
 for s in $(ls scripts/check-* 2>/dev/null); do
   b=$(basename "$s"); b=${b%.*}; n=$((n+1)); names="$b"
   q=$(printf '%s' "$b" | sed 's/[.]/[.]/g')   # a dot in a name is a literal dot, never "any character"
   [ -f package.json ] && names="$names $(grep -oE '"[A-Za-z0-9:_.-]+": *"[^"]*'"$q"'[^"]*"' package.json | cut -d'"' -f2)"
   hit=0; for nm in $names; do nq=$(printf '%s' "$nm" | sed 's/[.]/[.]/g')
-    grep -rqsE "(^|[^A-Za-z0-9:_.-])$nq([^A-Za-z0-9:_-]|[.][a-z]|\$)" $CI .claude/skills .claude/commands .claude/agents && hit=1; done
+    re="(^|[^A-Za-z0-9:_.-])$nq([^A-Za-z0-9:_-]|[.][a-z]|\$)"
+    { grep -rqsE "$re" $CI .claude/skills .claude/commands .claude/agents || printf '%s\n' "$HOOKS" | grep -qE "$re"; } && hit=1; done
   [ "$hit" = 1 ] || { k=$((k+1)); echo "NO INVOKER: $b"; }
 done
 echo "guard invokers: $n scripts checked, $k without invoker"
@@ -179,6 +191,7 @@ C3), and an untagged task is read as `owner`.
 ## Codebase Audit Report — Session N
 ### Completion status: COMPLETE | INCOMPLETE (steps N,M not run — reason)   ← ALWAYS first line
 ### Steps: 1 ✅ · 2 ✅ · 3 ✅ · 4 ✅ · 5 ✅ · 6 ✅ · 7 ✅   (⏭️ only with a structural reason in parentheses)
+### Steps self-check: [1 match | RED — the metrics.md row's Status cell carries no `steps:` line, or a bare ⏭️]   (ALWAYS present)
 ### Breadth findings (by dimension):
 | Dimension | Findings | Severity | → task added |
 ### Depth findings (specialists run): [list, or "none — no confirmed money/security findings"]

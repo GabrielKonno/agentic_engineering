@@ -66,7 +66,10 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    **ALWAYS ENUMERATE the rules, then COUNT each one's named signal in the session logs since the last
    framework-audit:**
    ```bash
-   grep -rlE '^> .*kept as HYPOTHES' .claude/skills .claude/rules      # the components to measure
+   # the components to measure — BLOCKQUOTE-ANCHORED and WRAP-TOLERANT: a reflow split `kept as` from
+   # `HYPOTHESES` across two `> ` lines and a line-anchored grep listed 0 components (`/audit` 2026-09-16 A-3);
+   # an unanchored join then listed THIS skill through its own report string. Only `> ` lines are joined.
+   for f in $(grep -rlE 'HYPOTHES' .claude/skills .claude/rules); do grep -E '^> ' "$f" | tr -d '\r' | tr '\n' ' ' | grep -qE 'kept as[ >]*HYPOTHES' && echo "$f"; done
    FM=.claude/phases/framework-metrics.md
    if [ ! -f "$FM" ]; then echo "RED: $FM missing — no window"; else
      SINCE=$(grep -E '^\| *[0-9]+ *\| *[0-9]{4}-[0-9]{2}-[0-9]{2} *\| *COMPLETE' "$FM" | tail -1 | awk -F'|' '{gsub(/[- ]/,"",$3); print $3}')
@@ -126,6 +129,18 @@ derived from which of the six questions actually ran** — never from the fact t
 itself succeeded. The six questions are the expensive half (fan-out over logs, ledgers, components);
 this rollup is the cheap half that survives an interrupt. An INCOMPLETE row records valid data but
 does NOT satisfy `FRAMEWORK_AUDIT_CADENCE` (session-rules → "Cadence integrity").
+**ALWAYS write the per-question line beside the status, in the row's Status cell AND under the report's
+`### Completion status` heading** — `steps: 1 ✅ · 2 ✅ · 3 ✅ · 4 ✅ · 5 ✅ · 6 ⏭️ (structural reason)`. The
+rule requires it of every periodic mechanism, and this skill wrote none, so every entry failed the rule's
+own self-check by construction (`/audit` 2026-09-16 A-7).
+**ALWAYS RUN session-rules → "Cadence integrity"'s self-check over the row, and REPORT it as
+`steps self-check: [1 match | RED]`** — the rule's self-check had no executing step (`/audit` 2026-09-16 A-19).
+It selects the LAST DATA ROW, never the file's last line — the template's table is followed by prose:
+```bash
+FM=.claude/phases/framework-metrics.md; ROW=$(grep -E '^\| *[0-9]+ *\|' "$FM" | tail -1)
+printf '%s\n' "$ROW" | awk -F'|' '{print $4}' | grep -oiE 'steps:' | wc -l             # expected: 1
+printf '%s\n' "$ROW" | awk -F'|' '{print $4}' | grep -cE '⏭️ *([^( ]|$)'                # expected: 0
+```
 
 ## Output & safety
 
@@ -148,6 +163,8 @@ friendly until approved.
 ```
 ## Framework Audit Report — Session N
 ### Completion status: COMPLETE | INCOMPLETE (questions N,M not answered — reason)   ← ALWAYS first line
+steps: 1 ✅ · 2 ✅ · 3 ✅ · 4 ✅ · 5 ✅ · 6 ✅   ← ⏭️ only with a structural reason in parentheses
+steps self-check: [1 match | RED]
 ### Q1 Dimension coverage: [orphaned dimensions, or "all owned"]
 ### Q2 Axis coverage: [missing axes/bridges, or "complete"]
 ### Q3 Recurring escape classes: [classes with no owner, or "none"]

@@ -185,26 +185,50 @@ opening the deploy PR, ALWAYS run this over the range being shipped** (replace `
 project's code roots from CLAUDE.md):
 ```bash
 R=origin/main..HEAD; L=.claude/logs/review-reports/receipts.md
-if ! C=$(git log --no-merges --format=%H "$R" -- src 2>&1); then
-  echo "RED: range $R unreadable — nothing checked"          # no remote yet, bad ref: FAILS CLOSED
+P="src"   # REPLACE with the project's code roots from CLAUDE.md, space-separated
+PASS='APPROVE|APPROVED|PASS|PASSED|✅'   # the ONLY verdicts that clear a commit — FIX REQUIRED, BLOCK, ❌ and any unknown verdict do not
+if ! C=$(git log --no-merges --format=%H "$R" -- $P 2>&1); then
+  echo "review receipts: RED — range unreadable — deploy blocked"; exit 1   # no remote yet, bad ref: FAILS CLOSED
+elif [ -z "$(git ls-files -- $P | head -1)" ]; then
+  echo "review receipts: RED — pathspec '$P' matches no tracked file — deploy blocked"; exit 1
 else n=0; k=0
   for c in $C; do n=$((n+1))
     git log -1 --format=%B "$c" | grep -qE '^Review-Exempt: .{10,}' && continue
-    grep -E '^- [^·]+ · [^·]+ · ' "$L" 2>/dev/null | grep -q "${c:0:7}" || { k=$((k+1)); echo "NO RECEIPT: ${c:0:7}"; }
+    # Only receipts whose `commits:` field names the hash count. EACH reviewer's LATEST verdict must be in
+    # PASS: one reviewer's APPROVE never overrides another's BLOCK. An owner exemption line clears the commit.
+    awk -F' · ' -v h="${c:0:7}" -v okre="^($PASS)([^A-Z]|$)" '/^- /{f=$NF; sub(/\r$/,"",f)
+      if (f !~ /^commits: / || (" " f ",") !~ ("[ ,]" h "[ ,]")) next
+      r=$1; sub(/^- +/,"",r); sub(/ +$/,"",r); v=toupper($2); sub(/^ +/,"",v)
+      if (r == "exempt") ex=1; else last[r]=v}
+      END{if (ex) exit 0; n=0; for (r in last) {n++; if (last[r] !~ okre) exit 1}; exit (n ? 0 : 1)}' "$L" 2>/dev/null \
+      || { k=$((k+1)); echo "NO RECEIPT: ${c:0:7}"; }
   done
-  echo "review receipts: $n commits in range, $k without receipt"
+  if [ "$k" = 0 ]; then echo "review receipts: $n commits in range, 0 without receipt"
+  else echo "review receipts: $n commits in range, $k without receipt — deploy blocked"; exit 1; fi
 fi
 ```
-**Expected: exactly one line, `review receipts: N commits in range, 0 without receipt`.** The check
-reads ONLY receipt lines of the ledger — never a log's commit list, where every commit's hash appears.
-Any `NO RECEIPT` or `RED:` line blocks the deploy until a review runs, the range is readable, or the
+**Expected: exactly one `review receipts:` line, and EXIT 0 only on `… 0 without receipt`.** Every other
+outcome exits 1, so a CI stage wiring this in blocks on the verdict itself — an earlier form exited 0 on
+`RED:` and `NO RECEIPT` alike (`/audit` 2026-09-16 A-6). The check reads ONLY receipt lines of the
+ledger, never a log's commit list, where every commit's hash appears.
+**ONLY a PASS verdict clears a commit, and EVERY reviewer's latest verdict on it must be one** — the
+earlier match read neither the verdict nor the `commits:` field, so a `BLOCK` and a hash quoted in another
+line's reason text both read GREEN (`/audit` 2026-09-16 A-9). Its first repair listed BLOCKING verdicts and
+missed `FIX REQUIRED` and `❌`, the ones code-reviewer, security-reviewer and validator actually write, and
+let one reviewer's APPROVE override another's BLOCK (this batch's pre-commit verifier, 2026-09-19). A
+verdict the list does not know BLOCKS — extend `PASS`, never the reverse. A `NO RECEIPT: <sha7>` line
+names each blocked commit; it accompanies the `… K without receipt — deploy blocked` line.
+**ALWAYS set `P` to EVERY code root.** A commit outside `P` is outside the gate by design; a `P` naming
+nothing tracked reads RED rather than `0 commits` (`/audit` 2026-09-16 A-11).
+Any `NO RECEIPT` or `RED` line blocks the deploy until a review runs, the range is readable, or the
 owner exempts the commit. An exemption is written at commit time as a `Review-Exempt: <reason>`
 trailer; for a commit that already exists, NEVER rewrite it — append
-`- exempt · owner decision · <reason> · commits: <sha7>` to the ledger. A commit that
-touches schema or migrations additionally needs a receipt from the adversarial or data reviewer when
-the project has one.
+`- exempt · owner decision · <reason> · commits: <sha7>` to the ledger.
+**ALWAYS require, for a commit that touches schema or migrations, a receipt from the adversarial or data
+reviewer when the project has one** — the gate above does NOT check this; the deploying session does, by
+reading the ledger for that commit (`/audit` 2026-09-16 A-18).
 
-**ALWAYS REPORT — `review receipts: N commits in range, 0 without receipt` or `review receipts: N commits in range, K without receipt — deploy blocked` or `review receipts: RED — range unreadable — deploy blocked`. NEVER emit nothing.**
+**ALWAYS REPORT — `review receipts: N commits in range, 0 without receipt` or `review receipts: N commits in range, K without receipt — deploy blocked` or `review receipts: RED — range unreadable — deploy blocked` or `review receipts: RED — pathspec '<P>' matches no tracked file — deploy blocked` — COPIED from the fence's four `review receipts:` lines. NEVER emit nothing.**
 
 ## Subagent mechanics
 

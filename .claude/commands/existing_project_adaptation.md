@@ -50,7 +50,7 @@ This session reads the existing codebase and documentation, then upgrades everyt
 ```bash
 git remote -v                                        # (a) EVERY remote — NEVER `head -1`: a fork's `upstream` is usually the second
 git rev-parse --abbrev-ref @{upstream} 2>/dev/null   # (b) does THIS branch track one?
-git fetch && git status -sb | head -1                # (c) ahead/behind
+git fetch --prune && git status -sb | head -1        # (c) ahead/behind — `--prune`: a remote that dropped the branch reads `[gone]`, never a stale `...` (`/audit` 2026-09-19 C-7)
 ```
 
 **Classify into exactly one of the SEVEN outcomes below — the table is exhaustive and its last row is the CATCH-ALL — the check FAILS CLOSED, never open:**
@@ -62,7 +62,7 @@ git fetch && git status -sb | head -1                # (c) ahead/behind
 | (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
 | (c) produced NO line — `git fetch` failed, so `&&` short-circuited | **RED — STOP.** `fetch failed — UNVERIFIABLE, STOPPED`. Re-run the two commands separately to see the error. |
 | (c) branch line contains `behind` | **RED — STOP.** `behind by N commits — STOPPED`. |
-| (c) branch line shows a `...` tracking segment and no `behind` | `up to date`. CONTINUE. |
+| (c) branch line shows a `...` tracking segment and neither `behind` nor `[gone]` | `up to date`. CONTINUE. A `[gone]` segment — the remote dropped the branch, which `--prune` makes visible — falls to the CATCH-ALL (`/audit` 2026-09-19 C-7). |
 | **anything else — any observation matching no row above** | **RED — STOP.** `unverifiable — STOPPED`. This CATCH-ALL is what makes the check fail CLOSED; without it an unmatched state is undefined rather than red (`/audit` 2026-09-02 K-1). |
 
 **NEVER read a bare `## main` (no `...upstream` segment) as "up to date".** With a remote present
@@ -244,7 +244,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.26.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.27.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -330,6 +330,7 @@ Check for required sections:
 □ Module Relationships (ASCII diagram + cross-module flows)
 □ Project Phases with completion criteria
 □ Progress Log index table (session, date, summary, log reference)
+□ `**PRD version:**` field (prd-sync-checker Check A compares against it — set after Phase 3)
 ```
 
 **Do NOT modify existing Progress Log entries.** Add missing sections at the appropriate location.
@@ -490,7 +491,9 @@ Add missing sections. **Do NOT remove existing customizations** — they may con
 
 If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, `produces:`, and lineage fields (`created:`, `last_eval:`, `fixes:`, `derived_from:`) in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
 
-If they don't exist: assess the PRD (once created in Phase 3) for risk indicators. If the project has auth, payments, multi-tenancy, AI/LLM, or PII → create them. Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Adapt with stack-specific attack vectors.
+If they don't exist: **ALWAYS decide NOW, from the codebase** — auth, payments, multi-tenancy, AI/LLM or PII present in the code → create them. Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Adapt with stack-specific attack vectors.
+**ALWAYS re-run this decision in Step 2.9b's PHASE-3 RE-CHECK, against the retroactive PRD and the resolved profile** (forward reference, flagged) — `production-financial` ALWAYS warrants them. The earlier text deferred the decision to "the PRD (once created in Phase 3)" and no later step returned to it, so an adapted `production-financial` project could mandate a red-team that was never installed (`/audit` 2026-09-16 A-8).
+**ALWAYS REPORT — `red/blue team: present — verified` or `red/blue team: created at Step 2.6 — [indicators]` or `red/blue team: created at the Phase-3 re-check — [indicators]` or `red/blue team: not warranted — no indicator in code or PRD`. NEVER emit nothing.**
 
 **Step 2.6.1 — Verify validator agent/skill:**
 
@@ -516,7 +519,7 @@ Read each rules file. No structural changes needed — rules files are project-s
 
 **PRECONDITION — `assets/examples/rules/` may not exist yet.** Phase 4 Step 4.1 is what copies it into the project; on a never-bootstrapped project this step runs BEFORE that. **ALWAYS CHECK first** (`ls projects/$ARGUMENTS/assets/examples/rules/ 2>/dev/null`): if it is missing, do NOT silently no-op — record the domain matches you found and **DEFER the copying to Step 4.6**, which runs after Step 4.1 has copied the examples and is this command's PRD-derived rules step (`/audit` 2026-09-02 M-9 — the deferral had named Step 4.1b, which handles cross-cutting concerns and never receives domain rules). **ALWAYS REPORT — `domain rules: N created` or `N matches deferred to Step 4.6 — examples not yet present`. NEVER emit nothing.**
 
-Based on the codebase analysis from Step 1 and the existing/retroactive PRD, identify domain signals that match example templates. For each domain that is a core feature or architectural pattern in the project, check if the corresponding rules file ALREADY EXISTS in `.claude/rules/`. If it does NOT exist and a matching example template is available in `assets/examples/rules/`, pre-create it:
+Based on the codebase analysis from Step 1 and the existing PRD when there is one (the retroactive PRD does not exist until Phase 3; Step 4.6 is its receiver — forward reference, flagged — `/audit` 2026-09-16 A-33), identify domain signals that match example templates. For each domain that is a core feature or architectural pattern in the project, check if the corresponding rules file ALREADY EXISTS in `.claude/rules/`. If it does NOT exist and a matching example template is available in `assets/examples/rules/`, pre-create it:
 
 | Domain signal | Rules file | Example template |
 |---|---|---|
@@ -565,7 +568,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.26.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.27.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -614,6 +617,13 @@ C1's writer check is DERIVED from every installed component that mentions `pende
 `prd-sync-checker` reads as an untagged writer and continuous mode stays unavailable. And
 `project-md-updater` now writes the `counts as N sessions for audit cadence` weight that
 `sprint-proposer` Step 0 reads — an older copy leaves every loop session counted as 1.
+**v2.27.0 migration — no member joins; two pairs travel together.** `validation-orchestrator`'s pre-deploy
+receipt gate now EXITS 1 unless every reviewer's latest verdict on each commit is a PASS, and prints four fixed `review receipts:` strings, and
+`session-log-creator`'s log slot copies them — **ALWAYS offer `session-log-creator` with it**; an older
+creator only lacks the pathspec-RED slot, never unsafe. `framework-audit` now writes a `steps:` line in
+the `framework-metrics.md` Status cell and runs the steps self-check over the NEWEST row only, so older
+rows need no rewrite (the `SINCE=` reader still matches `| COMPLETE`). `codebase-audit` gains the same
+self-check and wider guard-invoker sources (`/audit` 2026-09-16 A-6, A-7, A-9, A-13, A-19).
 
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
@@ -762,7 +772,8 @@ The current framework scales ceremony by risk profile. Existing projects must be
 
    **PHASE-3 RE-CHECK — ALWAYS run it, and ALWAYS REPORT — `risk profile: confirmed unchanged` or
    `risk profile: revised [old] → [new] — N tier-gated artifacts [copied | already present]`.**
-   When the retroactive PRD lands in Phase 3, re-read it against the profile chosen here. A
+   When the retroactive PRD lands in Phase 3, re-read it against the profile chosen here, **and ALWAYS
+   re-run Step 2.6's Red/Blue Team decision** against the PRD and the resolved profile. A
    revision UPWARD means tier-gated skeletons this step skipped are now owed: copy them then,
    never silently. **NEVER emit nothing.**
 
@@ -933,7 +944,10 @@ NEVER emit nothing.**
 | 1.0.0 | [date] | Retroactive PRD — created from codebase analysis during framework adaptation | AI + [owner] |
 ```
 
-**After creating the PRD:** update CLAUDE.md to reference it (`**PRD:** See assets/docs/prd.md`).
+**After creating the PRD:** update CLAUDE.md to reference it (`**PRD:** See assets/docs/prd.md`), **and ALWAYS
+write `**PRD version:** v1.0.0` into `.claude/phases/project.md`** when an existing project.md lacks it —
+bootstrap Step 3 writes the field and prd-sync-checker Check A compares against it, and an adapted
+project whose project.md already existed never received it (`/audit` 2026-09-19 C-24).
 
 ---
 
@@ -1286,6 +1300,13 @@ grep -c "\[added:" projects/$ARGUMENTS/.claude/agents/code-reviewer.md 2>/dev/nu
 echo "=== Activation chain integrity? ==="
 norm() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -- '-_/.' '    ' | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
 AG="projects/$ARGUMENTS/.claude/agents"
+# FAIL CLOSED WHEN `grep -P` CANNOT RUN (a C/POSIX locale on Git for Windows, or BSD/macOS grep). The
+# harvests below discard grep's stderr, so a grep that cannot run read as "no declaring component" and
+# printed the healthy `none installed` with exit 0 on a fully populated project (`/audit` 2026-09-19 C-2).
+if ! printf 'a
+' | grep -qP 'a' 2>/dev/null; then
+  echo "RED: this grep cannot run -P (C/POSIX locale, or a grep without PCRE) - the check cannot run"; exit 1
+fi
 declared=""; declarers=""
 for f in "$AG"/*.md; do
   [ -f "$f" ] || continue
@@ -1335,7 +1356,8 @@ echo "activation chains: $verified verified, $broken broken, $info info"
 ```
 
 **ALWAYS REPORT the loop's literal last line — `activation chains: N verified, M broken, I info`,
-or `activation chains: none installed - no declaring component in <path>`. NEVER emit nothing.**
+or `activation chains: none installed - no declaring component in <path>`, or one of the loop's two
+`RED: … - the check cannot run` lines, verbatim (a RED run's last line is the RED). NEVER emit nothing.**
 (**COPIED FROM the loop verbatim.** It emits THREE counts, so a two-count slot cannot receive it, and
 `none installed` is now a real branch rather than a verdict the step could never produce —
 `/audit` 2026-09-09 T-13, T-14.) Twin parity with bootstrap Step 12.5b, which mandates the
@@ -1416,6 +1438,11 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
   (Bootstrap's twin has carried "Delivered by receivers" since M-2; EPA's three verdicts were
   mandated with no slot to land in — `/audit` 2026-09-03 N-27.)
 
+### Red Team / Blue Team (Step 2.6 → Step 2.9b Phase-3 re-check) — ALWAYS report, never omit:
+- `red/blue team: present — verified` · `red/blue team: created at Step 2.6 — [indicators]` ·
+  `red/blue team: created at the Phase-3 re-check — [indicators]` · `red/blue team: not warranted — no indicator in code or PRD`
+  (the four verdicts Step 2.6 mandates, COPIED FROM it — `/audit` 2026-09-16 A-8.)
+
 ### Risk profile re-check (Step 2.9b → Phase 3) — ALWAYS report, never omit:
 - `risk profile: confirmed unchanged`
 - `risk profile: revised [old] → [new] — N tier-gated artifacts [copied | already present]`
@@ -1427,8 +1454,11 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 ### Activation chains (Step 5.1) — ALWAYS report, never omit:
 - `activation chains: N verified, M broken, I info`
 - `activation chains: none installed - no declaring component in <path>`
-  (BOTH verdicts the loop can emit, and ONLY those two — **COPIED FROM the loop's own two `echo`
-  lines, never re-derived** (Gate 4). The loop emits THREE counts and this slot offered two, so a
+- `RED: this grep cannot run -P (C/POSIX locale, or a grep without PCRE) - the check cannot run`
+- `RED: declaring components present but no gap parsed - the check cannot run`
+  (the FOUR verdicts the loop can emit, and ONLY those four — **COPIED FROM the loop's own `echo`
+  lines, never re-derived** (Gate 4). The two RED lines had no slot — one of them added by
+  `/audit` 2026-09-19 C-2 — so a RED run had nowhere to land. The loop emits THREE counts and this slot offered two, so a
   compliant discharge had nowhere to land; the `none installed` verdict carries the path. The
   MANDATE was corrected on both twins and the SLOT was not — `/audit` 2026-09-10 U-5, U-13.)
 

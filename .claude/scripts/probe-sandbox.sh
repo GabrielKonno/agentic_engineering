@@ -54,8 +54,16 @@
 #     command returns reads GREEN.
 #   - anything else writing the live `.git` meanwhile (an IDE's auto-fetch, another session) reads RED:
 #     a false RED, never a false GREEN. So does a remote that becomes (un)reachable mid-run.
+#   - the clone is checked out under the live repo's `core.autocrlf`, so its line endings can differ from
+#     a live worktree checked out under another setting: a probe that counts CR bytes can read differently
+#     inside. Text tools that ignore CR (grep, awk, sed on Git Bash) read the same.
 set -u
+# The CALLER's locale is saved and restored for the command, never the script's own `LC_ALL=C`: under a C
+# locale GNU grep refuses `-P`, and a sandboxed D7.6 loop then read "none installed" with a GREEN verdict
+# (`/audit` 2026-09-19 C-1). The script keeps `LC_ALL=C` for its OWN fingerprints only.
+if [ "${LC_ALL+set}" = set ]; then CALLER_LC_SET=1; CALLER_LC_ALL=$LC_ALL; else CALLER_LC_SET=0; CALLER_LC_ALL=; fi
 export LC_ALL=C GIT_TERMINAL_PROMPT=0
+with_caller_locale() { if [ "$CALLER_LC_SET" = 1 ]; then LC_ALL=$CALLER_LC_ALL "$@"; else ( unset LC_ALL; "$@" ); fi; }   # never `env -u`: it cannot run a builtin
 
 SELF_DIR=$(cd "$(dirname "$0")" && pwd)
 SELF="$SELF_DIR/$(basename "$0")"
@@ -129,7 +137,7 @@ cmd_run() {
   [ "$top" != "$live" ] || red "the sandbox resolves to the live repository"
 
   local rc
-  ( cd "$sb/r" && PROBE_SANDBOX="$sb/r" "$@" ) | sed -e '$a\'   # a missing final newline would glue the verdict to the output
+  ( cd "$sb/r" && PROBE_SANDBOX="$sb/r" with_caller_locale "$@" ) | sed -e '$a\'   # a missing final newline would glue the verdict to the output
   rc=${PIPESTATUS[0]}
 
   local after changed; after=$(fingerprint "$live" 2>/dev/null) || after="fingerprint failed"
@@ -168,7 +176,7 @@ cmd_selftest() {
   expect() {
     local name=$1 want=$2 wantrc=$3 wantparts=$4 dir=$5 cmd=$6 out rc verdict got parts
     total=$((total+1))
-    out=$(cd "$dir" && bash "$SELF" run -- bash -c "$cmd" 2>/dev/null); rc=$?
+    out=$(cd "$dir" && with_caller_locale bash "$SELF" run -- bash -c "$cmd" 2>/dev/null); rc=$?
     got=$(printf '%s\n' "$out" | tail -1)
     case "$got" in
       "probe-sandbox: GREEN"*) verdict=green ;;
@@ -195,6 +203,11 @@ cmd_selftest() {
   ( cd "$L" && git commit -q --allow-empty -m ahead ) >/dev/null 2>&1   # live main now AHEAD of its origin/main
   local om; om=$(git -C "$L" rev-parse refs/remotes/origin/main)
   expect "origin/main is the live remote ref, fetch fails closed" green 0 - "$L" "[ \"\$(git rev-parse refs/remotes/origin/main)\" = \"$om\" ] && ! git fetch -q origin 2>/dev/null"
+  # SAME ANSWER INSIDE AS IN PLACE: a locale-sensitive probe (`grep -P`) and the locale itself, measured in
+  # place under the caller's environment first, then compared inside the sandbox (`/audit` 2026-09-19 C-1).
+  PS_EXPECT=$(with_caller_locale bash -c 'printf "%s|%s" "${LC_ALL-unset}" "$(printf "ab\n" | grep -cP "a(?=b)" 2>&1; echo rc=$?)"')
+  export PS_EXPECT
+  expect "probe sees the caller's locale (grep -P as in place)" green 0 - "$L" '[ "$(printf "%s|%s" "${LC_ALL-unset}" "$(printf "ab\n" | grep -cP "a(?=b)" 2>&1; echo rc=$?)")" = "$PS_EXPECT" ]'
   echo "escapes — each caught by exactly the part named (RED, exit 3):"
   expect "HEAD file rewritten, same commit"       red 3 HEAD      "$L" "printf 'ref: refs/heads/other\n' > \"$L/.git/HEAD\""   # no reflog entry: only HEAD sees it
   expect "tag created"                            red 3 refs      "$L" "git -C \"$L\" tag probe-tag"
