@@ -12,9 +12,23 @@ own report (Phase 3), which is this session's output, not a change to the thing 
   Read-only refers to the AUDITED surfaces — the report is this session's output, and a report
   that lives only in a transcript cannot be carried to the session that applies it.
 - **READ-ONLY git inspection, anywhere in the repo** — `git log`, `git show`, `git status`,
-  `git diff`, `git grep`, `git rev-list`, `git check-ignore`, `git reflog`. Several checks below MANDATE these
+  `git diff`, `git grep`, `git rev-list`, `git check-ignore`, `git reflog`, and `git fetch`, which
+  writes only remote-tracking refs, `FETCH_HEAD` and objects, and which Phase 0 runs (forward reference, flagged). Several checks below MANDATE these
   (D16.3c scans all commits and messages; Agent 6's D17.1 classifies `git log`; Phase 3's own
-  self-check runs `git status`). They read history; they change nothing.
+  self-check runs `git status`). They read history; apart from `git fetch` moving remote-tracking
+  refs, they change nothing.
+- **EXECUTING a check that WRITES, a negation probe, a planted bad state or a persisted script — ONLY
+  inside `bash .claude/scripts/probe-sandbox.sh run [--staged] -- <command>`.** The script clones the
+  repo into a throwaway directory with fetch and push disabled and reads RED if the live repo changed. D7.6 and
+  D10.0 (forward references, flagged) mandate executing checks, several of which commit, stash or push; executed from the live
+  repo, one run pushed two planted commits to the real remote (`/audit` 2026-09-16 A-1, A-2).
+  **NEVER execute one in the live repository.**
+  **ALWAYS paste the script's final `probe-sandbox:` line beside the output it guarded.**
+  **NEVER run a READ-ONLY scan inside the sandbox** — the D16 gate's `staged`, `log` and `dir` scopes
+  and the git inspection above run in place. A clone carries no stash, no live index unless
+  `--staged`, and no gitignored `.claude/docs/`, so a scan there reads less and reports a false 0.
+  **ALWAYS pass a persisted script by ABSOLUTE path, extracted outside the repo** — the sandbox holds
+  only committed files, and the script fails closed on a command it cannot find.
 - **APPEND ONE ROW to the defect-series table in THIS file (`.claude/commands/audit.md`)** — Phase 3
   item 6 mandates it and the authorized-operations list forbade it, a contradiction that stood
   unreported for two runs and left the row unappended (`/audit` 2026-09-09 T-50). This is the ONE
@@ -29,7 +43,8 @@ own report (Phase 3), which is this session's output, not a change to the thing 
   exactly what happened to every report written before this line existed. **This is the ONLY
   git operation that WRITES.** NEVER `push`, NEVER `commit --amend`, NEVER a commit touching any
   other path, NEVER any history rewrite.
-- No other file creation, modification, or deletion
+- No other file creation, modification, or deletion inside the repository (the sandbox's clone
+  lives outside it and is deleted when the command ends; agents never pass `--keep`)
 
 **Rules:**
 - Every check is mechanical: compare claim against fact, report mismatch
@@ -92,7 +107,7 @@ covers it until a later session scans the range. Three consecutive runs executed
 written home, while a maintenance receipt credited `/audit` with owning it (`/audit` 2026-09-15 B-7).
 Mechanical, expected result stated:
 ```bash
-if git fetch -q origin; then
+if git fetch -q --prune origin; then
   OLD=$(grep -hE '^\*\*(push|push decay|Post-push D16):\*\*' "$(ls assets/docs/audit-*.md | sort | tail -1)" \
     | tr -d '\r' | grep -vE '^\*\*[A-Za-z0-9 -]+:\*\* RED' | grep -oE '— origin/main at s?[0-9a-f]{7,}$' | tail -1 | grep -oE '[0-9a-f]{7,}$')
   NEW=$(git rev-parse -q --verify --short refs/remotes/origin/main)
@@ -101,6 +116,9 @@ if git fetch -q origin; then
   else echo "RED: no recorded origin/main hash — origin/main at $NEW"; fi
 else echo "RED: fetch failed — origin/main unknown, nothing below is evidence"; fi
 ```
+**ALWAYS FETCH WITH `--prune`.** Without it a remote that no longer has `main` leaves a stale
+`refs/remotes/origin/main`, and the scan read `0 hits` over an endpoint the remote had dropped
+(`/audit` 2026-09-16 A-27).
 **NEVER write this as `[ -n "$OLD" ] && <gate> || echo …`** — the gate exits non-zero on a hit, so the
 `||` branch then ALSO printed "no recorded origin/main hash" beneath a real hit, mislabelling a
 published leak as a missing record (found by this batch's own negation proof, 2026-09-16).
@@ -200,6 +218,22 @@ Launch ALL 6 agents below **in a single message** using 6 parallel Agent tool ca
 Do NOT wait for one to finish before launching the next.
 
 Each agent receives its full contract as the prompt. Use `subagent_type: "general-purpose"` for all.
+
+**ALWAYS PREPEND this isolation rule to EVERY agent prompt, verbatim.** The Authorized-operations
+list above is session text: no agent receives it, so its "NEVER push" reached none of them, and an
+agent executing D10.0 pushed two planted commits to the real remote (`/audit` 2026-09-16 A-1).
+
+> Run every check that WRITES, every probe, every planted state and every persisted script through
+> `bash .claude/scripts/probe-sandbox.sh run [--staged] -- <command>`, giving a script by
+> ABSOLUTE path, and paste its final `probe-sandbox:` line beside the output.
+> NEVER run `git commit`, `git push`, `git reset`, `git stash`, `git checkout` or `git remote`, and
+> NEVER write a file, inside the live repository.
+> NEVER put a read-only scan in the sandbox: `d16-gate.sh staged | log | dir` and `git log`/`show`/
+> `diff`/`grep` run in place, where they see everything.
+> A `probe-sandbox: RED` line STOPS you: make it the FIRST line of your report and return.
+
+**An agent that returns on a `probe-sandbox: RED` did not complete its dimensions** — Phase 3 writes
+`Report status: INCOMPLETE`, naming that agent and the RED line's parts — or, for a fail-closed RED, its reason. (Forward reference, flagged: Phase 3's status lines.)
 
 ---
 
@@ -645,8 +679,10 @@ CHECKS:
            Into that directory: every `docs/modules/agents/*.md` (renamed `_`→`-`) plus every
            `examples/agents/*.md` into `.claude/agents/`, and every `examples/agents/*.md` into
            `assets/examples/agents/`.
-           **ALWAYS REPORT the path used, and ALWAYS confirm `git status --porcelain` is unchanged
-           by the probe.**
+           **ALWAYS build and run it inside `bash .claude/scripts/probe-sandbox.sh run -- …`.**
+           **ALWAYS REPORT the path used and the final `probe-sandbox:` line.** The proof used to be
+           `git status --porcelain` unchanged, which cannot see a commit that was made, pushed and
+           reset away (`/audit` 2026-09-16 A-1).
         2. Extract the loop VERBATIM from the file and run it against that project.
         3. **ALWAYS REPORT — `activation chains: N verified, K broken, I info`.**
            **Expected: every gap-declaring specialist resolves and K = 0.** A resolved count below
@@ -725,6 +761,7 @@ REPORT FORMAT:
   - EPA twin: [literal output]
   - `twins agree: yes / NO` — **counts AND info strings**, not counts alone (D7.7).
   Plus one row per rephrasing tested, with its literal output, and which the check silently misses.
+  - probe (D7.6): [synthetic-project path] | [the final `probe-sandbox:` line]
 - **Planted-specialist probe (D7.8) — MANDATORY, never blank:** [literal output]. **Zero output is RED.**
 - **Invariant proof output (D7.5) — MANDATORY, never blank.**
   **ALWAYS REPORT THE FILE COUNT BESIDE IT:** `files: N | output: [literal]`. **`output: 0` alone proves NOTHING** — measured, the
@@ -812,6 +849,11 @@ CHECKS:
   direction** — one that cannot go red is decoration; one that fires on the healthy state is worse.
   Three checks shipped in a single batch that could not fail at all, while this mandate lived only
   in the invoking prompt (`/audit` 2026-09-04 Q-3, Q-2, Q-10, Q-39).
+  **ALWAYS RUN EACH ONE THAT WRITES INSIDE `bash .claude/scripts/probe-sandbox.sh run --staged -- …`,
+  NEVER in the live repo.** Several of them `git commit`, `git stash` or `git push`, and a run of this
+  mandate from the live repo pushed two planted commits to the real remote (`/audit` 2026-09-16 A-1).
+  **ALWAYS run the D16 gate's `staged`, `log` and `dir` checks IN PLACE** — in the sandbox they read
+  a false 0 (Authorized operations).
 
 [D10] Command → skill invocation paths
   D10.1. Read prd_planning.md — extract every reference to a skill
@@ -864,7 +906,8 @@ REPORT FORMAT:
   | Command file | Referenced skill/section | Expected location | Exists? |
   |-------------|--------------------------|-------------------|---------|
   [one row per reference, INCLUDING the D10.5 citations inside maintenance.md and audit.md]
-- **Self-checks executed verbatim (D10.0) — MANDATORY, never blank:**
+- **Self-checks executed verbatim (D10.0), each one that WRITES inside `probe-sandbox.sh run`, the read-only ones in place — MANDATORY, never blank;
+  paste the final `probe-sandbox:` line of every run under the table:**
   | Check | file:line | Stated expectation | Actual output | Match? | Can go RED? | Can go GREEN? |
 - Runtime dual copy (D10.4): `cross-cutting-analysis` present in both | byte-identical: [yes/NO]
 - Trigger-list parity (D10.6): CLAUDE.md events [list] vs audit.md Phase 0 rows [list] —
@@ -1233,6 +1276,12 @@ no others** (`/audit` 2026-09-03 N-45, N-47):
 
 **Each run allocates ONE letter series** (`F`, `G`, `H`, `J`, `K`, `L`, `M`, `N` …), skipping
 letters that read as digits, and `S`, which collides with this repo's `s<hash>` notation.
+**WHEN EVERY OTHER LETTER IS USED, ALWAYS TAKE `C` AND THEN `D`, IN THAT ORDER** — a finding ID
+carries a hyphen (`C-1`) and a dimension name never does (`C`, `D16`), so they stay distinct.
+**After `D`, ALWAYS ASK THE OWNER for the scheme before writing any finding** — never invent one:
+every ledger grep in both commands matches `[A-Z]-[0-9]+`, and a two-letter ID reads as nothing
+to all of them. The scheme ran out with no rule, and a run chose `A` by judgement (`/audit`
+2026-09-16 A-38).
 
 **EXTENDING A CLOSED SERIES — who may, and how.** A finding surfaced OUTSIDE the run that owns a
 letter (a follow-up verification, or a maintenance session reconciling `origin/main`) is filed by
@@ -1289,7 +1338,8 @@ bullets for two runs, because `defect series:` was added and the heading never s
 ADJACENT direction, in the file that defines it (`/audit` 2026-09-09 T-40).
 
 - **`Report status:`** — `COMPLETE` (all agents returned, all dimensions evaluated) or
-  `INCOMPLETE — [which agents or dimensions did not return]`.
+  `INCOMPLETE — [which agents or dimensions did not return]` (an agent that stopped on a
+  `probe-sandbox: RED` did not return — name it and the parts that line names, or its reason when it failed closed).
 - **`defect series:`** — `row N appended` (verification mode) or `N/A — baseline mode`.
   **ONE surface, never three.** The series lives in exactly one table — "The defect series" above
   Phase 1 — and item 6 says APPEND ONE ROW AND TOUCH NOTHING ELSE. An earlier form of this line
@@ -1386,11 +1436,19 @@ step is the carry-over half.
    ```bash
    git add assets/docs/audit-YYYY-MM-DD.md && git commit -m "docs(audit): persist [run] — [N] findings open"
    ```
-   Mechanical self-check (expected result stated):
-   `git status --porcelain assets/docs/audit-YYYY-MM-DD.md` — **THIS run's report path, not the
-   whole directory** → **expected: EMPTY**. Any output means the report is still only in the
-   working tree. (Scoping matters: `assets/docs/` also holds lineage docs an unrelated session may
-   have left dirty, which would turn this red for the wrong reason.)
+   Mechanical self-check (expected result stated), over **THIS run's report path, not the whole
+   directory**:
+   ```bash
+   p=assets/docs/audit-YYYY-MM-DD.md; h=$(git log -1 --format=%h -- "$p")
+   if [ -n "$h" ] && [ "$h" = "$(git log -1 --format=%h)" ] && git log -1 --format=%s | grep -q '^docs(audit): persist' && [ -z "$(git status --porcelain -- "$p")" ]; then echo "report committed: s$h"; else echo "NOT committed — last report commit ${h:-none}, HEAD $(git log -1 --format=%h)"; fi
+   ```
+   **Expected: `report committed: sHASH`.** The report commit is the LAST one, so its hash MUST be
+   HEAD and its subject the `persist` form above. The earlier form, `git status --porcelain` alone,
+   read EMPTY both for a committed report and for one never written (`/audit` 2026-09-16 A-31); without
+   the subject test, a same-day re-run whose last commit was a WRITE-BACK to this file read GREEN
+   before its own report existed (this batch's pre-commit verifier, 2026-09-19). (Scoping matters: `assets/docs/` also holds
+   lineage docs an unrelated session may have left dirty, which would turn this red for the wrong
+   reason.)
    **ALWAYS REPORT — `report committed: sHASH` or `NOT committed — [reason]`. NEVER emit nothing.**
    This is the ONE git operation this session performs, and it does not violate the read-only
    rule: the report is this session's OUTPUT, never an audited surface. Evidence it is needed —

@@ -91,7 +91,7 @@ This is a framework maintenance session, not a project bootstrap.
 session, commits a persisted receipt calls unpushed are now PUBLISHED and the mandated D16 GREEN
 never ran over them. Mechanical, expected result stated:
 ```bash
-if git fetch -q origin; then
+if git fetch -q --prune origin; then
   git status -sb | head -1
   LAST=$(grep -hE '^\*\*(push|push decay|Post-push D16):\*\*' "$(ls assets/docs/audit-*.md | sort | tail -1)" \
     | tr -d '\r' | grep -vE '^\*\*[A-Za-z0-9 -]+:\*\* RED' | grep -oE '— origin/main at s?[0-9a-f]{7,}$' | tail -1 | grep -oE '[0-9a-f]{7,}$')
@@ -106,6 +106,8 @@ else echo "RED: fetch failed — origin/main unknown, nothing below is evidence"
 `origin/main` and the detector printed `unchanged` while the remote had moved; an unanchored hash
 regex matched an OLD endpoint quoted mid-sentence in an earlier receipt (found by this rule's own
 pre-commit verifier, 2026-09-16).
+**ALWAYS FETCH WITH `--prune`.** Without it a remote that no longer has `main` leaves a stale
+`refs/remotes/origin/main`, and the detector read it as a live endpoint (`/audit` 2026-09-16 A-27).
 **Expected: no `behind` segment, and `unchanged at sHASH` — `advanced sOLD..sNEW` means D16 is owed
 before any edit.** **COMPARE HASHES, NEVER THE STATUS LINE:** `git status -sb` prints no hash, so a
 push made from this same clone read `## main...origin/main` before AND after `origin/main` moved —
@@ -213,11 +215,13 @@ actually receive — stayed small (`/audit` D17.6). These four rules stop the lo
    judgement:
    ```bash
    S=$(git diff --name-only <first>~1 <last> -- docs/modules examples .claude/commands/bootstrap.md .claude/commands/existing_project_adaptation.md | wc -l)
-   HM=$(grep -E '^\| [A-Z]-[0-9]+ \| (HIGH|MEDIUM) \|' <the applied report> | grep -cE 'applied `?s(<hash>|<hash>)')
+   HM=$(grep -hE '^\| [A-Z]-[0-9]+ \| (HIGH|MEDIUM) \|' <every report this batch applied findings from> | grep -cE 'applied `?s(<hash>|<hash>)')
    [ "$S" -gt 0 ] || [ "$HM" -gt 0 ] && echo "trigger (d): fires — shipped files $S, HIGH/MEDIUM applied $HM" || echo "trigger (d): does not fire — apparatus-only, LOW-only"
    ```
    **Expected: one of the two lines.** A batch that fires it proposes the verification audit;
    one that does not reports so and proposes nothing.
+   **ALWAYS pass EVERY report the batch disposed findings from** — one file counted 2 where 7 were
+   applied across two reports (`/audit` 2026-09-16 A-32).
 2. **LOW FINDINGS ARE A BACKLOG, NEVER A SESSION.** They stay `open` and are carried forward
    mechanically (`/audit` Phase 3 item 3).
    - **NEVER open a maintenance session to apply only LOW findings on apparatus surfaces.**
@@ -864,9 +868,15 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    pre-fix file quoting an older finding's historical figure for a DIFFERENT command, and when the
    pre-fix form was actually executed it returned the same result as the post-fix one
    (`/audit` 2026-09-04 R-44).
-   **ALWAYS check out the pre-fix state (`git stash`, or run against
-   `<commit>~1`) and paste the red output with its `$` line.** If the pre-fix state cannot be
-   reconstructed, say `negation proof: NOT RUN — [why]` and let it be visible.
+   **ALWAYS reconstruct the pre-fix state INSIDE `bash .claude/scripts/probe-sandbox.sh run -- …`
+   and paste the red output, its `$` line and the final `probe-sandbox:` line.** Before the commit
+   the sandbox WITHOUT `--staged` IS the pre-fix state (HEAD); after it, check out `<commit>~1` there.
+   **NEVER combine `--staged` with a checkout** — the staged files are dirty in the sandbox and the
+   checkout aborts (this batch's pre-commit verifier, 2026-09-19). If the pre-fix state cannot be reconstructed, say
+   `negation proof: NOT RUN — [why]` and let it be visible.
+   **A `probe-sandbox: RED` verdict BLOCKS the commit** — the proof wrote to the live repo; restore it first.
+   **NEVER `git stash` or check out a pre-fix state in the live repo for a proof** — a probe run
+   there pushed two planted commits to the real remote (`/audit` 2026-09-16 A-1).
 
    ### CONTROL BACK-SWEEP — when this batch installs or amends a CHECK, GATE or REPORT KEY
 
@@ -924,7 +934,8 @@ Each item encodes a real miss that survived a first pass and was only caught by 
       the same batch mandated; a sum rule broken by the first line written under it; a heading rule
       contradicting the receipts form authorised beside it. All four shipped in one batch.
    4. **PROVE EACH AMENDED CONTROL BY NEGATION, WITH A COMMAND** — `component-design` §9 rule 4.
-      Run it against a state that MUST make it red. **A check that has never gone red is not
+      Run it against a state that MUST make it red, planted only inside
+      `bash .claude/scripts/probe-sandbox.sh run --staged -- …`. **A check that has never gone red is not
       evidence of health; it is an unproven claim.** Three checks shipped in one batch could not
       fail at all: a guard asserting a symptom the command does not produce, a harvest regex whose
       character class could not cross an em-dash, and a second one blind to the key class of the
@@ -957,7 +968,8 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    validated by nothing (`/audit` 2026-09-03 N-51). A list also goes stale the moment a component
    is added, which is the same defect as an enumerated set anywhere else.
    ```bash
-   python -c "import io,yaml,glob,os,sys
+   python -c "import textwrap; exec(textwrap.dedent('''
+   import io,yaml,glob,os,sys
    bad=0; n=0; sk=0
    for p in sorted(glob.glob('docs/modules/skills/*/SKILL.md'))+sorted(glob.glob('docs/modules/agents/*.md')):
        s=io.open(p,encoding='utf-8').read().replace(chr(13)+chr(10),chr(10))
@@ -968,7 +980,8 @@ Each item encodes a real miss that survived a first pass and was only caught by 
            exp=os.path.basename(os.path.dirname(p)) if p.endswith('SKILL.md') else os.path.basename(p)[:-3].replace('_','-')
            if d.get('name')!=exp: bad+=1; print('FAIL',p,'name=',d.get('name'),'expected',exp)
        except Exception as e: bad+=1; print('FAIL',p,type(e).__name__)
-   print('raw templates: %d validated of %d globbed, %d skipped (fenced),' % (n, n+sk, sk), 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)"
+   print('raw templates: %d validated of %d globbed, %d skipped (fenced),' % (n, n+sk, sk), 'OK' if not bad else str(bad)+' BROKEN'); sys.exit(1 if bad else 0)
+   '''))"
    ```
    Expected result: **`raw templates: N validated of M globbed, S skipped (fenced), OK`** —
    **ALWAYS REPORT ALL THREE NUMBERS.** The globs match 25 files and the parser validates 19: the
@@ -1003,6 +1016,16 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    `negation proof: N/A — no new self-check written`. A check that has never failed is decoration,
    not a control — and the session that catalogued that class shipped a self-check grepping the
    wrong token.
+   **ALWAYS plant that red state inside `bash .claude/scripts/probe-sandbox.sh run --staged -- …`,
+   never in the live repo, and ALWAYS paste the final `probe-sandbox:` line with the proof's stdout.**
+   **NEVER run the D16 gate or any other READ-ONLY scan inside the sandbox** — a clone has no stash
+   and no gitignored `.claude/docs/`, so it reads a false 0 there (`/audit` → Authorized operations).
+   **When the proof is persisted as a script, ALWAYS make its `$` line run it through the sandbox by
+   ABSOLUTE path** — `$ bash .claude/scripts/probe-sandbox.sh run --staged -- bash "$T/negation_proof.sh"`,
+   with `$T` a directory outside the repo. The sandbox holds only committed and staged files, so a
+   relative `negation_proof.sh` is absent there. Two persisted proofs failed open on a scratch `cd`,
+   and re-run "from the repo root" as their `$` lines said, they committed and pushed planted states
+   to the real remote (`/audit` 2026-09-16 A-2).
 
 7. **Version bump — decide it, APPLY it, and REPORT it.** The full policy is the
    "Version bumps" section below; this item is what makes the checklist REACH it. The bump lived
@@ -1077,11 +1100,13 @@ Each item encodes a real miss that survived a first pass and was only caught by 
     touched six such files (this rule's pre-commit verifier, 2026-09-16).
     - **ALWAYS give it the staged diff, the REPORT-FORMAT section of every command or skill the diff touches, the scratch-mother-repo recipe below and the privacy rule** (counts only, invented names). Question (a) reads a report section, so a diff-only brief made it unanswerable (`/audit` 2026-09-15 B-8).
     - **NEVER give it the finding texts** — a verifier handed the findings probes the named symptom and inherits its frame (`/audit` 2026-09-14 Run 3 meta-observation).
-    - **ALWAYS build the scratch mother repo with THIS recipe, and delete it afterwards:**
+    - **ALWAYS build the scratch mother repo with THIS recipe, and delete it afterwards** — the sandbox clones HEAD, applies the index, disables push and mirrors `projects/` names only; the earlier `mktemp` recipe had no push lock and was never deleted (`/audit` 2026-09-16 A-1):
       ```bash
-      M=$(mktemp -d) && git clone -q . "$M/repo" && git diff --cached > "$M/staged.patch" \
-        && git -C "$M/repo" apply --index "$M/staged.patch" && mkdir -p "$M/repo/projects/qzxv-wqjk"   # invented name, no dictionary-word part
+      out=$(bash .claude/scripts/probe-sandbox.sh run --staged --keep -- mkdir -p projects/qzxv-wqjk)   # invented name, no dictionary-word part
+      M=$(printf '%s\n' "$out" | sed -n 's/^probe-sandbox: kept at //p'); [ -n "$M" ] || echo "RED: $out"
+      # afterwards — guarded, because an empty M makes `dirname` return `.`:  [ -n "$M" ] && rm -rf "${M%/r}"
       ```
+    - **ALWAYS give it the isolation rule `/audit` → Phase 1 prepends to every agent, verbatim** — a verifier probes fences by executing them.
     - **ALWAYS ask it the FOUR CROSS-SURFACE questions, not only whether each fence behaves:** (a) does every verdict string a changed fence can print have a slot in that command's report; (b) is every ALWAYS/NEVER line added to one command twin present in the other, or named twin-specific; (c) does every step reference the batch adds point to an EARLIER step, or is it flagged; (d) does every rule the batch adds that names another component, field, signal or role point at a step or section that PRODUCES it, in a component installed at every tier the rule ships to. Every residue of the batch verified fence-by-fence was one of (a)-(c) (`/audit` 2026-09-15 Run 2 meta-observation); (d) is the class that reappeared in the shipped skill once (a)-(c) cleared the twins (`/audit` 2026-09-15 Run 3, B-11, B-12).
     - **ALWAYS PASTE the verifier's reproduced-defect list verbatim under the `verifier rounds:` key** — one line per defect, counts and invented names only. A one-line author summary of a subagent's output is a claim, not a receipt (`/audit` 2026-09-15 B-8).
     - **ALWAYS file each reproduced defect** in the applied report with the tag `[filed by <the session> on <date>, from its independent pre-commit verifier]`, after the collision check in `/audit` → "ID allocation", and fix it or leave it `open` like any finding.

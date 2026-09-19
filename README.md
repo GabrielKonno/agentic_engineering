@@ -141,7 +141,7 @@ agentic_engineering/
 │   ├── commands/                       ← 6 slash commands: /bootstrap, /prd_planning, /prd_change, /existing_project_adaptation, /maintenance, /audit
 │   ├── rules/                          ← component-design.md (consulted during /maintenance when editing agents/skills/rules)
 │   ├── skills/                         ← cross-cutting-analysis (runtime skill used during PRD sessions)
-│   ├── scripts/                        ← d16-gate.sh (project-information isolation gate, run by /maintenance and /audit)
+│   ├── scripts/                        ← d16-gate.sh (project-information isolation gate) + probe-sandbox.sh (where checks and probes execute) — both run by /maintenance and /audit
 │   └── settings.json                   ← Claude Code settings
 │
 ├── docs/
