@@ -58,7 +58,7 @@ git fetch --prune && git status -sb | head -1        # (c) ahead/behind — `--p
 | Observation | Verdict |
 |-------------|---------|
 | (a) empty — no remote configured at all | `no remote — skipped`. Nothing to be behind; CONTINUE. |
-| (a) lists an `upstream` remote (this clone is a FORK) | Compare against **`upstream`**, never `origin`: `git fetch upstream && git rev-list --count HEAD..upstream/main` → **0 = `up to date`; anything else = RED, `behind upstream by N — STOPPED`**. On a fork `@{upstream}` points at the FORK's own `origin`, so the rows below would read GREEN while the clone is arbitrarily behind the real upstream. |
+| (a) lists an `upstream` remote (this clone is a FORK) | Compare against **`upstream`**, never `origin`: `git fetch --prune upstream && git rev-list --count HEAD..upstream/main` (`--prune`, or a deleted upstream `main` leaves a stale ref and the count reads `0` — `/audit` 2026-09-19 D-2) → **0 = `up to date`; anything else = RED, `behind upstream by N — STOPPED`**. On a fork `@{upstream}` points at the FORK's own `origin`, so the rows below would read GREEN while the clone is arbitrarily behind the real upstream. |
 | (b) empty or errors — branch tracks nothing (or detached HEAD) | **RED — STOP.** `no upstream tracking — UNVERIFIABLE, STOPPED`. |
 | (c) produced NO line — `git fetch` failed, so `&&` short-circuited | **RED — STOP.** `fetch failed — UNVERIFIABLE, STOPPED`. Re-run the two commands separately to see the error. |
 | (c) branch line contains `behind` | **RED — STOP.** `behind by N commits — STOPPED`. |
@@ -94,10 +94,20 @@ Read the entire existing structure before making any changes. This is the most i
 If the project has a git remote, ALWAYS verify the local copy is current BEFORE analyzing it:
 
 ```bash
-git -C projects/$ARGUMENTS remote -v            # has a remote?
-git -C projects/$ARGUMENTS fetch origin
-git -C projects/$ARGUMENTS status -sb           # ahead/behind?
+git -C projects/$ARGUMENTS remote -v                    # (a) has a remote?
+git -C projects/$ARGUMENTS fetch --prune origin &&   git -C projects/$ARGUMENTS status -sb                # (b) ahead/behind — CHAINED, so a failed fetch prints nothing
 ```
+
+**Classify with Step 0.5's table, which this check is the twin of — it FAILS CLOSED, never open
+(`/audit` 2026-09-19 D-1):**
+
+| Observation | Verdict |
+|-------------|---------|
+| (a) empty — no remote configured | `no remote — skipped`. Nothing to be behind; CONTINUE. |
+| (b) produced NO line — the fetch failed, so `&&` short-circuited | **RED — STOP.** `project copy: fetch failed — UNVERIFIABLE, STOPPED`. |
+| (b) branch line contains `behind` | **RED — STOP.** `project copy: behind by N commits — STOPPED`. |
+| (b) branch line shows a `...` tracking segment and neither `behind` nor `[gone]` | `project copy: up to date`. CONTINUE. |
+| **anything else — a bare `## main` with no tracking segment, `[gone]`, any unmatched state** | **RED — STOP.** `project copy: unverifiable — STOPPED`. The CATCH-ALL is what makes this fail closed; without it a failed fetch, a dropped branch and a copy with no tracking branch all read as "not behind". |
 
 If the copy is BEHIND the remote: STOP and reconcile first (pull/reset per the owner's
 instruction) — every conclusion drawn from a stale copy is invalid, and edits made on it
@@ -199,8 +209,11 @@ Before proceeding, present a summary of everything you read:
 
 ### Existing framework docs:
 - CLAUDE.md: [exists/missing] — [summary of content]
-- Project-copy freshness (Step 1.0): `up to date` / `behind by N — reconciled before analysis` /
-  `no remote — skipped` — ALWAYS report; the verdict had no slot anywhere (`/audit` M-53)
+- Project-copy freshness (Step 1.0): `project copy: up to date` / `project copy: behind by N commits — STOPPED`
+  (reconciled before analysis) / `no remote — skipped` / `project copy: fetch failed — UNVERIFIABLE, STOPPED` /
+  `project copy: unverifiable — STOPPED` — ALL FIVE verdicts of Step 1.0's table, COPIED from it (Gate 4).
+  ALWAYS report; the verdict had no slot anywhere (`/audit` M-53), and the two fail-closed verdicts had none
+  until the table itself existed (`/audit` 2026-09-19 D-1)
 - project.md: [exists/missing] — [N rows in Progress Log index, last session date]
 - pendencias/backlog: [filename] — [N items in progress, N items done]
 - Agents: [list with names]
@@ -244,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.27.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.28.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -568,7 +581,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.27.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.28.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -624,6 +637,13 @@ creator only lacks the pathspec-RED slot, never unsafe. `framework-audit` now wr
 the `framework-metrics.md` Status cell and runs the steps self-check over the NEWEST row only, so older
 rows need no rewrite (the `SINCE=` reader still matches `| COMPLETE`). `codebase-audit` gains the same
 self-check and wider guard-invoker sources (`/audit` 2026-09-16 A-6, A-7, A-9, A-13, A-19).
+**v2.28.0 migration — the same pair, tightened; no new member.** The pre-deploy receipt gate now matches the
+WHOLE verdict field (a prefix like `APPROVE WITH NITS` no longer passes) and every non-RED line names the
+pathspec, so `validation-orchestrator` and `session-log-creator` MUST be refreshed together or the log slot
+quotes strings the gate no longer prints. `framework-audit` gains a denominator in its HYPOTHESIS listing —
+refresh it with `component_design.md`, which now carries the authoring half (a hypothesis lives in a `> `
+blockquote). A project that refreshes neither keeps a gate that passes prefixed verdicts
+(`/audit` 2026-09-20 AA-6, AA-7, AA-8, AA-1).
 
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
@@ -1373,7 +1393,9 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - `up to date` · `no remote — skipped` · `behind by N commits — STOPPED` ·
   `behind upstream by N — STOPPED` · `no upstream tracking — UNVERIFIABLE, STOPPED` ·
   `fetch failed — UNVERIFIABLE, STOPPED` · `unverifiable — STOPPED`
-- Project copy: `up to date` / `behind by N — reconciled before analysis` / `no remote — skipped`
+- Project copy (Step 1.0's five verdicts, COPIED from its table — Gate 4): `project copy: up to date` /
+  `project copy: behind by N commits — STOPPED` (reconciled before analysis) / `no remote — skipped` /
+  `project copy: fetch failed — UNVERIFIABLE, STOPPED` / `project copy: unverifiable — STOPPED`
 
 ### Risk profile and tier-gated install (Steps 2.9b / 2.9) — ALWAYS report, never omit:
 - Risk profile: [prototype | internal-tool | production | production-financial], derived from [signals]

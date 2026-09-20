@@ -43,7 +43,7 @@ Save to `.claude/logs/[filename]`:
 ## Review receipts
 [This session's lines COPIED from the ledger `.claude/logs/review-reports/receipts.md`, which validation-orchestrator → "Review receipts" appends to at verdict time:
 `- <reviewer> · <VERDICT> · report: .claude/logs/review-reports/s<N>-<reviewer>-<k>.md · commits: <sha7>`.
-`none — no reviewer ran` when none did. When the pre-deploy gate ran this session, ALSO its line, copied from the gate's own output: `review receipts: N commits in range, 0 without receipt` or `review receipts: N commits in range, K without receipt — deploy blocked` or `review receipts: RED — range unreadable — deploy blocked` or `review receipts: RED — pathspec '<P>' matches no tracked file — deploy blocked` (validation-orchestrator → "Review receipts").]
+`none — no reviewer ran` when none did. When the pre-deploy gate ran this session, ALSO its line, copied from the gate's own output, WITH the `NO RECEIPT: <sha7>` lines it printed: `review receipts: N commits in range under '<P>', 0 without receipt` or `review receipts: N commits in range under '<P>', K without receipt — deploy blocked (each named by a NO RECEIPT line above)` or `review receipts: RED — range unreadable — deploy blocked` or `review receipts: RED — pathspec '<P>' matches no tracked file — deploy blocked` (validation-orchestrator → "Review receipts").]
 
 ## Owner decisions
 [`normative propagation: N owner decisions recorded — K propagated to the PRD` or `owner decision with no normative effect — [reason]` or `none — no owner decision recorded` (session-rules → "Owner decision → normative document in the SAME commit")]

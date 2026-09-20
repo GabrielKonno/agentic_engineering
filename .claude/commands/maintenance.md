@@ -215,7 +215,7 @@ actually receive — stayed small (`/audit` D17.6). These four rules stop the lo
    judgement:
    ```bash
    S=$(git diff --name-only <first>~1 <last> -- docs/modules examples .claude/commands/bootstrap.md .claude/commands/existing_project_adaptation.md | wc -l)
-   HM=$(grep -hE '^\| [A-Z]-[0-9]+ \| (HIGH|MEDIUM) \|' assets/docs/audit-*.md | grep -cE 'applied `?s(<hash>|<hash>)')
+   HM=$(grep -hE '^\| [A-Z]{1,2}-[0-9]+ \| (HIGH|MEDIUM) \|' assets/docs/audit-*.md | grep -cE 'applied `?s(<hash>|<hash>)')
    [ "$S" -gt 0 ] || [ "$HM" -gt 0 ] && echo "trigger (d): fires — shipped files $S, HIGH/MEDIUM applied $HM" || echo "trigger (d): does not fire — apparatus-only, LOW-only"
    ```
    **Expected: one of the two lines.** A batch that fires it proposes the verification audit;
@@ -900,7 +900,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    # full batch, which is why..." was counted as a control, which is T-17's own defect returning
    # through a new door: T-17 removed the `grep`-prose shape and reintroduced it via `for `
    # (`/audit` 2026-09-10 U-45).
-   for f in .claude/commands/maintenance.md .claude/commands/audit.md; do
+   for f in .claude/commands/maintenance.md .claude/commands/audit.md $(git diff --name-only <first>~1 <last> -- docs/modules); do
      inf=$(awk '/^```/{g=!g;next} g' "$f" \
        | grep -cE '^\s*(\$ )?(grep|awk |python -c|diff -r|git |node|sed -n|for [A-Za-z_][A-Za-z0-9_]* in )')
      inl=$(grep -ohE '`(grep|git|diff|awk|sed|node|python|ls) [^`]{4,}`' "$f" | wc -l)
@@ -926,6 +926,9 @@ Each item encodes a real miss that survived a first pass and was only caught by 
      | grep -cE '(grep|python -c|diff -r|git (diff|show|status)|node|sed -n)'
    # 3. RUN EVERY CONTROL IN (1), not only those in (2), and paste each one's stdout.
    ```
+   **The `$(git diff …)` half is not optional: with only the two command files the denominator cannot go
+   red for a SHIPPED control, which is the class A-4 named and which its own first fix left uncovered
+   (`/audit` 2026-09-20 AA-2). Report the per-file lines, so a shipped file with 0 controls is visible.**
    **Expected: (1) is the denominator you report, (2) is at least 1 or this section is `N/A`, and
    every control in (1) has a `$` line with its literal output in the receipts.** A control you did
    not run is not a control you may report GREEN.
@@ -1253,7 +1256,7 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
      # SIX, since B-10: the sixth counts FENCE MARKERS, so deleting a whole pasted receipt generator —
      # evidence item 10 requires — is RED. The fence-aware filter alone made that deletion silent
      # (this rule's pre-commit verifier, 2026-09-16).
-     for pat in '^#{1,3} ' '^\| [A-Z]-[0-9]+ \|' '^> \*\*Errata ' '^ *\$ ' '^\*\*[a-z][a-z ._-]*:' '^```'; do
+     for pat in '^#{1,3} ' '^\| [A-Z]{1,2}-[0-9]+ \|' '^> \*\*Errata ' '^ *\$ ' '^\*\*[a-z][a-z ._-]*:' '^```'; do
        # FENCE-AWARE: a `# comment` inside a pasted generator is not a heading (`/audit` 2026-09-15 B-10);
        # the marker lines themselves stay visible for the sixth pattern.
        b=$(git show HEAD:"$f" 2>/dev/null | awk '/^```/{g=!g;print;next} !g' | grep -cE "$pat")
@@ -1361,7 +1364,7 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    # awk, NOT a sed range: `sed -n '/^Applies /,/from /p'` runs PAST a one-line Applies block,
    # because sed tests the end pattern from the line AFTER the start. Measured, it scored 3 of 4
    # healthy commits RED (2026-09-11).
-   git log -1 --format=%B <hash> | awk '/^Applies /{f=1} f&&/^$/{exit} f'      | grep -oE '\b[A-Z]-[0-9]+\b' | sort -u | wc -l      # MUST equal the number in the subject
+   git log -1 --format=%B <hash> | awk '/^Applies /{f=1} f&&/^$/{exit} f'      | grep -oE '\b[A-Z]{1,2}-[0-9]+\b' | sort -u | wc -l      # MUST equal the number in the subject
    ```
    **Expected: equal.** **ALWAYS RUN IT BEFORE WRITING THE SUBJECT, NEVER AFTER** — once the commit
    exists the only remedy is item 8's follow-up, which cannot change what the subject says. Two group commits in one batch overstated it ("6 findings"

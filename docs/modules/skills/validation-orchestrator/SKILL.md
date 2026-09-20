@@ -196,15 +196,15 @@ else n=0; k=0
     git log -1 --format=%B "$c" | grep -qE '^Review-Exempt: .{10,}' && continue
     # Only receipts whose `commits:` field names the hash count. EACH reviewer's LATEST verdict must be in
     # PASS: one reviewer's APPROVE never overrides another's BLOCK. An owner exemption line clears the commit.
-    awk -F' · ' -v h="${c:0:7}" -v okre="^($PASS)([^A-Z]|$)" '/^- /{f=$NF; sub(/\r$/,"",f)
+    awk -F' · ' -v h="${c:0:7}" -v okre="^($PASS)$" '/^- /{f=$NF; sub(/\r$/,"",f)
       if (f !~ /^commits: / || (" " f ",") !~ ("[ ,]" h "[ ,]")) next
-      r=$1; sub(/^- +/,"",r); sub(/ +$/,"",r); v=toupper($2); sub(/^ +/,"",v)
+      r=$1; sub(/^- +/,"",r); sub(/ +$/,"",r); v=toupper($2); sub(/^ +/,"",v); sub(/ *\([^()]*\)$/,"",v)
       if (r == "exempt") ex=1; else last[r]=v}
       END{if (ex) exit 0; n=0; for (r in last) {n++; if (last[r] !~ okre) exit 1}; exit (n ? 0 : 1)}' "$L" 2>/dev/null \
       || { k=$((k+1)); echo "NO RECEIPT: ${c:0:7}"; }
   done
-  if [ "$k" = 0 ]; then echo "review receipts: $n commits in range, 0 without receipt"
-  else echo "review receipts: $n commits in range, $k without receipt — deploy blocked"; exit 1; fi
+  if [ "$k" = 0 ]; then echo "review receipts: $n commits in range under '$P', 0 without receipt"
+  else echo "review receipts: $n commits in range under '$P', $k without receipt — deploy blocked (each named by a NO RECEIPT line above)"; exit 1; fi
 fi
 ```
 **Expected: exactly one `review receipts:` line, and EXIT 0 only on `… 0 without receipt`.** Every other
@@ -218,8 +218,23 @@ missed `FIX REQUIRED` and `❌`, the ones code-reviewer, security-reviewer and v
 let one reviewer's APPROVE override another's BLOCK (this batch's pre-commit verifier, 2026-09-19). A
 verdict the list does not know BLOCKS — extend `PASS`, never the reverse. A `NO RECEIPT: <sha7>` line
 names each blocked commit; it accompanies the `… K without receipt — deploy blocked` line.
-**ALWAYS set `P` to EVERY code root.** A commit outside `P` is outside the gate by design; a `P` naming
-nothing tracked reads RED rather than `0 commits` (`/audit` 2026-09-16 A-11).
+**ALWAYS set `P` to EVERY code root, and ALWAYS READ THE PATHSPEC BACK OFF THE OUTPUT LINE.** A `P` naming
+nothing tracked reads RED (`/audit` 2026-09-16 A-11), but a `P` naming SOME roots passed an unreviewed range
+as `0 commits in range, 0 without receipt`, exit 0, with nothing in the line to show why (`/audit` 2026-09-20
+AA-7) — so every non-RED line now names `P`. `0 commits in range under '<P>'` on a range you know is not
+empty means `P` is wrong, not that the range is clean.
+**ALWAYS match the WHOLE verdict field, never a prefix.** The boundary `([^A-Z]|$)` matched a SPACE, so
+`APPROVE WITH NITS`, `APPROVED BUT BLOCKED` and `PASS 1 OF 3 - FIX REQUIRED` all cleared their commits with
+exit 0 (`/audit` 2026-09-20 AA-6). Only the bare token, optionally followed by a parenthetical
+(`APPROVE (2 LOW)`), is a pass.
+**NEVER build this regex in an `awk -v` value, and NEVER put a trailing `#` comment on the `awk -v` line.**
+`awk -v` eats one level of escaping, so a `\(` written there reaches the regex as a GROUP that matches
+anything: two successive repairs of AA-6 looked anchored and still passed `APPROVE WITH NITS`. The
+parenthetical is therefore stripped INSIDE the awk program, where no `-v` unescaping applies, and `okre`
+is a bare anchored alternation. **The strip takes ONE trailing `(…)` containing no parentheses** — a greedy
+`(.*)` deletes from the first `(` to the last `)`, which passed `APPROVE (2 LOW) then FIX REQUIRED (1 HIGH)`
+and `PASS (lint) / FAIL (types)` (this batch's pre-commit verifier, 2026-09-20). The awk program also continues on the following lines, so a comment after
+the assignment truncates it — `bash -n` catches that one, and only an ADJACENT-CASE probe catches the first.
 Any `NO RECEIPT` or `RED` line blocks the deploy until a review runs, the range is readable, or the
 owner exempts the commit. An exemption is written at commit time as a `Review-Exempt: <reason>`
 trailer; for a commit that already exists, NEVER rewrite it — append
@@ -228,7 +243,7 @@ trailer; for a commit that already exists, NEVER rewrite it — append
 reviewer when the project has one** — the gate above does NOT check this; the deploying session does, by
 reading the ledger for that commit (`/audit` 2026-09-16 A-18).
 
-**ALWAYS REPORT — `review receipts: N commits in range, 0 without receipt` or `review receipts: N commits in range, K without receipt — deploy blocked` or `review receipts: RED — range unreadable — deploy blocked` or `review receipts: RED — pathspec '<P>' matches no tracked file — deploy blocked` — COPIED from the fence's four `review receipts:` lines. NEVER emit nothing.**
+**ALWAYS REPORT — `review receipts: N commits in range under '<P>', 0 without receipt` or `review receipts: N commits in range under '<P>', K without receipt — deploy blocked (each named by a NO RECEIPT line above)` or `review receipts: RED — range unreadable — deploy blocked` or `review receipts: RED — pathspec '<P>' matches no tracked file — deploy blocked` — COPIED from the fence's four `review receipts:` lines. **ALWAYS COPY the `NO RECEIPT: <sha7>` lines with it** — one per blocked commit; they were printed and slotted nowhere (`/audit` 2026-09-20 AA-8). NEVER emit nothing.**
 
 ## Subagent mechanics
 

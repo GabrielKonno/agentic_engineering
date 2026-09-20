@@ -86,6 +86,22 @@ no owner (`/audit` 2026-09-02 K-18).
 
 **Verification mode requires an audit report with `applied sHASH` findings** — that is what its
 Part 1 re-reads. Only trigger (d) supplies one.
+
+**RESUMING AN `INCOMPLETE` RUN — the mode is unchanged; only the SCOPE narrows.** A run that wrote
+`Report status: INCOMPLETE` named the agents that did not return; the run that finishes it re-dispatches
+EXACTLY those agents over the SAME batch. ALWAYS:
+(Forward references, flagged: Phase 3 items 1 and 6, and "The defect series" above Phase 1.)
+1. **Same mode, same batch hash** — `verification (over sHASH)`, never a new baseline.
+2. **A NEW run number, and TODAY's file.** `audit-<today>.md` is where a report goes (Phase 3 item 1), so a
+   resume that crosses midnight opens a new file; ALWAYS name the run it completes in the header, and name
+   the resuming run in nothing else — the earlier report stays as written.
+3. **A NEW ID series** for findings the resuming run files. The incomplete run's series is closed.
+4. **Verdict only what the dead agents owed**, and say in the header which IDs the earlier run already
+   verdicted. The two ledgers are read together; neither is rewritten.
+5. **ONE defect-series row per RUN, not per batch** (see "The defect series"): the resuming row carries the
+   BATCH total and says which row it completes. Never amend the earlier row — the table is append-only.
+This was executed once with no written home, and every one of these five decisions was taken by judgement
+(`/audit` 2026-09-20 AA-5).
 **An apparatus-only, LOW-only batch does NOT fire trigger (d)** — `/maintenance` → "Cycle governance"
 owns the exit and its mechanical test; this table only maps the event (owner decision, 2026-09-16).
 
@@ -211,6 +227,10 @@ R-7, R-8). **Append a row; never re-derive the old ones.**
 | 19 | `audit-2026-09-19.md` | Run 2 | `**Run mode:** verification (over 87210b1)` | 4 of 9 (INCOMPLETE run — 3 of 6 agents returned; 24 of 33 applied IDs unverdicted) |
 | 20 | `audit-2026-09-20.md` | Run 3 | `**Run mode:** verification (over 87210b1)` | 12 of 33 (the BATCH total; this run completed row 19's INCOMPLETE pass — the same batch, one row per RUN) |
 
+**A resumed run appends its OWN row** (Phase 0 → "Resuming an `INCOMPLETE` run"): the earlier row keeps the
+partial denominator it was written with, and the later row carries the batch total and names the row it
+completes. Two rows for one batch is the honest shape; amending the earlier one is forbidden.
+
 **No trend** — derive each row's share from the table above; NEVER copy the percentages onto this
 line (it carried 11 figures for a 12-row table, `/audit` 2026-09-14 Y-13). Batch size has been
 exonerated five times and should not be re-litigated without new evidence.
@@ -327,7 +347,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.27.0 they are
+         **Expected: at least 5 paths.** As of v2.28.0 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
@@ -594,10 +614,17 @@ CHECKS:
         Report). Without this step the extraction set is two of three and D6.3 searches for phrases
         it never collected; D6.7 patched over the hole by phrase while D6.3 still could not see it
         (`/audit` 2026-09-03 N-33). **ALWAYS report the declarer count — `declarers extracted: N of M`, where **M is DERIVED,
-        never typed**: `grep -rlc "gap:" docs/modules/agents/ | wc -l`. A hard-coded `3` in the
+        never typed**, and it MUST read BOTH forms the shipped loop recognises — the indented `> X gap:` and
+        the bold `**X gap**`:
+        `grep -rlE '(^ *> *[A-Za-z][A-Za-z0-9 &./-]*gap:|[*][*][A-Za-z][A-Za-z0-9 &./-]*gap[*][*])' docs/modules/agents/ | wc -l`
+        A hard-coded `3` in the
         file whose D6.8 says "count them, do not assume two" is the same defect one level down,
         and it cannot detect a FOURTH declarer — which is the risk D6.8 exists to catch
-        (`/audit` 2026-09-03 P-11). `N < M` is RED.**
+        (`/audit` 2026-09-03 P-11). **`N != M` is RED — BOTH directions.** The earlier form grepped the
+        literal `gap:` with `-rlc` (where `-l` silently suppresses `-c`), so a declarer written only in the
+        bold form — which is exactly how `validator.md` declares — was invisible to `M` while the loop
+        counted it, and the only RED was `N < M`, the direction that case never takes
+        (`/audit` 2026-09-20 AA-14, AA-15).**
   D6.3. For each gap phrase: search ALL agent descriptions in docs/modules/agents/ AND
         examples/agents/ for matching vocabulary in the description: field
   D6.4. The match must be exact or near-exact (per component-design.md §3 vocabulary alignment)
@@ -1281,10 +1308,16 @@ no others** (`/audit` 2026-09-03 N-45, N-47):
 letters that read as digits, and `S`, which collides with this repo's `s<hash>` notation.
 **WHEN EVERY OTHER LETTER IS USED, ALWAYS TAKE `C` AND THEN `D`, IN THAT ORDER** — a finding ID
 carries a hyphen (`C-1`) and a dimension name never does (`C`, `D16`), so they stay distinct.
-**After `D`, ALWAYS ASK THE OWNER for the scheme before writing any finding** — never invent one:
-every ledger grep in both commands matches `[A-Z]-[0-9]+`, and a two-letter ID reads as nothing
-to all of them. The scheme ran out with no rule, and a run chose `A` by judgement (`/audit`
-2026-09-16 A-38).
+**The single letters are EXHAUSTED as of 2026-09-20 (`D` was the last).** The owner's decision that
+day: **two-letter series — `AA`, then `AB`, `AC` … — and every ledger grep in both commands matches
+`[A-Z]{1,2}-[0-9]+`.** Never widen one grep alone: a one-letter class reads a two-letter ID as
+nothing, and the finding disappears from the carry-forward instead of failing loudly (`/audit`
+2026-09-20 AA-5's class; the exhaustion itself is `/audit` 2026-09-16 A-38).
+**TWO DISTINCT CHECKS, both mandatory — they differ in pattern, corpus and expected result:**
+- **VISIBILITY**, over THIS report, after writing the ledger: `grep -c '^| <SERIES>-[0-9]' <this report>`
+  → **equal to the number of rows you wrote.** A lower number means a grep somewhere still reads the
+  one-letter class and your findings are invisible to it.
+- **COLLISION**, over EVERY report, before writing: the check in "ID allocation" below.
 
 **EXTENDING A CLOSED SERIES — who may, and how.** A finding surfaced OUTSIDE the run that owns a
 letter (a follow-up verification, or a maintenance session reconciling `origin/main`) is filed by
@@ -1292,7 +1325,10 @@ letter (a follow-up verification, or a maintenance session reconciling `origin/m
 suffix and never by re-using an ID. This was executed twice with no written home at all
 (`/audit` 2026-09-09 T-31); a `N-28b` is off-scheme, and a reused ID costs a re-file and an
 erratum, both of which happened (`/audit` 2026-09-03 N-46, and the `M-16` collision it names).
-**ALWAYS RUN THE COLLISION CHECK FIRST** — `grep -c "^| <ID> |" <the report>` → **expected 0.**
+**ALWAYS RUN THE COLLISION CHECK FIRST** — `grep -h "^| <ID> |" assets/docs/audit-*.md | wc -l` →
+**expected 0**, over EVERY report, never one file: a two-letter series is free only when no report carries
+it. **`grep -hc` over a glob prints one count PER FILE and cannot be compared to 0** (this batch's
+pre-commit verifier, 2026-09-20).
 **ALWAYS NUMBER SEQUENTIALLY, WITH NO SUFFIXES.**
 **ALWAYS MARK THE ROW `[filed by <what> on <date>]`** so a later reader can tell it from the run's
 own findings.
@@ -1405,7 +1441,10 @@ step is the carry-over half.
    TOUCH NOTHING ELSE.** Every other surface CITES that table; **if one repeats a figure, DELETE
    the copy rather than updating it.** Four surfaces carried copies, three disagreed with each
    other, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8).
-   **RECOMPUTE this run's `N of M` FROM THE LEDGER, never from a prior summary**, then append.
+   **RECOMPUTE this run's `N of M` FROM THE LEDGER, never from a prior summary**, then append. **A run
+   RESUMING an INCOMPLETE one recomputes over BOTH ledgers and appends the BATCH total, saying which row it
+   completes** (Phase 0 → "Resuming an `INCOMPLETE` run"): its own ledger alone is a fraction of the batch,
+   and the earlier row is never amended.
    **NEVER claim a single grep derives the whole series** — the reports predate their own
    conventions and the historical set matches no one pattern: measured, a `grep -l` returns 4
    (it counts FILES), an occurrence grep returns 12 (three runs carry both a heading and a

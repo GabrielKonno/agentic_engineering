@@ -66,10 +66,17 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    **ALWAYS ENUMERATE the rules, then COUNT each one's named signal in the session logs since the last
    framework-audit:**
    ```bash
-   # the components to measure — BLOCKQUOTE-ANCHORED and WRAP-TOLERANT: a reflow split `kept as` from
-   # `HYPOTHESES` across two `> ` lines and a line-anchored grep listed 0 components (`/audit` 2026-09-16 A-3);
-   # an unanchored join then listed THIS skill through its own report string. Only `> ` lines are joined.
-   for f in $(grep -rlE 'HYPOTHES' .claude/skills .claude/rules); do grep -E '^> ' "$f" | tr -d '\r' | tr '\n' ' ' | grep -qE 'kept as[ >]*HYPOTHES' && echo "$f"; done
+   # N (the components to measure) and M (every component that STATES the rule) differ in ONE respect:
+   # N keeps only `> ` lines before joining. Both JOIN, so the wrapped shape counts in both (`/audit`
+   # 2026-09-16 A-3), and both EXCLUDE the two files that DEFINE the mechanism — this skill and the
+   # component-design rule — whose own text otherwise matches and made M permanently exceed N
+   # (this check's pre-commit verifier, 2026-09-20).
+   hyp() { for f in $(grep -rlE 'HYPOTHES' .claude/skills .claude/rules); do
+     case "$f" in */framework-audit/*|*component?design*) continue ;; esac
+     if [ "$1" = quoted ]; then grep -E '^> ' "$f"; else cat "$f"; fi \
+       | tr -d '\r' | tr '\n' ' ' | grep -qE 'kept as[ >]*HYPOTHES' && echo "$f"; done; }
+   hyp quoted            # N — the components this check can measure; each gets a count below
+   hyp any | wc -l       # M — components stating the rule at all; expected: equal to N's count
    FM=.claude/phases/framework-metrics.md
    if [ ! -f "$FM" ]; then echo "RED: $FM missing — no window"; else
      SINCE=$(grep -E '^\| *[0-9]+ *\| *[0-9]{4}-[0-9]{2}-[0-9]{2} *\| *COMPLETE' "$FM" | tail -1 | awk -F'|' '{gsub(/[- ]/,"",$3); print $3}')
@@ -90,7 +97,11 @@ sessions have passed since the last framework-audit. The owner accepts or defers
    listing matched this very fence and its own report string, so `N/A` was unreachable; a bare
    `mutator|scratchpad` count read a negated "none — no scratchpad collision" as one occurrence and
    missed a real one phrased without either word (this check's pre-commit verifier, 2026-09-16).
-   **ALWAYS REPORT — `hypotheses: N components — [component: exercised K | not exercised]` or `hypotheses: N/A — no rule kept as HYPOTHESES`. NEVER emit nothing.**
+   **ALWAYS REPORT BOTH COUNTS — `hypotheses: N components of M carrying the rule — [component: exercised K | not exercised]` or `hypotheses: N/A — no rule kept as HYPOTHESES (M=0)`. NEVER emit nothing.**
+   **`N < M` is RED: a component states the rule outside a `> ` blockquote, and the listing cannot see it.**
+   Without the denominator a missed component emits the AUTHORIZED `N/A` string and reads as health
+   (`/audit` 2026-09-20 AA-1). **A rule kept as HYPOTHESES ALWAYS lives inside a `> ` blockquote** — that is
+   what makes it discoverable; `component_design.md` carries the authoring half.
 5. **Meta-metrics review** — read `framework-metrics.md`: is the escape rate rising? Any reviewer
    with high false-positive (cry-wolf)? Any Known Bug Pattern that never triggers (dead weight)?
    If skill-gate is installed, also: any promoted skill never loaded since promotion (cross-check
@@ -168,7 +179,7 @@ steps self-check: [1 match | RED]
 ### Q1 Dimension coverage: [orphaned dimensions, or "all owned"]
 ### Q2 Axis coverage: [missing axes/bridges, or "complete"]
 ### Q3 Recurring escape classes: [classes with no owner, or "none"]
-### Q4 Aspirational-vs-real: [claimed-but-not-running mechanisms, or "none"] + did-it-land: [N confirmed, M defective | N/A] + hypotheses: [N components — exercised K | not exercised, or N/A]
+### Q4 Aspirational-vs-real: [claimed-but-not-running mechanisms, or "none"] + did-it-land: [N confirmed, M defective | N/A] + hypotheses: [N components of M carrying the rule — exercised K | not exercised, or N/A (M=0)]
 ### Q5 Meta-metrics: [escape rate trend, dead KBPs, cry-wolf reviewers]
 ### Q6 Process back-sweep: [old artifacts a new process rule condemns]
 ### Proposed framework improvements (BEHAVIOR — needs owner approval):

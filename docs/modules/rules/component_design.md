@@ -193,6 +193,15 @@ normative text inside the executing skill and still failed for ~50 sessions, cos
 cleanups. Code checks (lint, type ratchets) already follow this discipline — process checks
 must too.
 
+**A rule KEPT AS HYPOTHESES ALWAYS lives inside a `> ` blockquote, with `kept as HYPOTHESES` on one line.**
+Its measurer (`framework-audit` → Q4 → the HYPOTHESIS check) discovers components by joining `> ` lines
+only, so a hypothesis stated in plain prose is measured by nobody while the check still reports its
+authorized `N/A` (`/audit` 2026-09-20 AA-1; the line-wrap half is `/audit` 2026-09-16 A-3).
+**`framework-audit` ships at `production`+ ONLY.** Below that tier nothing measures a hypothesis, so the
+rule that keeps one ALWAYS says `unmeasured — no measurer at <tier>` where it names its signal, exactly as
+a lineage doc's efficacy anchor does. The blockquote is still required: it is what makes the rule
+discoverable the day the tier rises (this batch's pre-commit verifier, 2026-09-20).
+
 ## 7. Native Mechanisms — Don't Reinvent
 
 Claude Code provides these natively — do not build custom replacements:
