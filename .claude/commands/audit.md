@@ -82,7 +82,7 @@ no owner (`/audit` 2026-09-02 K-18).
 | (a) after an upstream absorption | **baseline** |
 | (b) before a MINOR or MAJOR version bump | **baseline** |
 | (c) owner request | **baseline**, unless the owner names a batch to verify |
-| (d) after a `/maintenance` session applied an audit batch that touched a shipped surface or disposed of a HIGH/MEDIUM finding | **verification (over that batch's commit)** |
+| (d) after a `/maintenance` session applied an audit batch AND evidence from outside the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | **verification (over that batch's commit)** |
 
 **Verification mode requires an audit report with `applied sHASH` findings** — that is what its
 Part 1 re-reads. Only trigger (d) supplies one.
@@ -102,8 +102,9 @@ EXACTLY those agents over the SAME batch. ALWAYS:
    BATCH total and says which row it completes. Never amend the earlier row — the table is append-only.
 This was executed once with no written home, and every one of these five decisions was taken by judgement
 (`/audit` 2026-09-20 AA-5).
-**An apparatus-only, LOW-only batch does NOT fire trigger (d)** — `/maintenance` → "Cycle governance"
-owns the exit and its mechanical test; this table only maps the event (owner decision, 2026-09-16).
+**A batch with no evidence from outside the loop does NOT fire trigger (d), whatever it touched** —
+`/maintenance` → "Cycle governance" owns the exit and its mechanical test; this table only maps the event
+(owner decision, 2026-09-20, replacing the 2026-09-16 form, which fired on four consecutive cycles).
 
 **IF THAT REPORT IS MISSING, TRUNCATED OR CONDENSED, RECONSTRUCT IT FROM GIT AND FILE THE DAMAGE
 AS A FINDING — NEVER proceed on the damaged copy and NEVER downgrade to baseline silently.**

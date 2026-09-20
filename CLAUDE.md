@@ -149,17 +149,17 @@ Part 1 pass that re-reads the structure around every already-`applied` fix).
 
 **When it runs — ALWAYS one of these events, never a remembered interval:** (a) after every
 upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner request,
-(d) **after a `/maintenance` session applies an audit batch that touched a SHIPPED surface or
-disposed of a HIGH or MEDIUM finding** — in `verification` mode (`/audit` Phase 0), which re-reads
-the structure around every `applied` fix instead of only checking that the required text is
-present. Trigger (d) exists because the fixes themselves introduce defects.
-**Trigger (d) HAS AN EXIT, and it is mechanical:** a batch that touched no shipped surface
-(`docs/modules/`, `examples/`, `.claude/commands/bootstrap.md`,
-`.claude/commands/existing_project_adaptation.md`) AND disposed of only LOW findings does NOT fire it.
-Without that exit the rule was a loop by construction — audit, maintenance, audit — with no
-convergence criterion in "The defect series" and a shipped share of the work that `/audit` D17.6
-kept measuring as small (owner decision, 2026-09-16; the governing section is `/maintenance` →
-"Cycle governance"). **The per-run figures AND the run count live in ONE table — `/audit` → “The defect series” — and are NEVER repeated here**: four surfaces carried copies of this series, three disagreed, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8). `/audit` Phase 3 owns appending a row.
+(d) **after a `/maintenance` session applies an audit batch, AND evidence from OUTSIDE the loop is
+waiting** — a project evolution doc pending absorption, or a `HIGH` tagged `[observed in use]` — in
+`verification` mode (`/audit` Phase 0), which re-reads the structure around every `applied` fix instead
+of only checking that the required text is present. Trigger (d) exists because the fixes themselves
+introduce defects.
+**Trigger (d)'s EXIT is now the DEFAULT, and it is mechanical:** a batch with no pending upstream doc and
+no `[observed in use]` HIGH does NOT fire it, however much of the shipped surface it touched. Its findings
+are backlog. The earlier exit tested "touched no shipped surface AND only LOW findings" — an OR away from
+always firing, which it did for four consecutive cycles while the loop audited its own corrections
+(owner decision, 2026-09-20, replacing the 2026-09-16 one; the governing section is `/maintenance` →
+"Cycle governance", which carries the measurement). **The per-run figures AND the run count live in ONE table — `/audit` → “The defect series” — and are NEVER repeated here**: four surfaces carried copies of this series, three disagreed, and one asserted a count its own list contradicted (`/audit` 2026-09-04 R-7, R-8). `/audit` Phase 3 owns appending a row.
 **`/audit` Phase 3 OWNS keeping this series current** — it was stale for a full run because
 nobody did, and the batch that rewrapped a line inside this very paragraph did not notice
 (`/audit` 2026-09-03 P-26). The first TWO ran under trigger (c)/owner request;

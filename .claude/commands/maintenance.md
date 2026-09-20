@@ -211,15 +211,29 @@ every applied batch fired trigger (d), every non-clean verdict became a finding,
 prose controls the next run then audited, while the shipped share of the work — what projects
 actually receive — stayed small (`/audit` D17.6). These four rules stop the loop from feeding itself.
 
-1. **TRIGGER (d) FIRES ONLY WHEN IT CAN MATTER.** ALWAYS decide it with this command, never by
-   judgement:
+1. **TRIGGER (d) FIRES ONLY ON EVIDENCE FROM OUTSIDE THE LOOP.** ALWAYS decide it with this command,
+   never by judgement:
    ```bash
-   S=$(git diff --name-only <first>~1 <last> -- docs/modules examples .claude/commands/bootstrap.md .claude/commands/existing_project_adaptation.md | wc -l)
-   HM=$(grep -hE '^\| [A-Z]{1,2}-[0-9]+ \| (HIGH|MEDIUM) \|' assets/docs/audit-*.md | grep -cE 'applied `?s(<hash>|<hash>)')
-   [ "$S" -gt 0 ] || [ "$HM" -gt 0 ] && echo "trigger (d): fires — shipped files $S, HIGH/MEDIUM applied $HM" || echo "trigger (d): does not fire — apparatus-only, LOW-only"
+   # PEND counts docs GENUINELY pending — Step 0's cross-check: a doc this repo already absorbed is
+   # awaiting the PROJECT's own discharge and is NOT evidence owed to us (it fired on 2 such docs when
+   # this rule was first written, 2026-09-20).
+   PEND=0; for d in $(grep -L "STATUS.*upstreamed" projects/*/.claude/docs/framework-evolution-*.md 2>/dev/null); do
+     grep -rql "$(basename "$d")" assets/docs/framework-evolution-upstream-*.md || PEND=$((PEND+1)); done
+   OBS=$(grep -hE '^\| [A-Z]{1,2}-[0-9]+ \| HIGH \|' assets/docs/audit-*.md | grep -c '\[observed in use\]')
+   [ "$PEND" -gt 0 ] || [ "$OBS" -gt 0 ] && echo "trigger (d): fires — pending upstream docs $PEND, HIGH observed in use $OBS" || echo "trigger (d): does not fire — no evidence from outside the loop; this batch's findings are backlog"
    ```
-   **Expected: one of the two lines.** A batch that fires it proposes the verification audit;
-   one that does not reports so and proposes nothing.
+   **Expected: one of the two lines.** A batch that fires it proposes the verification audit; one that
+   does not reports so and proposes NOTHING — **a batch touching a shipped surface is no longer a reason
+   to re-audit.**
+   **A `HIGH` is `[observed in use]` ONLY when a project session, an incident or the owner produced it**
+   — the filer writes that tag on the ledger row. A HIGH a verification run found in the PREVIOUS batch's
+   own text is NOT evidence from outside the loop; it is backlog, like every other finding.
+   **Why this replaced the shipped-surface test (owner decision, 2026-09-20):** the old condition was
+   `shipped files > 0 OR HIGH/MEDIUM applied > 0`, an OR that every real fix satisfies — it fired on four
+   consecutive cycles and never once exercised its exit. Measured at that decision: 108 open findings across
+   the reports, 20 verification runs, and a shipped delta of 428 → 0 → 77 → 50 lines against a steady ~100
+   lines of apparatus per batch, with the last three HIGH/MEDIUM findings all defects in the immediately
+   preceding batch's own corrections. The loop was auditing its own output.
    **ALWAYS read the GLOB, never a typed report list — the batch's hashes do the scoping.** One file counted
    2 where 7 were applied across two reports (`/audit` 2026-09-16 A-32), and the list that replaced it was
    still typed from memory (`/audit` 2026-09-19 C-9).
