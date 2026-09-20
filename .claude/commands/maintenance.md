@@ -251,10 +251,13 @@ actually receive — stayed small (`/audit` D17.6). These four rules stop the lo
    sed -n '/^for k in "inventory sweep"/,/^done$/p' .claude/commands/maintenance.md | grep -oE '"[a-z][a-z ._-]*"' | wc -l   # expected: 27
    sed -n '/^## Post-change checklist/,/^## Version bumps/p' .claude/commands/maintenance.md | grep -cE '^[0-9]+\. \*\*'   # expected: 14
    ```
-   **Any increase is RED.** The next step this moratorium points at — owner-approved, not yet done —
-   is MIGRATING the most-used prose controls (the receipt key loop, the report-deletions gate, the
-   push-decay detector, applied-proof) into `.claude/scripts/` with selftests, after which their
-   prose becomes a pointer.
+   **Any increase is RED.** **This moratorium points at NO next step.** An earlier form promised a
+   migration of the most-used prose controls into `.claude/scripts/`, approved-but-unscheduled, with no
+   owner, no trigger and no step — three audits read it back as an aspirational mechanism while
+   `git diff -- .claude/scripts` stayed empty (`/audit` 2026-09-16 A-40). The owner withdrew that promise
+   on 2026-09-20: **the migration is NOT scheduled.** A control moves into a script only when a session
+   is already rewriting it for another reason AND the `d16-gate.sh` pattern — logic in the script, a
+   selftest, prose reduced to a pointer — is cheaper than amending it in place.
 4. **UPSTREAM EVIDENCE OUTRANKS SELF-AUDIT.** A project's evolution doc comes from real use; a
    verification run over apparatus comes from the loop itself. When Step 0 finds a genuinely
    pending doc and a verification audit is also owed, ALWAYS recommend the absorption first.
