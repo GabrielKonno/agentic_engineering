@@ -1,6 +1,7 @@
 ---
 name: migration-runner
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Guides safe database migration execution. Verifies migration files,

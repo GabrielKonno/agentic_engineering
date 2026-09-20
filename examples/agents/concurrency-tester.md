@@ -1,6 +1,7 @@
 ---
 name: concurrency-tester
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Detects race conditions, lost updates, and double-booking by analyzing

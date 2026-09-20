@@ -1,6 +1,7 @@
 ---
 name: api-security-scanner
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Scans API endpoints for security vulnerabilities using the tiered security model.

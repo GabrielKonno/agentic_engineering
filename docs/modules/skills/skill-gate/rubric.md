@@ -17,7 +17,9 @@ Apply every section to the draft. Sections 1–2 produce `problems[]` and
 ## 1. Form (failures reprove)
 
 **1.1 Frontmatter conventions** — per `assets/examples/README.md`: `name:`
-(lowercase, hyphenated), `effort:`, `invocation:`, `description:` (Pushy format for
+(lowercase, hyphenated), `effort:`, `invocation:`, `model:` (AGENTS only — mandatory and
+explicit, `inherit` included; a SKILL carrying it is a REPROVE, since nothing reads it),
+`description:` (Pushy format for
 process components: what + MUST-trigger + consequence of skipping; contextual
 format for knowledge components), lineage fields (`created:`, `derived_from:`).
 

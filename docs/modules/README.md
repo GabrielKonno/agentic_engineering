@@ -39,13 +39,14 @@ Agent templates are stored at `.claude/agents/[name].md`.
 
 ## Design Rationale
 
-### Three mechanisms for reasoning depth (complementary)
+### Four mechanisms for reasoning depth (complementary)
 
 1. **Agent-level (automatic):** `effort:` in agent/skill frontmatter. Applies when that agent/skill is invoked. Security agents always use `effort: high`.
 2. **Task-level recommendation (seconds):** AI classifies task complexity → recommends increased reasoning depth in the plan. Human adjusts before approving. No restart needed.
 3. **Session-level model switch (restart):** AI detects task needs a different model → saves state with MODEL SWITCH marker → requests restart. AI reverts settings after task completion.
+4. **Component-level model (declarative):** `model:` in AGENT frontmatter, decided by the component's risk class and written once. Mechanisms 1-3 only ESCALATE; this is the only one that DESCENDS, and without it every spawned agent inherits the orchestrator's model whatever its risk class. Policy: `rules/session_rules.md` → "Model by risk class".
 
-Mechanisms stack: a standard-effort session uses high effort when security agents run (1), can switch to high effort for a financial task (2), and can switch to a more capable model for an architecture task (3).
+Mechanisms stack: a standard-effort session uses high effort when security agents run (1), can switch to high effort for a financial task (2), and can switch to a more capable model for an architecture task (3) — while (4) holds each spawned agent at the model its own risk class warrants, independently of the other three.
 
 ### Two validation routes
 

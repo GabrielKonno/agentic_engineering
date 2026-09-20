@@ -13,6 +13,7 @@ description: >
 tools: Read, Glob, Grep, Write
 effort: medium
 invocation: subagent
+model: inherit
 receives: draft path + rubric path (.claude/skills/skill-gate/rubric.md) + component index (names and descriptions only) + review cycle number. NOTHING else — no session history, no authorial intent, no explanation of the draft.
 produces: JSON verdict (schema below) written to .claude/skill-gate/review_reports/ and returned as the report
 created: framework-v2.4.0 (pre-validated)

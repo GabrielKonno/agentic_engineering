@@ -1,6 +1,7 @@
 ---
 name: performance-auditor
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Measures and audits code performance against baselines — detecting N+1 queries,

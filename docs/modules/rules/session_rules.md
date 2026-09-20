@@ -177,8 +177,53 @@ Derive from each task's `Complexity:` field. If no complexity field exists, clas
 1. **Agent-level (automatic):** `effort:` in agent/skill frontmatter. Security agents always `effort: high`.
 2. **Task-level (2 seconds):** AI MUST recommend effort level in plan and sprint proposal. Human adjusts if needed.
 3. **Session-level model switch (5 seconds):** AI saves state with MODEL SWITCH marker → requests restart. The procedure lives in two installed components: `project-md-updater` §"MODEL SWITCH entries" WRITES the marker block into `.claude/phases/project.md`, and `sprint-proposer` §1b DETECTS it on restart and resumes from it.
+4. **Component-level model (declarative):** `model:` in AGENT frontmatter. Mechanisms 1-3 only ESCALATE; this is the only one that DESCENDS. See "Model by risk class" below.
 
-Mechanisms stack: a standard-effort session uses high effort when security agents run (mechanism 1), can switch to high effort for a financial task (mechanism 2), and can switch to a more capable model for an architecture task (mechanism 3).
+Mechanisms stack: a standard-effort session uses high effort when security agents run (mechanism 1), can switch to high effort for a financial task (mechanism 2), and can switch to a more capable model for an architecture task (mechanism 3) — while mechanism 4 holds each spawned agent at the model its own risk class warrants, independently of the other three.
+
+## Model by risk class — the DESCENDING direction (mechanism 4)
+
+Mechanisms 1-3 answer "when is the current model NOT ENOUGH?" and have no answer for "when is it
+MORE than enough?". An agent with no `model:` inherits the orchestrator's model, so in an autonomous
+loop — where the orchestrator runs the most capable model available — EVERY agent of EVERY risk
+class runs that model, including the ones that only extract or compare.
+
+**ALWAYS set `model:` in the frontmatter of every agent (`invocation: subagent`), decided by the
+component's RISK CLASS, written ONCE, and never adjusted per session:**
+
+| What the component's contract produces | `model:` | Why |
+|---|---|---|
+| A VERDICT that gates a commit — reviewers, validator, arbitrator, red/blue team, criteria-enforcer, skill-reviewer | `inherit` | The verdict IS the rigor, and rigor is not a cost lever. |
+| An EXTRACTION or a COMPARISON carrying no verdict — pattern extractors, sync checkers | `sonnet` | The output is a list, not a judgement. |
+| The BREADTH pass of a fan-out — audit dimensions, parallel sweeps | `sonnet` | Cheap breadth, reserved depth: the depth specialists it escalates to keep `inherit`. |
+
+**ALWAYS WRITE `model: inherit` EXPLICITLY — never omit the field to mean it.** An absent field and
+a decided one are indistinguishable by grep, and the whole value of this mechanism is that
+`grep -rn "^model:" .claude/agents/` answers which model reviewed which commit.
+
+**NEVER WRITE `model:` INTO A SKILL.** Skills are `invocation: user` or `invocation: inline` — they
+load into the current context and never spawn, so nothing reads the field. That is the `last_eval:`
+class: a field with no executor.
+
+**NEVER DOWNGRADE a component's model because a run of tasks validated clean.** The model is fixed
+by the component's risk class, never by the streak — the same rule the validation geometry carries.
+
+**NEVER PIN a dated model ID.** Any generation alias is permitted (`opus`, `sonnet`, `haiku`,
+`fable`) plus `inherit`. The table above gives the DEFAULT per risk class, not the whole set — a
+project whose orchestrator runs below the top tier may legitimately RAISE a money-path reviewer,
+which is mechanism 4 used in the escalating direction. A pinned dated ID is a version claim that
+decays silently.
+
+> kept as HYPOTHESES — that a cheaper model performs equivalently on a component whose contract is
+> extraction or comparison is an EMPIRICAL claim, and no run has measured it. Signal: a validation
+> post-mortem whose root-cause class is `review-missed-pattern` or `weak-criterion` on a task whose
+> chain included a non-`inherit` agent — it lives in the Post-Mortem Ledger in `project.md`.
+> **unmeasured — no measurer below `production`, AND none above it either:** `framework-audit` Q4
+> is the HYPOTHESIS check, but its counting command reads ONE hardcoded signal out of
+> `## Orchestration lessons` in the session logs, so it enumerates this component and can produce
+> no count for it. Naming Q4 as the measurer without saying this would be the `last_eval:` class —
+> a field whose executor does not reach it. Q4 measures this rule only once its count becomes
+> per-component and can read the Post-Mortem Ledger.
 
 ## Documentation quality
 

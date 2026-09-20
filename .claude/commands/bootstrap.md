@@ -513,6 +513,15 @@ correctly). No skill found? That is fine — skills are optional.
 
 **Before creating any agent or skill in the steps below:** read `assets/examples/README.md` for conventions (frontmatter, structure, output format, invocation type). Then check if a relevant example exists in `assets/examples/agents/` or `assets/examples/skills/`. If found, use as a structural template — adapt to this project's stack and domain. Do NOT copy verbatim if not perfectly suitable for the project.
 
+**ALWAYS WRITE `model:` in the frontmatter of every AGENT created below, explicitly — `inherit`
+included — and NEVER write it into a skill** (`.claude/rules/session-rules.md` → "Model by risk
+class"). The value follows what the agent's report PRODUCES: `inherit` for any component whose
+verdict gates a commit — which is every reviewer, the validator, the arbitrator, red/blue team and
+every specialist in `assets/examples/agents/` — and a cheaper generation alias only for a contract
+that extracts or compares without judging. **The `guards` CI stage wired in Step 14.2 runs
+`scripts/check-agent-frontmatter.mjs`, which FAILS on an agent with no `model:` and on a skill that
+has one**, so an agent authored without it turns the pipeline red on the project's first run.
+
 ### Step 7 — Create code-reviewer agent
 
 **`production-financial` (Step 1.2) — ALWAYS add, in BOTH branches below, a line under

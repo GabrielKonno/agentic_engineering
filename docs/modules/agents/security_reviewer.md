@@ -6,6 +6,7 @@
 ---
 name: security-reviewer
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Security review agent based on OWASP Top 10 and common attack vectors.

@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.28.0
+# Agentic Engineering Framework v2.29.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -147,7 +147,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.28.0)
+│   ├── modules/                            ← Single source of truth (v2.29.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -407,6 +407,8 @@ Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is
 - **Segment mode:** you approve a fixed task list once; the AI cuts it into phases by dependency and resource conflicts, runs every phase, and reports at each boundary. If the session ends mid-segment, a `LOOP CONTINUATION` marker lets the next session resume with no new approval. Say "cancel the loop" to revoke.
 - **Continuous mode:** you approve an ADMISSION POLICY instead of a list. The AI re-reads the backlog at every task boundary and executes every task that passes it — including tasks you register mid-session. Tasks the AI discovers enter only in a capped class; large or architecture/security tasks are held for you. A checkpoint digest every 10 tasks and a discovery brake keep you supervising. An empty queue is idle, not an end; re-entry across sessions uses the native `/loop /sprint-proposer continuous`. Say "cancel continuous mode" to revoke.
 - **What it never does:** activate by itself, relax the validation geometry after a streak of green, run an audit autonomously, or run an agent that mutates the working tree in parallel with one that reads it.
+
+**Model by Risk Class** — Every agent declares its own `model:` in frontmatter, decided by what its report produces and written once. A component whose verdict gates a commit stays at `inherit` (the orchestrator's model); one that only extracts or compares runs a cheaper tier, as does the breadth pass of an audit fan-out. The field is written EXPLICITLY even when it is `inherit`, because an absent field and a decided one are indistinguishable — and the whole point is that `grep -rn "^model:"` answers which model reviewed which commit. Skills never carry it: a skill loads into the current context and never spawns.
 
 **Review Receipts** — A reviewer verdict counts only when its final report is saved under `.claude/logs/review-reports/` and cited by a line in that folder's receipts ledger. Before a migration reaches production or the deploy PR opens, every code commit in the range must carry a receipt or an explicit owner exemption; the AI checks this and blocks the deploy otherwise.
 

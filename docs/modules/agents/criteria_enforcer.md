@@ -7,6 +7,7 @@ description: >
 tools: Read, Write
 effort: high
 invocation: subagent
+model: inherit
 receives: '"Task: [task name exactly as in pendencias.md]" — passed by main agent in prompt'
 produces: criteria upgrade summary — list of upgraded criteria (WEAK→STRONG) or "all STRONG — no changes"
 created: framework-v1.6.0 (pre-validated)

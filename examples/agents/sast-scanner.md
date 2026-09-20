@@ -1,6 +1,7 @@
 ---
 name: sast-scanner
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Performs static application security testing by running SAST tools (semgrep,

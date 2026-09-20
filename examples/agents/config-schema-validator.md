@@ -1,6 +1,7 @@
 ---
 name: config-schema-validator
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Validates environment configuration against schema (types, required values,

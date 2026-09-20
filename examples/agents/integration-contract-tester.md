@@ -1,6 +1,7 @@
 ---
 name: integration-contract-tester
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Validates integrations with external APIs and third-party services.

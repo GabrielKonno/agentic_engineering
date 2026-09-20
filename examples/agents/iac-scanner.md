@@ -1,6 +1,7 @@
 ---
 name: iac-scanner
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Reviews infrastructure-as-code for security misconfigurations by checking IAM

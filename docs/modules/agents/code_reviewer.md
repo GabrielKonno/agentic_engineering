@@ -6,6 +6,7 @@
 ---
 name: code-reviewer
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Reviews code after implementation. Spawned as independent subagent for

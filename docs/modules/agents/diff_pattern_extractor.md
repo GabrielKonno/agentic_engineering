@@ -7,6 +7,7 @@ description: >
 tools: Read, Edit, Bash, Glob, Grep
 effort: medium
 invocation: subagent
+model: sonnet
 receives: no extra context needed — reads git diff and .claude/agents/code-reviewer.md autonomously
 produces: summary of patterns added/modified/removed, with FIX/DERIVED/CAPTURED classification for each
 created: framework-v1.6.0 (pre-validated)

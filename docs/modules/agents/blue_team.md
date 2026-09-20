@@ -7,6 +7,7 @@
 ---
 name: blue-team
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Defensive security verifier. Spawned as independent subagent after validation

@@ -7,6 +7,7 @@
 ---
 name: red-team
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Adversarial security tester for [STACK]. Spawned as independent subagent

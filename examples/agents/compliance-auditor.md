@@ -1,6 +1,7 @@
 ---
 name: compliance-auditor
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Audits personal data handling for LGPD/GDPR compliance by verifying consent

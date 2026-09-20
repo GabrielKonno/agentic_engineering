@@ -1,6 +1,7 @@
 ---
 name: visual-regression-tester
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Captures and compares UI screenshots across viewports and browsers to detect

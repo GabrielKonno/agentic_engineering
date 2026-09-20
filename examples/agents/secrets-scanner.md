@@ -1,6 +1,7 @@
 ---
 name: secrets-scanner
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Scans code and git history for leaked credentials using high-entropy detection,

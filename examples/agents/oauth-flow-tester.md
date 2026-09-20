@@ -1,6 +1,7 @@
 ---
 name: oauth-flow-tester
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Tests OAuth 2.0, OIDC, and SAML federation flows for protocol correctness —

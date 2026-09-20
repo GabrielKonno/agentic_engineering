@@ -7,6 +7,7 @@ description: >
 tools: Read, Write
 effort: medium
 invocation: subagent
+model: sonnet
 receives: no extra context needed — reads assets/docs/prd.md and .claude/phases/project.md autonomously
 produces: one of three outcomes — "synced vX→vY [changes]", "no changes detected", or "mismatch found — awaiting user input"
 created: framework-v1.6.0 (pre-validated)

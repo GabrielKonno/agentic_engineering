@@ -1,6 +1,7 @@
 ---
 name: data-integrity-checker
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Verifies referential integrity, cascade completeness, and denormalized data

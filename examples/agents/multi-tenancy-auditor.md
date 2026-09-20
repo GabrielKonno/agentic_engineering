@@ -1,6 +1,7 @@
 ---
 name: multi-tenancy-auditor
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Audits multi-tenant implementations by inspecting data-isolation and

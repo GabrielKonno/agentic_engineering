@@ -1,6 +1,7 @@
 ---
 name: load-tester
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Executes load and stress tests against API endpoints, measuring p50/p95/p99

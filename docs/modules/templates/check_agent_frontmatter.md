@@ -84,6 +84,11 @@ function extractFrontmatter(src) {
 // só o piso dependency-free p/ os indicadores inequívocos.
 const SPECIAL_START = new Set(["#", "&", "*", "!", "@", "%", "`"]);
 
+// Valores aceitos em `model:` (session-rules → "Model by risk class"). ALIASES DE GERAÇÃO, nunca um
+// ID datado: um ID pinado é uma alegação de versão que decai em silêncio. `inherit` = o modelo do
+// orquestrador, escrito EXPLICITAMENTE para que a decisão seja greppável.
+const MODEL_VALUES = new Set(["inherit", "opus", "sonnet", "haiku", "fable"]);
+
 /**
  * Checagem ESTRUTURAL, sem parser — pega a classe FRAMEWORK-AGENT-YAML-01 e vizinhas.
  * Retorna { keys: Set<string>, errors: string[] }.
@@ -177,6 +182,32 @@ for (const f of [...agentFiles(), ...skillFiles()]) {
           `(o registry resolve pelo nome — divergência = componente inalcançável pelo caminho esperado).`,
       );
     }
+  }
+
+  // mecanismo 4 (session-rules → "Model by risk class"): `model:` é a única alavanca que DESCE,
+  // e ela só tem leitor em AGENTE — uma skill carrega no contexto atual e nunca spawna.
+  // Os dois sentidos são RED: ausente num agente, presente numa skill.
+  if (f.kind === "agent") {
+    if (!keys.has("model")) {
+      problems.push(
+        `${rel}: frontmatter sem a chave obrigatória "model:" (session-rules → "Model by risk class"). ` +
+          `Ausência e decisão são indistinguíveis por grep — escreva "model: inherit" explicitamente.`,
+      );
+    } else {
+      const modelLine = fm.split("\n").find((l) => /^model:/.test(l)) ?? "";
+      const modelVal = modelLine.replace(/^model:\s*/, "").replace(/^["']|["']$/g, "").trim();
+      if (!MODEL_VALUES.has(modelVal)) {
+        problems.push(
+          `${rel}: model "${modelVal}" não é "inherit" nem um alias de geração (${[...MODEL_VALUES].join(", ")}) ` +
+            `— um ID datado é uma alegação de versão que decai em silêncio.`,
+        );
+      }
+    }
+  } else if (keys.has("model")) {
+    problems.push(
+      `${rel}: skill com "model:" — uma skill carrega no contexto atual e nunca spawna, então nada ` +
+        `lê o campo. É a classe "last_eval:": um campo sem executor.`,
+    );
   }
 
   // reforço js-yaml: se o parse falhar, é a prova definitiva de que o registry não carrega.

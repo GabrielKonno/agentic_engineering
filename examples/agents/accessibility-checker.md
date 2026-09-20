@@ -1,6 +1,7 @@
 ---
 name: accessibility-checker
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Audits UI for WCAG 2.1 AA compliance — checking semantic HTML, ARIA attributes,

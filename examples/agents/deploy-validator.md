@@ -1,6 +1,7 @@
 ---
 name: deploy-validator
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Validates production readiness by walking a pre-deployment checklist across

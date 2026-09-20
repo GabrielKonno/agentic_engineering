@@ -7,6 +7,7 @@
 ---
 name: arbitrator
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Resolves conflicts between validator ❌ and contradicting mechanical evidence.

@@ -1,6 +1,7 @@
 ---
 name: dependency-auditor
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Audits project dependencies by running security scans (npm audit or stack

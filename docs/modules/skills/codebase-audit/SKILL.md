@@ -42,8 +42,14 @@ defers — this is a large unit of work, prioritized like any other.
 it when the run ends. A usage-limit cut must leave the audit visible as INCOMPLETE, never as "never
 opened"; an `IN PROGRESS` row NEVER resets the cadence clock.
 
-Spawn `general-purpose` subagents IN PARALLEL, one per dimension. Each reads the relevant slice
-of the codebase and returns findings only (no fixes):
+**ALWAYS SPAWN the breadth fan-out at `model: sonnet`** — one `general-purpose` subagent per
+dimension, IN PARALLEL. This pass declares no verdict: it returns findings that step 2 confirms
+before anything acts on them, which is exactly the class `session-rules` → "Model by risk class"
+(mechanism 4) puts below `inherit`. **"Breadth is cheap" was this skill's stated discipline with
+nothing making it cheap** — a spawn that names no model inherits the orchestrator's, so every
+dimension ran at the most capable model the session had.
+
+Each reads the relevant slice of the codebase and returns findings only (no fixes):
 
 - **Separation / maintainability** — oversized files (vs `quality-budgets.md` caps), god modules,
   cross-module imports that violate the Architectural Decisions, duplication. **Process components
@@ -192,7 +198,7 @@ C3), and an untagged task is read as `owner`.
 ### Completion status: COMPLETE | INCOMPLETE (steps N,M not run — reason)   ← ALWAYS first line
 ### Steps: 1 ✅ · 2 ✅ · 3 ✅ · 4 ✅ · 5 ✅ · 6 ✅ · 7 ✅   (⏭️ only with a structural reason in parentheses)
 ### Steps self-check: [1 match | RED — the metrics.md row's Status cell carries no `steps:` line, or a bare ⏭️]   (ALWAYS present)
-### Breadth findings (by dimension):
+### Breadth findings (by dimension) — fan-out model: [sonnet | inherit — structural reason]:
 | Dimension | Findings | Severity | → task added |
 ### Depth findings (specialists run): [list, or "none — no confirmed money/security findings"]
 ### Ops checklist: [PASS count / GAP list]   (production+)

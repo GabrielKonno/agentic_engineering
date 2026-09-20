@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.28.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.29.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -297,6 +297,7 @@ gained it and no audit dimension looked for it (`/audit` 2026-09-09 T-32).
 - **validator agent** (`.claude/agents/validator.md`) — mandatory, independent verification
 - **arbitrator agent** (`.claude/agents/arbitrator.md`) — mandatory, conflict resolution
 - **`invocation:` frontmatter** on all review/validation agents/skills (`subagent` or `inline`)
+- **`model:` frontmatter** on every AGENT — mandatory and explicit, `inherit` included; FORBIDDEN on skills (`session-rules` → "Model by risk class"; the guard enforces both directions)
 - **`receives:` / `produces:` frontmatter** on `invocation: subagent` agents/skills (I/O contract)
 - **Lineage frontmatter** on all agents/skills (`created:`, `last_eval:`, `fixes:`, `derived_from:`)
 - **Efficacy tracking** on Known Bug Patterns (`[added: sN | triggered: sN | false-positive: N]`)
@@ -581,7 +582,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.28.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.29.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -644,6 +645,17 @@ quotes strings the gate no longer prints. `framework-audit` gains a denominator 
 refresh it with `component_design.md`, which now carries the authoring half (a hypothesis lives in a `> `
 blockquote). A project that refreshes neither keeps a gate that passes prefixed verdicts
 (`/audit` 2026-09-20 AA-6, AA-7, AA-8, AA-1).
+
+**v2.29.0 migration — the frontmatter guard and EVERY agent move together.** Mechanism 4
+(`session-rules` → "Model by risk class") makes `model:` mandatory in every `.claude/agents/*.md`
+and forbidden in every `.claude/skills/*/SKILL.md`, and the refreshed
+`scripts/check-agent-frontmatter.mjs` FAILS on both. So `session-rules.md`, the guard, and every
+agent the project holds MUST be refreshed together — refreshing the guard alone turns the
+project's `guards` CI stage red on every pre-v2.29.0 agent. The coupled set, the owner-facing
+wording and the two honest paths live ONCE, at the guard step's "COUPLED REFRESH" note; this line
+is the index, not a second home. `codebase-audit` also gains a breadth-pass model and a wider
+`Breadth findings` slot — refresh it with `session-rules.md` or its report prints a heading the
+skill no longer mandates.
 
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
@@ -755,6 +767,21 @@ An invalid YAML frontmatter makes a component silently VANISH from the registry
 project has a `package.json`, register `"check:agents": "node scripts/check-agent-frontmatter.mjs"`;
 if it has a CI pipeline, add a `guards` stage running it (dependency-free, no install needed).
 Then RUN it once now — an adapted project may already carry a broken frontmatter.
+
+**COUPLED REFRESH — `session-rules.md`, the guard and EVERY agent move TOGETHER, or the project's
+CI goes red.** As of
+v2.29.0 the guard also enforces mechanism 4 (`session-rules` → "Model by risk class"): `model:` is
+MANDATORY in every `.claude/agents/*.md` and FORBIDDEN in every `.claude/skills/*/SKILL.md`. A
+project adapted before v2.29.0 carries neither.
+
+**ALWAYS TELL THE OWNER, at the `DIFFERS from framework: check-agent-frontmatter.mjs` decision,
+that refreshing the guard alone will fail on every existing agent** — then offer the two honest
+paths: refresh `session-rules.md`, the guard AND every agent in the SAME pass — all three, so the
+policy the guard enforces is the one the project holds (each agent's value is decided by what its
+report produces: `inherit` for any gating verdict) — or keep the current guard until that pass is
+scheduled.
+
+**NEVER refresh the guard silently on a project whose agents carry no `model:`.**
 
 **ALWAYS STOP on any line beginning `FAILED` printed by the fences of this step AND of Step 2.9b** —
 `FAILED to copy`, `FAILED to extract`, `FAILED to refresh`, `FAILED to compare`, and the backstops' `FAILED:` lines. The target is unwritable, occupied by a file or directory

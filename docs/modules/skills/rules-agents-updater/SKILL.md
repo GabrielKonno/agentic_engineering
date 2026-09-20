@@ -77,7 +77,9 @@ ONLY if product scope changed. Always update changelog with new version.
 
 **When:** A complex process was executed 2+ times and will recur (skill), or a specialized review role is needed (agent).
 
-Check `assets/examples/` for conventions and structural templates before creating. Frontmatter must include `effort:`, `invocation:`, and lineage fields.
+Check `assets/examples/` for conventions and structural templates before creating. Frontmatter must include `effort:`, `invocation:`, and lineage fields. **An AGENT must ALSO carry
+`model:`, explicitly** (`inherit` included) — `session-rules` → "Model by risk class"; the guard this
+skill invokes fails on a missing one. **A SKILL must NEVER carry it.**
 
 **Do NOT create if:** one-time pattern, rules file more appropriate, Known Bug Pattern suffices, or duplicates existing content.
 

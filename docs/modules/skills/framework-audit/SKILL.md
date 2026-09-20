@@ -37,6 +37,13 @@ sessions have passed since the last framework-audit. The owner accepts or defers
 
 ## Process — the six questions (fan out general-purpose agents to answer each)
 
+**ALWAYS SPAWN this fan-out at `inherit`, NEVER at the breadth tier `codebase-audit` uses.** The
+exemption is stated because an unstated one is indistinguishable from a forgetting: the six
+questions below are META-JUDGEMENT ("which dimension has no owner?", "which claimed mechanism is
+not running?"), not the dimension ENUMERATION that puts `codebase-audit`'s breadth pass under
+`session-rules` → "Model by risk class". A question about what the process cannot see is the last
+place to spend less.
+
 1. **Dimension coverage** — does every dimension have an owner? (review/learning, continuity/
    memory, ops, security, eval.) Which is orphaned?
 2. **Axis coverage** — does the MACRO axis exist and run (codebase-audit)? The temporal bridge
@@ -182,6 +189,7 @@ steps self-check: [1 match | RED]
 ### Q4 Aspirational-vs-real: [claimed-but-not-running mechanisms, or "none"] + did-it-land: [N confirmed, M defective | N/A] + hypotheses: [N components of M carrying the rule — exercised K | not exercised, or N/A (M=0)]
 ### Q5 Meta-metrics: [escape rate trend, dead KBPs, cry-wolf reviewers]
 ### Q6 Process back-sweep: [old artifacts a new process rule condemns]
+### Fan-out model: [inherit | RED — a breadth tier was used; the six questions are meta-judgement]
 ### Proposed framework improvements (BEHAVIOR — needs owner approval):
 | # | Improvement | Dimension | Rationale |
 ### Awaiting owner decision: approve / defer / reject each.

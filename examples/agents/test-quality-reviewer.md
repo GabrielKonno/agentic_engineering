@@ -1,6 +1,7 @@
 ---
 name: test-quality-reviewer
 invocation: subagent
+model: inherit
 effort: medium
 description: >
   Reviews test code by checking assertion quality, false-positive prevention

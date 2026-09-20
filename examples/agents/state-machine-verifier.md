@@ -1,6 +1,7 @@
 ---
 name: state-machine-verifier
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Verifies state machine implementations by extracting states and transitions

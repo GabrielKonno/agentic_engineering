@@ -87,12 +87,18 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 
 **A convention stated for one kind is NEVER automatically true of another.** The `**Frontmatter:**`
 block below is the AGENT and SKILL contract; **rules examples do not use it at all** — 11 of 11
-carry `domain:` / `applies_to:` instead, with no `name:`, `effort:` or `invocation:` field. Read
+carry `domain:` / `applies_to:` instead, with no `name:`, `effort:`, `invocation:` or `model:` field. Read
 the per-kind sections and measure before citing any of these as universal (`/audit` K-29, L-31).
 
 **Frontmatter:**
 - `name:` — lowercase, hyphenated
 - `effort:` — `medium` for checklists and patterns, `high` for security, financial, architectural
+- `model:` — **AGENTS ONLY, and ALWAYS written explicitly.** `inherit` for any component whose
+  report carries a gating verdict (every example here does); a generation alias (`sonnet`, `haiku`)
+  only when the contract is extraction or comparison with no verdict. Never a dated ID. **A SKILL
+  NEVER carries it** — a skill loads into the current context and never spawns, so nothing reads
+  the field. Policy and risk-class table: `session-rules` → "Model by risk class"; the frontmatter
+  guard fails on a missing one and on a skill that has one.
 - `description:` — explains when to use. Two conventions:
   - **Process skills** (workflow steps): pushy format — `[What]. MUST [trigger]. [Consequence of skipping].`
   - **Knowledge skills** (reference patterns): contextual format — explains when the skill is useful, no imperative trigger

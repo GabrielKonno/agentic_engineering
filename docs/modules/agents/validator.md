@@ -7,6 +7,7 @@
 ---
 name: validator
 invocation: subagent
+model: inherit
 effort: high
 description: >
   Independent validation agent. Spawned via Agent tool after implementation.
