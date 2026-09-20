@@ -209,6 +209,7 @@ R-7, R-8). **Append a row; never re-derive the old ones.**
 | 17 | `audit-2026-09-16.md` | Run 1 | `**Run mode:** verification (over 5ecefa9 · 28b157a · db70667 · 847d18f)` | 15 of 31 |
 | 18 | `audit-2026-09-19.md` | Run 1 | `**Run mode:** verification (over 194f44a)` | 7 of 18 |
 | 19 | `audit-2026-09-19.md` | Run 2 | `**Run mode:** verification (over 87210b1)` | 4 of 9 (INCOMPLETE run — 3 of 6 agents returned; 24 of 33 applied IDs unverdicted) |
+| 20 | `audit-2026-09-20.md` | Run 3 | `**Run mode:** verification (over 87210b1)` | 12 of 33 (the BATCH total; this run completed row 19's INCOMPLETE pass — the same batch, one row per RUN) |
 
 **No trend** — derive each row's share from the table above; NEVER copy the percentages onto this
 line (it carried 11 figures for a 12-row table, `/audit` 2026-09-14 Y-13). Batch size has been
