@@ -452,26 +452,32 @@ The framework's `.gitignore` contains `projects/` — framework git never tracks
 
 ### Why templates reference files that don't exist in this repo
 
-Templates in `docs/modules/` (templates/, agents/, rules/) contain paths such as `.claude/agents/prd-sync-checker.md` and `.claude/agents/code-reviewer.md`. These paths do **not** resolve in the framework repository — they resolve in the bootstrapped project.
+Templates in `docs/modules/` (templates/, agents/, rules/, skills/) contain paths such as `.claude/rules/session-rules.md` and `.claude/agents/prd-sync-checker.md`. These paths do **not** resolve in the framework repository — they resolve in the bootstrapped project.
 
 This is intentional: templates are blueprints for project files. The paths they contain are the paths those files will have *after bootstrap creates them*. When reading a template, the context is the future project directory, not the framework root.
 
 **Example:** `templates/claude_md.md` contains:
 
-> "4. PRD sync check — invoke `.claude/agents/prd-sync-checker.md` as subagent"
+> "`.claude/rules/session-rules.md`" (the pointer every session reads for its ceremony by tier)
 
-This path does not exist in the framework repo. It will exist at `projects/[name]/.claude/agents/prd-sync-checker.md` after Step 5.7 copies it from `docs/modules/agents/prd_sync_checker.md`.
+This path does not exist in the framework repo. It will exist at `projects/[name]/.claude/rules/session-rules.md` after Step 5.7 extracts it from `docs/modules/rules/session_rules.md`. (The example used to quote a `prd-sync-checker` line the template no longer carries — `/audit` 2026-09-21 C-25.)
 
 **Files that only exist after bootstrap:**
 - `.claude/phases/project.md`, `pendencias.md`, `done_tasks.md` — created at Steps 3-4
-- `.claude/agents/*.md` — created at Steps 7-11
+- `.claude/agents/*.md` — process agents copied at Step 5.7, `skill-reviewer` at Step 5.8
+  (`internal-tool`+), the review and validation agents created at Steps 7-11 (Red/Blue Team at
+  Step 9 only when PRD risk signals warrant it), specialists pre-installed at Step 12.5 for each
+  kept gap that matches one
 - `.claude/skills/*/SKILL.md` — copied at Step 5.7, additional skills at Steps 6 and 12
 - `.claude/settings.json` — created at Step 14
 - `assets/examples/` — copied at Step 1.5
+- `.claude/rules/*.md` — session, evolution and component rules extracted at Step 5.7, ops and
+  quality-budget rules at Step 5.8 (`production`+), domain rules pre-created at Step 13
 
 **Files that only exist during development (not at bootstrap):**
-- `.claude/rules/*.md` — created when domain patterns accumulate (3+ patterns from same domain)
-- `.claude/logs/*.md` — session logs, one per session (first created at end of session 0)
+- further `.claude/rules/*.md` — added when domain patterns accumulate (3+ patterns from same domain)
+- `.claude/logs/*.md` — session logs, one per session; the directory is initialized at Step 14
+  and the first log is written by session 1, not session 0
 
 ### Runtime flow (inside a bootstrapped project)
 

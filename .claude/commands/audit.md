@@ -257,6 +257,8 @@ agent executing D10.0 pushed two planted commits to the real remote (`/audit` 20
 **The second rule reached the agents through the INVOKING PROMPT for four runs and appeared nowhere
 in this file**, so every run got it only if whoever dispatched remembered — the K-15 / L-3 class
 EVERY agent contract below names (`/audit` 2026-09-21 AD-7).
+The `--keep` ban below reached no agent for the same reason: it lived only in the
+Authorized-operations list, which is session text (`/audit` 2026-09-21 C-11).
 
 > Run every check that WRITES, every probe, every planted state and every persisted script through
 > `bash .claude/scripts/probe-sandbox.sh run [--staged] -- <command>`, giving a script by
@@ -268,6 +270,7 @@ EVERY agent contract below names (`/audit` 2026-09-21 AD-7).
 > only remote-tracking refs and which the two `origin/main` endpoint detectors (one in
 > `maintenance.md`, one in this file) both open with. D10.0 tells you to extract and run them.
 > A `probe-sandbox: RED` line STOPS you: make it the FIRST line of your report and return.
+> **NEVER pass `--keep`** — a kept clone survives the command and leaves a copy of the repo on disk.
 
 > **TIER OF REFERENCE — a reference resolves in the tier where the text that CITES it RUNS, never
 > in the directory you happen to be standing in.** This repo is a FACTORY: most of what a shipped
@@ -373,7 +376,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.31.4 they are
+         **Expected: at least 5 paths.** As of v2.31.5 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,

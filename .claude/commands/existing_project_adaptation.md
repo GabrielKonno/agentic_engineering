@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.31.4 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.31.5 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -297,7 +297,10 @@ gained it and no audit dimension looked for it (`/audit` 2026-09-09 T-32).
 - **validator agent** (`.claude/agents/validator.md`) — mandatory, independent verification
 - **arbitrator agent** (`.claude/agents/arbitrator.md`) — mandatory, conflict resolution
 - **`invocation:` frontmatter** on all review/validation agents/skills (`subagent` or `inline`)
-- **`model:` frontmatter** on every AGENT — mandatory and explicit, `inherit` included; FORBIDDEN on skills (`session-rules` → "Model by risk class"; the guard enforces both directions)
+- **`model:` frontmatter** on every AGENT (verified by the frontmatter guard in Step 2.9 — v2.29.0+ only; an
+  older guard the owner chose to keep does NOT check it — and NOT in Steps 2.4-2.8 despite the
+  heading above; `/audit` 2026-09-21 AB-7) — mandatory and explicit,
+  `inherit` included; FORBIDDEN on skills (`session-rules` → "Model by risk class"; the guard enforces both directions)
 - **`receives:` / `produces:` frontmatter** on `invocation: subagent` agents/skills (I/O contract)
 - **Lineage frontmatter** on all agents/skills (`created:`, `last_eval:`, `fixes:`, `derived_from:`)
 - **Efficacy tracking** on Known Bug Patterns (`[added: sN | triggered: sN | false-positive: N]`)
@@ -586,7 +589,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.31.4 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.31.5 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
