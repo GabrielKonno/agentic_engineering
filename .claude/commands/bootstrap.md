@@ -242,6 +242,11 @@ branch placement by this batch's pre-commit verifier).
 
 **If `.claude/phases/project.md` already exists:** Do NOT overwrite. Add a new index row to the Progress Log table for this migration/bootstrap session. Verify it has the required sections (Architectural Decisions, Module Relationships, Progress Log index table). Add missing sections.
 
+**ALSO verify and write `**PRD version:**` in the Overview, exactly as the create branch below
+does.** A pre-existing `project.md` may carry a STALE value — the template has shipped the
+field since v1.6.0, but nothing on this branch refreshed it — and `prd-sync-checker` compares
+against whatever is there (`/audit` 2026-09-21 D-3).
+
 **If it does not exist:** Read the template at `docs/modules/templates/project_md.md`. Adapt with PRD data:
 - Fill Overview from PRD sections 1.1, 1.2, 1.3 (including `**PRD version:** [READ the latest version from the PRD's Changelog table — do NOT assume v1.0.0; a PRD revised via `/prd_change` before bootstrap carries a higher version, and this field is what prd-sync-checker compares against]`)
 - Fill Architectural Decisions table with stack decisions from PRD

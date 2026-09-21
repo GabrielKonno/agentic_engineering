@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.31.3 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.31.4 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -505,7 +505,11 @@ Add missing sections. **Do NOT remove existing customizations** — they may con
 
 If they exist: verify they have `effort: high`, `invocation: subagent`, `receives:`, `produces:`, and lineage fields (`created:`, `last_eval:`, `fixes:`, `derived_from:`) in frontmatter, tiered test structure (Tier 1/2/3), and the Tier 3 MANDATORY STOP protocol. Add if missing.
 
-If they don't exist: **ALWAYS decide NOW, from the codebase** — auth, payments, multi-tenancy, AI/LLM or PII present in the code → create them. Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Adapt with stack-specific attack vectors.
+If they don't exist: **ALWAYS decide NOW, from the codebase** — auth, payments, multi-tenancy, AI/LLM, sensitive data (PII, health, financial), EXTERNAL API
+INTEGRATIONS WITH CREDENTIALS or USER FILE UPLOADS present in the code → create them. **All
+SEVEN indicators, copied from bootstrap Step 9's list — the last two were missing here, so an
+adapted project with credentialed integrations or user uploads got no Red/Blue Team where a
+bootstrapped one does** (`/audit` 2026-09-21 D-6). Read templates at `docs/modules/agents/red_team.md` and `docs/modules/agents/blue_team.md`. Adapt with stack-specific attack vectors.
 **ALWAYS re-run this decision in Step 2.9b's PHASE-3 RE-CHECK, against the retroactive PRD and the resolved profile** (forward reference, flagged) — `production-financial` ALWAYS warrants them. The earlier text deferred the decision to "the PRD (once created in Phase 3)" and no later step returned to it, so an adapted `production-financial` project could mandate a red-team that was never installed (`/audit` 2026-09-16 A-8).
 **ALWAYS REPORT — `red/blue team: present — verified` or `red/blue team: created at Step 2.6 — [indicators]` or `red/blue team: created at the Phase-3 re-check — [indicators]` or `red/blue team: not warranted — no indicator in code or PRD`. NEVER emit nothing.**
 
@@ -582,7 +586,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.31.3 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.31.4 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
