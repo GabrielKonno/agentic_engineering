@@ -303,6 +303,13 @@ anyone other than its author (`/audit` 2026-09-04, meta-observation).
     <its literal stdout, unedited>
 ```
 **NEVER as a sentence containing a number.**
+**AND ALWAYS RUN THE MEASUREMENT IN AN INVOCATION THAT MAKES NO COMMIT.** A receipt composed in
+the same shell invocation as the command that measures it is written BEFORE the number exists,
+so what lands is the author's expectation with a command quoted beside it — the exact shape
+this rule forbids, arrived at from a direction the rule did not name. Measured: three receipts
+in one session were false this way, the second one commit after the correction that stated the
+lesson, and every one of them had the true figure printed on screen at the time. **Measure,
+READ the output, then compose.**
 **THE `$` LINE MUST BE THE MANDATED COMMAND, BYTE-FOR-BYTE — NEVER A NARROWED, RE-SCOPED OR
 RE-WRITTEN VARIANT OF IT.** `references: 9 of 9` was discharged with the first alternative of the
 mandated regex silently DELETED; run verbatim the command returns 47 over that batch, and the
