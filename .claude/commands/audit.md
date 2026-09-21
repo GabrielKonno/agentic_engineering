@@ -1,14 +1,18 @@
 # Framework Audit
 
 This is a **read-only audit session** for the agentic_engineering framework repository. **No
-AUDITED file is modified** — the audit never fixes what it finds. It writes exactly one file: its
-own report (Phase 3), which is this session's output, not a change to the thing under audit.
+AUDITED file is modified** — the audit never fixes what it finds. It writes its own report (Phase 3) and,
+in verification mode, the ONE defect-series row authorised below — and nothing else, which is this session's output, not a change to the thing under audit.
 
 **Authorized operations:**
 - Read any file in the repository
 - List directory contents
 - Launch parallel audit agents
-- **Write EXACTLY ONE file: this run's report at `assets/docs/audit-YYYY-MM-DD.md`** (Phase 3).
+- **Write the report at `assets/docs/audit-YYYY-MM-DD.md`** (Phase 3) — and, in verification
+  mode, the ONE appended defect-series row authorised below. **NO THIRD PATH.** This line read
+  "EXACTLY ONE file" while the bullet below mandated the append, so an executing agent read a
+  prohibition on the very operation it was told to perform (`/audit` 2026-09-21 AD-4/AD-5, whose
+  sweep reached five descriptive surfaces and missed this, the authoritative one).
   Read-only refers to the AUDITED surfaces — the report is this session's output, and a report
   that lives only in a transcript cannot be carried to the session that applies it.
 - **READ-ONLY git inspection, anywhere in the repo** — `git log`, `git show`, `git status`,
@@ -245,9 +249,12 @@ Do NOT wait for one to finish before launching the next.
 
 Each agent receives its full contract as the prompt. Use `subagent_type: "general-purpose"` for all.
 
-**ALWAYS PREPEND this isolation rule to EVERY agent prompt, verbatim.** The Authorized-operations
+**ALWAYS PREPEND BOTH RULES BELOW to EVERY agent prompt, verbatim.** The Authorized-operations
 list above is session text: no agent receives it, so its "NEVER push" reached none of them, and an
 agent executing D10.0 pushed two planted commits to the real remote (`/audit` 2026-09-16 A-1).
+**The second rule reached the agents through the INVOKING PROMPT for four runs and appeared nowhere
+in this file**, so every run got it only if whoever dispatched remembered — the K-15 / L-3 class
+EVERY agent contract below names (`/audit` 2026-09-21 AD-7).
 
 > Run every check that WRITES, every probe, every planted state and every persisted script through
 > `bash .claude/scripts/probe-sandbox.sh run [--staged] -- <command>`, giving a script by
@@ -257,6 +264,18 @@ agent executing D10.0 pushed two planted commits to the real remote (`/audit` 20
 > NEVER put a read-only scan in the sandbox: `d16-gate.sh staged | log | dir` and `git log`/`show`/
 > `diff`/`grep` run in place, where they see everything.
 > A `probe-sandbox: RED` line STOPS you: make it the FIRST line of your report and return.
+
+> **TIER OF REFERENCE — a reference resolves in the tier where the text that CITES it RUNS, never
+> in the directory you happen to be standing in.** This repo is a FACTORY: most of what a shipped
+> template cites is created INSIDE a project by bootstrap from the `docs/modules/` sources.
+> **NEVER say "this path does not exist here" from an `ls` in this root** — a template citing
+> `.claude/rules/X` or `.claude/phases/Y` is CORRECT even when the path is absent here, and some
+> such paths DO exist here on purpose (this repo keeps the runtime subset its own commands need,
+> which `CLAUDE.md`’s structure block enumerates). Absence proves nothing and presence proves
+> nothing either.
+> **The MIRROR is equally a defect and is the half that gets missed:** a SHIPPED artifact citing
+> something that lives ONLY in this repo — a `/maintenance` or `/audit` section, a command file —
+> is unresolvable in every project and MUST carry an availability qualifier.
 
 **An agent that returns on a `probe-sandbox: RED` did not complete its dimensions** — Phase 3 writes
 `Report status: INCOMPLETE`, naming that agent and the RED line's parts — or, for a fail-closed RED, its reason. (Forward reference, flagged: Phase 3's status lines.)
@@ -350,7 +369,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.31.0 they are
+         **Expected: at least 5 paths.** As of v2.31.1 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
@@ -1240,7 +1259,7 @@ After ALL 6 agents return, consolidate their reports into a single audit report.
 **Dimensions checked:** 17 [+ a Part 1 fix-verification pass, in verification mode]
 **Agents dispatched:** 6
 
-**carried: [N] open + [M] escalated from [previous report file]** | `carried: none — first audit`
+**carried: [N] open + [M] escalated from [previous report file] — [the IDs]** | `carried: none — first audit`
 — ALWAYS present. **Plus one OBSERVATION line per `accepted-risk` item**, citing its record and
 never re-opening it (Phase 3's carry-forward report item; `/audit` 2026-09-02 M-26).
 
@@ -1448,12 +1467,39 @@ step is the carry-over half.
    recent `assets/docs/audit-*.md`) into the new one, re-verifying each against the current disk:
    still true → carry with its original ID; fixed since → mark `applied`. An audit that silently
    drops the last one's open items is how "deferred" becomes "forgotten".
+   **ALWAYS CARRY IT AS A LEDGER ROW (`| ID | Severity | Location | Finding | Status |`), NEVER AS A
+   NAME IN PROSE.** A prose list is invisible to every grep that decides survival, so a finding
+   named only there is dropped by the NEXT run without anyone omitting anything. Measured: one run
+   declared `carried: 81 open` in prose and wrote no row for any of them; the next run read the rows
+   and declared `carried: 8`, and **41 findings still open in the two preceding reports got no
+   `^\| ID \|` row in the report that was supposed to carry them forward** (`/audit` 2026-09-21
+   AD-1). They still have rows in the reports that FILED them — the break is in the chain, not in
+   the originals, and saying "no rows anywhere" overstates it.
+   **AND ALWAYS READ THE PREVIOUS REPORT'S ROWS, NEVER ITS `carried:` SENTENCE** — the sentence is a
+   claim about the rows, and when the two disagree the rows are what the next run will inherit. If
+   they disagree, the chain is already broken: walk back through `assets/docs/audit-*.md` until
+   every still-open ID has a row, RECOVER the missing ones into this run's ledger, and FILE the
+   break as a finding of this run.
    **A LOW finding whose file the audited batch did not touch is re-verified MECHANICALLY, never by
    re-reading:** `git diff --name-only <batch range> -- <its file>` empty → still true by construction.
    Say which LOW findings were carried this way (owner decision, 2026-09-16 — `/maintenance` → "Cycle
    governance").
 4. **ALWAYS report in one line how many findings were carried forward** — `carried: N open + M
-   escalated from [previous file]`, or `carried: none — first audit`. Never nothing.
+   escalated from [previous file] — [the IDs]`, or `carried: none — first audit`. Never nothing.
+   **ALWAYS NAME THE CARRIED IDs IN THAT LINE, NEVER ONLY A COUNT.** A count cannot be checked
+   against anything; a list can be checked against the rows, one ID at a time. This is what makes
+   item 3's row requirement verifiable by the NEXT run rather than by trust.
+   **NO MECHANICAL CHECK IS WRITTEN HERE, AND THAT IS A STATED GAP, NOT AN OVERSIGHT.** A
+   row-count reconciliation was drafted for this item and REMOVED before it shipped, for two
+   independent reasons: the apparatus moratorium (`/maintenance` → "Cycle governance" rule 3)
+   forbids adding a new prose-embedded control to this file, and item 4 carried no command before;
+   and the draft counted rows over the WHOLE FILE, which on AD-1's own data reads 128 against a
+   `carried: 81` and would have passed GREEN on the very incident it was written for — the
+   whole-file blindness this file already documents ABOVE, at the prediction grep
+   (`/audit` 2026-09-15 B-16). **A scoped form would have to reuse the fence-aware `sec()`
+   extractor `/maintenance` defines; until a session is rewriting this item for another reason,
+   the rule above stands as prose and AD-1's mechanism is HALF-FIXED — rows are required, and
+   nothing counts them** (this batch's pre-commit verifier, 2026-09-21).
    **An `accepted-risk` item is NOT carried forward as a finding.** Report it once per run as an
    OBSERVATION citing its record, and NEVER re-open it — the record states what WOULD re-open it
    (a new working-tree occurrence, or an identifier of a different class). A finding with a

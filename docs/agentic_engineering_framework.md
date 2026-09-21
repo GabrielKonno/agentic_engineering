@@ -46,7 +46,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 | `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design always; ops-rules, quality-budgets for production+ profiles). |
 | `docs/modules/skills/` | 15 pre-built skills (12 lifecycle: sprint-proposer, autonomous-loop, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 3 tier-gated: codebase-audit, framework-audit, skill-gate) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated skills copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
 | `examples/` | Quality reference templates for agents (20), skills (9), and rules (11) | Copied to the project's `assets/examples/` during bootstrap. The AI consults these before creating new agents or skills on-demand. Not active configuration — read-only reference. |
-| `.claude/commands/` | 6 slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`, `/audit`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. `/audit` is a read-only utility for framework integrity checks — it never modifies an audited file, and writes only its own dated report under `assets/docs/`. |
+| `.claude/commands/` | 6 slash commands (`/prd_planning`, `/prd_change`, `/bootstrap`, `/existing_project_adaptation`, `/maintenance`, `/audit`) | Entry points for human-AI sessions via Claude Code. Each command sets the session mode, configures authorized operations, and guides the workflow. `/audit` is a read-only utility for framework integrity checks — read-only refers to the AUDITED surfaces. It writes its own dated report under `assets/docs/` and, in verification mode, appends ONE row to its own defect-series table; it changes nothing else. |
 | `.claude/commands/bootstrap.md` | Bootstrap slash command | The 15-step pipeline (an unnumbered **Setup** phase that runs first, 15 primary steps 1-15, Step 0.5 as a pre-PRD gate, and sub-steps like 5.7/5.8/14.5) that reads all components above and generates a complete project. Invoked via `/bootstrap [project-name]`. |
 | `projects/` | Bootstrapped projects (one folder per project) | Local workspace, git-ignored by the framework repo. Each project has its own git repo from the Setup phase — bootstrap runs `git init` inside the project folder before writing any file. |
 
@@ -243,6 +243,10 @@ The AI runs from the framework root during bootstrap (session 0) and from within
 agentic_engineering/                         # Framework root (meta-project)
 ├── CLAUDE.md                                # Meta-project contract (bootstrap behavior)
 ├── .gitignore                               # Contains "projects/" — isolates project repos
+├── README.md                                # Overview and quick start
+├── .gitattributes                           # Keeps *.sh LF
+├── .claude/                                 # This repo's OWN runtime (commands, rules, skills, scripts, docs, settings.json)
+├── assets/docs/                             # Framework-layer records: /audit reports, lineage
 ├── docs/
 │   ├── agentic_engineering_framework.md      # This document (tool-agnostic concepts)
 │   ├── modules/                              # Shared templates and skills (single source of truth)
@@ -1004,6 +1008,11 @@ Report template categories:
 - Tests: ✅/❌/⏭️ [N EXECUTED, N passed, N failed, wall time — the COUNT is mandatory evidence]
 - Review: ✅/❌/⏭️ [inline or "code-reviewer subagent" — ⏭️ when no Code Review Report was provided]
 - Security: ✅/⚠️/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes" — ⚠️, NEVER ❌, for a declared coverage gap with no specialist report]
+- Security reviewer: ran — [verdict] | skipped — no client-bound data ([reason]) — **ORCHESTRATOR-ONLY.**
+  This row records whether the `security-reviewer` subagent was spawned, a decision only the
+  orchestrator makes, so the validator has no slot for it and `produces:` does not count it.
+  Mandated by `validation-orchestrator` → the client-bound-data trigger; it existed on that one
+  surface alone until 2026-09-21 (`/audit` AD-6).
 - Mutation Tests: ✅/⏭️ [N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️
 - UI: ✅/❌/⏭️/BASELINE-CREATED [screenshot evidence or "no UI changes in this task" — BASELINE-CREATED when the visual-regression specialist captured first baselines — reachable only when the CODE-REVIEWER declared the gap, since a specialist spawned from THIS report's own declaration runs after this row is written (`/audit` 2026-09-02 M-20)]
@@ -1024,7 +1033,9 @@ surfaces, not two:** this list, `docs/modules/agents/validator.md`'s Output temp
 `docs/modules/skills/validation-orchestrator/SKILL.md`'s own abbreviated report list — which was
 an undeclared third copy no sync rule reached (`/audit` 2026-09-02 M-14). This list and
 `docs/modules/agents/validator.md`'s Output template are TWINS **except for the one row marked
-ORCHESTRATOR-ONLY above**. **ALWAYS, when adding or renaming a category, update ALL THREE
+ORCHESTRATOR-ONLY above** — there are TWO such rows (`Validation:` and `Security reviewer:`),
+and a sentence saying "the one row" goes stale the moment a second is marked.
+**ALWAYS, when adding or renaming a category, update ALL THREE
 SURFACES** — this list, `validator.md`'s Output template, AND
 `validation-orchestrator/SKILL.md`'s own report list — **AND** `validator.md`'s `produces:` field,
 using the SAME verdict vocabulary throughout. The clause said "BOTH lists" for one full batch after

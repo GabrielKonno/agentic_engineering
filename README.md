@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.31.0
+# Agentic Engineering Framework v2.31.1
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -52,7 +52,7 @@ The framework has 5 session modes in the framework repo, plus project-repo execu
 - `/maintenance` — Edit framework docs, examples, CLAUDE.md, this repo's own `.claude/` runtime, and `assets/docs/` records
 
 Plus one utility, not a session mode:
-- `/audit` — read-only integrity check across 17 dimensions via 6 parallel agents; writes and commits one dated report under `assets/docs/`
+- `/audit` — read-only integrity check across 17 dimensions via 6 parallel agents; writes and commits its dated report under `assets/docs/` — plus, in verification mode, one appended row in its own defect-series table
 
 **Project repo** (inside the project) — The AI reads the project's own CLAUDE.md, follows the Session Protocol, proposes sprints, implements tasks, validates via subagents, and reports with evidence. The framework repo is no longer involved.
 
@@ -122,7 +122,7 @@ Run these from the framework root with Claude Code:
 | `/bootstrap` | project name | Bootstrap project from PRD (Session 0) |
 | `/existing_project_adaptation` | project name | Upgrade existing project to framework |
 | `/maintenance` | (none) | Edit framework docs, examples, CLAUDE.md, this repo's own `.claude/` runtime, `assets/docs/` records |
-| `/audit` | (none) | Read-only integrity check across 17 dimensions via 6 parallel agents; writes and commits one dated report to `assets/docs/` |
+| `/audit` | (none) | Read-only integrity check across 17 dimensions via 6 parallel agents; writes and commits its dated report to `assets/docs/` (plus, in verification mode, one row in its own defect-series table) |
 
 **Alternative:** The bootstrap logic lives in `.claude/commands/bootstrap.md` and can be adapted for other AI tools.
 
@@ -142,12 +142,13 @@ agentic_engineering/
 │   ├── rules/                          ← component-design.md (consulted during /maintenance when editing agents/skills/rules)
 │   ├── skills/                         ← cross-cutting-analysis (runtime skill used during PRD sessions)
 │   ├── scripts/                        ← d16-gate.sh (project-information isolation gate) + probe-sandbox.sh (where checks and probes execute) — both run by /maintenance and /audit
+│   ├── docs/                           ← Framework notes and ideas (git-ignored, not copied to projects)
 │   └── settings.json                   ← Claude Code settings
 │
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.31.0)
+│   ├── modules/                            ← Single source of truth (v2.31.1)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -158,6 +159,9 @@ agentic_engineering/
 │   ├── agents/                         ← 20 agent templates (quality, domain, ops, security, compliance)
 │   ├── skills/                         ← 9 skill templates (stack, domain, process)
 │   └── rules/                          ← 11 rules templates (auth, compliance, i18n, scheduling, resilience, integration, etc.)
+│
+├── assets/                             ← Framework-layer records (never copied to projects)
+│   └── docs/                           ← /audit reports + upstream lineage docs
 │
 └── projects/                           ← Local workspace (git-ignored)
     └── [project-name]/                 ← Each project gets its own git repo
@@ -374,7 +378,7 @@ The framework learns from your project:
 | `/existing_project_adaptation [name]` | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
 | `/prd_change [name]` | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
 | `/maintenance` | Changing the framework itself, or absorbing lessons projects recorded | An audit report or pending `framework-evolution-*.md` docs | Framework edits + write-back and receipts in the audit report |
-| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a maintenance batch applied an audit batch AND evidence from OUTSIDE the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | The repository (and the last report, in verification mode) | One dated report in `assets/docs/` with stable finding IDs |
+| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a maintenance batch applied an audit batch AND evidence from OUTSIDE the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | The repository (and the last report, in verification mode) | Its dated report in `assets/docs/` (+1 defect-series row in verification mode) with stable finding IDs |
 
 ---
 

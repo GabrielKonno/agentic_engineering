@@ -820,7 +820,24 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **THE UNIT IS ONE FINDING ID, and the `$` line MUST be a per-ID command** — a file-union command returning paths tests no ID and no
    line, and was pasted under a `49 of 49` claim (`/audit` 2026-09-10 U-2).
 
-   **Gate 3 — ROW COUNT EQUALS DISPOSED COUNT.**
+   **Gate 3 — THE RECEIPTS SECTION EXISTS, AND ITS ROW COUNT EQUALS THE DISPOSED COUNT.**
+   **THE SECTION'S ABSENCE IS NOT CHECKED BY ANYTHING, AND THAT IS A STATED GAP** (`/audit`
+   2026-09-21 AD-9, which stays `open`). The 27-key loop is self-scoped to "this run's section", so
+   when no section exists the loop has nothing to iterate and its silence is indistinguishable from
+   a clean run.
+   **NEVER CLOSE THIS WITH A KEY-COUNTING GREP OVER A COMMIT MESSAGE.** Two forms were
+   drafted for this gate and both were cut before shipping, each proved dead by an independent
+   verifier: one required the bold `**key:**` form and returned 0 on the commits it was run
+   against; its replacement accepted the plain form and was then greened by any conventional
+   subject line (`chore:`, `fix:`) whether or not one receipt existed. **The deeper problem is that
+   BOTH FORMS ARE LIVE IN HISTORY — MEASURE, NEVER ASSUME WHICH:** the 27-key loop below anchors on
+   `^\*\*$k:`, so it scores some older commits highly and recent ones at zero, purely by which form
+   the author happened to use. A gate built on either anchor alone is right about half the corpus.
+   Closing this needs the loop and the gate swept together, in a session already rewriting them
+   (this batch's pre-commit verifier rounds 1-3, 2026-09-21 — rounds 1 and 2 killed the two greps,
+   round 3 killed the sentence that explained them).
+
+   **THEN, ROW COUNT EQUALS DISPOSED COUNT.**
    ```bash
    grep -cE 'applied `?sHASH' <the report file>   # plus any accepted-risk / rejected rows
    # CONSOLIDATED FORM: one alternation over every hash in the batch —
@@ -960,19 +977,26 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    done
    # RED CONDITION, so step 1 CAN fail: if a file's total is LOWER than the previous batch
    # reported, a control was deleted - name which. An enumerator with no threshold cannot go red.
-   # THE THRESHOLD IS THE FIGURE THIS COMMAND RETURNS **TODAY**, NEVER A REMEMBERED ONE, AND NEVER
-   # A FIGURE MEASURED BEFORE THE BATCH. The `52` that certified one batch was measured at
-   # `<first>~1`; re-run at the tip the same command returns 55, so up to THREE controls could be
-   # deleted and still read GREEN (`/audit` 2026-09-10 U-6). Baseline RE-measured 2026-09-15 at
-   # the TIP of the batch applying `/audit` 2026-09-14 W-20 (NOT at `<first>~1` — that is exactly
-   # how the stale `52` was produced): maintenance.md 5 fenced + 26 inline = 31;
-   # audit.md 7 + 28 = 35; TOTAL 66. (The 2026-09-11 figure, 62, was stale by one from 512f07b; a
-   # first write of THIS line said 65 and was stale before the batch closed — measured again here.)
-   # RE-MEASURED 2026-09-15 at the tip of the batch applying `/audit` 2026-09-15 Z-1 (its push-gate
-   # prose added one inline control): maintenance.md 5 fenced + 27 inline = 32; audit.md 7 + 28 = 35;
-   # TOTAL 67.
-   # RE-MEASURE THIS AT THE FINAL TIP, NEVER MID-BATCH. Written mid-batch it read 54, then 60,
-   # and both were stale before the batch closed — U-6's own class, inside U-6's own fix.
+   # THE FLOOR IS DERIVED, NEVER WRITTEN. **NEVER PUT A BASELINE FIGURE IN THIS PROSE.**
+   # A written figure is only as good as the next session's willingness to re-measure it. Several
+   # accumulated here, each stale within days of being written, and the last one had drifted far
+   # enough that a large number of controls could be deleted and still read GREEN - `/audit`
+   # 2026-09-10 U-6 recurring inside U-6's own fix, which told the reader to re-measure and nobody
+   # did (`/audit` 2026-09-21 AC-9). Every written baseline is deleted; DERIVE it instead.
+   # **ALWAYS RUN THE ENUMERATOR ABOVE - THE SAME ONE, UNCHANGED - AGAINST `<first>~1` AND AGAINST
+   # THE TIP, AND COMPARE PER FILE.** Run it at the earlier revision inside
+   # `bash .claude/scripts/probe-sandbox.sh run -- ...`; NEVER stash or check out in the live repo.
+   # **NEVER WRITE A SECOND, SHORTER ENUMERATOR FOR THIS.** One was written here and diverged from
+   # the real one within a single batch - it dropped the `docs/modules/` half, so a SHIPPED control
+   # could not make it red, and it summed across files, so a deletion in one offset by an addition
+   # in the other read GREEN and "name which" became unanswerable (this batch's pre-commit verifier,
+   # 2026-09-21). component-design 5: POINT, never restate.
+   # **STATED LIMIT, MEASURED, NOT A DIVERGENCE: the enumerator only toggles on COLUMN-0 fences, so
+   # every control inside an INDENTED fence - which is where all four Gates live - is invisible to
+   # it.** Deleting such a control leaves the totals unchanged, proved in a sandbox against the four
+   # Gates' own commands. So this floor is a ratchet for column-0 controls ONLY; it can neither
+   # confirm nor deny that an indented one survived, and a session that deletes one must say so by
+   # hand (round 2 of the same verifier).
    # 2. THE CONTROLS THIS BATCH TOUCHED — the numerator.
    git diff --cached -U0 .claude/commands/ docs/modules/ | grep '^+' \
      | grep -cE '(grep|python -c|diff -r|git (diff|show|status)|node|sed -n)'
@@ -1480,8 +1504,17 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    returns none.
    **ALWAYS LIST the tokens the batch used, and ALWAYS ADD any new one to the alternation in the
    same edit.**
-8. **A FALSE CLAIM IN AN ALREADY-MADE COMMIT MESSAGE IS CORRECTED BY A FOLLOW-UP COMMIT, NEVER BY
-   `--amend`.** A later commit may already depend on the hash, and the record of what was claimed
+8. **A FALSE CLAIM IN AN ALREADY-MADE COMMIT — IN ITS MESSAGE *OR* IN ITS CONTENT — IS CORRECTED
+   BY A FOLLOW-UP COMMIT, NEVER BY `--amend`.**
+   **THE CONTENT HALF WAS UNWRITTEN UNTIL 2026-09-21** (`/audit` AD-8): this item was scoped by its
+   own title to the MESSAGE, while four commits in one window corrected the CONTENT of their
+   immediate predecessor and no rule said what any of them owed. **A CONTENT CORRECTION IS A FIX
+   COMMIT AND CARRIES THE FULL RECEIPT SET** — it changes a command, template or rule, so it states
+   its own `bump:`, runs its own gates, and is receipted like any other fix. Measured over that
+   window, **not one of them carried a full receipt set** — recompute the coverage with the 27-key
+   list above rather than trusting any figure written here, which is how a three-number series for
+   four commits reached this paragraph in the first place.
+   **NEVER TREAT A CONTENT CORRECTION AS A WRITE-BACK.** A later commit may already depend on the hash, and the record of what was claimed
    and when is itself evidence — the correction belongs beside the error, not in place of it. The
    follow-up states what the original claimed, what is true, and how the gap was found.
    **ALWAYS REPORT — `commit correction: sHASH corrected by sHASH — [what]` or `commit correction: none`.**

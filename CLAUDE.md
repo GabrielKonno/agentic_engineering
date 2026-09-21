@@ -143,7 +143,8 @@ This repository supports 5 session modes, each activated by its slash command:
 Each command sets the session mode, configures authorized operations, and guides the workflow. The project name argument maps to `projects/[project-name]/`.
 
 **Utilities:** `/audit` — read-only integrity check across 17 dimensions (structural, references, process logic, quality, document accuracy, project-information isolation, and one meta dimension — D17 process coverage, which hunts flows the repo executes or promises but never documented). Launches 6 parallel audit agents and produces a consolidated report, persisted to
-`assets/docs/audit-YYYY-MM-DD.md` (the only file it writes). It runs in one of two MODES,
+`assets/docs/audit-YYYY-MM-DD.md`. It writes TWO files and no others: that report, and — in
+verification mode — ONE appended row in `.claude/commands/audit.md`’s defect-series table. It runs in one of two MODES,
 decided in its Phase 0: `baseline` (claim vs fact) or `verification` (the 17 dimensions PLUS a
 Part 1 pass that re-reads the structure around every already-`applied` fix).
 

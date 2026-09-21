@@ -225,6 +225,15 @@ PRD`. NEVER emit nothing.**
 
 Create the file at the project root as `CLAUDE.md`.
 
+**This step is the RECEIVER of Step 1.2's RISK PROFILE.** ALWAYS replace the bracketed
+`**Risk profile:**` placeholder with the tier Step 1.2c chose. **This applies whether CLAUDE.md
+was just created OR already existed** — a pre-existing file is exactly the case where the profile
+has never been recorded, and a paragraph living inside the does-not-exist branch would miss it
+(the shape Step 3's twin already states). **The receipt is Step 1.2c's own grep, which expects
+`1` for CLAUDE.md — no new report key is minted here.** Step 1.2 asserted "Steps 2 and 3 ALWAYS
+confirm receipt" while neither step mentioned the profile at all (`/audit` 2026-09-21 AD-3;
+branch placement by this batch's pre-commit verifier).
+
 **The template is a slim orchestrator** (~90 lines). It contains project identity and pointers to skills/rules. Protocol logic lives in process skills (copied in Step 5.7) and session rules (also copied in Step 5.7).
 
 ---
@@ -248,6 +257,12 @@ architectural, naming the concern and the sections it spans. This applies whethe
 just created OR already existed: a pre-existing file is exactly the case where the concerns have
 never been recorded. **REPORT `cross-cutting received: A/A architecture concerns written` — a
 mismatch with Step 1.1's count is RED.**
+
+**This step is ALSO the RECEIVER of Step 1.2's RISK PROFILE.** ALWAYS replace the bracketed
+`**Risk profile:**` placeholder in the Overview with the tier Step 1.2c chose. **The receipt is
+Step 1.2c's own grep, run after this step — no new report key is minted here.** Step 1.2 asserted
+"Steps 2 and 3 ALWAYS confirm receipt" while neither step mentioned the profile at all, so the
+hand-off was declared on one side only (`/audit` 2026-09-21 AD-3).
 
 ---
 
@@ -835,7 +850,11 @@ placeholder "[Configured in Step 14 below — the skill-gate hook always, the fo
 CLAUDE.md still carries that line references a bootstrap step that does not exist in the project.
 Replace it with `configured — [the hooks written]`, or with `configured — skill-gate hook only (project has no formatter)`.
 
-**Note:** If `.claude/settings.json` or `.claude/settings.local.json` already exists, merge the keys rather than overwriting.
+**Note:** If `.claude/settings.json` or `.claude/settings.local.json` already exists, follow the
+template’s own **Merge rule** (`docs/modules/templates/settings_json.md`) rather than the summary
+that used to stand here — it names the keys and carries the never-replace clause for an existing
+`statusLine`, which a restated copy lost (component-design §5: the source POINTS, never restates;
+`/audit` 2026-09-21 AD-2).
 
 ---
 

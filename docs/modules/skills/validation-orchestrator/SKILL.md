@@ -115,7 +115,7 @@ logic-heavy task with no auth change.** It is client-bound when ANY is true:
 - a role-gated or privileged figure, field or UI element was added or changed;
 - a surface renders personal data or credentials.
 
-**ALWAYS REPORT — `security-reviewer: ran — [verdict]` or `security-reviewer: skipped — no client-bound data ([reason])`, in the Validation Report's `Security reviewer:` slot. NEVER emit nothing.**
+**ALWAYS REPORT — `security-reviewer: ran — [verdict]` or `security-reviewer: skipped — no client-bound data ([reason])`, in the `Security reviewer:` row of the Verification results block — an ORCHESTRATOR-ONLY row, like `Validation:`, so the validator's Output template has no slot for it. NEVER emit nothing.**
 
 > Evidence (production project): with the trigger limited to auth/payment keywords, the
 > security-reviewer recorded **0 spawns in 20 sessions** — including two sessions whose work was
