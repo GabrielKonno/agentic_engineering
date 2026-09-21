@@ -265,3 +265,41 @@ whoever executes the moment X must run.**
 **Same family as §6 (banned anti-patterns need a mechanical self-check) and §8 (a component can be
 PRESENT and absent from the registry).** In all three, only a mechanical check separates
 "installed" from "actually running" — the textual claim never does.
+
+
+## 10. A MANDATE IS WRITTEN LAST — its destination is written first
+
+§9 says the instruction to invoke X belongs to whoever owns the moment X runs. This is the
+ordering rule one level down, and it governs the EDIT, not the design.
+
+**WHEN A BATCH ADDS A MANDATE TO RECORD, REPORT OR LOG ANYTHING, ALWAYS WRITE THE DESTINATION
+FIRST — in the same batch, before the sentence that mandates it.** In order:
+
+1. **NAME the destination and open it.** The slot, the log verb, the report line, the status cell.
+2. **VERIFY the component that OWNS it admits the new value** — follow it to whoever WRITES that
+   surface, not whoever reads it. A mandate addressed to a component that does not own the
+   destination is written by nobody.
+3. **SWEEP every surface that ENUMERATES the destination's vocabulary.** A log verb set, a status
+   set and a report enumeration are usually three separate files, and extending one of them is the
+   common failure.
+4. **ONLY THEN write the mandate.**
+
+**NEVER write the mandate first and the destination after.** It reads like progress and produces an
+obligation nobody can honour — and the defect does not announce itself, because the mandate is
+present, correct and unexecutable.
+
+> Evidence (this repo, 2026-09-20): a batch adding an adopt-vs-create gate mandated recording in
+> four places. Three independent pre-commit verification rounds found, across them, a destination
+> that did not exist, one that could not admit the value, one owned by a different component, and a
+> log-verb set extended in 1 of 16 surfaces that enumerate it. The rounds found 11, then 16, then 15:
+> each repair added mandates faster than it added destinations. **The batch was abandoned; only this
+> rule shipped, because it is the only part that mandates no recording of its own.**
+
+**In the FRAMEWORK REPO this pairs with the maintenance command's slot gate** — the one that
+harvests every new `ALWAYS REPORT` key and checks, in both directions, that a slot exists for it.
+**That gate is framework-only and reaches NO bootstrapped project**, and even where it runs its
+harvest sees only keys introduced by the literal phrase `ALWAYS REPORT` — never a new log verb
+and never a new status value, which are two of the destination kinds step 1 above enumerates.
+**So in a project this rule stands alone, and in the framework it still covers destinations that
+gate cannot see.** The gate asks whether a slot exists; this rule fixes WHEN it is written, so the
+gate has something true to find.
