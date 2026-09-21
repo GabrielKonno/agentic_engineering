@@ -30,7 +30,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   └── cross-cutting-analysis/         # Runtime skill used during PRD sessions
 │   ├── scripts/
 │   │   ├── d16-gate.sh                     # D16 isolation gate — the ONE definition (/maintenance, push gate, /audit D16)
-│   │   └── probe-sandbox.sh                # Probe isolation — the ONE place checks, probes and persisted proofs execute (/audit, /maintenance)
+│   │   └── probe-sandbox.sh                # Probe isolation — the ONE place a check that WRITES, a negation proof or a persisted script executes; NOT for read-only scans (/audit, /maintenance)
 │   ├── docs/                               # Framework notes and ideas (not copied to projects)
 │   ├── settings.json                       # Claude Code settings
 │   └── settings.local.json                 # Machine-local overrides (gitignored)

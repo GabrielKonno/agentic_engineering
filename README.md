@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.31.2
+# Agentic Engineering Framework v2.31.3
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -141,21 +141,21 @@ agentic_engineering/
 │   ├── commands/                       ← 6 slash commands: /bootstrap, /prd_planning, /prd_change, /existing_project_adaptation, /maintenance, /audit
 │   ├── rules/                          ← component-design.md (consulted during /maintenance when editing agents/skills/rules)
 │   ├── skills/                         ← cross-cutting-analysis (runtime skill used during PRD sessions)
-│   ├── scripts/                        ← d16-gate.sh (project-information isolation gate) + probe-sandbox.sh (where checks and probes execute) — both run by /maintenance and /audit
+│   ├── scripts/                        ← d16-gate.sh (project-information isolation gate) + probe-sandbox.sh (where a check that WRITES, a negation proof or a persisted script executes — never a read-only scan) — both run by /maintenance and /audit
 │   ├── docs/                           ← Framework notes and ideas (git-ignored, not copied to projects)
 │   └── settings.json                   ← Claude Code settings
 │
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.31.2)
+│   ├── modules/                            ← Single source of truth (v2.31.3)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
 │   │   └── skills/                         ← 15 pre-built skills (12 lifecycle + 3 tier-gated)
 │   │
 ├── examples/                           ← Quality reference templates (copied to projects)
-│   ├── README.md                       ← Conventions for creating agents/skills
+│   ├── README.md                       ← Conventions for creating agents, skills and rules
 │   ├── agents/                         ← 20 agent templates (quality, domain, ops, security, compliance)
 │   ├── skills/                         ← 9 skill templates (stack, domain, process)
 │   └── rules/                          ← 11 rules templates (auth, compliance, i18n, scheduling, resilience, integration, etc.)

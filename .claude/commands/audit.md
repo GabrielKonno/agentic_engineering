@@ -44,8 +44,10 @@ in verification mode, the ONE defect-series row authorised below — and nothing
   created by the fix that created the operation (`/audit` 2026-09-10 U-47). **NO THIRD PATH may be
   committed.** A report that lives only in the
   working tree does not survive a `git clean`, a `git checkout`, or a session boundary — which is
-  exactly what happened to every report written before this line existed. **This is the ONLY
-  git operation that WRITES.** NEVER `push`, NEVER `commit --amend`, NEVER a commit touching any
+  exactly what happened to every report written before this line existed. **Apart from `git fetch` moving remote-tracking refs, authorised above, this is the ONLY
+  git operation that WRITES IN THE LIVE REPOSITORY** — inside the sandbox clone a probe may
+  legitimately commit, stash or reset, which is the whole point of the clone.
+  NEVER `push`, NEVER `commit --amend`, NEVER a commit touching any
   other path, NEVER any history rewrite.
 - No other file creation, modification, or deletion inside the repository (the sandbox's clone
   lives outside it and is deleted when the command ends; agents never pass `--keep`)
@@ -262,7 +264,9 @@ EVERY agent contract below names (`/audit` 2026-09-21 AD-7).
 > NEVER run `git commit`, `git push`, `git reset`, `git stash`, `git checkout` or `git remote`, and
 > NEVER write a file, inside the live repository.
 > NEVER put a read-only scan in the sandbox: `d16-gate.sh staged | log | dir` and `git log`/`show`/
-> `diff`/`grep` run in place, where they see everything.
+> `diff`/`grep` run in place, where they see everything — and so does `git fetch`, which writes
+> only remote-tracking refs and which the two `origin/main` endpoint detectors (one in
+> `maintenance.md`, one in this file) both open with. D10.0 tells you to extract and run them.
 > A `probe-sandbox: RED` line STOPS you: make it the FIRST line of your report and return.
 
 > **TIER OF REFERENCE — a reference resolves in the tier where the text that CITES it RUNS, never
@@ -369,7 +373,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.31.2 they are
+         **Expected: at least 5 paths.** As of v2.31.3 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,

@@ -28,7 +28,8 @@ components are out of scope (see `.claude/rules/evolution-policy.md`).
 - Updating an EXISTING component → STOP, follow evolution-policy instead. If the
   update ADDS an empirical claim, ALWAYS mark that claim `verified: false` inline.
 - **A VERBATIM SPLIT or an UPSTREAM COPY → this skill does NOT apply, ONLY under the conditions
-  evolution-policy → "Component creation gate" → Exemption states.** ALWAYS read them there and write
+  evolution-policy → "Component creation gate" → the
+  **"Exemption — a VERBATIM SPLIT or an UPSTREAM COPY"** bold lead-in INSIDE that section states.** ALWAYS read them there and write
   the commit-message line that section names; this skill NEVER restates them.
 - **EXTRACTING part of an existing component into a new one (a SPLIT) that the Exemption does not
   cover → this skill APPLIES to the new component, and evolution-policy governs the edit to the

@@ -132,8 +132,9 @@ The declaring components are `code-reviewer`, `security-reviewer` and **`validat
 so a single pass structurally cannot reach the third.
 
 **Pass 1 — ALWAYS, after receiving the code-reviewer and security-reviewer reports:**
-1. READ the Coverage Gap Declaration section in each report (in code-reviewer's report format the
-   same section is headed `### Coverage gaps declared:`). The section is ALWAYS present and
+1. READ the Coverage Gap Declaration section in each report (in BOTH reviewers' report formats —
+   code-reviewer AND security-reviewer — that same section is headed `### Coverage gaps declared:`;
+   naming only one of them is W-28's class, `/audit` 2026-09-21 A-12). The section is ALWAYS present and
    reads `None` when empty — an ABSENT section is a defect in that agent, not a skip condition.
 2. For each declared gap, SEARCH `.claude/agents/` descriptions for an agent whose
    description matches the gap's domain vocabulary.

@@ -992,7 +992,9 @@ reports; **pass 2** after the Validation Report, because the validator's own dec
 exist until the validator has run. **A single pass structurally cannot reach the third declarer**
 (`/audit` 2026-09-03 P-14 — this surface still described two declarers and one pass while the
 orchestrator it documents had already moved to three and two).
-Read the Coverage Gap Declaration section in each report. For each declared gap, search `.claude/agents/` descriptions for a specialist agent matching the gap's domain. If found: spawn it and include its report as evidence for the validator. If not found: note the gap in "Items for human verification." This is generic — zero cost when no gaps are declared.
+Read the Coverage Gap Declaration section in each report (in BOTH reviewers' report formats —
+code-reviewer AND security-reviewer — that same section is headed `### Coverage gaps declared:`;
+the validator uses `### Coverage Gap Declaration:`). For each declared gap, search `.claude/agents/` descriptions for a specialist agent matching the gap's domain. If found: spawn it and include its report as evidence for the validator. If not found: note the gap in "Items for human verification." This is generic — zero cost when no gaps are declared.
 
 **Step 6 — Process Validation Report:**
 - All ✅: proceed to report.
