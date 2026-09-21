@@ -249,9 +249,13 @@ actually receive — stayed small (`/audit` D17.6). These four rules stop the lo
    Mechanical, expected result stated:
    ```bash
    sed -n '/^for k in "inventory sweep"/,/^done$/p' .claude/commands/maintenance.md | grep -oE '"[a-z][a-z ._-]*"' | wc -l   # expected: 27
-   sed -n '/^## Post-change checklist/,/^## Version bumps/p' .claude/commands/maintenance.md | grep -cE '^[0-9]+\. \*\*'   # expected: 14
+   sed -n '/^## Post-change checklist/,/^## Version bumps/p' .claude/commands/maintenance.md | grep -cE '^[0-9]+\. \*\*'   # expected: 14 — see the unit note below
    ```
-   **Any increase is RED.** **This moratorium points at NO next step.** An earlier form promised a
+   **Any increase is RED.** **THE SECOND COUNT'S UNIT IS "bolded numbered item in the checklist
+range", NOT "checklist item":** 10 are the numbered checklist items and 4 come from two 2-item
+sub-lists inside the same range. It works as a ratchet at 14; it will also go RED on a new numbered
+sub-list item that is not a checklist item, and that is a false RED to adjudicate, not a violation
+(`/audit` 2026-09-20 AC-16). **This moratorium points at NO next step.** An earlier form promised a
    migration of the most-used prose controls into `.claude/scripts/`, approved-but-unscheduled, with no
    owner, no trigger and no step — three audits read it back as an aspirational mechanism while
    `git diff -- .claude/scripts` stayed empty (`/audit` 2026-09-16 A-40). The owner withdrew that promise
@@ -1044,7 +1048,7 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    **ALWAYS plant that red state inside `bash .claude/scripts/probe-sandbox.sh run --staged -- …`,
    never in the live repo, and ALWAYS paste the final `probe-sandbox:` line with the proof's stdout.**
    **NEVER run the D16 gate or any other READ-ONLY scan inside the sandbox** — a clone has no stash
-   and no gitignored `.claude/docs/`, so it reads a false 0 there (`/audit` → Authorized operations).
+   and no gitignored `.claude/docs/`, so it reads a false 0 there (`/audit` → the **Authorized operations:** bold lead-in, not a heading).
    **When the proof is persisted as a script, ALWAYS make its `$` line run it through the sandbox by
    ABSOLUTE path** — `$ bash .claude/scripts/probe-sandbox.sh run --staged -- bash "$T/negation_proof.sh"`,
    with `$T` a directory outside the repo. The sandbox holds only committed and staged files, so a
@@ -1198,9 +1202,20 @@ partial refresh would have admitted every AI-filed task uncapped (`/audit` 2026-
 rest, every bump:**
 ```bash
 OLD=2.20.0   # the version being replaced
-grep -rn "v$OLD" README.md docs/ .claude/ CLAUDE.md 2>/dev/null | grep -v 'created: framework-v'
+grep -rn "v$OLD" README.md docs/ .claude/ CLAUDE.md 2>/dev/null | grep -v 'created: framework-v' | grep -vE 'v[0-9.]+ migration|pre-v[0-9.]+'
 ```
-**Expected BEFORE the bump: every surface that must move. Expected AFTER: ZERO hits.** A residue
+**Expected BEFORE the bump: every surface that must move. Expected AFTER: ZERO hits.**
+**BOTH EXCLUSIONS ARE LOAD-BEARING, AND THE SECOND ONE IS A NET, NOT A CENSUS.**
+`existing_project_adaptation.md` accrues one dated `**vX.Y.Z migration —` heading PER VERSION, by
+design, and those are LINEAGE exactly as `created: framework-v` is — a bump must never rewrite
+them. Without that filter the stated ZERO was structurally unreachable for three consecutive bumps,
+so the control read RED on the healthy state every time (`/audit` 2026-09-20 AC-14).
+**KNOWN RESIDUAL, stated because a lexical filter cannot see it:** the migration note's BODY also
+names the version it describes (`As of vX.Y.Z the guard…`, `a project adapted before vX.Y.Z…`), and
+those lines are lineage too. **So: expected AFTER is ZERO hits OUTSIDE a migration note, and every
+surviving hit is READ before it is dismissed — a hit in any OTHER file, or a hit in EPA that is not
+inside a migration note, is RED.** NEVER widen the filter to swallow them by pattern: `As of vX.Y.Z`
+is also the shape of a real stamp, and excluding it would hide the class this control exists to catch. A residue
 grep returns 0 when the state is correct, so `0 remaining` is reachable — a PRESENCE grep is not a
 control (item 5). `created: framework-vX.Y.Z` fields are excluded because they are LINEAGE.
 `created: framework-vX.Y.Z` fields inside components are **LINEAGE, never the current version** —
@@ -1227,6 +1242,14 @@ ALWAYS:**
    `.claude/` ONLY if the framework itself needs it at runtime.
 2. **WRITE its frontmatter to survive the registry** — `name:` matching the file/folder, every
    free-text scalar quoted (component-design §8), then run checklist item 6.
+   **An AGENT template ALSO carries `model:`, explicitly — `inherit` included — and a SKILL NEVER
+   carries it** (`session-rules` → "Model by risk class"; the shipped guard fails on both
+   directions). This clause is one more artifact of that rule's class: the back-sweep that promoted
+   it reached the components that CREATE or REVIEW agent frontmatter and missed this one, which is
+   where THIS repo writes a new component's frontmatter (`/audit` 2026-09-20 AC-4).
+   **NO COUNT IS STATED HERE ON PURPOSE.** A first draft said "the three components" and "the fourth
+   artifact"; re-measured over the promoting commit the set is larger, and a count in prose decays
+   the moment the class gains a member (this batch's pre-commit verifier, 2026-09-20).
 3. **NAME its INVOKER** — the component that executes the moment this one must run, and put the
    instruction THERE (component-design §9). A component whose only activation notice lives in its
    own frontmatter is read by nobody.
@@ -1436,9 +1459,14 @@ When the prompt says to apply an audit, or names a report file, ALWAYS:
    execution of this pass has found defects in already-applied findings, at a rate the ONE table
    records (`/audit` → “The defect series”; the figures are never copied here — `/audit`
    2026-09-04 R-7), and step 2's re-verification runs BEFORE applying, never after.
-   **ALWAYS decide it first with "Cycle governance" rule 1** — an apparatus-only, LOW-only batch does
-   not fire trigger (d). Report
-   `verification audit: proposed / ran / skipped — [owner deferred] / not triggered — apparatus-only, LOW-only`; NEVER nothing.
+   **ALWAYS decide it first with "Cycle governance" rule 1** — a batch with NO pending upstream doc
+   and NO `HIGH` tagged `[observed in use]` does not fire trigger (d), however much of the shipped
+   surface it touched. Report
+   `verification audit: proposed / ran / skipped — [owner deferred] / not triggered — no evidence from outside the loop`; NEVER nothing.
+   **THE VERDICT STRINGS HERE ARE COPIED FROM RULE 1, NEVER RE-DERIVED.** `b62ef33` rewrote rule 1
+   and did not sweep this invoker, so item 9 kept mandating a verdict (`apparatus-only, LOW-only`)
+   that rule 1 no longer produces — component-design §9 inside a cycle-governance fix
+   (`/audit` 2026-09-20 AC-5).
 
 ## Upstream intake — absorbing framework evolutions from projects
 

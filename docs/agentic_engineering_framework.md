@@ -1383,7 +1383,7 @@ If any test reveals a gap: strengthen the criterion or add a complementary crite
 
 This review is NOT optional introspection — it is a mechanical checklist applied to every criterion at creation time. The AI has not yet written code, so the bias toward defending an implementation does not exist.
 
-**Complexity hint:** Each task carries a complexity classification (routine, logic-heavy, architecture/security) set at creation time. This determines which reasoning depth mechanism activates: routine tasks use defaults, logic-heavy tasks get increased reasoning, architecture/security tasks may trigger a model switch. The implementing AI can override this classification after reading the task.
+**Complexity hint:** Each task carries a complexity classification (routine, logic-heavy, architecture/security) set at creation time. This determines which reasoning depth mechanism activates: routine tasks use defaults, logic-heavy tasks get increased reasoning, architecture/security tasks may trigger a model switch. Those are the first three of FOUR reasoning-depth mechanisms, and all three only ESCALATE. The fourth DESCENDS and is independent of the task: each agent declares its own `model:` by risk class (`modules/rules/session_rules.md` → "Model by risk class"). The implementing AI can override this classification after reading the task.
 
 ### Evolution 2: Self-Validation Loop
 
@@ -1693,6 +1693,13 @@ When creating agents or skills, classify their reasoning requirement:
 - **Standard reasoning** (code review checklist, pattern reference, style guide): default reasoning is sufficient.
 
 The tool-specific implementation (frontmatter, config, etc.) is defined in the `/bootstrap` command. The principle is: security and financial agents always get deep reasoning, regardless of the session's default setting.
+
+**Reasoning depth and MODEL are different axes, and both are declared at creation.** Depth is how hard the component thinks; the model is which engine it thinks on. An agent that declares no model inherits the orchestrator's, so in an autonomous session every agent of every risk class runs the most capable model available — including one whose contract is only to extract or compare. So:
+
+- **Every AGENT declares `model:` explicitly, `inherit` included.** The value follows what its report PRODUCES: `inherit` for any component whose verdict gates a commit; a cheaper generation alias only for a contract that extracts or compares without judging. An absent field and a decided one are indistinguishable, which is why the field is written even when it changes nothing.
+- **A SKILL never declares it.** A skill loads into the current context and never spawns, so nothing would read the field — the `last_eval:` class, a field with no executor.
+
+The risk-class table and the full policy live in `modules/rules/session_rules.md` → "Model by risk class"; the shipped frontmatter guard fails on an agent without the field and on a skill that has one.
 
 ### Before creating (quality reference):
 

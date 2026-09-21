@@ -87,7 +87,9 @@ no owner (`/audit` 2026-09-02 K-18).
 **Verification mode requires an audit report with `applied sHASH` findings** — that is what its
 Part 1 re-reads. Only trigger (d) supplies one.
 
-**RESUMING AN `INCOMPLETE` RUN — the mode is unchanged; only the SCOPE narrows.** A run that wrote
+### Resuming an `INCOMPLETE` run
+
+**The mode is unchanged; only the SCOPE narrows.** A run that wrote
 `Report status: INCOMPLETE` named the agents that did not return; the run that finishes it re-dispatches
 EXACTLY those agents over the SAME batch. ALWAYS:
 (Forward references, flagged: Phase 3 items 1 and 6, and "The defect series" above Phase 1.)
@@ -348,7 +350,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.29.0 they are
+         **Expected: at least 5 paths.** As of v2.29.1 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
@@ -833,6 +835,8 @@ FILES TO READ:
 13b. docs/modules/skills/project-md-updater/SKILL.md — target of a §heading citation D8.7's own
     sanctioned example names; the check cannot run without it
 14. CLAUDE.md (D10.5 trigger letters (a)-(d); D10.6 parity)
+15. README.md — the THIRD trigger-list surface D10.6 compares; the check cannot run without it, and
+    it is the surface that carried an abolished trigger for four commits (`/audit` 2026-09-20 AC-1)
 
 **Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
 while the list omits it is how a working check ends up living in the invoking prompt instead of in
@@ -884,7 +888,7 @@ CHECKS:
   NEVER in the live repo.** Several of them `git commit`, `git stash` or `git push`, and a run of this
   mandate from the live repo pushed two planted commits to the real remote (`/audit` 2026-09-16 A-1).
   **ALWAYS run the D16 gate's `staged`, `log` and `dir` checks IN PLACE** — in the sandbox they read
-  a false 0 (Authorized operations).
+  a false 0 (the **Authorized operations:** bold lead-in above, not a heading).
 
 [D10] Command → skill invocation paths
   D10.1. Read prd_planning.md — extract every reference to a skill
@@ -902,12 +906,33 @@ CHECKS:
          trigger letters (a)-(d), and `session_rules.md` → "Execution proof". Apply D8.7's
          exact-match rule. These two files are EXECUTED every maintenance and audit session; a
          dangling citation here misroutes the session itself.
-  D10.6. **TRIGGER-LIST PARITY.** `audit.md` Phase 0's trigger table and the
-         `**When it runs**` paragraph under **Utilities** in `CLAUDE.md` MUST name the same set of
-         events. (That paragraph is a bold lead-in, not a heading — cite it as such;
+  D10.6. **TRIGGER-LIST PARITY — THREE surfaces, never two.** `audit.md` Phase 0's trigger table,
+         the `**When it runs**` paragraph under **Utilities** in `CLAUDE.md`, **and the `/audit`
+         row of `README.md`'s "What each command does" table** MUST name the same set of
+         events. (That CLAUDE.md paragraph is a bold lead-in, not a heading — cite it as such;
          `/audit` 2026-09-02 M-25.) A trigger present in one and absent from the
          other is a FINDING in whichever direction — an unowned trigger (`/audit` K-18) or an
          undocumented one.
+         **THE README ROW IS NOT OPTIONAL and it is the one that was missed.** `b62ef33` rewrote
+         trigger (d) across the two command surfaces and README kept the abolished condition for
+         four commits, because this check named only two surfaces — an unmeasured copy of a list
+         the other two are gated on (`/audit` 2026-09-20 AC-1). Mechanical, expected result stated:
+         ```bash
+         grep -ci 'outside the loop' README.md CLAUDE.md
+         sed -n '/^| CLAUDE.md trigger | Mode |/,/^$/p' .claude/commands/audit.md | grep -ci 'outside the loop'
+         ```
+         **Expected: at least 1 on EACH of the three.** A `0` names the surface that did not move
+         with trigger (d) — that is the whole finding, and it is the direction that actually broke.
+         **ASSERT THE CURRENT CONDITION'S PRESENCE, NEVER A RETIRED PHRASE'S ABSENCE, AND NEVER
+         GREP THIS FILE WHOLE.** Two forms of this check self-matched before this one: the first
+         grepped the abolished tail with `audit.md` among its targets, and the second asserted
+         presence with `audit.md` still among them — in BOTH the command line was itself a match, so
+         the `audit.md` half could not go RED. The second shipped under prose CLAIMING the first was
+         fixed, and only an independent verifier stripping every genuine mention exposed it
+         (this batch's pre-commit verifier, 2026-09-20). **Scoping to the Phase 0 TABLE is what
+         removes the self-match** — the command lives outside it.
+         **ALWAYS RE-DERIVE the asserted phrase from `/maintenance` → "Cycle governance" rule 1 when
+         that rule changes** — a parity check is only a control while it names the live condition.
   D10.7. Report any reference that does NOT resolve
 
 REPORT FORMAT:
@@ -941,8 +966,9 @@ REPORT FORMAT:
   paste the final `probe-sandbox:` line of every run under the table:**
   | Check | file:line | Stated expectation | Actual output | Match? | Can go RED? | Can go GREEN? |
 - Runtime dual copy (D10.4): `cross-cutting-analysis` present in both | byte-identical: [yes/NO]
-- Trigger-list parity (D10.6): CLAUDE.md events [list] vs audit.md Phase 0 rows [list] —
-  match: [yes / NO — which side carries the extra trigger]
+- Trigger-list parity (D10.6) — **THREE surfaces, one cell each, never blank:**
+  CLAUDE.md events [list] | audit.md Phase 0 rows [list] | README.md `/audit` row [list] —
+  match: [yes / NO — NAME the surface that did not move, which is the direction that broke]
 - Unresolved: [list, or "none"]
 ```
 
@@ -1472,7 +1498,10 @@ step is the carry-over half.
 ' "$T" | grep '^| [0-9]* | `audit-' | grep -vc 'Run mode:\*\* verification')
    [ "$((V+PRE))" = "$ROWS" ] && echo "GREEN $V+$PRE=$ROWS" || echo "RED $V+$PRE vs $ROWS"
    ```
-   **GREEN 9+2=11 today; deleting any row returns RED.**
+   **The command computes BOTH sides, so it cannot go stale — but NEVER quote a figure beside it.**
+An earlier form read `GREEN 9+2=11 today`; run at the tip it returns `GREEN 18+2=20`, and a reader
+checking the quoted figure instead of the command would have called a healthy table broken
+(`/audit` 2026-09-20 AC-15). **Deleting any row returns RED.**
    **ALWAYS REPORT `defect series:` with the row you appended, and its `$` line.**
 
 7. **ALWAYS COMMIT the report in THIS session — LAST, after every content item above** — writing it to disk is not persisting it.

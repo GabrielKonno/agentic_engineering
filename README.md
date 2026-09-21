@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.29.0
+# Agentic Engineering Framework v2.29.1
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -147,7 +147,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.29.0)
+│   ├── modules/                            ← Single source of truth (v2.29.1)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -374,7 +374,7 @@ The framework learns from your project:
 | `/existing_project_adaptation [name]` | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
 | `/prd_change [name]` | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
 | `/maintenance` | Changing the framework itself, or absorbing lessons projects recorded | An audit report or pending `framework-evolution-*.md` docs | Framework edits + write-back and receipts in the audit report |
-| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a maintenance batch that touched shipped surfaces | The repository (and the last report, in verification mode) | One dated report in `assets/docs/` with stable finding IDs |
+| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a maintenance batch applied an audit batch AND evidence from OUTSIDE the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | The repository (and the last report, in verification mode) | One dated report in `assets/docs/` with stable finding IDs |
 
 ---
 
