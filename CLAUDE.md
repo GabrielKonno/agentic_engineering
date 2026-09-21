@@ -55,7 +55,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── project_md.md, pendencias_md.md  # Phase document templates
 │   │   │   ├── metrics_md.md               # Code health time series (internal-tool+)
 │   │   │   ├── framework_metrics_md.md     # Process health time series (production+)
-│   │   │   ├── settings_json.md            # Settings + hooks template
+│   │   │   ├── settings_json.md            # Settings + statusline + hooks template
 │   │   │   └── check_agent_frontmatter.md  # Component-registry liveness guard (all tiers → scripts/)
 │   │   ├── agents/                         # Agent templates (copied to .claude/agents/)
 │   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates

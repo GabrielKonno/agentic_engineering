@@ -816,7 +816,7 @@ Create `.claude/logs/` directory for session logs:
 mkdir -p projects/$ARGUMENTS/.claude/logs
 ```
 
-Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/settings.json` with the permissions and hooks configuration.
+Read the template at `docs/modules/templates/settings_json.md`. Create `.claude/settings.json` with the permissions, statusline and hooks configuration.
 
 **ALWAYS merge the `enabledPlugins` key recorded in Step 5.5** (if that step succeeded) into the
 settings file now — this step is the RECEIVER of that handoff. The template does NOT carry the key

@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.30.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.31.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -582,7 +582,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.30.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.31.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -1045,7 +1045,14 @@ with no slot is owed by nobody (`/audit` 2026-09-03 N-21, N-27).
 
 **Step 4.2 — Create settings.json and initialize logs (if missing):**
 
-Read the template at `docs/modules/templates/settings_json.md` for the reference configuration. If `projects/$ARGUMENTS/.claude/settings.json` or `projects/$ARGUMENTS/.claude/settings.local.json` already exists, **merge** the keys rather than overwriting.
+Read the template at `docs/modules/templates/settings_json.md` for the reference configuration. If `projects/$ARGUMENTS/.claude/settings.json` or `projects/$ARGUMENTS/.claude/settings.local.json` already exists, **merge** the `statusLine` and `hooks` keys rather than overwriting — **an existing `statusLine` is the OWNER'S and is NEVER replaced.**
+
+**THE FENCE BELOW IS A VERBATIM DUPLICATE OF THAT TEMPLATE'S JSON, and it is the copy that drifts.**
+Bootstrap Step 14 READS the template; this step EMBEDS it, so a key added to the template reaches
+new projects and silently skips adapted ones. **The diff that catches this is `/maintenance` →
+Gate 1 (TWIN PARITY)**, which owns the moment either file is edited — the mandate lives there, not
+here (component-design §9). The `statusLine` key was added to the template and left out here until
+a pre-commit verifier caught it (2026-09-21).
 
 ```bash
 # Create logs directory
@@ -1066,6 +1073,11 @@ if [ ! -f "projects/$ARGUMENTS/.claude/settings.json" ] && [ -d "projects/$ARGUM
       "Bash(npm *)",
       "Bash(npx *)"
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node -e \"let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const j=JSON.parse(s),c=j.context_window||{},o=j.cost||{},m=j.model||{};process.stdout.write((m.display_name||'')+' | ctx '+(c.used_percentage!=null?c.used_percentage+'%':'?')+' | $'+Number(o.total_cost_usd||0).toFixed(2))}catch(e){}})\"",
+    "padding": 0
   },
   "hooks": {
     "PostToolUse": [
@@ -1088,7 +1100,7 @@ if [ ! -f "projects/$ARGUMENTS/.claude/settings.json" ] && [ -d "projects/$ARGUM
   }
 }
 SETTINGS
-  echo "Created settings.json with hooks"
+  echo "Created settings.json with statusline and hooks"
 fi
 ```
 

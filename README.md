@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.30.0
+# Agentic Engineering Framework v2.31.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -147,7 +147,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.30.0)
+│   ├── modules/                            ← Single source of truth (v2.31.0)
 │   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -189,7 +189,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `.claude/rules/component-design.md` | `modules/rules/component_design.md` | Agent/skill/rule design: gap-declaration, Pushy Descriptions, vocabulary alignment |
 | `.claude/agents/prd-sync-checker.md`, `criteria-enforcer.md`, `diff-pattern-extractor.md` | `modules/agents/prd_sync_checker.md`, etc. | Process agents — invoked as subagents; isolated context |
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
-| `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + auto-formatting hooks |
+| `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + owner statusline + formatter and skill-gate hooks |
 | `scripts/check-agent-frontmatter.mjs` | `modules/templates/check_agent_frontmatter.md` | Component-registry liveness guard — invalid agent/skill frontmatter fails loud instead of silently vanishing (also wired as a CI `guards` stage) |
 | `.claude/skills/codebase-audit/` *(internal-tool+)* | `modules/skills/codebase-audit/` | MACRO axis — periodic system health audit |
 | `.claude/phases/metrics.md` *(internal-tool+)* | `modules/templates/metrics_md.md` | Code health time series (one row per audit) |
@@ -409,6 +409,8 @@ Start at Level 3. Move to Level 4 after 3-5 sessions when the validation loop is
 - **What it never does:** activate by itself, relax the validation geometry after a streak of green, run an audit autonomously, or run an agent that mutates the working tree in parallel with one that reads it.
 
 **Model by Risk Class** — Every agent declares its own `model:` in frontmatter, decided by what its report produces and written once. A component whose verdict gates a commit stays at `inherit` (the orchestrator's model); one that only extracts or compares runs a cheaper tier, as does the breadth pass of an audit fan-out. The field is written EXPLICITLY even when it is `inherit`, because an absent field and a decided one are indistinguishable — and the whole point is that `grep -rn "^model:"` answers which model reviewed which commit. Skills never carry it: a skill loads into the current context and never spawns.
+
+**The Owner’s Meter** — A project’s `settings.json` ships a statusline printing the model, the context-window percentage and the session cost. The framework sets NO numeric context gate for the AI: a model cannot observe its own context usage, and an instructed estimate is confabulation. In Level-5 loop mode the `autonomous-loop` skill therefore forbids self-estimated percentages and tells the orchestrator to ask the OWNER for the real meter — this is that meter, rendered for a human and never entering the AI’s judgement.
 
 **Review Receipts** — A reviewer verdict counts only when its final report is saved under `.claude/logs/review-reports/` and cited by a line in that folder's receipts ledger. Before a migration reaches production or the deploy PR opens, every code commit in the range must carry a receipt or an explicit owner exemption; the AI checks this and blocks the deploy otherwise.
 

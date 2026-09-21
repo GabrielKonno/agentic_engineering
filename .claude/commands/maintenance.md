@@ -760,6 +760,18 @@ Each item encodes a real miss that survived a first pass and was only caught by 
    to every sweep that greps by pattern, because the pattern is present in one copy
    (`/audit` 2026-09-03 N-6).
 
+   **A TWIN IS ALSO A BLOCK EMBEDDED IN ANOTHER FILE, not only a directory pair.**
+   `existing_project_adaptation.md` Step 4.2 carries a VERBATIM COPY of the settings template's
+   JSON in a heredoc, because that step writes the file instead of reading the template the way
+   bootstrap Step 14 does. **ALWAYS RUN THIS TOO:**
+   ```bash
+   diff <(sed -n '/^```json$/,/^```$/p' docs/modules/templates/settings_json.md | sed '1d;$d' | tr -d '\r') \
+        <(sed -n "/<< 'SETTINGS'/,/^SETTINGS$/p" .claude/commands/existing_project_adaptation.md | sed '1d;$d' | tr -d '\r')
+   ```
+   **Expected: no output (exit 0).** A key added to the template reaches every NEW project and
+   silently skips every ADAPTED one — which is exactly what happened when `statusLine` was added
+   (2026-09-21, caught by a pre-commit verifier, not by a gate).
+
    **Gate 2 — EVERY RECEIPT ROW NAMES A FILE THE COMMIT TOUCHED.**
    ```bash
    git show --name-only --format="" HEAD    # or the staged set, pre-commit
