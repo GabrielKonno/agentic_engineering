@@ -56,6 +56,18 @@ This is a framework maintenance session, not a project bootstrap.
   hash** — the detectors read the last hash as "scanned up to here", so a hash on a RED line made a
   published leak before it invisible to every later discharge (this rule's pre-commit verifier,
   2026-09-16).
+  **WHEN A PUSH LANDS, ALWAYS UPDATE *EVERY* HASH-ENDING KEY IN THE SECTION, NEVER ONLY `push:`.**
+  The detector takes `tail -1` over the hash-ending lines of THREE keys (`push:`, `push decay:`,
+  `Post-push D16:`), so KEY ORDER decides which endpoint wins, not recency. A session that pushed
+  and corrected `push:` alone left `push decay:` on the pre-push hash, and because `push decay:`
+  sorts later the next session would have read the STALE one. It failed SAFE there — the symmetric
+  case UNDER-scans, and published commits never get the D16 the rule requires
+  (`/audit` 2026-09-20 AC-29).
+  **AND ALWAYS KEEP THE WHOLE VERDICT ON ONE LINE, ENDING WITH THE HASH.** The harvest anchors on
+  `^**<key>:**` AND on the hash at line END, so a key whose verdict WRAPS drops out of the set
+  entirely and the detector silently falls back to another key's hash. That is how the FIRST repair
+  of AC-29 failed: the rewritten `push decay:` wrapped, and the endpoint went from stale to wrong
+  (same finding, second manifestation).
   **THE `push:` VALUE IS A POINT-IN-TIME CLAIM AND IT DECAYS — WITHIN a session AND BETWEEN
   SESSIONS.** The next session ALWAYS re-checks before doing anything else: if `origin/main`
   moved, commits a persisted receipt calls unpushed are now published and the mandated GREEN
