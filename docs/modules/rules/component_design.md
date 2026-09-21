@@ -291,9 +291,13 @@ A mention in a rules file, a log or the backlog is prose — it is where orphane
   and name the invoker in the script's header.
 - A guard that cannot run in CI (it reads a gitignored file, it needs production secrets) ALWAYS gets
   a skill step instead — usually the session-start skill — never "run it by hand".
-- The periodic check is `codebase-audit` → step 6 → "every guard script has an EXECUTABLE invoker"
-  (`internal-tool`+; at `prototype` nothing checks it periodically — the same-change wiring is the
-  only control).
+- The periodic check is `codebase-audit` → "Debt-aging triage" →
+  **"every guard script has an EXECUTABLE invoker"** — the heading is real; the quoted mandate is a
+  bold lead-in inside it. BOTH are given on purpose: the heading so the reader can navigate, the
+  verbatim string so the claim can be grepped.
+  **NEVER WRAP A QUOTED STRING ACROSS A LINE BREAK** — a grep for it then returns 0.
+  It ships at `internal-tool`+; at `prototype` nothing checks it periodically and the same-change
+  wiring is the only control (`/audit` 2026-09-21 AA-11, AC-19).
 
 > Evidence (production project): five guard scripts that exit 1 had no invoker at all. One watched
 > the age of the only backup, which then aged 13 of its 14 allowed days; the script had been run by

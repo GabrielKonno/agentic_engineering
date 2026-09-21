@@ -369,7 +369,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.31.1 they are
+         **Expected: at least 5 paths.** As of v2.31.2 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
