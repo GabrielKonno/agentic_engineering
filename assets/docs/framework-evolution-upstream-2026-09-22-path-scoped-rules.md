@@ -52,7 +52,8 @@ continuous mode. Checked against the current `autonomous-loop`:
 
 | Anchor | Measurer | Status |
 |--------|----------|--------|
-| The always-loaded share stays near the ~5% measured at the source | `scripts/check-rules-paths.mjs` prints `always loaded: X of Y chars (P%)` in every CI `guards` run, at every tier | named |
+| The always-loaded share stays near the ~5% measured at the source | IN A PROJECT: `scripts/check-rules-paths.mjs` prints `always loaded: X of Y chars (P%)` in every CI `guards` run, at every tier | named |
+| The same, for THIS repo's own `.claude/rules/component-design.md` | nothing — this repo ships no guard, runs no CI stage and carries no tier | unmeasured — no measurer in this repo (`/audit` AE-8) |
 | No new `ALWAYS_LOADED` entry without a reason | the same guard lists every `ALWAYS` line with its reason | named |
 | A subagent's starting context stays in the tens of thousands of tokens | nothing installed reads `/context` | unmeasured — no measurer at any tier |
 | No defect whose rule existed but was not loaded (shell writes, new files) | nothing counts it; the hook that would is project-local | unmeasured — no measurer at any tier |

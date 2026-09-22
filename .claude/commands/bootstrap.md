@@ -383,7 +383,7 @@ Enable the Skill Creator plugin for automated skill evaluation:
 
 ---
 
-### Step 5.7 — Copy pre-built process skills, process agents, and session rules
+### Step 5.7 — Copy pre-built process skills, process agents, session rules, and guard scripts
 
 **Process skills (12 lifecycle — ALWAYS copied to `.claude/skills/`):**
 
@@ -452,6 +452,12 @@ so sessions and CI can invoke it uniformly.
 **Rules load-scope guard (ALL tiers — copied to `scripts/`):**
 
 ```bash
+# BACKSTOP (Setup guard) — `mkdir -p` would happily CREATE a missing project, which is V-12's own
+# defect, so the name and the project folder are checked FIRST; then this fence stands alone instead
+# of depending on the preceding one having run (`/audit` AE-2 and this batch's verifier).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS" ] || { echo "FAILED: projects/$ARGUMENTS is not an existing folder"; exit 1; }
+mkdir -p projects/$ARGUMENTS/scripts
 sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_rules_paths.md | sed '1d;$d' > projects/$ARGUMENTS/scripts/check-rules-paths.mjs
 ```
 

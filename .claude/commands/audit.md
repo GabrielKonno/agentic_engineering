@@ -1471,7 +1471,9 @@ step is the carry-over half.
    closed, and item 3 below cannot see it (`/audit` 2026-09-02 L-8). The ID is what a later maintenance session
    cites; a finding without one cannot be tracked across sessions.
 3. **ALWAYS carry FORWARD every finding that is NOT closed — `open` AND `escalated`** — from the previous audit report (the most
-   recent `assets/docs/audit-*.md`) into the new one, re-verifying each against the current disk:
+   recent `assets/docs/audit-*.md` whose header does NOT say `**Run mode:** receipts-only`; that
+   kind carries receipts and a push endpoint, never a ledger, and reading it for findings returns a
+   falsely clean backlog) into the new one, re-verifying each against the current disk:
    still true → carry with its original ID; fixed since → mark `applied`. An audit that silently
    drops the last one's open items is how "deferred" becomes "forgotten".
    **ALWAYS CARRY IT AS A LEDGER ROW (`| ID | Severity | Location | Finding | Status |`), NEVER AS A

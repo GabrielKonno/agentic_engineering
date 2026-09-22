@@ -171,6 +171,16 @@ the per-kind sections and measure before citing any of these as universal (`/aud
 - STRONG criteria examples where applicable
 
 **Rules (WHAT constraints apply):**
+
+**Frontmatter — the per-kind contract; rules use NONE of the agent/skill fields:**
+- `domain:` — the domain slug
+- `# Scope:` — a YAML comment carrying the prose scope, for whoever seeds the file
+- `paths:` — a YAML list of globs. **This is the only key the harness reads.** A rule WITHOUT it
+  loads in EVERY session and EVERY subagent; `applies_to:` is ignored (component-design §7). The
+  globs in these examples are ILLUSTRATIVE — replace them with the project's real paths when the
+  file is seeded, and `scripts/check-rules-paths.mjs` reports any that match no tracked file.
+- NEVER `name:`, `effort:`, `invocation:` or `model:` — those belong to the agent/skill contract.
+
 - Inviolable rules numbered — non-negotiable boundaries
 - Checklists for new entities (new table, new endpoint, etc.) — **where the domain HAS an
   entity-creation flow.** **1 of 11** examples carries one (`multi-tenancy-rules.md`'s “New Table Checklist”); **5 of 11** carry a `- [ ]` checklist of any kind, and those five are a different set. Both figures are measured, and the earlier `6` was carried through unmeasured twice (`/audit` 2026-09-04 R-39).

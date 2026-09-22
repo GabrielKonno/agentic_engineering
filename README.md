@@ -195,7 +195,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + owner statusline + formatter and skill-gate hooks |
 | `scripts/check-agent-frontmatter.mjs` | `modules/templates/check_agent_frontmatter.md` | Component-registry liveness guard — invalid agent/skill frontmatter fails loud instead of silently vanishing (also wired as a CI `guards` stage) |
-| `scripts/check-rules-paths.mjs` | `modules/templates/check_rules_paths.md` | Rules load-scope guard — every rule carries `paths:` (loaded only when a matching file is read) or is declared always-loaded; fails on the ignored `applies_to:` key and on dead globs (CI `guards` stage) |
+| `scripts/check-rules-paths.mjs` | `modules/templates/check_rules_paths.md` | Rules load-scope guard — every rule carries `paths:` (loaded only when a matching file is read) or is declared always-loaded; fails on the ignored `applies_to:` key and on an unscoped, undeclared rule, and REPORTS dead globs without failing (CI `guards` stage) |
 | `.claude/skills/codebase-audit/` *(internal-tool+)* | `modules/skills/codebase-audit/` | MACRO axis — periodic system health audit |
 | `.claude/phases/metrics.md` *(internal-tool+)* | `modules/templates/metrics_md.md` | Code health time series (one row per audit) |
 | `.claude/skills/skill-gate/` + `.claude/agents/skill-reviewer.md` + `.claude/drafts/` *(internal-tool+)* | `modules/skills/skill-gate/`, `modules/agents/skill_reviewer.md` | Creation gate — new skills/rules drafted, blind-reviewed, and promoted (never self-approved) |
@@ -379,7 +379,7 @@ The framework learns from your project:
 | `/existing_project_adaptation [name]` | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
 | `/prd_change [name]` | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
 | `/maintenance` | Changing the framework itself, or absorbing lessons projects recorded | An audit report or pending `framework-evolution-*.md` docs | Framework edits + write-back and receipts in the audit report |
-| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a maintenance batch applied an audit batch AND evidence from OUTSIDE the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | The repository (and the last report, in verification mode) | Its dated report in `assets/docs/` (+1 defect-series row in verification mode) with stable finding IDs |
+| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a `/maintenance` session applies an audit batch AND evidence from OUTSIDE the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | The repository (and the last report, in verification mode) | Its dated report in `assets/docs/` (+1 defect-series row in verification mode) with stable finding IDs |
 
 ---
 

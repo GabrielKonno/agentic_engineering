@@ -57,6 +57,10 @@ This is a framework maintenance session, not a project bootstrap.
   published leak before it invisible to every later discharge (this rule's pre-commit verifier,
   2026-09-16).
   **WHEN A PUSH LANDS, ALWAYS UPDATE *EVERY* HASH-ENDING KEY IN THE SECTION, NEVER ONLY `push:`.**
+  The section lives in a dated report file — ALWAYS, since 2026-09-22 (see the checklist's
+  persistence mandate) — which is what makes this mandate executable and what the detector reads.
+  **NEVER record a push anywhere else**: recorded in a lineage doc it is invisible to the detector,
+  which then reports `advanced` over a range already scanned GREEN (`/audit` AE-6, AE-7).
   The detector takes `tail -1` over the hash-ending lines of THREE keys (`push:`, `push decay:`,
   `Post-push D16:`), so KEY ORDER decides which endpoint wins, not recency. A session that pushed
   and corrected `push:` alone left `push decay:` on the pre-push hash, and because `push decay:`
@@ -125,11 +129,15 @@ before any edit.** **COMPARE HASHES, NEVER THE STATUS LINE:** `git status -sb` p
 push made from this same clone read `## main...origin/main` before AND after `origin/main` moved —
 the check could not go RED on the common case (`/audit` 2026-09-15 B-7). **A `RED: no recorded
 origin/main hash` line means the most recent report carries no hash-ending line yet: derive the
-endpoint from the graph by hand, and SAY SO in the key.** **KNOWN LIMIT, fails closed:** the detector
-reads only the most recent `assets/docs/audit-*.md`. A session whose receipts lived in a COMMIT BODY
-(no report file) is not read, so the next session sees `RED: no recorded origin/main hash` and
-derives the endpoint from that commit body by hand — say so (this rule's pre-commit verifier,
-2026-09-16).
+endpoint from the graph by hand, and SAY SO in the key.** **KNOWN LIMIT, and it is NOT closed by the commit-body retirement:** the detector reads whichever
+`assets/docs/audit-*.md` sorts LAST BY FILENAME, which is the newest DATE, not the file this session
+wrote. So a push recorded correctly — in a report file — is invisible whenever that report is not
+the newest-dated one, and the verdict is a silent, WRONG `advanced` (this batch's pre-commit
+verifier, 2026-09-22; the same shape as `/audit` AE-7, where the record sat in a lineage doc).
+**THEREFORE: ALWAYS WRITE THE `push:` LINE INTO THE NEWEST-DATED REPORT FILE**, creating today's
+per the checklist's persistence mandate when it does not exist — never only into an older report you
+happened to be applying. A push recorded anywhere else is a defect, not a variant; if you meet one,
+derive the endpoint from the graph by hand and SAY SO in the key.
 The rule was written with no invoker in this sequence and no self-check
 (`/audit` 2026-09-04 R-26; `/audit` 2026-09-09 T-29).
 **ALWAYS REPORT — `push decay: unchanged — origin/main at sHASH` or `push decay: advanced sOLD..sNEW — D16 re-run over the newly-published range: [GREEN | RED, findings] — origin/main at sNEW` or `push decay: advanced sOLD..sNEW (endpoint derived by hand — [why]) — D16 re-run over the newly-published range: [GREEN | RED, findings] — origin/main at sNEW` or `push decay: RED — [fetch failed | no origin/main ref | gate could not check: reason] — origin/main unverified`. NEVER emit nothing.**
@@ -337,10 +345,24 @@ added to this list, and neither could then go RED (`/audit` 2026-09-15 B-8, B-9)
 reporting it.** Each numbered item below ends in an `ALWAYS REPORT` mandate, and a line that lives
 only in a transcript cannot be re-read by the `/audit` that verifies this batch, by the next
 maintenance session, or by you. Write them ALL, verbatim, into:
-- **the audit report file**, under a `## Post-change checklist receipts (sHASH)` heading, when
-  this session applied an audit batch (Audit intake's write-back step already writes to that
-  file); OR
-- **the commit message body**, when there is no report file.
+- **the dated report file `assets/docs/audit-YYYY-MM-DD.md`, ALWAYS** — under a
+  `## Post-change checklist receipts (sHASH)` heading. When this session applied an audit batch the
+  file already exists (Audit intake's write-back step writes to it). **When it does NOT exist,
+  CREATE it** with a two-line header — `# Framework maintenance receipts — YYYY-MM-DD` and
+  `**Run mode:** receipts-only — no audit ran this day` — and write the section into it.
+  **THE `receipts-only` HEADER IS LOAD-BEARING: it enters the `assets/docs/audit-*.md` glob, and two
+  readers resolve that glob for FINDINGS** — Audit intake step 1 and `/audit` Phase 3's
+  carry-forward. **Both ALWAYS SKIP a file whose header says `receipts-only`**: it carries receipts
+  and a push endpoint, never a ledger, so reading it for findings returns zero and looks like a
+  clean backlog. The `push decay:` detector, which wants the newest endpoint, reads it normally
+  (this batch's pre-commit verifier, 2026-09-22).
+**THE COMMIT-MESSAGE BODY IS NO LONGER A VALID HOME — retired 2026-09-22 (`/audit` AE-9, AE-6, AE-7).**
+It was authorised in prose and read by NOTHING. All three heading completions below require a hash
+that cannot exist while a commit message is being written, so the fence-aware extractor returns ZERO
+lines from a commit body; the `push decay:` detector reads only the newest `assets/docs/audit-*.md`;
+and Audit intake's reader does the same. Measured on the batch that exposed this: the 27 keys scored
+27 of 27 — under a heading form the rule does not authorise, i.e. by accident.
+**A commit body may still SUMMARISE the batch; it is NEVER the receipts' home.**
 
 **The receipts section heading is an H2 beginning `## Post-change checklist receipts (`.** THREE
 completions are valid: `(sHASH)` for a single-commit batch, `(\`sHASH\`)` — the backticked form,
@@ -390,6 +412,16 @@ done
 Grep them out — **BOTH alternatives ANCHORED to a `$` line**:
 `grep -cE '^ *\$ *<|^ *\$ .*(\.\.\.|…)'` over the section → **expected 0**, and name any survivor
 with the reason it cannot be written literally.
+**AND NAME THE KEYS THAT USED THE `n/a` ESCAPE — the third way to satisfy the shape without
+measuring anything. COUNT NOTHING: a bare count cannot enforce "only under", because two escapes
+under two UNAUTHORISED keys score exactly like the healthy two** (this batch's pre-commit verifier,
+2026-09-22). Per-key form, over the section:
+```bash
+awk '/^\*\*[a-z][a-z ._-]*:/{k=$0; sub(/^\*\*/,"",k); sub(/:.*/,"",k)} /^ *\$ *n\/a/{print k}' <this run's section> | sort -u
+```
+**Expected: nothing but `classification` and `new component`**, the two keys this file authorises.
+Any other key printed is RED — measured on the batch that exposed it, six keys used the escape and
+four were unauthorised (`/audit` AE-12).
 **NEVER leave the ellipsis alternative unanchored.**
 Unanchored, `\.\.\.` matches any line containing three dots — including pasted `## main...origin/main`
 stdout — so the check returned **5 where 0 was expected on a healthy section**, and its discharge
@@ -673,6 +705,14 @@ Each item encodes a real miss that survived a first pass and was only caught by 
      grep -rohE '`?\.claude/[a-z][a-z_-]*/' docs/modules/ | tr -d '`' | sort -u \
        | grep -v '^[.]claude/commands/$' | while read d; do
        grep -q "ARGUMENTS/${d%/}" .claude/commands/bootstrap.md || echo "MANDATED, NEVER CREATED: $d"
+     done
+     # HALF 2 — its own command, which HALF 1 structurally cannot be. A path a shipped artifact
+     # mandates and NO command mentions at all never reaches half 1's `ARGUMENTS/` anchor, so half 1
+     # reports it under the same string as a path that IS mentioned but never created. Half 2 was
+     # declared in the comments above and shipped no command for a batch (`/audit` AE-10).
+     grep -rohE '`?\.claude/[a-z][a-z_-]*/' docs/modules/ | tr -d '`' | sort -u \
+       | grep -v '^[.]claude/commands/$' | while read d; do
+       grep -qF "${d%/}" .claude/commands/bootstrap.md || echo "MANDATED, NEVER MENTIONED: $d"
      done
      ```
      **Expected: no output from either half.** A hit in half 2 is a shipped rule pointing at a
@@ -1324,7 +1364,9 @@ Upstream intake below — applying audit findings is the more frequent of the tw
 written home until `/audit` D17 found the gap.)
 
 When the prompt says to apply an audit, or names a report file, ALWAYS:
-1. **READ the most recent `assets/docs/audit-*.md`** and work from its stable IDs (`F-3`, `G-7`).
+1. **READ the most recent `assets/docs/audit-*.md` — SKIPPING any whose header says
+   `**Run mode:** receipts-only`**, which carries receipts and a push endpoint but no ledger — and
+   work from its stable IDs (`F-3`, `G-7`).
    Cite IDs in the commit message so a later session can trace what was applied.
 2. **RE-VERIFY each finding against the CURRENT disk before applying it.** A report is evidence,
    not truth: it may be stale, or its characterization may be wrong. When a finding says
@@ -1578,6 +1620,16 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
    source docs can share one.
 5. **NEVER edit the project's own evolution docs** (no-touch rule) — marking them
    `upstreamed` is the project's own next session's job, guided by this repo's lineage record.
+   **ONE EXCEPTION, and it is the owner's to grant, never this session's to assume: the owner may
+   AUTHORIZE this session to mark the header `upstreamed` from here.** It was exercised on
+   2026-09-22 and had no written home at all, so the next session met an unqualified NEVER and a
+   precedent living only in a lineage doc (`/audit` AE-5). When it is granted, ALWAYS:
+   - **EDIT ONLY THE STATUS HEADER**, preserving the previous status struck through, and naming the
+     absorbing commit and the lineage file;
+   - **LEAVE THE EDIT UNCOMMITTED** — the project repo's own commit conventions and gates belong to
+     its own session, and this repo does not run them;
+   - **SAY BOTH FACTS in the closing report and in the lineage record**, because an unstated
+     exception is indistinguishable from a violation of the rule above it.
 6. Run the post-change verification (cross-references, template fence extraction, D16
    isolation gate, `bash .claude/scripts/d16-gate.sh staged`) before committing.
 7. **ALWAYS PROPOSE `/audit` after the absorption lands** — this is trigger (a) in CLAUDE.md,
@@ -1587,6 +1639,8 @@ sweep surfaced pending docs and the owner authorized absorbing them, ALWAYS:
 8. **ALWAYS HAND THE DISPOSITION BACK to the owner in the session's closing report** — one line
    per absorbed doc: its path, the verdict (graduated / adapted / rejected), the lineage file and
    commit that record it, and the explicit sentence that the doc is now **dischargeable**, i.e.
-   the project's own next session marks its header `upstreamed`. The no-touch rule stops this repo
-   from marking it; it does NOT excuse this repo from SAYING so. Without THIS step the last link of
+   the project's own next session marks its header `upstreamed` — unless the owner authorised this
+   session to mark it from here (item 5's exception), in which case the line says SO, and says the
+   edit was left uncommitted. The no-touch rule stops this repo from marking it unbidden; it does
+   NOT excuse this repo from SAYING so either way. Without THIS step the last link of
    the chain rests on owner memory — the exact failure class Step 0 exists to eliminate.
