@@ -64,3 +64,12 @@ The source doc is now **dischargeable**: the projeto-fonte's own next session ma
 requires is satisfied. The adaptation MUST preserve the project's existing `paths:` blocks and its
 guard (it will read `DIFFERS from framework` on `check-rules-paths.mjs`; keep the project's copy,
 which carries its own matcher and the hook's `--for` mode).
+
+## Push record (2026-09-22)
+
+**push:** requested — D16 GREEN over 1 unpushed commit → pushed 08e2123..ece8b08 — origin/main at ece8b08
+**Post-push D16:** GREEN over the published range — origin/main at ece8b08
+**source doc:** marked `upstreamed` in the project working tree from this session, with the owner's
+explicit authorization (an exception to the no-touch rule, stated here because an unstated exception
+is indistinguishable from a forgetting). The edit was left UNCOMMITTED: the project repo's own
+commit conventions and gates belong to its own session. The prior status line is preserved struck through.
