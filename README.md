@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.31.5
+# Agentic Engineering Framework v2.32.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -18,7 +18,7 @@ This repo is a **factory for AI-ready projects**. It reads your product requirem
   |  prd.md     |------->| Bootstrap Prompt   |---------->| CLAUDE.md           |
   +-------------+        |                    |           | project.md          |
                          | Reads:             |           | pendencias.md       |
-                         |  - 7 doc templates |           | 7-10 agent .md files|
+                         |  - 8 doc templates |           | 7-10 agent .md files|
                          |  - 10 agent files  |           | 12-15 process skills|
                          |  - 5 rules files   |           | 3-5 rules files     |
                          |  - 15 skills       |           | examples/ (copy)    |
@@ -148,8 +148,8 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.31.5)
-│   │   ├── templates/                      ← Document and config templates (7, incl. the frontmatter liveness guard)
+│   ├── modules/                            ← Single source of truth (v2.32.0)
+│   │   ├── templates/                      ← Document and config templates (8, incl. the frontmatter and rules-scope guards)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
 │   │   └── skills/                         ← 15 pre-built skills (12 lifecycle + 3 tier-gated)
@@ -195,6 +195,7 @@ When you run the bootstrap prompt, the AI creates these files *inside your proje
 | `assets/examples/*` | `examples/*` | Quality reference for on-demand agent/skill creation (read-only copy) |
 | `.claude/settings.json` | `modules/templates/settings_json.md` | Permissions + owner statusline + formatter and skill-gate hooks |
 | `scripts/check-agent-frontmatter.mjs` | `modules/templates/check_agent_frontmatter.md` | Component-registry liveness guard — invalid agent/skill frontmatter fails loud instead of silently vanishing (also wired as a CI `guards` stage) |
+| `scripts/check-rules-paths.mjs` | `modules/templates/check_rules_paths.md` | Rules load-scope guard — every rule carries `paths:` (loaded only when a matching file is read) or is declared always-loaded; fails on the ignored `applies_to:` key and on dead globs (CI `guards` stage) |
 | `.claude/skills/codebase-audit/` *(internal-tool+)* | `modules/skills/codebase-audit/` | MACRO axis — periodic system health audit |
 | `.claude/phases/metrics.md` *(internal-tool+)* | `modules/templates/metrics_md.md` | Code health time series (one row per audit) |
 | `.claude/skills/skill-gate/` + `.claude/agents/skill-reviewer.md` + `.claude/drafts/` *(internal-tool+)* | `modules/skills/skill-gate/`, `modules/agents/skill_reviewer.md` | Creation gate — new skills/rules drafted, blind-reviewed, and promoted (never self-approved) |

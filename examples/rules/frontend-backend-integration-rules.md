@@ -1,6 +1,11 @@
 ---
 domain: frontend-backend-integration
-applies_to: fullstack applications with separate frontend and backend, SSR/SSG apps with API layers, SPAs with REST/GraphQL backends
+# Scope: fullstack applications with separate frontend and backend, SSR/SSG apps with API layers, SPAs with REST/GraphQL backends
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/api/**"
+  - "**/services/**"
 ---
 
 # Frontend-Backend Integration Rules

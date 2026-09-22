@@ -1,6 +1,12 @@
 ---
 domain: observability
-applies_to: all backend services, API handlers, background jobs, message consumers, infrastructure
+# Scope: all backend services, API handlers, background jobs, message consumers, infrastructure
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/logger*.*"
+  - "**/telemetry/**"
+  - "**/workers/**"
 ---
 
 # Observability Rules

@@ -1,6 +1,12 @@
 ---
 domain: rate-limiting-abuse-prevention
-applies_to: public API endpoints, authentication endpoints, webhook receivers, payment endpoints
+# Scope: public API endpoints, authentication endpoints, webhook receivers, payment endpoints
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/api/**"
+  - "**/webhooks/**"
+  - "**/middleware.*"
 ---
 
 # Rate Limiting & Abuse Prevention Rules

@@ -1,6 +1,16 @@
 ---
 domain: component-design
-applies_to: "docs/modules/agents/**,docs/modules/skills/**,docs/modules/rules/**,examples/agents/**,examples/skills/**,examples/rules/**,.claude/commands/**,.claude/skills/**,.claude/rules/**,.claude/agents/**"
+paths:
+  - "docs/modules/agents/**"
+  - "docs/modules/skills/**"
+  - "docs/modules/rules/**"
+  - "docs/modules/templates/**"
+  - "examples/agents/**"
+  - "examples/skills/**"
+  - "examples/rules/**"
+  - ".claude/commands/**"
+  - ".claude/skills/**"
+  - ".claude/rules/**"
 ---
 
 # Component Design Policy
@@ -190,6 +200,18 @@ Claude Code provides these natively — do not build custom replacements:
 | Agent tool isolation | Fresh context per subagent | Context sharing between subagents |
 | Rules `paths:` globs | Lazy loading per file pattern | Manual conditional loading |
 | CLAUDE.md auto-read | Loaded every session | "Read project config" steps in skills |
+
+**ALWAYS scope a rules file with `paths:` (a YAML list of globs) — NEVER with `applies_to:` or any other key.**
+The harness reads `paths:` only: a rule without it loads in EVERY session and EVERY subagent, and a scope
+written in another key is intent with no mechanism — the §8 class, one key over. A rule stays unscoped only
+when it governs the session itself — in a project, listed with its reason in the shipped guard's
+`ALWAYS_LOADED` (`docs/modules/templates/check_rules_paths.md`; this repo runs no such guard).
+**NEVER instruct an agent to "read all `.claude/rules/*.md`"** — with scoping, that line
+cancels the gain exactly in the subagents; name the files under review instead, and the Read loads the rules.
+
+> Evidence (production project, 2026-09): 19 rules files declared scope in `applies_to:` and loaded in full —
+> ~52% of a 1M window before any work; a 200k subagent died on its starting context. After `paths:`, the
+> always-loaded share was ~5% and a subagent started at ~63k tokens, measured by a control/test agent pair.
 
 **Subagent depth limit:** Only main Claude can use the Agent tool. Design
 activation flows that route through main Claude's report reading, not through

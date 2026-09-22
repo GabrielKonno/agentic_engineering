@@ -31,7 +31,7 @@ when the diff's domain is recognized via this agent's description.
 **Context to include in prompt:**
 - Git diff (`git diff HEAD~1`)
 - Code Review Report (if accessibility gap triggered this invocation)
-- All `.claude/rules/*.md` files
+- The path-scoped `.claude/rules/*.md` of the files under review — NEVER pasted: NAME those files explicitly so the subagent Reads them (Read tool) and the harness loads their rules
 - CLAUDE.md: Key Patterns and Architecture sections
 
 **What main Claude should do with this report:**
@@ -100,7 +100,7 @@ After implementing or modifying:
 - **Git diff** — read via `git diff HEAD~1` to identify changed components and templates
 - **Component file paths** — the markup/JSX/template files the diff touched
 - **WCAG requirements context** — the target conformance level, passed via prompt
-- **Rules files** — all `.claude/rules/*.md` (an `accessibility-rules.md`, when present, is authoritative)
+- **Rules files** — always-loaded rules are already in your context; domain rules in `.claude/rules/*.md` are PATH-SCOPED (`paths:`) and load only when you **Read** (Read tool — a shell `cat` does not trigger it) a matching file, so ALWAYS Read every file under review before judging it, and Read a rules file directly only when its domain is at stake with none of its files in scope (an `accessibility-rules.md`, when present, is authoritative)
 
 ## Output Format
 

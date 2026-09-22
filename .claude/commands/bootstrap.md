@@ -449,6 +449,22 @@ the manual check is reading the frontmatter of every agent/skill after editing i
 project gains a `package.json`, register `"check:agents": "node scripts/check-agent-frontmatter.mjs"`
 so sessions and CI can invoke it uniformly.
 
+**Rules load-scope guard (ALL tiers — copied to `scripts/`):**
+
+```bash
+sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_rules_paths.md | sed '1d;$d' > projects/$ARGUMENTS/scripts/check-rules-paths.mjs
+```
+
+A rules file with no `paths:` frontmatter loads in EVERY session and EVERY subagent; one WITH
+`paths:` loads only when a matching file is READ (component-design §7). This guard fails on an
+unscoped rule not listed in its `ALWAYS_LOADED`, on the dead `applies_to:` key, and on a glob that
+matches no tracked file (reported, never failed — it may be a module not built yet).
+**ALWAYS keep `ALWAYS_LOADED` at the two shipped entries** (`session-rules.md`, `evolution-policy.md`)
+unless the owner names another, with its reason. If the project has a `package.json`, register
+`"check:rules-paths": "node scripts/check-rules-paths.mjs"`. It needs `git`. Its invokers are
+`rules-agents-updater` (every tier, when a rule is created or rescoped) and — at `internal-tool`+ —
+the CI `guards` stage (forward reference, flagged: Step 14.2).
+
 Skills and agents are auto-discovered by Claude Code from `.claude/skills/` and `.claude/agents/`. No explicit listing is needed in CLAUDE.md.
 
 ---
@@ -480,6 +496,13 @@ sed -n '/^````markdown$/,/^````$/p' docs/modules/templates/framework_metrics_md.
 sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/ops_rules.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/ops-rules.md
 sed -n '/^````markdown$/,/^````$/p' docs/modules/rules/quality_budgets.md | sed '1d;$d' > projects/$ARGUMENTS/.claude/rules/quality-budgets.md
 ```
+
+**ALWAYS set the `paths:` of both rules just copied** — `quality-budgets.md` ships `src/**`:
+REPLACE it with the project's real source roots (the reviewer loads the file by Reading the code
+it reviews); `ops-rules.md` ships the audit skill's path: ADD the stack's infra, deploy and
+migration globs.
+**NEVER remove `paths:` to make a rule "always apply"** — that is a new
+`ALWAYS_LOADED` entry, paid in every session and subagent.
 
 **`production-financial` only — additionally** fill the ops-rules §6 reconciliation queries with
 schema-specific SELECTs (from the PRD data model).
@@ -817,7 +840,10 @@ placed (rules file or pendencias task)` — a mismatch with Step 1.1's count is 
 **Guard:** Only pre-create when BOTH conditions are met: (1) the domain is a core feature or architectural pattern in the PRD, and (2) a matching example template exists in `assets/examples/rules/`.
 
 For each match: copy from `assets/examples/rules/` to `.claude/rules/`, adapting:
-- `applies_to:` frontmatter: reference the project's actual module names from the PRD
+- `paths:` frontmatter: REPLACE the example's illustrative globs with globs over the project's
+  actual module paths from the PRD (keep its `# Scope:` comment).
+- **NEVER write `applies_to:`** — the harness ignores it and the rule then loads in every session
+  (component-design §7)
 - Remove clearly irrelevant sections that contradict the PRD (e.g., RTL layout section in i18n-rules.md if the project targets only Portuguese/English)
 - Add an HTML comment at the top of the file body: `<!-- Seeded from example template at bootstrap. Refined by rules-agents-updater as project-specific patterns emerge. -->`
 - Do NOT rewrite code examples to match the project's stack — leave for `rules-agents-updater` to refine with real code patterns
@@ -875,8 +901,9 @@ pipeline never starts out empty and added "later."
 - Emit a minimal pipeline that runs, in order: install → lint → build → test. Each step uses the
   REAL command if it exists; if a command is not yet defined (e.g., no tests yet), emit it
   commented with a `# TODO: enable when [command] exists` marker — never silently omit the stage.
-- Add a `guards` stage running `node scripts/check-agent-frontmatter.mjs` (copied in Step 5.7 —
-  dependency-free, needs no install). CI catches a broken component frontmatter before merge; the
+- Add a `guards` stage running `node scripts/check-agent-frontmatter.mjs` AND
+  `node scripts/check-rules-paths.mjs` (both copied in Step 5.7 — dependency-free, need no install;
+  the second needs `git`, which every CI checkout has). CI catches a broken component frontmatter before merge; the
   session-start/loop-start run (session-rules) catches it earlier, before any PR exists.
 - **ALWAYS make the test stage PROVE it executed** (session-rules → "Execution proof"): configure
   the runner so a zero-unit run FAILS (most runners have a flag for it — e.g. "fail when no tests
@@ -1008,6 +1035,7 @@ git commit -m "chore: bootstrap from agentic framework"
 
 ### Guards: copied from framework (Step 5.7):
 - scripts/check-agent-frontmatter.mjs (component-registry liveness — FRAMEWORK-AGENT-YAML-01; CI stage wired in Step 14.2)
+- scripts/check-rules-paths.mjs (rules load scope — `paths:` declared, no dead glob; CI stage wired in Step 14.2)
 
 ### Domain rules pre-created (from example templates — Step 13):
 - .claude/rules/[domain]-rules.md ← seeded, refined by rules-agents-updater

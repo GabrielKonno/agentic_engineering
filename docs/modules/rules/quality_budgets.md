@@ -1,15 +1,18 @@
 # Template: Quality Budgets
 
 > Create at `.claude/rules/quality-budgets.md` during bootstrap — **production+ profiles only**.
-> Lives in `rules/` so it is part of the `.claude/rules/*.md` set the code-reviewer already
-> receives — that makes the delta gate work with zero extra context routing.
+> Lives in `rules/` and is scoped with `paths:` over the project's source roots, so the code-reviewer
+> loads it by READING the code under review — the delta gate needs zero extra context routing.
 > Caps are DEFAULTS — tune per project. The point is a tripwire on slow erosion ("boiled frog"),
 > not a hard blocker: the code-reviewer delta gate FLAGS a budget regression, it does not block.
 
 ````markdown
 ---
 domain: quality-budgets
-applies_to: "**/*"
+# REPLACE `src/**` with this project's real source roots at bootstrap — the reviewer loads this
+# file by READING the code under review, so the globs must cover every source file.
+paths:
+  - "src/**"
 ---
 
 # Quality Budgets

@@ -250,7 +250,7 @@ reading the ledger for that commit (`/audit` 2026-09-16 A-18).
 
 **Context routing — ALWAYS include:**
 - Agent's own .md file
-- All `.claude/rules/*.md` files
+- Path-scoped `.claude/rules/*.md` — NEVER pasted: the subagent loads each domain's rules by **Reading** (Read tool) the files it reviews, so ALWAYS name the files under review explicitly (a shell `cat` does not load them)
 - CLAUDE.md: Key Patterns, Architecture
 - project.md: Architectural Decisions table ONLY
 - IF security-relevant: security-reviewer.md + stack security skill

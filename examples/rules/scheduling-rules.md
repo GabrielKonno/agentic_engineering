@@ -1,6 +1,12 @@
 ---
 domain: scheduling-temporal
-applies_to: appointment booking, calendar features, recurring events, cron jobs, time-based business rules
+# Scope: appointment booking, calendar features, recurring events, cron jobs, time-based business rules
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/scheduling/**"
+  - "**/calendar/**"
+  - "**/cron/**"
 ---
 
 # Scheduling & Temporal Rules

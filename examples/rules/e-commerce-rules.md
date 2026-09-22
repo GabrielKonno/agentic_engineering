@@ -1,6 +1,13 @@
 ---
 domain: e-commerce
-applies_to: cart, checkout, orders, payments, inventory, pricing
+# Scope: cart, checkout, orders, payments, inventory, pricing
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/cart/**"
+  - "**/checkout/**"
+  - "**/orders/**"
+  - "**/payments/**"
 ---
 
 # E-Commerce Rules

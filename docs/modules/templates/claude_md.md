@@ -1,7 +1,7 @@
 # Template: CLAUDE.md (slim orchestrator)
 
 > Create at project root as `CLAUDE.md`.
-> This is the v2.31.5 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
+> This is the v2.32.0 slim orchestrator (~90 lines). Protocol logic lives in process skills, loaded on demand.
 > For design rationale and architectural decisions, see `docs/modules/README.md`.
 
 ```markdown
@@ -27,6 +27,7 @@ This file provides guidance to Claude Code when working with this repository.
 - Every session with implementation work MUST end with `/session-end`
 - If context degrades mid-session: run `/context-recovery`
 - Task limits, documentation quality, reasoning depth: see `.claude/rules/session-rules.md`
+- Domain rules in `.claude/rules/` are PATH-SCOPED: they load when a matching file is READ (Read tool). When planning, writing criteria or admitting a task WITHOUT opening its code, ALWAYS Read the domain's rules file directly
 - Implementation workflow (before/during/after): handled by `validation-orchestrator` skill
 - Before executing any skill workflow (session-end, sprint-proposer, etc.), ALWAYS Read the SKILL.md file first — never work from memory
 

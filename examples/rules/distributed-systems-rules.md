@@ -1,6 +1,12 @@
 ---
 domain: distributed-systems
-applies_to: event-driven modules, saga orchestrators, message queues, async processors, services making cross-service calls
+# Scope: event-driven modules, saga orchestrators, message queues, async processors, services making cross-service calls
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/events/**"
+  - "**/queues/**"
+  - "**/workers/**"
 ---
 
 # Distributed Systems Rules

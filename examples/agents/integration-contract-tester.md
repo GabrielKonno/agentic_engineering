@@ -75,7 +75,7 @@ After implementing or modifying:
 ## Input
 
 - **Git diff** — read via `git diff HEAD~1` to identify changed request/response shapes
-- **Rules files** — all `.claude/rules/*.md`
+- **Rules files** — always-loaded rules are already in your context; domain rules in `.claude/rules/*.md` are PATH-SCOPED (`paths:`) and load only when you **Read** (Read tool — a shell `cat` does not trigger it) a matching file, so ALWAYS Read every file under review before judging it, and Read a rules file directly only when its domain is at stake with none of its files in scope
 - **CLAUDE.md Key Patterns** — the project's own integration conventions
 - **List of external services used** — passed via prompt, with each contract's source of truth
 

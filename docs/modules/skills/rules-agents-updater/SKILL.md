@@ -42,6 +42,15 @@ If the domain has 2+ sessions but does NOT yet justify a rules file (e.g., only 
 
 Path: `.claude/rules/[domain]-rules.md`. See `assets/examples/rules/` for reference templates.
 
+**ALWAYS give a new rules file a `paths:` frontmatter** — a YAML list of globs over the files the
+domain governs, derived from the paths the rule itself cites. A rule without it loads in every
+session and every subagent (component-design §7), and `scripts/check-rules-paths.mjs` fails on it.
+**ALWAYS extend the globs when a new section cites a file outside them** — an uncovered file edits
+without its rule in context.
+**ALWAYS RUN `node scripts/check-rules-paths.mjs` after creating or rescoping a rule** — expected
+exit 0; read any `DEAD` line it prints (a typo, or a module not built yet). This step is the guard's
+invoker at every tier; CI runs it too from `internal-tool` up.
+
 ### 2. Update existing agents and skills
 
 For each discovery: "If I were reading this agent/skill in a new session, would I miss the pattern I just found?" If yes, add it now. Route discoveries to the appropriate agent or skill based on the type of finding.

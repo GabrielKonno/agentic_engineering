@@ -87,7 +87,7 @@ The framework instructs the AI to check `assets/examples/` before creating any n
 
 **A convention stated for one kind is NEVER automatically true of another.** The `**Frontmatter:**`
 block below is the AGENT and SKILL contract; **rules examples do not use it at all** — 11 of 11
-carry `domain:` / `applies_to:` instead, with no `name:`, `effort:`, `invocation:` or `model:` field. Read
+carry `domain:` / `paths:` (plus a `# Scope:` comment) instead, with no `name:`, `effort:`, `invocation:` or `model:` field. Read
 the per-kind sections and measure before citing any of these as universal (`/audit` K-29, L-31).
 
 **Frontmatter:**

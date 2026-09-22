@@ -32,7 +32,7 @@ the diff's domain is recognized via this agent's description.
 **Context to include in prompt:**
 - Git diff (`git diff HEAD~1`)
 - Security Review Report (if coverage gap triggered this invocation)
-- All `.claude/rules/*.md` files
+- The path-scoped `.claude/rules/*.md` of the files under review — NEVER pasted: NAME those files explicitly so the subagent Reads them (Read tool) and the harness loads their rules
 - CLAUDE.md: Key Patterns and Architecture sections
 
 **What main Claude should do with this report:**

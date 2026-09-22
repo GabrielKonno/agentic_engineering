@@ -219,8 +219,9 @@ implementer's isolated context, never in the orchestrator's:
 > optional — it is RELOCATED.
 
 **Input — ALWAYS exactly this, never more:** the task's full block from pendencias
-(Context/State/Constraints/Criteria, criteria already strengthened), the relevant rules files,
-CLAUDE.md Key Patterns, and target file paths. NEVER the session history, the loop plan, or other
+(Context/State/Constraints/Criteria, criteria already strengthened), the NAMES of the relevant rules
+files (path-scoped rules load when the implementer READS a matching file — NEVER paste them), CLAUDE.md
+Key Patterns, and target file paths. NEVER the session history, the loop plan, or other
 tasks' reasoning.
 
 **Output contract — ALWAYS require:** the plan and its self-check, files changed, diff summary,
@@ -288,6 +289,8 @@ into a recoverable state instead of a blind commit — or a falsely-failed phase
      continuing. Canonical docs are the anchor; the compact summary is derived. Re-anchoring every
      cycle means successive compacts do NOT compound drift (each re-reads the original, not the
      previous summary).
+     **ALWAYS re-Read the in-flight task's target files before its next edit** — path-scoped rules
+     entered the context as attachments to earlier Reads, and a compact can drop them.
   4. **A subagent report is NOT state to protect:** the implementation lives in the working tree
      (re-derivable from the diff); a read-only verdict is re-runnable (idempotent). If a compact
      intervenes between a reviewer's verdict and acting on it, RE-RUN the reviewer — NEVER commit

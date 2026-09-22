@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.31.5 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.32.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -536,6 +536,21 @@ If it doesn't exist: create it. The arbitrator is mandatory for ALL projects. Re
 
 Read each rules file. No structural changes needed — rules files are project-specific. Just verify they are referenced from the code-reviewer's Security section or relevant agent.
 
+**ONE frontmatter change IS needed — the load scope.** A rule with no `paths:` loads in every
+session and every subagent; `applies_to:` is ignored by the harness (component-design §7).
+```bash
+grep -rl --include='*.md' '^applies_to:' projects/$ARGUMENTS/.claude/rules/ 2>/dev/null; echo "applies_to files: $(grep -rl --include='*.md' '^applies_to:' projects/$ARGUMENTS/.claude/rules/ 2>/dev/null | wc -l)"   # recursive, like the guard
+```
+- **ALWAYS convert every listed file:** replace `applies_to:` with a `paths:` YAML list of globs
+  over the files that domain actually governs (derived from the paths the rule itself cites), and
+  keep the old value as a `# Scope:` comment. `session-rules.md` and `evolution-policy.md` take no
+  `paths:` — they stay always-loaded.
+- **NEVER touch a rule that already has `paths:`** — the project scoped it deliberately.
+- **ALWAYS ASK the owner before leaving any other rule unscoped** — it becomes an `ALWAYS_LOADED`
+  entry in `scripts/check-rules-paths.mjs` (forward reference, flagged: Step 2.9), with its reason.
+- **ALWAYS REPORT — `rules scope: N applies_to converted, K already scoped, A always-loaded`.** NEVER emit nothing.
+
+
 **Step 2.7.1 — Pre-create missing domain rules from codebase analysis:**
 
 **PRECONDITION — `assets/examples/rules/` may not exist yet.** Phase 4 Step 4.1 is what copies it into the project; on a never-bootstrapped project this step runs BEFORE that. **ALWAYS CHECK first** (`ls projects/$ARGUMENTS/assets/examples/rules/ 2>/dev/null`): if it is missing, do NOT silently no-op — record the domain matches you found and **DEFER the copying to Step 4.6**, which runs after Step 4.1 has copied the examples and is this command's PRD-derived rules step (`/audit` 2026-09-02 M-9 — the deferral had named Step 4.1b, which handles cross-cutting concerns and never receives domain rules). **ALWAYS REPORT — `domain rules: N created` or `N matches deferred to Step 4.6 — examples not yet present`. NEVER emit nothing.**
@@ -557,7 +572,9 @@ Based on the codebase analysis from Step 1 and the existing PRD when there is on
 | Observability / logging | observability-rules.md | assets/examples/rules/observability-rules.md |
 
 For each match: copy from `assets/examples/rules/` to `.claude/rules/`, adapting:
-- `applies_to:` frontmatter: reference actual module names found in the codebase
+- `paths:` frontmatter: REPLACE the example's illustrative globs with globs over the actual module
+  paths found in the codebase (keep its `# Scope:` comment).
+- **NEVER write `applies_to:`** — the harness ignores it (component-design §7)
 - Remove clearly irrelevant sections
 - Add HTML comment: `<!-- Seeded from example template during adaptation. Refined by rules-agents-updater as patterns emerge. -->`
 
@@ -589,7 +606,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.31.5 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.32.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -664,6 +681,22 @@ is the index, not a second home. `codebase-audit` also gains a breadth-pass mode
 `Breadth findings` slot — refresh it with `session-rules.md` or its report prints a heading the
 skill no longer mandates.
 
+**v2.32.0 migration — rules scope moves to `paths:`; the rules, the new guard and the routing
+components move together.** Every rule template now carries `paths:` (the key the harness reads)
+instead of `applies_to:` (ignored — the rule loaded in every session), and the reviewer/validator
+agents, `validation-orchestrator` and `autonomous-loop` stop telling subagents to read ALL rules.
+Step 2.7 converts the project's own rules in place; the new `scripts/check-rules-paths.mjs` FAILS
+on any `applies_to:` left, so **ALWAYS run Step 2.7's conversion BEFORE installing that guard**.
+A project that refreshes a routing component but keeps `applies_to:` loses nothing it had — its
+rules still load always; a project that converts to `paths:` but keeps an old reviewer telling it
+to "read all rules" keeps paying the full load in every subagent.
+**ALWAYS offer, with the conversion, the routing fix in `code-reviewer`, `security-reviewer`,
+`validator` and `arbitrator` as an IN-PLACE EDIT of their "Rules files" line only** — those agents
+were customized at bootstrap and a template copy would erase their Known Bug Patterns; **NEVER
+`refresh_agent` them for this.** `validation-orchestrator` and `autonomous-loop` follow the normal
+skill-refresh decision.
+**NEVER overwrite an existing `paths:` block** on a refresh.
+
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
 **ALWAYS remove, then copy, with these helpers:**
@@ -689,6 +722,7 @@ refresh_extract() { src=$1; lang=$2; d=$3; t=$(mktemp); sed -n "/^\`\`\`\`$lang\
   elif cp "$t" "$d"; then echo "Refreshed: $d"; else echo "FAILED to refresh: $d"; fi; rm -f "$t"; }
 refresh_rule() { refresh_extract "docs/modules/rules/$1.md" markdown "projects/$ARGUMENTS/.claude/rules/$(echo "$1" | tr '_' '-').md"; }
 refresh_guard() { refresh_extract docs/modules/templates/check_agent_frontmatter.md js "projects/$ARGUMENTS/scripts/check-agent-frontmatter.mjs"; }
+refresh_rules_guard() { refresh_extract docs/modules/templates/check_rules_paths.md js "projects/$ARGUMENTS/scripts/check-rules-paths.mjs"; }
 # The coupled-set refresh runs in Step 2.9b ("THE COUPLED-SET QUESTION"), after all its members' verdicts exist.
 ```
 **ALWAYS define these helpers and call them in the SAME shell invocation** — a function defined in one
@@ -775,6 +809,30 @@ project has a `package.json`, register `"check:agents": "node scripts/check-agen
 if it has a CI pipeline, add a `guards` stage running it (dependency-free, no install needed).
 Then RUN it once now — an adapted project may already carry a broken frontmatter.
 
+**Copy the rules load-scope guard (all tiers — to `scripts/`)** — ONLY after Step 2.7's
+`rules scope:` conversion, or it fails on every `applies_to:` the project still carries:
+```bash
+# BACKSTOP (Setup guard) — the copy below must never act on a missing project (`/audit` 2026-09-15 V-12).
+case "$ARGUMENTS" in ''|.*|*[!A-Za-z0-9._-]*) echo "FAILED: project name is empty, starts with a dot, or has characters outside [A-Za-z0-9._-]"; exit 1 ;; esac
+[ -d "projects/$ARGUMENTS/scripts" ] || { echo "FAILED: projects/$ARGUMENTS/scripts is not an existing folder"; exit 1; }
+dest="projects/$ARGUMENTS/scripts/check-rules-paths.mjs"
+t=$(mktemp); sed -n '/^````js$/,/^````$/p' docs/modules/templates/check_rules_paths.md | sed '1d;$d' > "$t"
+if [ ! -s "$t" ]; then echo "FAILED to extract guard template: check_rules_paths.md"
+elif [ ! -e "$dest" ]; then
+  if cp "$t" "$dest"; then echo "Copied guard: scripts/check-rules-paths.mjs"; else echo "FAILED to copy guard: scripts/check-rules-paths.mjs"; fi
+elif [ ! -f "$dest" ]; then echo "FAILED to copy guard: scripts/check-rules-paths.mjs — the target is not a regular file"
+else cmp -s "$t" "$dest"; rc=$?
+  if [ $rc -eq 0 ]; then echo "SKIPPED (identical): check-rules-paths.mjs"
+  elif [ $rc -eq 1 ]; then echo "DIFFERS from framework: check-rules-paths.mjs — owner decides: refresh or keep"
+  else echo "FAILED to compare guard: check-rules-paths.mjs"; fi
+fi
+rm -f "$t"
+```
+**ALWAYS write into its `ALWAYS_LOADED` every rule Step 2.7 left unscoped with the owner's reason**,
+register `"check:rules-paths": "node scripts/check-rules-paths.mjs"` when there is a `package.json`,
+add it to the CI `guards` stage, and RUN it once now. A `DIFFERS` project copy may carry its own
+`ALWAYS_LOADED` and matcher — **ALWAYS show the diff before offering `refresh_rules_guard`.**
+
 **COUPLED REFRESH — `session-rules.md`, the guard and EVERY agent move TOGETHER, or the project's
 CI goes red.** As of
 v2.29.0 the guard also enforces mechanism 4 (`session-rules` → "Model by risk class"): `model:` is
@@ -801,7 +859,7 @@ of the wrong kind, or its template extracted empty (`/audit` 2026-09-14 Y-9).
 - **Process skills (12 lifecycle):** sprint-proposer, autonomous-loop, session-end, context-recovery, validation-orchestrator, project-md-updater, pendencias-updater, config-file-updater, rules-agents-updater, session-log-creator, cross-cutting-analysis, commit
 - **Process agents (3):** prd-sync-checker, criteria-enforcer, diff-pattern-extractor
 - **Rules (3 core):** session-rules.md, evolution-policy.md, component-design.md
-- **Guards (1):** scripts/check-agent-frontmatter.mjs (component-registry liveness — run once during adaptation)
+- **Guards (2):** scripts/check-agent-frontmatter.mjs (component-registry liveness — run once during adaptation), scripts/check-rules-paths.mjs (rules load scope — run once after Step 2.7's conversion)
 
 Skills and agents are auto-discovered by Claude Code. No explicit listing is needed in CLAUDE.md.
 
@@ -896,6 +954,11 @@ esac
 ```
 
 **Step 2.9's STOP rule governs every `FAILED` line the fence above prints.**
+
+**ALWAYS set the `paths:` of a freshly `Copied` `ops-rules.md` or `quality-budgets.md`** — the
+template's `src/**` / audit-skill path is a placeholder: REPLACE `quality-budgets.md`'s with the
+project's real source roots and ADD the stack's infra, deploy and migration globs to `ops-rules.md`.
+**NEVER remove `paths:` to make a rule "always apply"** — that is a new `ALWAYS_LOADED` entry.
 
 **THE COUPLED-SET QUESTION — ALWAYS ASK IT HERE, ONCE, over the members' verdicts from Steps 2.9 AND
 2.9b.** The members are the six lifecycle skills and the `diff-pattern-extractor` and `prd-sync-checker` agents (Step 2.9) plus
@@ -1453,6 +1516,9 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - CI floor: [created / skipped / deferred — task added]
 - `scripts/check-agent-frontmatter.mjs`: [`Copied guard` · `SKIPPED (identical)` · `DIFFERS from framework` → refreshed (`refresh_guard`) / kept]
   (COPIED FROM the Step 2.9 guard fence's verdicts; `already present` was the pre-verdict form)
+- `scripts/check-rules-paths.mjs`: [`Copied guard` · `SKIPPED (identical)` · `DIFFERS from framework` → refreshed (`refresh_rules_guard`) / kept]
+  (COPIED FROM the Step 2.9 rules-guard fence's verdicts)
+- rules scope (Step 2.7): `rules scope: N applies_to converted, K already scoped, A always-loaded`
 - `assets/examples/` (Step 4.1): [copied / already present]
 - Plugin enablement (Step 4.4): [key merged / none — unavailable]
 

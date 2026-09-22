@@ -1,6 +1,12 @@
 ---
 domain: internationalization-localization
-applies_to: all user-facing UI, date/time display, number formatting, form inputs, email templates, error messages
+# Scope: all user-facing UI, date/time display, number formatting, form inputs, email templates, error messages
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/locales/**"
+  - "**/i18n/**"
+  - "**/components/**"
 ---
 
 # Internationalization & Localization Rules

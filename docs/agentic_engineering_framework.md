@@ -41,7 +41,7 @@ The bootstrap prompt reads the components below and generates a self-contained p
 
 | Directory | Contains | Role in the system |
 |-----------|----------|--------------------|
-| `docs/modules/templates/` | 7 document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json, metrics.md, framework-metrics.md, the `scripts/check-agent-frontmatter.mjs` liveness guard). |
+| `docs/modules/templates/` | 8 document and config blueprints (`.md` files) | Used by the bootstrap prompt to generate project files (CLAUDE.md, project.md, pendencias.md, settings.json, metrics.md, framework-metrics.md, the `scripts/check-agent-frontmatter.mjs` liveness guard, the `scripts/check-rules-paths.mjs` rules load-scope guard). |
 | `docs/modules/agents/` | Agent blueprints (`.md` files) | Used by bootstrap to create `.claude/agents/*.md`. Templates reference paths that will exist inside the bootstrapped project, not in this repo. |
 | `docs/modules/rules/` | Rules file blueprints (`.md` files) | Used by bootstrap to create `.claude/rules/*.md` (session-rules, evolution-policy, component-design always; ops-rules, quality-budgets for production+ profiles). |
 | `docs/modules/skills/` | 15 pre-built skills (12 lifecycle: sprint-proposer, autonomous-loop, validation-orchestrator, cross-cutting-analysis, commit, etc.; + 3 tier-gated: codebase-audit, framework-audit, skill-gate) | Lifecycle skills copied at bootstrap Step 5.7; tier-gated skills copied at Step 5.8 only when the risk profile warrants them. Each skill implements one step of the Session Protocol, Execution Protocol, PRD workflows, or the periodic audits. Protocol concepts (WHEN things happen, HOW tasks are validated) are now fully implemented by these skills — no standalone protocol files. 3 process agents (`prd-sync-checker`, `criteria-enforcer`, `diff-pattern-extractor`) live in `docs/modules/agents/` and have `invocation: subagent` — invoked via Agent tool. |
@@ -410,6 +410,7 @@ Setup    (unnumbered, runs first)                --> projects/<name>/ + assets/d
          modules/rules/evolution_policy.md      --> .claude/rules/evolution-policy.md
          modules/rules/component_design.md     --> .claude/rules/component-design.md
          modules/templates/check_agent_frontmatter.md --> scripts/check-agent-frontmatter.mjs
+         modules/templates/check_rules_paths.md       --> scripts/check-rules-paths.mjs
 5.8      modules/skills/{codebase-audit,skill-gate,framework-audit}, agents/skill_reviewer.md --> tier-gated skeletons (by profile)
 6        (external: skill registries)            --> Stack-specific skills (optional)
 7        modules/agents/code_reviewer.md          --> .claude/agents/code-reviewer.md
@@ -472,7 +473,9 @@ This path does not exist in the framework repo. It will exist at `projects/[name
 - `.claude/settings.json` — created at Step 14
 - `assets/examples/` — copied at Step 1.5
 - `.claude/rules/*.md` — session, evolution and component rules extracted at Step 5.7, ops and
-  quality-budget rules at Step 5.8 (`production`+), domain rules pre-created at Step 13
+  quality-budget rules at Step 5.8 (`production`+), domain rules pre-created at Step 13. Every rule
+  carries `paths:` (loaded when a matching file is READ) except the always-loaded pair,
+  `session-rules.md` and `evolution-policy.md` — `scripts/check-rules-paths.mjs` guards it
 
 **Files that only exist during development (not at bootstrap):**
 - further `.claude/rules/*.md` — added when domain patterns accumulate (3+ patterns from same domain)
@@ -564,7 +567,7 @@ The version number is what the AI agent uses in the PRD sync check to detect cha
 
 ### At the START of implementation sessions:
 
-> **Note:** Claude Code automatically handles CLAUDE.md reading, rules loading (via `applies_to` globs), skill/agent discovery (via `description:` frontmatter), and codebase exploration. The steps below cover what Claude Code does NOT do automatically. Non-implementation sessions (planning, task management, quick fixes) do not need this ceremony.
+> **Note:** Claude Code automatically handles CLAUDE.md reading, rules loading (via `paths:` globs — a rule without `paths:` loads in every session and subagent; `applies_to:` is ignored), skill/agent discovery (via `description:` frontmatter), and codebase exploration. The steps below cover what Claude Code does NOT do automatically. Non-implementation sessions (planning, task management, quick fixes) do not need this ceremony.
 
 1. **Check for MODEL SWITCH continuation:** Check for a MODEL SWITCH block below the Progress Log table in project.md. If one exists:
    - This session is a continuation — skip normal task selection
@@ -1168,7 +1171,8 @@ Each subagent receives an **instruction set with file paths and scope**, not a d
 ```
 ALWAYS instruct the subagent to read:
   - The agent's own .md file (code-reviewer reads code-reviewer.md, etc.)
-  - .claude/rules/*.md (ALL rules files — cost is low, risk of omission is high)
+  - the files under review, BY NAME — path-scoped .claude/rules/*.md load when the subagent READS
+    a matching file (routing ALL rules was the earlier default; measured, it cost ~52% of a 1M window)
   - CLAUDE.md sections: Key Patterns, Architecture
   - project.md: Architectural Decisions table ONLY
 
@@ -2098,7 +2102,7 @@ When writing security acceptance criteria in pendencias.md, prefix Tier 3 criter
 | **Model switch mid-sprint** | Task in sprint requires model switch → unclear if sprint continues after restart | Model switch interrupts the sprint. After restart, the AI re-proposes a new sprint (which may include the remaining tasks). The original sprint is logged as "interrupted: model switch at task N". |
 | **Validation declares false ✅** | Multi-step criterion partially verified, tool silences error, criterion too weak | Validation Failure Post-Mortem: structured diagnosis → classify root cause → route improvement to correct document. Mandatory when human finds bug in ✅ task. |
 | **Criteria don't detect breakage** | Criteria check a snapshot or pass with hardcoded/wrong data | Mutation testing (Step 5c): sabotage critical code, verify criteria fail. If they don't, strengthen and re-validate. Only for logic-heavy and architecture tasks. |
-| **Subagent context incomplete** | Context routing omits a relevant rules file | Route ALL rules files (`.claude/rules/*.md`) to every subagent. Cost is low, risk of omission is high. |
+| **Subagent context incomplete** | Context routing omits a relevant rules file | Scope every domain rule with `paths:` and NAME the files under review in the subagent prompt: the harness loads the matching rules when the subagent READS them. (Superseded remedy: "route ALL rules to every subagent — cost is low". Measured in a production project, all rules took ~52% of a 1M window before any work and a 200k subagent could not start.) |
 | **Subagent context contaminated** | Boundaries violated — subagent reads implementation reasoning | BOUNDARIES section in subagent prompt template. NEVER list explicitly blocks project.md Progress Log, session logs, sprint proposals, and implementation plans. |
 | **Validation token overhead** | Each subagent consumes tokens for file reads + reasoning | Graduated validation: Route 1 (inline) for routine tasks, Route 2 (subagent) for logic-heavy/arch/security with adaptive depth. Accept overhead as cost of unbiased validation where bias matters. Monitor if sessions become shorter. |
 | **Validation latency** | Subagent spawn + file reads + reasoning + return per subagent | 10-30s per subagent. Acceptable vs risk of false ✅ from biased inline review. |

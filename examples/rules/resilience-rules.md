@@ -1,6 +1,12 @@
 ---
 domain: resilience-error-handling
-applies_to: services with external dependencies, microservices, API consumers, background job processors
+# Scope: services with external dependencies, microservices, API consumers, background job processors
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/clients/**"
+  - "**/integrations/**"
+  - "**/workers/**"
 ---
 
 # Resilience & Error Handling Rules

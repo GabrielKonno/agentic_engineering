@@ -1,6 +1,12 @@
 ---
 domain: compliance-lgpd-gdpr
-applies_to: all modules that collect, store, process, or transmit personal data
+# Scope: all modules that collect, store, process, or transmit personal data
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/privacy/**"
+  - "**/consent/**"
+  - "**/migrations/**"
 ---
 
 # Compliance Rules (LGPD / GDPR)

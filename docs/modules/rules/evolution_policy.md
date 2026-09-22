@@ -6,7 +6,7 @@
 ````markdown
 ---
 domain: evolution-policy
-applies_to: "**/*"
+# No `paths:` on purpose — ALWAYS LOADED (listed in scripts/check-rules-paths.mjs ALWAYS_LOADED).
 ---
 
 # Evolution Policy

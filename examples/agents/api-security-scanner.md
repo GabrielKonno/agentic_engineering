@@ -28,7 +28,7 @@ This agent receives:
 - **Git diff** — read via `git diff HEAD~1` to identify changed endpoints and data flows
 - **Security-reviewer.md** — universal security principles and OWASP checklist
 - **Stack security skill** — framework-specific security settings and patterns (if exists in `.claude/skills/`)
-- **Rules files** — all `.claude/rules/*.md` for domain-specific constraints
+- **Rules files** — always-loaded rules are already in your context; domain rules in `.claude/rules/*.md` are PATH-SCOPED (`paths:`) and load only when you **Read** (Read tool — a shell `cat` does not trigger it) a matching file, so ALWAYS Read every file under review before judging it, and Read a rules file directly only when its domain is at stake with none of its files in scope (for domain-specific constraints)
 - **Acceptance criteria** — the task's criteria to verify security requirements
 
 ## Output

@@ -1,6 +1,12 @@
 ---
 domain: authentication-authorization
-applies_to: all modules with user access, protected resources, role-based features
+# Scope: all modules with user access, protected resources, role-based features
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+paths:
+  - "**/auth/**"
+  - "**/middleware.*"
+  - "**/*session*.*"
 ---
 
 # Authentication & Authorization Rules

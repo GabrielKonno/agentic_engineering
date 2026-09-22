@@ -25,7 +25,7 @@ derived_from: null
 ## Input
 When invoked as subagent:
 - **Git diff** — read via `git diff HEAD~1`
-- **Rules files** — all `.claude/rules/*.md`
+- **Rules files** — always-loaded rules are already in your context; domain rules in `.claude/rules/*.md` are PATH-SCOPED (`paths:`) and load only when you **Read** (Read tool — a shell `cat` does not trigger it) a matching file, so ALWAYS Read every file under review before judging it, and Read a rules file directly only when its domain is at stake with none of its files in scope
 - **CLAUDE.md** — Key Patterns and Architecture sections
 - **project.md** — Architectural Decisions table ONLY
 

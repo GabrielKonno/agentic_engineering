@@ -28,7 +28,7 @@ Not needed for:
 - Quick fixes where the user specifies the exact task
 - Framework maintenance sessions
 
-Claude Code automatically handles: CLAUDE.md reading, rules loading (via `applies_to` globs), skill/agent discovery (via `description:` frontmatter), and codebase exploration.
+Claude Code automatically handles: CLAUDE.md reading, rules loading (via `paths:` globs — a rule without `paths:` loads in every session and subagent; `applies_to:` is ignored), skill/agent discovery (via `description:` frontmatter), and codebase exploration.
 
 ## Process
 

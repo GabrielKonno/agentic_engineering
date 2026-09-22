@@ -32,7 +32,7 @@ when the diff's domain is recognized via this agent's description.
 **Context to include in prompt:**
 - Git diff (`git diff HEAD~1`)
 - Security Review Report (if coverage gap triggered this invocation)
-- All `.claude/rules/*.md` files
+- The path-scoped `.claude/rules/*.md` of the files under review — NEVER pasted: NAME those files explicitly so the subagent Reads them (Read tool) and the harness loads their rules
 - CLAUDE.md: Key Patterns and Architecture sections
 
 **What main Claude should do with this report:**
@@ -45,7 +45,7 @@ when the diff's domain is recognized via this agent's description.
 - **Git diff** — read via `git diff HEAD~1` to identify changed files and patterns
 - **SAST tool output** — JSON or SARIF file from semgrep/Bandit/ESLint (if available); path passed via prompt
 - **security-reviewer.md** — universal OWASP checklist for cross-reference
-- **Rules files** — all `.claude/rules/*.md`
+- **Rules files** — always-loaded rules are already in your context; domain rules in `.claude/rules/*.md` are PATH-SCOPED (`paths:`) and load only when you **Read** (Read tool — a shell `cat` does not trigger it) a matching file, so ALWAYS Read every file under review before judging it, and Read a rules file directly only when its domain is at stake with none of its files in scope
 
 ## Output
 

@@ -1,6 +1,13 @@
 ---
 domain: multi-tenancy
-applies_to: all modules with organization-scoped data
+# Scope: all modules with organization-scoped data
+# The globs below are ILLUSTRATIVE — REPLACE them with this project's real paths when the file is
+# seeded. `paths:` is the key the harness reads; a rule without it loads in EVERY session.
+# When org scoping touches nearly every file, leave `paths:` out instead and list this file in
+# scripts/check-rules-paths.mjs ALWAYS_LOADED with that reason — a small invariant may load always.
+paths:
+  - "**/migrations/**"
+  - "**/api/**"
 ---
 
 # Multi-Tenancy Rules

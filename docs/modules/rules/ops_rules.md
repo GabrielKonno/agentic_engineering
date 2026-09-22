@@ -9,7 +9,10 @@
 ````markdown
 ---
 domain: ops
-applies_to: "**/*"
+# Loads when the audit skill or an infra/deploy file is READ. ADD the stack's infra, deploy and
+# migration globs at bootstrap — a dead glob fails scripts/check-rules-paths.mjs once code exists.
+paths:
+  - ".claude/skills/codebase-audit/**"
 ---
 
 # Ops Rules (the Operate dimension)

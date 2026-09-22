@@ -56,7 +56,8 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── metrics_md.md               # Code health time series (internal-tool+)
 │   │   │   ├── framework_metrics_md.md     # Process health time series (production+)
 │   │   │   ├── settings_json.md            # Settings + statusline + hooks template
-│   │   │   └── check_agent_frontmatter.md  # Component-registry liveness guard (all tiers → scripts/)
+│   │   │   ├── check_agent_frontmatter.md  # Component-registry liveness guard (all tiers → scripts/)
+│   │   │   └── check_rules_paths.md        # Rules load-scope guard — `paths:` or ALWAYS_LOADED (all tiers → scripts/)
 │   │   ├── agents/                         # Agent templates (copied to .claude/agents/)
 │   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
 │   │   │   ├── validator.md, arbitrator.md # Validation agent templates
