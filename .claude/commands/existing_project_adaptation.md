@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.32.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.33.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -606,7 +606,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.32.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.33.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -696,6 +696,19 @@ were customized at bootstrap and a template copy would erase their Known Bug Pat
 `refresh_agent` them for this.** `validation-orchestrator` and `autonomous-loop` follow the normal
 skill-refresh decision.
 **NEVER overwrite an existing `paths:` block** on a refresh.
+
+**v2.33.0 migration — six text additions; this version adds NO new coupling.** From a
+production project's multi-agent reporting pilot: `session-rules` → "Model by risk class" gains
+the hypothesis's first measurement; `component-design` §8 gains rule 4 (installed ≠ available);
+`evolution-policy` → framework-evolution docs gains the pilot cut condition; `ops-rules` §6 gains
+the snapshot-oracle item; `validation-orchestrator` → Review receipts gains "verbatim means
+untransformed"; `security-reviewer` gains section 13, "AI-Agent Tool Gates". None of the six
+depends on another.
+**A `validation-orchestrator` refresh STAYS governed by the coupled sets above** (continuous mode;
+v2.28.0) — NEVER refresh it alone on the strength of this note.
+**ALWAYS offer the `security-reviewer` section as an IN-PLACE INSERT before its Coverage Gap
+Declaration, plus its line in "What this review covered" — NEVER `refresh_agent` it for this**,
+for the same reason as v2.32.0: the agent was customized at bootstrap.
 
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).

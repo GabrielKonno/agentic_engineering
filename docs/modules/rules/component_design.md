@@ -270,6 +270,19 @@ start — never the session that wrote it.
    fallback to a general-purpose agent (see session-rules → "Autonomous loop watchdog",
    including the receipt discipline: a review verdict only counts with a verifiable artifact
    from a real independent subagent).
+4. **INSTALLED ≠ AVAILABLE: an agent FILE CREATED during a session may not be spawnable in that
+   session, even after the session Reads it** (`verified: false`: harness behaviour observed once,
+   2026-09, and may change between versions). The reload-on-Read above concerns the frontmatter of
+   an agent the registry already listed; a NEW agent was observed not to enter it.
+   **When a spawn of an agent created in THIS session returns `Agent type '<name>' not found`,
+   ALWAYS treat it as that expected state, never as a broken file:** defer the spawn — a creation
+   eval included — to the NEXT session and say so, and plan nothing else that needs the agent into
+   the session that installs it.
+   **NEVER fall back to a general-purpose agent here either (rule 3)** — it would also hand the
+   task the tools the specialist was denied on purpose.
+   Evidence (production project): a four-agent reporting team was created and wired in one
+   session, and the first spawn failed there. The owner stopped instead of improvising, and the
+   flow ran cleanly in the next session.
 
 ## 9. Activation instructions belong to the INVOKER, never to the INVOKED
 

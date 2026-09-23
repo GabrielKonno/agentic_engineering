@@ -173,6 +173,10 @@ RECEIPT) and the EXECUTOR of the pre-deploy gate (session-rules → "Deploy gate
 team, data or specialist reviewers), ALWAYS:**
 1. **SAVE its final report verbatim** — `mkdir -p .claude/logs/review-reports` first — to
    `.claude/logs/review-reports/s<N>-<reviewer>-<k>.md` (session, reviewer, sequence), and commit it.
+   **VERBATIM MEANS UNTRANSFORMED — NEVER translate, summarize, reformat or merge the report while
+   saving it.** The orchestrator is a router, not a copy layer. (Evidence, production project: an orchestrator saving a
+   subagent's analysis for the next agent translated it and labelled it "VERBATIM". The producer's
+   audit found the transcript faithful but carrying number formats from the other language.)
 2. **APPEND one line to the receipts ledger `.claude/logs/review-reports/receipts.md`, IN THE SAME
    COMMIT as the saved report:**
    `- <reviewer> · <VERDICT> · report: .claude/logs/review-reports/s<N>-<reviewer>-<k>.md · commits: <sha7>, <sha7>`

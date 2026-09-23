@@ -217,6 +217,14 @@ mechanism: main Claude reads it, finds `sast-scanner` by its description, and sp
 - [ ] String fields have max length at schema level — prevents payload bombs
 - [ ] Numeric fields have range validation where business logic applies
 
+## 13. AI-Agent Tool Gates (check when the diff adds or edits a hook, a permission rule, or a script an agent is confined to)
+- [ ] Sensitive targets are protected by an ALLOWLIST of permitted roots/commands — NEVER a DENYLIST of forbidden ones. A denylist is always one form behind: a glob, a sibling path, another tool reaching the same file
+- [ ] The allowlist is checked PER TOOL, on the input field THAT tool actually uses — a check on one tool's path field is satisfied by a neighbouring field of another (a search tool's own path, a glob argument)
+- [ ] Shell access is limited to the named commands with NO shell operators (`&&`, `;`, `|`, redirects, `$()`, backticks, newlines, env prefixes) — an agent's `tools:` list restricts the TOOL, never its arguments
+- [ ] Unknown tools are denied by default, and unreadable gate input BLOCKS (fail closed)
+- [ ] Every data restriction the agent is under ("read-only", "one tenant only", "aggregates only") is enforced by a MECHANISM (a query runner or gate that refuses), never by prose in the agent prompt. "Aggregates only" means refusing row-identifier and personal-data columns — a row cap does not enforce it
+- [ ] The gate was proven to BLOCK by a real refused call in the live harness, not only by offline tests (component-design §9 rule 4: prove a check by negation) — and a live probe that needs an agent to ATTEMPT the violation was requested by the owner in the session, because a well-written agent correctly refuses a probe relayed through a task message
+
 ## Coverage Gap Declaration
 
 After completing ALL numbered sections, declare what was and was not covered.
@@ -233,6 +241,7 @@ Include this section in every Security Review Report.
 - Red Team thinking (Section 9)
 - Rate limiting & abuse prevention (Section 11)
 - Data validation depth (Section 12)
+- AI-agent tool gates (Section 13)
 
 ### What manual review cannot fully cover
 

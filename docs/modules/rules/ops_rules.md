@@ -62,5 +62,6 @@ everything AFTER: the runtime health of the deployed system. Walked category-by-
 ## 6. Data reconciliation (production-financial)
 - [ ] Periodic SELECT-only checks that derived/aggregate data matches source of truth?
 - [ ] Anomaly count expected = 0; any nonzero is a high-priority finding?
+- [ ] When a check compares a derived figure against an immutable SNAPSHOT of the same quantity, is the snapshot read ONLY by the checker, while the producer derives from base data? A producer that reads the snapshot makes a "match" a tautology
 - Stack content: [fill — the actual reconciliation queries, schema-specific]
 ````

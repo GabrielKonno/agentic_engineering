@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.32.0
+# Agentic Engineering Framework v2.33.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -148,7 +148,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.32.0)
+│   ├── modules/                            ← Single source of truth (v2.33.0)
 │   │   ├── templates/                      ← Document and config templates (8, incl. the frontmatter and rules-scope guards)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)

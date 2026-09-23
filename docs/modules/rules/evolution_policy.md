@@ -135,6 +135,10 @@ the others through the mother framework repo (the repo this project was bootstra
   re-reading this doc is not an anchor — the next framework-audit must be able to MEASURE it.
   ALWAYS add a final `Meta` row: *did any of these remediations introduce a finding of the SAME
   class?* — remediation-introduced defects are a recurring class, not a curiosity.
+- **when the lesson comes from a PILOT of a new mechanism, its CUT CONDITION** — the result that
+  would have made the mechanism unnecessary — whether it was met, and **WHEN it was declared:
+  before the pilot ran, or after.** A condition written after the result can only confirm it,
+  and a pilot measured against one is a narrative, not a measurement — so say which it was.
 
 The doc has a DUAL purpose — and that is what decides when it can be retired:
 1. **Upstream vehicle** (one-time): the owner runs a `/maintenance` session in the mother
