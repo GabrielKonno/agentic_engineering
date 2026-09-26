@@ -16,7 +16,9 @@ This is a framework maintenance session, not a project bootstrap.
   section, which places new components under this repo's own `.claude/` when the framework needs
   them at runtime.
 - **`git commit` — always. `git push` — ONLY when the owner has asked for it in this session, and
-  ONLY after D16 over the unpushed commits comes back GREEN.** NEVER push on your own initiative:
+  ONLY after D16 over the unpushed commits comes back GREEN.** An unpushed MINOR or MAJOR bump ALSO
+  needs its `/audit` report persisted first ("Version bumps").
+  NEVER push on your own initiative:
   **AND NEVER CHAIN THE GATE TO THE PUSH WITH `&&`. BRANCH ON THE VERDICT, NEVER ON THE EXIT
   STATUS.** `<d16 scan> && git push` fires the push when the CHECK RAN, not when it PASSED.
   The gate returned RED and the push went out anyway, publishing three project identifiers to
@@ -1276,8 +1278,13 @@ batches ahead — the same "instrument that lies" class the audits keep surfacin
 or the command pipeline, and ALWAYS state the decision in the commit** — `bump: vX.Y.Z` or
 `bump: none — [reason]`. Never leave it unsaid.
 
-**ALWAYS PROPOSE `/audit` BEFORE a MINOR or MAJOR bump** — this is trigger (b) in CLAUDE.md, and
-this section is its invoker. A bump publishes the current state as a contract; the net runs first.
+**ALWAYS PROPOSE `/audit` BEFORE a MINOR or MAJOR bump is PUSHED** — this is trigger (b) in CLAUDE.md,
+and this section is its invoker. The bump may be COMMITTED first; it is the PUSH that publishes the
+contract, so the net runs before the push (owner decision, 2026-09-26, `/audit` W-26 — the
+"commit the bump, audit, then push" order had run five times against a rule that said "before the bump").
+**NEVER push an unpushed MINOR or MAJOR bump until its `/audit` report is persisted, or the owner
+says in the session to push without it** — the push gate in "Authorized operations" checks D16 only,
+so this line is the one that holds the order.
 Report `audit: proposed / ran / skipped — [owner deferred]`, never nothing. (PATCH bumps do not
 require it.)
 

@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.33.1 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.34.0 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -616,7 +616,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.33.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.34.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -732,6 +732,17 @@ does.
 **NEVER `refresh_agent` it.**
 Step 2.5's list now names all 13 sections and Step 2.1 compares the Session Protocol bullet by
 bullet; neither adds coupling.
+
+**v2.34.0 migration — one routing trigger, plus wording.** `validation-orchestrator` spawns
+`security-reviewer` on every route when a diff touches an AGENT TOOL GATE (a hook, a permission rule,
+an agent-confined script), and its `Security reviewer:` row gains `or tool gate`; `autonomous-loop`
+names the same trigger. **All three changed skills (`validation-orchestrator`, `autonomous-loop`,
+`sprint-proposer`) are governed by the coupled sets above — ALWAYS refresh them WITH those sets, NEVER alone.** `security-reviewer`'s "When this agent is invoked" line names the new
+trigger.
+**ALWAYS offer that line as an IN-PLACE EDIT, NEVER `refresh_agent`.** The rest is wording that
+changes no contract (instruction style in `validation-orchestrator`, `sprint-proposer`,
+`code-reviewer`'s Known Bug Patterns rule; `session-rules` hypothesis text) — `code-reviewer` is
+offered in place for the same reason as `security-reviewer`.
 
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
@@ -1562,8 +1573,8 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - CLAUDE.md: [sections added/modified; Session Protocol bullets added — or "bullets match the template"]
 - project.md: [adaptation entry added, sections added]
 - pendencias.md: [tasks upgraded with metadata]
-- code-reviewer.md: [Known Bug Patterns seeded, sections added]
-- security-reviewer.md: [sections added — N of 13 numbered sections present after Step 2.5; in-place edits offered (§13 insert, §13 last-box removal): applied / declined / n/a]
+- code-reviewer.md: [Known Bug Patterns seeded, sections added; in-place edits offered (v2.34.0 Known Bug Patterns rule): applied / declined / n/a]
+- security-reviewer.md: [sections added — N of 13 numbered sections present after Step 2.5; in-place edits offered (§13 insert, §13 last-box removal, v2.34.0 invocation line): applied / declined / n/a]
 - [other agents/skills]: [changes]
 
 ### Documents created:

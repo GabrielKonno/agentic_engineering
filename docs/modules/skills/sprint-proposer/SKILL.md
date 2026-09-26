@@ -216,7 +216,7 @@ Derive from each task's `Complexity:` field in pendencias.md. If no complexity f
 ### Rules
 - Only include tasks with satisfied dependencies
 - Never include a task whose prerequisite is also in the sprint (sequential dependency)
-- If a task is classified as architecture/security, it will trigger model switch — note this in Risks
+- **If a task is classified as architecture/security, ALWAYS note in Risks that it triggers a model switch**
 - Large tasks (1 per session) should not be batched with other tasks
 
 ---
@@ -254,7 +254,7 @@ After the validation-orchestrator skill completes successfully:
 
 1. **Commit** if not already committed: for routine tasks with inline validation, `git add -A && git commit -m "feat: [task name] — validated"`. For subagent-validated tasks, the `feat:` commit was made before Phase B — it already stands.
 2. **Update pendencias.md:** move completed task to `done_tasks.md` (full metadata), confirm next task in pendencias.md.
-3. **Context health check:** If this is task 3+ in the session, evaluate context health. If degrading → run `/context-recovery` instead of continuing.
+3. **Context health check:** **From the 3rd task in a session on, ALWAYS evaluate context health before the next one.** If it is degrading, ALWAYS run `/context-recovery` instead of continuing, and say so.
 4. **Sprint-approved mode:** pick next task from the batch and proceed directly to the validation-orchestrator's "Before Implementing" section. Do NOT re-propose the sprint or ask for confirmation. If all sprint tasks are done, produce a sprint report:
 
 ```

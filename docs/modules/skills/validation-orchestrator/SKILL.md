@@ -93,8 +93,11 @@ suite that finishes implausibly fast is a skip until proven otherwise.
 Execute these steps in order. Do not skip steps — each one produces evidence for the validation report.
 
 1. **Code review** — Self-review using `.claude/agents/code-reviewer.md` as a checklist: project patterns, domain rules, Known Bug Patterns, edge cases.
-2. **Security check** — Check security-reviewer.md headers. If changes touch user input, auth, database, APIs, secrets, or HTML rendering: do the full security review. If they touch **client-bound data** (see Route 2): spawn the security-reviewer subagent — that trigger applies on every route.
-3. **UI verification (if UI files modified)** — Use the project's browser automation MCP to verify visual changes. Navigate to the affected pages, take snapshots, and verify that VERIFY: criteria match what's rendered. Test at a mobile viewport (≤430px) in addition to desktop. Code review alone is NOT sufficient for UI verification — browser automation is mandatory. If browser automation is unavailable: mark UI as ❌ with reason, list VERIFY: criteria as MANUAL:.
+2. **Security check** — Check security-reviewer.md headers. If changes touch user input, auth, database, APIs, secrets, or HTML rendering: do the full security review. If they touch **client-bound data** or an **agent tool gate** (see Route 2): spawn the security-reviewer subagent — those triggers apply on every route.
+3. **UI verification (if UI files modified)** — Use the project's browser automation MCP to verify visual changes: navigate to the affected pages, take snapshots, and check that VERIFY: criteria match what's rendered.
+   - **ALWAYS test at a mobile viewport (≤430px) in addition to desktop.**
+   - **NEVER accept code review alone as UI verification** — browser automation is mandatory.
+   - **If browser automation is unavailable, ALWAYS mark UI as ❌ with the reason and list the VERIFY: criteria as MANUAL:.**
 4. **Criteria check** — Check all acceptance criteria by tag type (BUILD:/VERIFY:/QUERY:/REVIEW:).
 5. **Regression** — Run full test suite or re-check last 2-3 tasks' criteria.
 6. **Report** — Produce the validation report using the standard format.
@@ -115,7 +118,16 @@ logic-heavy task with no auth change.** It is client-bound when ANY is true:
 - a role-gated or privileged figure, field or UI element was added or changed;
 - a surface renders personal data or credentials.
 
-**ALWAYS REPORT — `security-reviewer: ran — [verdict]` or `security-reviewer: skipped — no client-bound data ([reason])`, in the `Security reviewer:` row of the Verification results block — an ORCHESTRATOR-ONLY row, like `Validation:`, so the validator's Output template has no slot for it. NEVER emit nothing.**
+**ALWAYS ALSO spawn security-reviewer when the diff touches an AGENT TOOL GATE — on ANY route.** It
+is a tool gate when the diff changes ANY of:
+- the `hooks` or `permissions` key of `.claude/settings*.json`;
+- a script a hook in those files runs (the path its `command` names);
+- a script or query runner an agent is confined to — one named in a `permissions.allow` rule or in an
+  agent's own prompt as the only way it may reach data or the shell.
+Its §13 "AI-Agent Tool Gates" checks these, and nothing else routes such a diff to it
+(`/audit` 2026-09-22 AE-15).
+
+**ALWAYS REPORT — `security-reviewer: ran — [verdict]` or `security-reviewer: skipped — no client-bound data or tool gate ([reason])`, in the `Security reviewer:` row of the Verification results block — an ORCHESTRATOR-ONLY row, like `Validation:`, so the validator's Output template has no slot for it. NEVER emit nothing.**
 
 > Evidence (production project): with the trigger limited to auth/payment keywords, the
 > security-reviewer recorded **0 spawns in 20 sessions** — including two sessions whose work was
@@ -160,7 +172,12 @@ no coverage gaps are declared.
 
 **Process report:** All ✅ → done. Any ❌ → fix, commit, re-spawn full subagent sequence from code-reviewer. Max 3 retries. After limit: STOP and escalate to human with diagnosis of what keeps failing and what was tried.
 
-**UI tasks in Route 2:** The validator subagent handles UI verification via browser automation MCP. When spawning the validator, include in the prompt: (1) that UI files were modified, (2) which VERIFY: criteria require browser verification, and (3) the app URL or route where changes are visible. The validator will navigate, take snapshots, and verify elements match criteria.
+**UI tasks in Route 2:** The validator subagent handles UI verification via browser automation MCP.
+**When spawning the validator for a UI task, ALWAYS include in its prompt:**
+- **UI files:** that UI files were modified, and which;
+- **Criteria:** which VERIFY: criteria require browser verification;
+- **Location:** the app URL or route where the changes are visible.
+The validator then navigates, takes snapshots, and verifies the elements against the criteria.
 
 ---
 
@@ -174,9 +191,12 @@ team, data or specialist reviewers), ALWAYS:**
 1. **SAVE its final report verbatim** — `mkdir -p .claude/logs/review-reports` first — to
    `.claude/logs/review-reports/s<N>-<reviewer>-<k>.md` (session, reviewer, sequence), and commit it.
    **VERBATIM MEANS UNTRANSFORMED — NEVER translate, summarize, reformat or merge the report while
-   saving it.** The orchestrator is a router, not a copy layer. (Evidence, production project: an orchestrator saving a
-   subagent's analysis for the next agent translated it and labelled it "VERBATIM". The producer's
-   audit found the transcript faithful but carrying number formats from the other language.)
+   saving it.**
+   **The same holds for EVERY subagent output the orchestrator RELAYS to the next agent** — hand it
+   over as returned, or say explicitly that it was transformed. The orchestrator is a router, not a
+   copy layer. (Evidence, production project: an orchestrator relaying a subagent's analysis to the
+   next agent translated it and labelled it "VERBATIM"; the content survived, but its number formats
+   came out in the other language — a transformation the label denied.)
 2. **APPEND one line to the receipts ledger `.claude/logs/review-reports/receipts.md`, IN THE SAME
    COMMIT as the saved report:**
    `- <reviewer> · <VERDICT> · report: .claude/logs/review-reports/s<N>-<reviewer>-<k>.md · commits: <sha7>, <sha7>`
@@ -286,7 +306,7 @@ Each subagent is a fresh Agent tool instance — isolated context.
 - Tests:      ✅/❌/⏭️  (N executed / N failed — ALWAYS the count, never just the verdict)
 - Review:     ✅/❌
 - Security:   ✅/❌/⏭️
-- Security reviewer: ran — [verdict] | skipped — no client-bound data ([reason])
+- Security reviewer: ran — [verdict] | skipped — no client-bound data or tool gate ([reason])
 - Mutation Tests:   ✅/⏭️  (N mutants, N NEUTER)
 - DB:         ✅/❌/⏭️
 - UI:         ✅/❌/⏭️/BASELINE-CREATED  (BASELINE-CREATED is reachable only when the CODE-REVIEWER declared the gap, since a specialist spawned from THIS report's own declaration runs after this row is written)
@@ -302,7 +322,9 @@ Each subagent is a fresh Agent tool instance — isolated context.
 - [next task]
 ```
 
-⏭️ = not applicable to this task. Never use ⏭️ for UI if `.tsx/.jsx/.css/.html` or template files were modified, or for Tests if business logic + test framework exists, or for Migration if migration files are in the diff. ⏭️ is NOT "I skipped it." If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 attempts): use ❌ with reason, list VERIFY: criteria as MANUAL:.
+⏭️ = not applicable to this task. ⏭️ is NOT "I skipped it."
+- **NEVER use ⏭️** for UI if `.tsx/.jsx/.css/.html` or template files were modified, for Tests if business logic + a test framework exist, or for Migration if migration files are in the diff.
+- **If browser automation couldn't run (tool unavailable, dev server down, flaky after 3 attempts), ALWAYS use ❌ with the reason and list the VERIFY: criteria as MANUAL:.**
 
 **ALWAYS carry the executed COUNT on Tests, Regression, and Mutation — a bare ✅ is not
 evidence.** A run that exited 0 having executed ZERO units, or whose summary could not be parsed,
@@ -339,6 +361,6 @@ BEFORE fixing, diagnose and improve the validation loop:
    and `Recurring?` — set to `YES (Nx)` if this root-cause class already appears in the ledger,
    else `no`. A `YES` means a one-off fix is NOT enough: flag it for the next codebase-audit /
    framework-audit as a class with a missing owner.
-6. Log in session log and project.md.
+6. **ALWAYS log the post-mortem** in the session log and in `project.md`.
 
 For `prototype` profile: do steps 1-4 and 6 (skip the ledger row). Then fix the bug normally.

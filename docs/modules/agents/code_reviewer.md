@@ -289,7 +289,8 @@ This agent DEFINES the verdicts; it does NOT schedule itself.
 
 [Empty on day 1. Populated automatically.]
 
-**Rule:** When a bug is fixed, ask: "Could this pattern appear elsewhere?" If yes, add here AND grep for existing instances.
+**Rule — when a bug is fixed, ALWAYS ask: "Could this pattern appear elsewhere?"**
+**If yes, ALWAYS add it here in the entry format above AND grep for existing instances.**
 ```
 
 ## Creation eval

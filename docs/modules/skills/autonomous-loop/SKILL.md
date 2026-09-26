@@ -249,8 +249,8 @@ into a recoverable state instead of a blind commit — or a falsely-failed phase
 ### 3d. Validation geometry (hybrid by risk)
 
 - **Routine/small:** ONE merged review+validation subagent (single report: checklist review +
-  criteria verification) — plus security-reviewer when the diff touches client-bound data
-  (`validation-orchestrator` → Route 2; that trigger holds on every route). The implementer is already an isolated subagent, so the two-judge split
+  criteria verification) — plus security-reviewer when the diff touches client-bound data or an agent tool gate
+  (`validation-orchestrator` → Route 2; those triggers hold on every route). The implementer is already an isolated subagent, so the two-judge split
   loses its main justification for low-risk diffs.
 - **Logic-heavy:** full Route 2 (code-reviewer → validator), unchanged.
 - **Security-relevant:** full chain including security-reviewer (+ red-team when high-risk), unchanged.

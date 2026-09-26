@@ -86,7 +86,7 @@ no owner (`/audit` 2026-09-02 K-18).
 | CLAUDE.md trigger | Mode |
 |---|---|
 | (a) after an upstream absorption | **baseline** |
-| (b) before a MINOR or MAJOR version bump | **baseline** |
+| (b) before a MINOR or MAJOR version bump is PUSHED | **baseline** |
 | (c) owner request | **baseline**, unless the owner names a batch to verify |
 | (d) after a `/maintenance` session applied an audit batch AND evidence from outside the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | **verification (over that batch's commit)** |
 
@@ -378,7 +378,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.33.1 they are
+         **Expected: at least 5 paths.** As of v2.34.0 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and, under `projects/*/scripts/`, ONLY the files the
          command lists** (`check-agent-frontmatter.mjs`, `check-rules-paths.mjs`) — Bootstrap

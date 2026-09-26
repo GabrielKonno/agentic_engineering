@@ -150,7 +150,7 @@ decided in its Phase 0: `baseline` (claim vs fact) or `verification` (the 17 dim
 Part 1 pass that re-reads the structure around every already-`applied` fix).
 
 **When it runs — ALWAYS one of these events, never a remembered interval:** (a) after every
-upstream absorption, (b) before every MINOR or MAJOR version bump, (c) on owner request,
+upstream absorption, (b) before every MINOR or MAJOR version bump is PUSHED, (c) on owner request,
 (d) **after a `/maintenance` session applies an audit batch, AND evidence from OUTSIDE the loop is
 waiting** — a project evolution doc pending absorption, or a `HIGH` tagged `[observed in use]` — in
 `verification` mode (`/audit` Phase 0), which re-reads the structure around every `applied` fix instead

@@ -981,7 +981,7 @@ Output: Validation Report with a per-category verdict (mostly ✅/❌/⏭️; Se
 
 **If security-relevant** (auth, RLS, payment, AI/LLM, multi-tenancy, file upload, secrets):
 
-**security-reviewer subagent** (before validator — and on ANY route when the diff touches client-bound data: a changed response shape, props passed from server to client, a privileged figure, rendered personal data):
+**security-reviewer subagent** (before validator — and on ANY route when the diff touches client-bound data: a changed response shape, props passed from server to client, a privileged figure, rendered personal data — or an agent tool gate: a hook, a permission rule, a script an agent is confined to):
 Input: git diff, security-reviewer.md, stack security skill, rules files.
 Output: Security Review Report.
 
@@ -1019,10 +1019,10 @@ Report template categories:
 - Tests: ✅/❌/⏭️ [N EXECUTED, N passed, N failed, wall time — the COUNT is mandatory evidence]
 - Review: ✅/❌/⏭️ [inline or "code-reviewer subagent" — ⏭️ when no Code Review Report was provided]
 - Security: ✅/⚠️/❌/⏭️ [inline / security-reviewer subagent / Red Team Tier 1-2 results / "no security-relevant changes" — ⚠️, NEVER ❌, for a declared coverage gap with no specialist report]
-- Security reviewer: ran — [verdict] | skipped — no client-bound data ([reason]) — **ORCHESTRATOR-ONLY.**
+- Security reviewer: ran — [verdict] | skipped — no client-bound data or tool gate ([reason]) — **ORCHESTRATOR-ONLY.**
   This row records whether the `security-reviewer` subagent was spawned, a decision only the
   orchestrator makes, so the validator has no slot for it and `produces:` does not count it.
-  Mandated by `validation-orchestrator` → the client-bound-data trigger; it existed on that one
+  Mandated by `validation-orchestrator` → the client-bound-data and agent-tool-gate triggers; it existed on that one
   surface alone until 2026-09-21 (`/audit` AD-6).
 - Mutation Tests: ✅/⏭️ [N mutations tested (N of them NEUTER), N criteria confirmed — or "routine task, skipped"]
 - DB: ✅/❌/⏭️

@@ -219,7 +219,8 @@ decays silently.
 > generalization. Signal: a validation
 > post-mortem whose root-cause class is `review-missed-pattern` or `weak-criterion` on a task whose
 > chain included a non-`inherit` agent — it lives in the Post-Mortem Ledger in `project.md`.
-> **unmeasured — no measurer below `production`, AND none above it either:** `framework-audit` Q4
+> **unmeasured — no measurer below `production`, AND none above it either** (the n=1 below was
+> counted BY HAND, once; no component counts it): `framework-audit` Q4
 > is the HYPOTHESIS check, but its counting command reads ONE hardcoded signal out of
 > `## Orchestration lessons` in the session logs, so it enumerates this component and can produce
 > no count for it. Naming Q4 as the measurer without saying this would be the `last_eval:` class —
@@ -228,12 +229,13 @@ decays silently.
 > **The first measurement (production project, 2026-09, one multi-agent report, n=1):** a data
 > extractor on `sonnet` made ZERO errors on the axis a query runner locked mechanically (tenant
 > filter, personal data, writes) and SIX on the narrated axis: 2 query definitions, 1 swapped
-> citation, 3 prose counts or speculations. The oracle caught NONE of the six. The `inherit`
+> citation, 3 prose counts or speculations. The oracle — an immutable SNAPSHOT of the same figures,
+> read only by the checker (ops-rules §6, installed at `production`+) — caught NONE of the six. The `inherit`
 > analyst that consumed the output caught 4, and the orchestrator caught 2. Remove the judging
 > consumer and four of them reach the synthesis. What it suggests, still as HYPOTHESIS: the saving
 > is a property of the FLOW, not only of the component. It holds where the extractor's output is
 > checked by a mechanical lock or by a judging consumer, and fails on NARRATED output that nobody
-> checks. An oracle does not replace the judge, because it checks only the figures it compares.
+> checks. A snapshot oracle does not replace the judge, because it checks only the figures it compares.
 
 ## Documentation quality
 

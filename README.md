@@ -1,4 +1,4 @@
-# Agentic Engineering Framework v2.33.1
+# Agentic Engineering Framework v2.34.0
 
 A meta-framework for preparing an AI agent's workspace — instructions, protocols, validation agents, process skills, domain rules, and quality examples — so the AI can develop software projects autonomously with structured validation.
 
@@ -148,7 +148,7 @@ agentic_engineering/
 ├── docs/
 │   ├── agentic_engineering_framework.md    ← Core concepts (read this to understand the methodology)
 │   │
-│   ├── modules/                            ← Single source of truth (v2.33.1)
+│   ├── modules/                            ← Single source of truth (v2.34.0)
 │   │   ├── templates/                      ← Document and config templates (8, incl. the frontmatter and rules-scope guards)
 │   │   ├── agents/                         ← Agent templates (10 agents)
 │   │   ├── rules/                          ← Rules templates (5 rules files)
@@ -379,7 +379,7 @@ The framework learns from your project:
 | `/existing_project_adaptation [name]` | Upgrading an existing project | Existing codebase + partial docs | Upgraded docs + retroactive PRD |
 | `/prd_change [name]` | Product scope changes | Change description | Updated PRD + propagation to engineering docs |
 | `/maintenance` | Changing the framework itself, or absorbing lessons projects recorded | An audit report or pending `framework-evolution-*.md` docs | Framework edits + write-back and receipts in the audit report |
-| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump, on request, or after a `/maintenance` session applies an audit batch AND evidence from OUTSIDE the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | The repository (and the last report, in verification mode) | Its dated report in `assets/docs/` (+1 defect-series row in verification mode) with stable finding IDs |
+| `/audit` | After an upstream absorption, before a MINOR/MAJOR bump is pushed, on request, or after a `/maintenance` session applies an audit batch AND evidence from OUTSIDE the loop is waiting (a pending project evolution doc, or a HIGH tagged `[observed in use]`) | The repository (and the last report, in verification mode) | Its dated report in `assets/docs/` (+1 defect-series row in verification mode) with stable finding IDs |
 
 ---
 

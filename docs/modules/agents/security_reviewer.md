@@ -51,7 +51,8 @@ When invoked as subagent, do NOT read:
 
 ## When this agent is invoked
 Check whenever changes involve: user input, auth, database queries, API endpoints,
-file operations, external APIs, AI/LLM integration, secrets, HTML rendering, sessions.
+file operations, external APIs, AI/LLM integration, secrets, HTML rendering, sessions — and
+hooks, permission rules or agent-confined scripts (§13; `validation-orchestrator` routes them here on every route).
 
 ## 1. Injection Prevention
 

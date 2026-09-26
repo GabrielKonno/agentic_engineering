@@ -41,8 +41,11 @@ no new component, no new report key.
 
 ## Migration
 
-Six independent text additions; no coordinated refresh set. See `existing_project_adaptation.md`
-→ "v2.33.0 migration". `security-reviewer` is offered as an in-place insert, never a refresh,
+Six independent text additions; this version adds NO new coupling — a `validation-orchestrator`
+refresh STAYS governed by the coupled sets already named there. See `existing_project_adaptation.md`
+→ the `**v2.33.0 migration —` bold lead-in (not a heading).
+*(Corrected 2026-09-26, `/audit` 2026-09-23 AF-10 and AF-11: this line read "no coordinated refresh
+set" and cited "v2.33.0 migration" as if it were a heading.)* `security-reviewer` is offered as an in-place insert, never a refresh,
 because it is customized at bootstrap.
 
 ## Efficacy anchors — and who measures them
