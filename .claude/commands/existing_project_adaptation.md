@@ -257,7 +257,7 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.34.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.34.1 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
@@ -616,7 +616,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.34.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.34.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -743,6 +743,15 @@ trigger.
 changes no contract (instruction style in `validation-orchestrator`, `sprint-proposer`,
 `code-reviewer`'s Known Bug Patterns rule; `session-rules` hypothesis text) — `code-reviewer` is
 offered in place for the same reason as `security-reviewer`.
+
+**v2.34.1 migration — path corrections only.** `security-reviewer` cited `examples/rules/compliance-rules.md`
+and `examples/agents/sast-scanner.md`, and the `deploy-validator` example cited
+`examples/agents/config-schema-validator.md`; in a project all three live under `assets/examples/`
+(`/audit` 2026-09-26 AG-1).
+**ALWAYS offer the two `security-reviewer` lines, and the `deploy-validator` line when that agent is
+installed, as IN-PLACE EDITS — NEVER `refresh_agent`.**
+Step 4.1 copies `assets/examples/` only when it is MISSING, so an existing copy keeps the old path.
+**ALWAYS offer the same one-line edit in `assets/examples/agents/deploy-validator.md` too.** No coupling.
 
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
@@ -1574,7 +1583,8 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - project.md: [adaptation entry added, sections added]
 - pendencias.md: [tasks upgraded with metadata]
 - code-reviewer.md: [Known Bug Patterns seeded, sections added; in-place edits offered (v2.34.0 Known Bug Patterns rule): applied / declined / n/a]
-- security-reviewer.md: [sections added — N of 13 numbered sections present after Step 2.5; in-place edits offered (§13 insert, §13 last-box removal, v2.34.0 invocation line): applied / declined / n/a]
+- security-reviewer.md: [sections added — N of 13 numbered sections present after Step 2.5; in-place edits offered (§13 insert, §13 last-box removal, v2.34.0 invocation line, v2.34.1 example paths): applied / declined / n/a]
+- deploy-validator (installed agent and `assets/examples/` copy): [v2.34.1 example path — applied / declined / n/a]
 - [other agents/skills]: [changes]
 
 ### Documents created:

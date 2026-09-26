@@ -136,7 +136,7 @@ financial data, or health data.
 
 - [ ] Does the changed code collect or store personal data?
   - If YES and `.claude/rules/compliance-rules.md` EXISTS: verify code follows data minimization and consent-tracking rules defined there.
-  - If YES and file is ABSENT: add finding at severity INFO — "Project collects personal data but has no compliance-rules.md. Create from `examples/rules/compliance-rules.md`."
+  - If YES and file is ABSENT: add finding at severity INFO — "Project collects personal data but has no compliance-rules.md. Create from `assets/examples/rules/compliance-rules.md`."
 - [ ] Does code transmit personal data to third-party services (analytics, error tracking, email)?
   - If YES and no masking/anonymization present: flag as MEDIUM.
 - [ ] Does code implement deletion of user data?
@@ -193,7 +193,7 @@ If any answer reveals a risk: address it before proceeding.
 
 **Tier 1 — always run when diff touches auth, input processing, cryptography, deserialization, file I/O, or shell execution:**
 - [ ] semgrep (or equivalent) scan output reviewed — zero ERROR-severity findings unresolved before APPROVE.
-- [ ] If SAST tool output unavailable: perform manual pattern review per `examples/agents/sast-scanner.md` Tier 1 checklist (injection patterns, deserialization, path traversal, XXE, SSRF, cryptography).
+- [ ] If SAST tool output unavailable: perform manual pattern review per `assets/examples/agents/sast-scanner.md` Tier 1 checklist (injection patterns, deserialization, path traversal, XXE, SSRF, cryptography).
 - [ ] Document tooling gap as INFO finding if SAST tool is not installed — include recommendation to install.
 
 **Escalation condition:** If diff touches auth, authorization, input processing, cryptography,

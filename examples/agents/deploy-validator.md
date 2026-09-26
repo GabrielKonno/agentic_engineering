@@ -53,7 +53,7 @@ Do NOT read:
 - [ ] Debug mode off — `DEBUG=false`, `NODE_ENV=production`, framework-specific debug settings
 
 ### Config Schema Validation
-- [ ] All env vars pass type and format checks — invoke `config-schema-validator` subagent (or manually verify per `examples/agents/config-schema-validator.md` Tier 2 checks)
+- [ ] All env vars pass type and format checks — invoke `config-schema-validator` subagent (or manually verify per `assets/examples/agents/config-schema-validator.md` Tier 2 checks)
 - [ ] No sensitive var has a fallback default in application code (e.g., `process.env.JWT_SECRET || 'fallback'`)
 - [ ] No sensitive var has a non-empty default value in `.env.example`
 - [ ] Cross-variable consistency verified: `NODE_ENV=production` → `DEBUG=false`, DB uses TLS, no `*_DEV_*` flags active

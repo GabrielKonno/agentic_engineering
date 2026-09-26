@@ -378,7 +378,7 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.34.0 they are
+         **Expected: at least 5 paths.** As of v2.34.1 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
          `projects/*/.claude/rules/` **and, under `projects/*/scripts/`, ONLY the files the
          command lists** (`check-agent-frontmatter.mjs`, `check-rules-paths.mjs`) — Bootstrap

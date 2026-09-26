@@ -9,6 +9,28 @@ Single source of truth for all templates, agents, rules, and skills used by boot
 - `rules/` — Rules templates (session-rules, evolution-policy, component-design, ops-rules, quality-budgets) copied to `.claude/rules/`
 - `skills/` — 15 pre-built process skills copied to projects at bootstrap Step 5.7 (12 lifecycle/process, incl. `autonomous-loop`) and Step 5.8 (3 tier-gated: codebase-audit, framework-audit, skill-gate)
 
+## Layers — core and teams
+
+Every module belongs to ONE layer. **Core** serves any team (session cycle, backlog, evolution,
+generic validation). **IT** is the software team, installed by default today. The layer does NOT
+change where a component is installed: bootstrap copies both layers (tier-gated modules per the
+risk profile), because IT is the only distributed team. It records which components a non-code team would still need, and it is where a
+future team's modules will be listed.
+
+**The directory layout does not follow the layers yet — ON PURPOSE.** The physical split
+(`core/`, `teams/<team>/`) is deferred until a SECOND team is distributed by the framework, so the
+path citations to `docs/modules/` are rewritten once, in the batch that gives the new directories a
+reason to exist (owner decision, 2026-09-26).
+
+| Layer | Skills | Agents | Rules | Templates |
+|-------|--------|--------|-------|-----------|
+| **Core** | `sprint-proposer`, `session-end`, `session-log-creator`, `context-recovery`, `pendencias-updater`, `project-md-updater`, `config-file-updater`, `rules-agents-updater`, `commit`, `cross-cutting-analysis`, `autonomous-loop`; tier-gated: `framework-audit`, `skill-gate` | `prd_sync_checker`, `skill_reviewer` (tier-gated) | `session_rules`, `evolution_policy`, `component_design` | `claude_md`, `project_md`, `pendencias_md`, `settings_json`, `check_agent_frontmatter`, `check_rules_paths`, `framework_metrics_md` |
+| **Core, with code vocabulary** | `validation-orchestrator` — the per-task cycle is generic; its three routes are code routes | `criteria_enforcer` — every deliverable has acceptance criteria; its BUILD/VERIFY/QUERY/REVIEW tags are code tags · `diff_pattern_extractor` — spawned by the core session-end skill every session, but it reads the diff: it is IT's learning sensor | — | — |
+| **IT** | tier-gated: `codebase-audit` | `code_reviewer`, `security_reviewer`, `red_team`, `blue_team`, `validator`, `arbitrator` | `quality_budgets`, `ops_rules` | `metrics_md` |
+
+**When a module is ADDED, ALWAYS add it to this table in the same edit** — it is an inventory
+surface, like the lists above (`/maintenance` → the inventory propagation sweep).
+
 ## How bootstraps use modules
 
 The bootstrap command (`.claude/commands/bootstrap.md`) references modules instead of containing templates inline. Each step:

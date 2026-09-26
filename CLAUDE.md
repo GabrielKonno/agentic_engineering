@@ -59,7 +59,7 @@ agentic_engineering/                        ← Cloned once, kept permanently
 │   │   │   ├── check_agent_frontmatter.md  # Component-registry liveness guard (all tiers → scripts/)
 │   │   │   └── check_rules_paths.md        # Rules load-scope guard — `paths:` or ALWAYS_LOADED (all tiers → scripts/)
 │   │   ├── agents/                         # Agent templates (copied to .claude/agents/)
-│   │   │   ├── code_reviewer.md, security_reviewer.md  # Core agent templates
+│   │   │   ├── code_reviewer.md, security_reviewer.md  # Review agent templates (IT layer)
 │   │   │   ├── validator.md, arbitrator.md # Validation agent templates
 │   │   │   ├── red_team.md, blue_team.md   # Security agent templates
 │   │   │   ├── prd_sync_checker.md, criteria_enforcer.md, diff_pattern_extractor.md  # Process agent templates
