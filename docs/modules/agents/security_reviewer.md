@@ -223,7 +223,6 @@ mechanism: main Claude reads it, finds `sast-scanner` by its description, and sp
 - [ ] Shell access is limited to the named commands with NO shell operators (`&&`, `;`, `|`, redirects, `$()`, backticks, newlines, env prefixes) — an agent's `tools:` list restricts the TOOL, never its arguments
 - [ ] Unknown tools are denied by default, and unreadable gate input BLOCKS (fail closed)
 - [ ] Every data restriction the agent is under ("read-only", "one tenant only", "aggregates only") is enforced by a MECHANISM (a query runner or gate that refuses), never by prose in the agent prompt. "Aggregates only" means refusing row-identifier and personal-data columns — a row cap does not enforce it
-- [ ] The gate was proven to BLOCK by a real refused call in the live harness, not only by offline tests (component-design §9 rule 4: prove a check by negation) — and a live probe that needs an agent to ATTEMPT the violation was requested by the owner in the session, because a well-written agent correctly refuses a probe relayed through a task message
 
 ## Coverage Gap Declaration
 

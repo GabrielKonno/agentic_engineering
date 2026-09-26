@@ -350,9 +350,10 @@ maintenance session, or by you. Write them ALL, verbatim, into:
   file already exists (Audit intake's write-back step writes to it). **When it does NOT exist,
   CREATE it** with a two-line header — `# Framework maintenance receipts — YYYY-MM-DD` and
   `**Run mode:** receipts-only — no audit ran this day` — and write the section into it.
-  **THE `receipts-only` HEADER IS LOAD-BEARING: it enters the `assets/docs/audit-*.md` glob, and two
-  readers resolve that glob for FINDINGS** — Audit intake step 1 and `/audit` Phase 3's
-  carry-forward. **Both ALWAYS SKIP a file whose header says `receipts-only`**: it carries receipts
+  **THE `receipts-only` HEADER IS LOAD-BEARING: it enters the `assets/docs/audit-*.md` glob, and
+  every reader that resolves "the previous report" from it** — Audit intake step 1, and in `/audit`
+  Phase 3's carry-forward, its prediction check and Agent 1's accepted-risk input. **All ALWAYS SKIP a file with a line BEGINNING `**Run mode:** receipts-only`**
+  (`/audit` Phase 3 item 1's definition — an audit appended that day supersedes the line): it carries receipts
   and a push endpoint, never a ledger, so reading it for findings returns zero and looks like a
   clean backlog. The `push decay:` detector, which wants the newest endpoint, reads it normally
   (this batch's pre-commit verifier, 2026-09-22).
@@ -1364,8 +1365,8 @@ Upstream intake below — applying audit findings is the more frequent of the tw
 written home until `/audit` D17 found the gap.)
 
 When the prompt says to apply an audit, or names a report file, ALWAYS:
-1. **READ the most recent `assets/docs/audit-*.md` — SKIPPING any whose header says
-   `**Run mode:** receipts-only`**, which carries receipts and a push endpoint but no ledger — and
+1. **READ the most recent `assets/docs/audit-*.md` — SKIPPING any with a line BEGINNING
+   `**Run mode:** receipts-only`** (a superseded line starts `*(superseded)*` and does not count), which carries receipts and a push endpoint but no ledger — and
    work from its stable IDs (`F-3`, `G-7`).
    Cite IDs in the commit message so a later session can trace what was applied.
 2. **RE-VERIFY each finding against the CURRENT disk before applying it.** A report is evidence,

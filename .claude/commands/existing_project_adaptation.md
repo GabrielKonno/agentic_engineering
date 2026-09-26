@@ -257,11 +257,16 @@ an adapted project could ship the annotation verbatim (`/audit` 2026-09-03 P-21)
 Compare the existing config file against this checklist. Add any missing section:
 
 ```
-Required sections (compare against docs/modules/templates/claude_md.md — v2.33.0 slim orchestrator):
+Required sections (compare against docs/modules/templates/claude_md.md — v2.33.1 slim orchestrator):
 □ Project Overview (name, state, PRD reference, pending tasks reference, session logs)
 □ Session Protocol (pointers to /sprint-proposer, /autonomous-loop, /session-end,
   /context-recovery, validation-orchestrator, session-rules.md — FIVE pointers plus the rules
-  file; this line named three for two batches, `/audit` 2026-09-09 T-32)
+  file; this line named three for two batches, `/audit` 2026-09-09 T-32) — ALWAYS compare it
+  BULLET BY BULLET against the template's `## Session Protocol`, NEVER by heading presence:
+  the template also carries BEHAVIOURAL bullets (the path-scoped rules line, v2.32.0; the
+  Read-the-SKILL.md-first line), and a presence check let adapted projects miss them
+  (`/audit` 2026-09-23 AF-4). Add the path-scoped bullet ONLY once Step 2.7 converted the rules to
+  `paths:` — before that it claims a scoping the project does not have
 □ Commands section
 □ MCP Servers section
 □ Skills & Agents section (auto-discovery note, no explicit listing)
@@ -287,7 +292,7 @@ gained it and no audit dimension looked for it (`/audit` 2026-09-09 T-32).
 
 *v2.1.0 structural change:*
 - CLAUDE.md is now a slim orchestrator (~90 lines). All protocol logic lives in skills and rules.
-- Session Protocol section is 5 lines of pointers, not inline protocol steps.
+- Session Protocol section is a short list of pointers and behavioural bullets, not inline protocol steps — count its bullets in the template, never here.
 - Skills & Agents section uses auto-discovery (no explicit listing).
 - Session rules live in `.claude/rules/session-rules.md` (task limits, doc quality, reasoning depth, scripts convention).
 - Evolution policy lives in `.claude/rules/evolution-policy.md` (FIX/DERIVED/CAPTURED classification, auto-evolution boundaries).
@@ -487,7 +492,7 @@ Check frontmatter:
 □ BOUNDARIES section (what NOT to read — anti-bias firewall)
 ```
 
-Compare against the full checklist (9 sections):
+Compare against the full checklist (13 sections):
 ```
 □ 1. Injection Prevention (SQL, XSS, Prompt, Command, LDAP/XML/NoSQL)
 □ 2. Authentication and Authorization
@@ -498,7 +503,12 @@ Compare against the full checklist (9 sections):
 □ 7. Security Headers
 □ 8. Stack-Specific Security (delegation note to stack skill / Red Team)
 □ 9. Red Team Thinking (5 questions)
+□ 10. SAST Integration (static analysis gap → sast-scanner, spawned by main Claude)
+□ 11. Rate Limiting & Abuse Prevention
+□ 12. Data Validation
+□ 13. AI-Agent Tool Gates
 ```
+**COUNT THE BOXES AGAINST THE TEMPLATE, NEVER AGAINST THIS LIST** — `grep -cE '^## [0-9]+\.' docs/modules/agents/security_reviewer.md` → **expected: equal to the number of NUMBERED □ in the section list above** (the frontmatter boxes do not count). The list said 9 while the template shipped 13, so §§10-12 never reached an adapted project's existing agent (`/audit` 2026-09-23 AF-3).
 
 Add missing sections. **Do NOT remove existing customizations** — they may contain project-specific security rules.
 
@@ -606,7 +616,7 @@ After migration, update any references in CLAUDE.md from `.claude/skills/[name].
 
 **Step 2.9 — Copy pre-built process skills, process agents, and session rules:**
 
-The v2.33.0 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
+The v2.33.1 CLAUDE.md references process skills and rules via pointers. Without these, every pointer is a broken reference.
 
 **Copy process skills (12 lifecycle — ALWAYS copied, to `.claude/skills/`):**
 ```bash
@@ -696,6 +706,10 @@ were customized at bootstrap and a template copy would erase their Known Bug Pat
 `refresh_agent` them for this.** `validation-orchestrator` and `autonomous-loop` follow the normal
 skill-refresh decision.
 **NEVER overwrite an existing `paths:` block** on a refresh.
+**ALWAYS add, with the conversion, the CLAUDE.md template's Session Protocol bullet on PATH-SCOPED
+domain rules** (Read the rules file directly when planning without opening code) — Step 2.1's
+bullet-by-bullet comparison is its home; a project converted to `paths:` without it plans with the
+domain rules unloaded (`/audit` 2026-09-23 AF-4).
 
 **v2.33.0 migration — six text additions; this version adds NO new coupling.** From a
 production project's multi-agent reporting pilot: `session-rules` → "Model by risk class" gains
@@ -709,6 +723,15 @@ v2.28.0) — NEVER refresh it alone on the strength of this note.
 **ALWAYS offer the `security-reviewer` section as an IN-PLACE INSERT before its Coverage Gap
 Declaration, plus its line in "What this review covered" — NEVER `refresh_agent` it for this**,
 for the same reason as v2.32.0: the agent was customized at bootstrap.
+
+**v2.33.1 migration — corrections only.** `security-reviewer` §13 loses its last box (live-harness
+proof), which the agent's input could never evidence (`/audit` 2026-09-23 AF-5).
+**ALWAYS offer its removal as an IN-PLACE EDIT when the project's agent carries it** —
+`grep -c 'proven to BLOCK by a real refused call' .claude/agents/security-reviewer.md` → 1 means it
+does.
+**NEVER `refresh_agent` it.**
+Step 2.5's list now names all 13 sections and Step 2.1 compares the Session Protocol bullet by
+bullet; neither adds coupling.
 
 **REFRESH — ONLY what the owner chose.** `cp -r SRC DEST` onto an EXISTING `DEST` nests it
 (`DEST/<name>/SKILL.md`) (`/audit` 2026-09-14 X-4).
@@ -1133,7 +1156,7 @@ Read the template at `docs/modules/templates/settings_json.md` for the reference
 **THE FENCE BELOW IS A VERBATIM DUPLICATE OF THAT TEMPLATE'S JSON, and it is the copy that drifts.**
 Bootstrap Step 14 READS the template; this step EMBEDS it, so a key added to the template reaches
 new projects and silently skips adapted ones. **The diff that catches this is `/maintenance` →
-Gate 1 (TWIN PARITY)**, which owns the moment either file is edited — the mandate lives there, not
+"Post-change checklist" → the `Gate 1 — TWIN PARITY.` bold lead-in (not a heading)**, which owns the moment either file is edited — the mandate lives there, not
 here (component-design §9). The `statusLine` key was added to the template and left out here until
 a pre-commit verifier caught it (2026-09-21).
 
@@ -1536,11 +1559,11 @@ same line — this command ran the loop and reported nothing (`/audit` 2026-09-0
 - Plugin enablement (Step 4.4): [key merged / none — unavailable]
 
 ### Documents upgraded:
-- CLAUDE.md: [sections added/modified]
+- CLAUDE.md: [sections added/modified; Session Protocol bullets added — or "bullets match the template"]
 - project.md: [adaptation entry added, sections added]
 - pendencias.md: [tasks upgraded with metadata]
 - code-reviewer.md: [Known Bug Patterns seeded, sections added]
-- security-reviewer.md: [sections added]
+- security-reviewer.md: [sections added — N of 13 numbered sections present after Step 2.5; in-place edits offered (§13 insert, §13 last-box removal): applied / declined / n/a]
 - [other agents/skills]: [changes]
 
 ### Documents created:

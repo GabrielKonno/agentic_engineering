@@ -209,6 +209,7 @@ PRD`. NEVER emit nothing.**
 **All files from Step 2 onwards are created inside `projects/$ARGUMENTS/`.** Paths in this prompt (e.g., `CLAUDE.md`, `.claude/phases/`) are relative to the project root. Exception: shell command blocks (cp/mkdir/sed) run from the FRAMEWORK root — their targets keep the explicit `projects/$ARGUMENTS/` prefix because their sources (`docs/modules/...`, `examples/`) are framework-relative.
 
 **If CLAUDE.md already exists:** Do NOT overwrite. Instead, compare the existing content with the template. Add missing sections and update outdated sections. Report what was added/changed.
+**ALWAYS compare its `## Session Protocol` BULLET BY BULLET against the template's, NEVER by heading presence** — twin of `/existing_project_adaptation` Step 2.1 (`/audit` 2026-09-23 AF-4).
 
 **If CLAUDE.md does not exist:** Read the template at `docs/modules/templates/claude_md.md`. Adapt with PRD data:
 - Fill Project Overview from PRD (name, description, modules, owner)
@@ -592,6 +593,7 @@ defers this note here because the file does not exist until this step.
 This agent is created at bootstrap for ALL projects (security is universal).
 
 **If `.claude/agents/security-reviewer.md` already exists:** Do NOT overwrite. Verify it has: prompt injection section, tiered security testing model reference, and Section 8 delegation.
+**ALWAYS ALSO check it against every numbered section of the template** — `grep -cE '^## [0-9]+\.' docs/modules/agents/security_reviewer.md` gives the count — and add the missing ones; twin of `/existing_project_adaptation` Step 2.5 (`/audit` 2026-09-23 AF-3).
 
 **If it does not exist:** Read the template at `docs/modules/agents/security_reviewer.md`. Adapt:
 - **Pre-select Coverage Gap Declarations from PRD:** Review the five optional gap sections (static analysis, secrets coverage, federation protocol, compliance, infrastructure security). Remove sections clearly irrelevant to this project (e.g., remove federation protocol gap if no OAuth/OIDC/SAML; remove infrastructure security gap if no IaC/Docker/K8s). Keep sections that match PRD's tech stack and architecture. When in doubt, keep — gaps are conditional and only fire when matching diffs appear.

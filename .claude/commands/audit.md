@@ -313,7 +313,9 @@ FILES TO READ:
 9. The agent's persistent memory directory, every file incl. `MEMORY.md` (D16.3b) — path resolved
    from the session context
 10. Git history: `git rev-list --all` contents AND `git log --all` messages (D16.3c)
-11. The PREVIOUS audit report in `assets/docs/` — required to emit the `accepted-risk` OBSERVATION
+11. The PREVIOUS audit report in `assets/docs/` — the most recent one, SKIPPING
+    a file with a line BEGINNING `**Run mode:** receipts-only` (a line starting `*(superseded)*`
+    does not count) — required to emit the `accepted-risk` OBSERVATION
     Phase 3 mandates instead of re-reporting a closed item as a hit
 
 **Every file a CHECK below names MUST appear in this list (`FILES TO READ` / `INPUTS` — the same obligation under either heading).** Reading it "because the check says so"
@@ -376,12 +378,15 @@ CHECKS:
          grep -oE 'projects/\$ARGUMENTS/[A-Za-z0-9_./-]+' .claude/commands/bootstrap.md \
            | grep -E '(examples|\.claude|scripts)' | sort -u
          ```
-         **Expected: at least 5 paths.** As of v2.33.0 they are
+         **Expected: at least 5 paths.** As of v2.33.1 they are
          `projects/*/assets/examples/`, `projects/*/.claude/skills/`, `projects/*/.claude/agents/`,
-         `projects/*/.claude/rules/` **and `projects/*/scripts/`** — Bootstrap
+         `projects/*/.claude/rules/` **and, under `projects/*/scripts/`, ONLY the files the
+         command lists** (`check-agent-frontmatter.mjs`, `check-rules-paths.mjs`) — Bootstrap
          Step 1.5 copies `examples/` there, Steps 5.7/5.8 copy `docs/modules/skills/`,
          `docs/modules/agents/` and `docs/modules/rules/` into the next three, and **Step 5.7
-         extracts `check_agent_frontmatter.md` into the fifth**. Naming only the
+         extracts the guard templates into the fifth**.
+         **NEVER exclude the whole `scripts/` directory:** the rest of it is the project's OWN code, and excluding it dropped dozens of
+         genuine project sources from the comparison set (`/audit` 2026-09-23 AF-14). Naming only the
          first left three equally verbatim copy targets unexcluded (`/audit` 2026-09-04 Q-30) and
          the fifth was still missing a batch later, producing six false positives on execution
          (`/audit` 2026-09-09 T-10, filed as R-19 and written back `applied` with nothing landed). So a
@@ -1403,6 +1408,8 @@ It was evaluated three times anyway, from dispatch prompts rather than from disk
 ```bash
 # SCOPE TO THE PREVIOUS RUN, NEVER THE WHOLE FILE: keep only the text after the LAST `# Run N`
 # heading that sits outside a code fence (the whole file when it has none).
+# <the PREVIOUS report> is resolved as Phase 3 item 3 resolves it — NEVER a `receipts-only` file,
+# which carries no prediction and reads a false `n/a` (`/audit` 2026-09-23 AF-6).
 awk '/^```/{f=!f} !f&&/^# Run [0-9]+/{b=""} {b=b $0 "\n"} END{printf "%s", b}' <the PREVIOUS report> \
   | sed -n '/^## Meta-observation/,/^## /p' | grep -c 'Prediction'
 ```
@@ -1464,6 +1471,15 @@ step is the carry-over half.
    and never invent a suffixed filename.** Two runs in one day is the normal shape of
    audit → maintenance → re-audit, and the earlier run's ledger is what the later one carries
    forward.
+   **When today's file is a `receipts-only` one, ALWAYS SUPERSEDE its header in the same write** —
+   prefix the old line with `*(superseded)* `.
+   **NEVER add a second `**Run mode:**` line for it** —
+   the appended run's own `**Run mode:**` line (report format) is the file's mode, and a duplicate
+   double-counts the run in "The defect series". Appending under an unchanged `receipts-only`
+   header hid a whole ledger from the readers that skip such a file (`/audit` 2026-09-23 AF-1).
+   **A file is `receipts-only` ONLY when a line BEGINS with `**Run mode:** receipts-only`** — a
+   superseded line begins with `*(superseded)*` and does not count. Every reader of that header
+   uses this definition.
 2. **ALWAYS give every finding a STABLE ID (`F-1`, `F-2`, …) and a status column** — exactly one
    of: `open` / `applied sHASH` / `rejected — [reason]` / **`escalated — owner decision pending`** /
    **`accepted-risk — see [record]`**. The last two exist because a pushed privacy hit (D16.3c)
@@ -1471,7 +1487,7 @@ step is the carry-over half.
    closed, and item 3 below cannot see it (`/audit` 2026-09-02 L-8). The ID is what a later maintenance session
    cites; a finding without one cannot be tracked across sessions.
 3. **ALWAYS carry FORWARD every finding that is NOT closed — `open` AND `escalated`** — from the previous audit report (the most
-   recent `assets/docs/audit-*.md` whose header does NOT say `**Run mode:** receipts-only`; that
+   recent `assets/docs/audit-*.md` with no line BEGINNING `**Run mode:** receipts-only` (item 1's definition); that
    kind carries receipts and a push endpoint, never a ledger, and reading it for findings returns a
    falsely clean backlog) into the new one, re-verifying each against the current disk:
    still true → carry with its original ID; fixed since → mark `applied`. An audit that silently
